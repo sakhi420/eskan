@@ -1,0 +1,44 @@
+# قواعد اشتراک، Trial و Entitlements
+
+- **نسخه مدل:** آینهٔ `contracts/openapi.yaml` v0.3.0 (schemas: `SubscriptionPlan`,
+  `SubscriptionStatus`, `PlanLimits`, `OrganizationSubscription`, `SubscriptionAuditEvent`,
+  `ManualSubscriptionPayment`).
+
+## چرخهٔ حیات
+
+1. ثبت سازمان (اولین OWNER) → ساخت خودکار `OrganizationSubscription` با `TRIALING`
+   و `trialEndsAt = now + trialDays` (پیش‌فرض ۳۰ روز، قابل تنظیم از config/plan).
+2. در Trial، entitlements طرح `PRO` فعال است.
+3. پایان Trial (با زمان سرور) → `FREE` (بدون حذف داده).
+4. پس از فعال‌سازی دستی، status = `ACTIVE` با `periodStartsAt/EndsAt`؛
+   در انقضا → `GRACE_PERIOD` (پیش‌فرض ۷ روز) → `FREE`.
+5. `SUSPENDED` با اقدام Platform Admin (و دلیل)؛ ازسرگیری با `/resume`.
+
+## طرح‌ها و محدودیت‌ها (seed/قابل تغییر، نه hard-code)
+
+| کد | حداکثر لیلیه | حداکثر ساکن فعال | حداکثر کاربر کارمند (non-owner) | ویژگی‌ها |
+|----|--------------|------------------|---------------------------|----------|
+| `FREE` | ۱ | ۳۰ | ۲ | گزارش پایه |
+| `PRO` | ۳ | ۳۰۰ | ۱۰ | گزارش پیشرفته، CSV |
+| `BUSINESS` | قابل تنظیم | قابل تنظیم | قابل تنظیم | همه + امور مالی تفصیلی |
+
+- این سقف‌ها **seed اولیه** برای پایلوت‌اند و از دیتابیس/تنظیمات طرح خوانده می‌شوند؛
+  نباید در منطق برنامه hard-code شوند.
+- `null` در سقف (`maxHostels` و...) به معنی «نامحدود» است و فقط برای `BUSINESS`
+  (یا با مقدار صریح تعریف‌شده) نمایش داده می‌شود.
+
+**قیمت:** قیمت `PRO` و `BUSINESS` تا تصمیم تجاری واقعی تعیین نمی‌شود؛
+`priceAmount` nullable است و **null به معنی «قیمت صفر/رایگان» نیست** (یعنی «هنوز
+تعیین نشده»). قیمت‌ها/سقف‌ها/entitlements/Trial/Grace از طرح‌های دیتابیس خوانده می‌شوند.
+
+## Enforcement
+
+- هر mutation که سقف طرح را بشکند → `409`/`422` با `code=PLAN_LIMIT_EXCEEDED` (شامل
+  feature/limit/usage).
+- queue نوشتنی آفلاینِ ساکنان موجود در پایان دوره مسدود نمی‌شود؛ صرفاً *ایجاد* رکورد فراتر از
+  سقف FREE رد می‌شود (خواندن/تاریخچه/گزارش حفظ می‌شود).
+
+## جداسازی مالی
+
+- درآمد اشتراک ESKAN (`ManualSubscriptionPayment`) هرگز در گزارش‌های کرایه/دریافت ساکنان
+  وارد نمی‌شود و برعکس.

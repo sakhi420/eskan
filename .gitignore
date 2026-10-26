@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+*.log
+*-log.txt
+*-done.txt
+server-err.txt
+server-out.txt
+.env
+.env.local
+.env.*.local
+reports/
+dumps/
+backups/
+.DS_Store
+Thumbs.db
+*.tsbuildinfo

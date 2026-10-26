@@ -1,0 +1,3016 @@
+openapi: 3.0.3
+info:
+  title: ESKAN Backend API
+  version: 0.3.0
+  description: |
+    قرارداد رسمی API سامانهٔ اسکان (ESKAN) — مدیریت لیلیه‌های خصوصی.
+    منبع حقیقت قرارداد: این فایل. مسیر محصول زیر `/api/v1`.
+  contact:
+    name: ESKAN Engineering
+  license:
+    name: Proprietary
+servers:
+  - url: http://localhost:3000
+    description: local development
+tags:
+  - name: system
+    description: health and service metadata
+  - name: auth
+    description: authentication and session management
+  - name: organizations
+    description: organization profile and memberships
+  - name: hostels
+    description: hostels master data
+  - name: rooms
+    description: rooms of a hostel
+  - name: beds
+    description: beds of a room
+  - name: residents
+    description: residents and their accounts
+  - name: contracts
+    description: stay contracts
+  - name: bed-assignments
+    description: bed assignment lifecycle
+  - name: charges
+    description: charges (billed obligations)
+  - name: payments
+    description: payments and allocations
+  - name: deposits
+    description: deposit / security transactions
+  - name: expenses
+    description: paid expenses
+  - name: reports
+    description: dashboard and financial reports
+  - name: sync
+    description: offline-first synchronization
+  - name: subscriptions
+    description: subscription plans, trial and entitlements
+  - name: platform-admin
+    description: platform admin subscription management
+security:
+  - bearerAuth: []
+    xOrganizationId: []
+paths:
+  /health/live:
+    get:
+      tags: [system]
+      summary: liveness probe
+      operationId: healthLive
+      security: []
+      responses:
+        '200':
+          description: alive
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status: { type: string, enum: [ok] }
+  /health/ready:
+    get:
+      tags: [system]
+      summary: readiness probe (database reachable)
+      operationId: healthReady
+      security: []
+      responses:
+        '200':
+          description: ready
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, database]
+                properties:
+                  status: { type: string, enum: [ready] }
+                  database: { type: string, enum: [up, down] }
+        '503':
+          $ref: '#/components/responses/Error'
+  /api/v1/system/version:
+    get:
+      tags: [system]
+      summary: service version
+      operationId: systemVersion
+      security: []
+      responses:
+        '200':
+          description: service version
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: object
+                    required: [name, version, apiVersion]
+                    properties:
+                      name: { type: string }
+                      version: { type: string }
+                      apiVersion: { type: string }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/system/me:
+    get:
+      tags: [system]
+      summary: authenticated user summary
+      operationId: systemMe
+      responses:
+        '200':
+          description: current user
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/UserSummary' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/v1/auth/register:
+    post:
+      tags: [auth]
+      summary: register owner account + organization (config-controlled)
+      operationId: authRegister
+      security: []
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterRequest' }
+      responses:
+        '201':
+          description: created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/AuthSession' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+  /api/v1/auth/login:
+    post:
+      tags: [auth]
+      summary: login
+      operationId: authLogin
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: session created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/AuthSession' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '401': { $ref: '#/components/responses/Error' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+  /api/v1/auth/refresh:
+    post:
+      tags: [auth]
+      summary: rotate refresh token
+      operationId: authRefresh
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RefreshRequest' }
+      responses:
+        '200':
+          description: new access + rotated refresh
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/AuthSession' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '401': { $ref: '#/components/responses/Error' }
+  /api/v1/auth/logout:
+    post:
+      tags: [auth]
+      summary: revoke current session
+      operationId: authLogout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RefreshRequest' }
+      responses:
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '204': { description: revoked }
+        '401': { $ref: '#/components/responses/Error' }
+  /api/v1/auth/logout-all:
+    post:
+      tags: [auth]
+      summary: revoke all sessions of the user
+      operationId: authLogoutAll
+      responses:
+        '409': { $ref: '#/components/responses/Conflict' }
+        '204': { description: revoked }
+        '401': { $ref: '#/components/responses/Error' }
+  /api/v1/auth/me:
+    get:
+      tags: [auth]
+      summary: current user
+      operationId: authMe
+      responses:
+        '200':
+          description: current user
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/UserSummary' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '401': { $ref: '#/components/responses/Error' }
+  /api/v1/auth/change-password:
+    post:
+      tags: [auth]
+      summary: change own password
+      operationId: authChangePassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ChangePasswordRequest' }
+      responses:
+        '409': { $ref: '#/components/responses/Conflict' }
+        '204': { description: changed }
+        '401': { $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+  /api/v1/organizations/current:
+    get:
+      tags: [organizations]
+      summary: current organization profile
+      operationId: organizationGetCurrent
+      responses:
+        '200':
+          description: organization
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Organization' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    patch:
+      tags: [organizations]
+      summary: update organization profile
+      operationId: organizationPatchCurrent
+      parameters:
+        - in: header
+          name: X-Expected-Version
+          required: true
+          schema: { type: integer }
+          description: expected version
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OrganizationUpdateRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '200':
+          description: updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Organization' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '409': { $ref: '#/components/responses/Error' }
+  /api/v1/organizations/current/members:
+    get:
+      tags: [organizations]
+      summary: list members
+      operationId: organizationListMembers
+      responses:
+        '200':
+          description: members
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Membership' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/v1/organizations/current/members/{membershipId}:
+    patch:
+      tags: [organizations]
+      summary: change member role/active (owner only)
+      operationId: organizationPatchMember
+      parameters:
+        - in: path
+          name: membershipId
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MembershipUpdateRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '200':
+          description: updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Membership' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '409': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+  /api/v1/hostels:
+    get:
+      tags: [hostels]
+      summary: list hostels
+      operationId: hostelList
+      parameters:
+        - { name: page, in: query, required: false, schema: { type: integer, default: 1 } }
+        - { name: size, in: query, required: false, schema: { type: integer, default: 20 } }
+        - { name: q, in: query, required: false, schema: { type: string } }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '200':
+          description: hostels
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/HostelPage' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+    post:
+      tags: [hostels]
+      summary: create hostel
+      operationId: hostelCreate
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/HostelRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '201':
+          description: created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Hostel' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/hostels/{hostelId}:
+    get:
+      tags: [hostels]
+      summary: get hostel
+      operationId: hostelGet
+      parameters: [{ name: hostelId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: hostel
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Hostel' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+    patch:
+      tags: [hostels]
+      summary: update hostel
+      operationId: hostelUpdate
+      parameters:
+        - { name: hostelId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/HostelRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Hostel' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/hostels/{hostelId}/archive:
+    post:
+      tags: [hostels]
+      summary: archive hostel
+      operationId: hostelArchive
+      parameters: [{ name: hostelId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: archived
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Hostel' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/hostels/{hostelId}/rooms:
+    get:
+      tags: [rooms]
+      summary: list rooms of a hostel
+      operationId: roomList
+      parameters:
+        - { name: hostelId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: page, in: query, required: false, schema: { type: integer, default: 1 } }
+        - { name: size, in: query, required: false, schema: { type: integer, default: 20 } }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: rooms
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/RoomPage' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+    post:
+      tags: [rooms]
+      summary: create room
+      operationId: roomCreate
+      parameters:
+        - { name: hostelId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RoomRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '201':
+          description: created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Room' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/rooms/{roomId}:
+    get:
+      tags: [rooms]
+      summary: get room
+      operationId: roomGet
+      parameters: [{ name: roomId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: room
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Room' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+    patch:
+      tags: [rooms]
+      summary: update room
+      operationId: roomUpdate
+      parameters:
+        - { name: roomId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RoomRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Room' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/rooms/{roomId}/archive:
+    post:
+      tags: [rooms]
+      summary: archive room
+      operationId: roomArchive
+      parameters: [{ name: roomId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: archived
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Room' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/rooms/{roomId}/beds:
+    get:
+      tags: [beds]
+      summary: list beds of a room
+      operationId: bedList
+      parameters:
+        - { name: roomId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: page, in: query, required: false, schema: { type: integer, default: 1 } }
+        - { name: size, in: query, required: false, schema: { type: integer, default: 20 } }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: beds
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/BedPage' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+    post:
+      tags: [beds]
+      summary: create bed
+      operationId: bedCreate
+      parameters:
+        - { name: roomId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BedRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '201':
+          description: created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Bed' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/beds/{bedId}:
+    get:
+      tags: [beds]
+      summary: get bed
+      operationId: bedGet
+      parameters: [{ name: bedId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: bed
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Bed' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+    patch:
+      tags: [beds]
+      summary: update bed
+      operationId: bedUpdate
+      parameters:
+        - { name: bedId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BedRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Bed' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/beds/{bedId}/deactivate:
+    post:
+      tags: [beds]
+      summary: deactivate bed
+      operationId: bedDeactivate
+      parameters: [{ name: bedId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: deactivated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Bed' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/residents:
+    get:
+      tags: [residents]
+      summary: list residents
+      operationId: residentList
+      parameters:
+        - { name: page, in: query, required: false, schema: { type: integer, default: 1 } }
+        - { name: size, in: query, required: false, schema: { type: integer, default: 20 } }
+        - { name: q, in: query, required: false, schema: { type: string } }
+        - { name: type, in: query, required: false, schema: { $ref: '#/components/schemas/ResidentType' } }
+        - { name: status, in: query, required: false, schema: { $ref: '#/components/schemas/ResidentStatus' } }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '200':
+          description: residents
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/ResidentPage' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+    post:
+      tags: [residents]
+      summary: create resident
+      operationId: residentCreate
+      parameters:
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ResidentRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '201':
+          description: created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Resident' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/residents/{residentId}:
+    get:
+      tags: [residents]
+      summary: get resident
+      operationId: residentGet
+      parameters: [{ name: residentId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: resident
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Resident' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+    patch:
+      tags: [residents]
+      summary: update resident
+      operationId: residentUpdate
+      parameters:
+        - { name: residentId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ResidentRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Resident' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/residents/{residentId}/archive:
+    post:
+      tags: [residents]
+      summary: archive resident (only if no active contract/debt)
+      operationId: residentArchive
+      parameters: [{ name: residentId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: archived
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Resident' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/residents/{residentId}/timeline:
+    get:
+      tags: [residents]
+      summary: resident timeline (contracts/assignments)
+      operationId: residentTimeline
+      parameters: [{ name: residentId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: timeline
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/ResidentTimeline' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/residents/{residentId}/account:
+    get:
+      tags: [residents]
+      summary: resident financial account
+      operationId: residentAccount
+      parameters: [{ name: residentId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: account
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/ResidentAccount' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/residents/{residentId}/assignments:
+    get:
+      tags: [bed-assignments]
+      summary: resident assignment history
+      operationId: residentAssignments
+      parameters: [{ name: residentId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: assignments
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/BedAssignment' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/contracts:
+    get:
+      tags: [contracts]
+      summary: list contracts
+      operationId: contractList
+      parameters:
+        - { name: page, in: query, required: false, schema: { type: integer, default: 1 } }
+        - { name: size, in: query, required: false, schema: { type: integer, default: 20 } }
+        - { name: status, in: query, required: false, schema: { $ref: '#/components/schemas/ContractStatus' } }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '200':
+          description: contracts
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/ContractPage' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+    post:
+      tags: [contracts]
+      summary: create contract (DRAFT)
+      operationId: contractCreate
+      parameters:
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ContractRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '201':
+          description: created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/StayContract' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/contracts/{contractId}:
+    get:
+      tags: [contracts]
+      summary: get contract
+      operationId: contractGet
+      parameters: [{ name: contractId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: contract
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/StayContract' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+    patch:
+      tags: [contracts]
+      summary: update contract (before finalization)
+      operationId: contractUpdate
+      parameters:
+        - { name: contractId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ContractRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/StayContract' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/contracts/{contractId}/activate:
+    post:
+      tags: [contracts]
+      summary: activate contract
+      operationId: contractActivate
+      parameters: [{ name: contractId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: activated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/StayContract' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/contracts/{contractId}/terminate:
+    post:
+      tags: [contracts]
+      summary: terminate contract
+      operationId: contractTerminate
+      parameters: [{ name: contractId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: terminated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/StayContract' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/bed-assignments:
+    post:
+      tags: [bed-assignments]
+      summary: assign bed to resident
+      operationId: assignmentCreate
+      parameters:
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BedAssignmentRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '201':
+          description: created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/BedAssignment' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '409': { $ref: '#/components/responses/Error' }
+  /api/v1/bed-assignments/{assignmentId}/end:
+    post:
+      tags: [bed-assignments]
+      summary: end bed assignment
+      operationId: assignmentEnd
+      parameters: [{ name: assignmentId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: ended
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/BedAssignment' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/charges:
+    get:
+      tags: [charges]
+      summary: list charges
+      operationId: chargeList
+      parameters:
+        - { name: page, in: query, required: false, schema: { type: integer, default: 1 } }
+        - { name: size, in: query, required: false, schema: { type: integer, default: 20 } }
+        - { name: residentId, in: query, required: false, schema: { type: string, format: uuid } }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '200':
+          description: charges
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/ChargePage' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+    post:
+      tags: [charges]
+      summary: create charge
+      operationId: chargeCreate
+      parameters:
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ChargeRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '201':
+          description: created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Charge' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/charges/{chargeId}:
+    get:
+      tags: [charges]
+      summary: get charge
+      operationId: chargeGet
+      parameters: [{ name: chargeId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: charge
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Charge' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/charges/{chargeId}/reverse:
+    post:
+      tags: [charges]
+      summary: reverse charge
+      operationId: chargeReverse
+      parameters:
+        - { name: chargeId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReversalRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: reversed
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Charge' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/payments:
+    get:
+      tags: [payments]
+      summary: list payments
+      operationId: paymentList
+      parameters:
+        - { name: page, in: query, required: false, schema: { type: integer, default: 1 } }
+        - { name: size, in: query, required: false, schema: { type: integer, default: 20 } }
+        - { name: residentId, in: query, required: false, schema: { type: string, format: uuid } }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '200':
+          description: payments
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/PaymentPage' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+    post:
+      tags: [payments]
+      summary: record payment + allocations
+      operationId: paymentCreate
+      parameters:
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PaymentRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '201':
+          description: created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Payment' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '409': { $ref: '#/components/responses/Error' }
+  /api/v1/payments/{paymentId}:
+    get:
+      tags: [payments]
+      summary: get payment
+      operationId: paymentGet
+      parameters: [{ name: paymentId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: payment
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Payment' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/payments/{paymentId}/reverse:
+    post:
+      tags: [payments]
+      summary: reverse payment
+      operationId: paymentReverse
+      parameters:
+        - { name: paymentId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReversalRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: reversed
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Payment' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/residents/{residentId}/payments:
+    get:
+      tags: [payments]
+      summary: resident payments
+      operationId: residentPayments
+      parameters: [{ name: residentId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: payments
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Payment' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/residents/{residentId}/deposit-transactions:
+    get:
+      tags: [deposits]
+      summary: resident deposit transactions
+      operationId: depositListByResident
+      parameters: [{ name: residentId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: deposit transactions
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/DepositTransaction' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+    post:
+      tags: [deposits]
+      summary: record deposit event
+      operationId: depositCreate
+      parameters:
+        - { name: residentId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DepositRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '201':
+          description: created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/DepositTransaction' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '409': { $ref: '#/components/responses/Error' }
+  /api/v1/deposit-transactions/{depositTransactionId}/reverse:
+    post:
+      tags: [deposits]
+      summary: reverse a deposit event (correction)
+      operationId: depositReverse
+      parameters:
+        - { name: depositTransactionId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReversalRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: reversed
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/DepositTransaction' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/expenses:
+    get:
+      tags: [expenses]
+      summary: list expenses
+      operationId: expenseList
+      parameters:
+        - { name: page, in: query, required: false, schema: { type: integer, default: 1 } }
+        - { name: size, in: query, required: false, schema: { type: integer, default: 20 } }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '200':
+          description: expenses
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/ExpensePage' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+    post:
+      tags: [expenses]
+      summary: record expense
+      operationId: expenseCreate
+      parameters:
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ExpenseRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '201':
+          description: created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Expense' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/expenses/{expenseId}:
+    get:
+      tags: [expenses]
+      summary: get expense
+      operationId: expenseGet
+      parameters: [{ name: expenseId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: expense
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Expense' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/expenses/{expenseId}/reverse:
+    post:
+      tags: [expenses]
+      summary: reverse expense
+      operationId: expenseReverse
+      parameters:
+        - { name: expenseId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReversalRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: reversed
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Expense' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/reports/dashboard:
+    get:
+      tags: [reports]
+      summary: dashboard summary
+      operationId: reportDashboard
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '200':
+          description: dashboard
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/DashboardReport' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/reports/occupancy:
+    get:
+      tags: [reports]
+      summary: occupancy report
+      operationId: reportOccupancy
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '200':
+          description: occupancy
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/OccupancyReport' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/reports/receivables:
+    get:
+      tags: [reports]
+      summary: receivables report
+      operationId: reportReceivables
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '200':
+          description: receivables
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/ReceivablesReport' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/reports/financial-summary:
+    get:
+      tags: [reports]
+      summary: financial summary for a period
+      operationId: reportFinancialSummary
+      parameters:
+        - { name: from, in: query, required: true, schema: { type: string, format: date } }
+        - { name: to, in: query, required: true, schema: { type: string, format: date } }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '200':
+          description: financial summary
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/FinancialSummaryReport' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/reports/expenses:
+    get:
+      tags: [reports]
+      summary: expense report for a period
+      operationId: reportExpenses
+      parameters:
+        - { name: from, in: query, required: true, schema: { type: string, format: date } }
+        - { name: to, in: query, required: true, schema: { type: string, format: date } }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '200':
+          description: expense report
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/ExpenseReport' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/reports/residents/{residentId}/statement:
+    get:
+      tags: [reports]
+      summary: resident statement
+      operationId: reportResidentStatement
+      parameters:
+        - { name: residentId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: from, in: query, required: true, schema: { type: string, format: date } }
+        - { name: to, in: query, required: true, schema: { type: string, format: date } }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: statement
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/ResidentStatement' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/sync/devices/register:
+    post:
+      tags: [sync]
+      summary: register a device for sync
+      operationId: syncRegisterDevice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SyncDeviceRegisterRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '201':
+          description: device registered
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/SyncDevice' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/sync/changes:
+    get:
+      tags: [sync]
+      summary: pull changes since cursor
+      operationId: syncChanges
+      parameters:
+        - { name: afterSequence, in: query, required: false, schema: { type: integer } }
+        - { name: limit, in: query, required: false, schema: { type: integer, default: 100, maximum: 500 } }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '200':
+          description: changes
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/SyncChangesResponse' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '422': { $ref: '#/components/responses/Error' }
+  /api/v1/sync/status:
+    get:
+      tags: [sync]
+      summary: sync status
+      operationId: syncStatus
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '200':
+          description: status
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/SyncStatus' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/sync/resync-request:
+    post:
+      tags: [sync]
+      summary: request full resync for a device
+      operationId: syncResyncRequest
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '204': { description: resync requested }
+
+  /api/v1/organizations/current/members/invitations:
+    get:
+      tags: [organizations]
+      summary: list member invitations
+      operationId: invitationList
+      responses:
+        '200':
+          description: invitations
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Invitation' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [organizations]
+      summary: create member invitation (owner only)
+      operationId: invitationCreate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InvitationRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '201':
+          description: invitation created (raw token shown once)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/InvitationCreated' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/Error' }
+  /api/v1/organizations/current/members/invitations/{invitationId}/revoke:
+    post:
+      tags: [organizations]
+      summary: revoke a pending invitation
+      operationId: invitationRevoke
+      parameters:
+        - { name: invitationId, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '200':
+          description: revoked
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Invitation' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '404': { $ref: '#/components/responses/Error' }
+  /api/v1/invitations/accept:
+    post:
+      tags: [organizations]
+      summary: accept an invitation with a one-time token
+      operationId: invitationAccept
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InvitationAcceptRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '200':
+          description: membership created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/Membership' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+  /api/v1/organizations:
+    get:
+      tags: [organizations]
+      summary: list my memberships and organizations
+      operationId: organizationListMine
+      responses:
+        '200':
+          description: memberships
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/MembershipSummary' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/v1/plans:
+    get:
+      tags: [subscriptions]
+      summary: list published subscription plans
+      operationId: planList
+      security: []
+      responses:
+        '200':
+          description: published plans
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/PlanPage' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/subscription/current:
+    get:
+      tags: [subscriptions]
+      summary: effective subscription and entitlements of the active organization
+      operationId: subscriptionGetCurrent
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '200':
+          description: current subscription
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/SubscriptionCurrent' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/subscription/history:
+    get:
+      tags: [subscriptions]
+      summary: subscription change history for the active organization
+      operationId: subscriptionHistory
+      parameters:
+        - { name: page, in: query, required: false, schema: { type: integer, default: 1 } }
+        - { name: size, in: query, required: false, schema: { type: integer, default: 20 } }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '200':
+          description: history
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/SubscriptionHistoryPage' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/admin/organizations:
+    get:
+      tags: [platform-admin]
+      summary: list organizations (platform admin only)
+      operationId: adminOrganizationList
+      description: requires PLATFORM_ADMIN system-level role
+      parameters:
+        - { name: page, in: query, required: false, schema: { type: integer, default: 1 } }
+        - { name: size, in: query, required: false, schema: { type: integer, default: 20 } }
+        - { name: q, in: query, required: false, schema: { type: string } }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '200':
+          description: organizations
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/AdminOrganizationPage' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/admin/organizations/{organizationId}/subscription:
+    get:
+      tags: [platform-admin]
+      summary: view an organization subscription (platform admin only)
+      operationId: adminSubscriptionGet
+      description: requires PLATFORM_ADMIN system-level role
+      parameters:
+        - { name: organizationId, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: subscription
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/SubscriptionCurrent' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/admin/organizations/{organizationId}/subscription/history:
+    get:
+      tags: [platform-admin]
+      summary: view an organization subscription history (platform admin only)
+      operationId: adminSubscriptionHistory
+      description: requires PLATFORM_ADMIN system-level role
+      parameters:
+        - { name: organizationId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: page, in: query, required: false, schema: { type: integer, default: 1 } }
+        - { name: size, in: query, required: false, schema: { type: integer, default: 20 } }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: history
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/SubscriptionHistoryPage' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/admin/organizations/{organizationId}/subscription/activate:
+    post:
+      tags: [platform-admin]
+      summary: activate a paid plan after manual verification (platform admin only)
+      operationId: adminSubscriptionActivate
+      description: requires PLATFORM_ADMIN system-level role
+      parameters:
+        - { name: organizationId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AdminActivateRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: subscription updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/OrganizationSubscription' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/admin/organizations/{organizationId}/subscription/extend:
+    post:
+      tags: [platform-admin]
+      summary: extend a paid period (platform admin only)
+      operationId: adminSubscriptionExtend
+      description: requires PLATFORM_ADMIN system-level role
+      parameters:
+        - { name: organizationId, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AdminExtendRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: subscription updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/OrganizationSubscription' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/admin/organizations/{organizationId}/subscription/change-plan:
+    post:
+      tags: [platform-admin]
+      summary: change an organization plan (platform admin only)
+      operationId: adminSubscriptionChangePlan
+      description: requires PLATFORM_ADMIN system-level role
+      parameters:
+        - { name: organizationId, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AdminChangePlanRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: subscription updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/OrganizationSubscription' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/admin/organizations/{organizationId}/subscription/suspend:
+    post:
+      tags: [platform-admin]
+      summary: suspend a subscription (platform admin only)
+      operationId: adminSubscriptionSuspend
+      description: requires PLATFORM_ADMIN system-level role
+      parameters:
+        - { name: organizationId, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AdminSuspendRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: subscription updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/OrganizationSubscription' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/admin/organizations/{organizationId}/subscription/resume:
+    post:
+      tags: [platform-admin]
+      summary: resume a suspended subscription (platform admin only)
+      operationId: adminSubscriptionResume
+      description: requires PLATFORM_ADMIN system-level role
+      parameters:
+        - { name: organizationId, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AdminResumeRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: subscription updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/OrganizationSubscription' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/admin/organizations/{organizationId}/subscription/grant-grace:
+    post:
+      tags: [platform-admin]
+      summary: grant a grace period (platform admin only)
+      operationId: adminSubscriptionGrantGrace
+      description: requires PLATFORM_ADMIN system-level role
+      parameters:
+        - { name: organizationId, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AdminGrantGraceRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: subscription updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/OrganizationSubscription' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/admin/organizations/{organizationId}/subscription/payments:
+    post:
+      tags: [platform-admin]
+      summary: record a verified manual subscription payment (platform admin only)
+      operationId: adminSubscriptionPayment
+      description: requires PLATFORM_ADMIN system-level role; records an out-of-band verified payment
+      parameters:
+        - { name: organizationId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AdminManualPaymentRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: payment recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/ManualSubscriptionPayment' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    xOrganizationId:
+      type: apiKey
+      in: header
+      name: X-Organization-Id
+      description: selector only; authority verified server-side
+  responses:
+    Error:
+      description: error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorized:
+      description: not authenticated
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: not authorized
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: resource not found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Conflict:
+      description: conflict (version/state/idempotency)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    ValidationError:
+      description: validation failed
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    RateLimited:
+      description: too many requests
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+  schemas:
+    Meta:
+      type: object
+      required: [traceId]
+      properties:
+        traceId: { type: string }
+    Error:
+      type: object
+      required: [type, title, status, detail, code, traceId]
+      properties:
+        type: { type: string }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        instance: { type: string }
+        code: { $ref: '#/components/schemas/ErrorCode' }
+        traceId: { type: string }
+        errors:
+          type: array
+          items: { $ref: '#/components/schemas/FieldError' }
+    FieldError:
+      type: object
+      required: [field, code, message]
+      properties:
+        field: { type: string }
+        code: { type: string }
+        message: { type: string }
+    ErrorCode:
+      type: string
+      enum:
+        - VALIDATION_ERROR
+        - UNAUTHENTICATED
+        - FORBIDDEN
+        - RESOURCE_NOT_FOUND
+        - RESOURCE_VERSION_CONFLICT
+        - IDEMPOTENCY_KEY_REUSED
+        - DUPLICATE_RECEIPT_NUMBER
+        - BED_ASSIGNMENT_OVERLAP
+        - CONTRACT_NOT_ACTIVE
+        - CHARGE_ALREADY_REVERSED
+        - PAYMENT_ALREADY_REVERSED
+        - ALLOCATION_EXCEEDS_PAYMENT
+        - PLAN_LIMIT_EXCEEDED
+        - DEPOSIT_BALANCE_INSUFFICIENT
+        - SYNC_RESYNC_REQUIRED
+        - SYNC_CURSOR_INVALID
+        - BUSINESS_RULE_VIOLATION
+        - RATE_LIMITED
+        - REGISTRATION_DISABLED
+        - DUPLICATE_CODE
+        - RESOURCE_HAS_ACTIVE_ASSIGNMENT
+        - INTERNAL_ERROR
+    PlanCode:
+      type: string
+      enum: [FREE, PRO, BUSINESS]
+    PlanStatus:
+      type: string
+      enum: [DRAFT, PUBLISHED, ARCHIVED]
+    PlanBillingCycle:
+      type: string
+      enum: [MONTHLY, YEARLY]
+    SubscriptionStatus:
+      type: string
+      enum: [TRIALING, ACTIVE, GRACE_PERIOD, FREE, EXPIRED, SUSPENDED]
+    SubscriptionAction:
+      type: string
+      enum: [TRIAL_STARTED, TRIAL_ENDED, PLAN_ACTIVATED, PLAN_EXTENDED, PLAN_CHANGED, PLAN_DOWNGRADED, SUSPENDED, RESUMED, GRACE_GRANTED, PAYMENT_VERIFIED]
+    PlanLimits:
+      type: object
+      required: [advancedReports, csvExport, detailedFinance]
+      properties:
+        maxHostels: { type: integer, nullable: true }
+        maxRooms: { type: integer, nullable: true }
+        maxBeds: { type: integer, nullable: true }
+        maxResidents: { type: integer, nullable: true }
+        maxMembers: { type: integer, nullable: true }
+        maxDevices: { type: integer, nullable: true }
+        advancedReports: { type: boolean }
+        csvExport: { type: boolean }
+        detailedFinance: { type: boolean }
+    SubscriptionPlan:
+      type: object
+      required: [id, version, code, name, status, currency, billingCycle, limits, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        version: { type: integer }
+        code: { $ref: '#/components/schemas/PlanCode' }
+        name: { type: string }
+        description: { type: string }
+        status: { $ref: '#/components/schemas/PlanStatus' }
+        currency: { type: string, enum: [AFN] }
+        priceAmount: { type: integer, nullable: true }
+        billingCycle: { $ref: '#/components/schemas/PlanBillingCycle' }
+        limits: { $ref: '#/components/schemas/PlanLimits' }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    SubscriptionUsage:
+      type: object
+      required: [hostels, residents, members, devices]
+      properties:
+        hostels: { type: integer }
+        rooms: { type: integer }
+        beds: { type: integer }
+        residents: { type: integer }
+        members: { type: integer }
+        devices: { type: integer }
+    OrganizationSubscription:
+      type: object
+      required: [id, organizationId, plan, status, version, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        organizationId: { type: string, format: uuid }
+        plan: { $ref: '#/components/schemas/SubscriptionPlan' }
+        status: { $ref: '#/components/schemas/SubscriptionStatus' }
+        trialStartsAt: { type: string, format: date-time, nullable: true }
+        trialEndsAt: { type: string, format: date-time, nullable: true }
+        periodStartsAt: { type: string, format: date-time, nullable: true }
+        periodEndsAt: { type: string, format: date-time, nullable: true }
+        graceEndsAt: { type: string, format: date-time, nullable: true }
+        version: { type: integer }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    SubscriptionCurrent:
+      type: object
+      required: [subscription, limits, usage]
+      properties:
+        subscription: { $ref: '#/components/schemas/OrganizationSubscription' }
+        limits: { $ref: '#/components/schemas/PlanLimits' }
+        usage: { $ref: '#/components/schemas/SubscriptionUsage' }
+        remainingTrialDays: { type: integer, nullable: true }
+    SubscriptionAuditEvent:
+      type: object
+      required: [id, organizationId, action, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        organizationId: { type: string, format: uuid }
+        actorUserId: { type: string, format: uuid, nullable: true }
+        action: { $ref: '#/components/schemas/SubscriptionAction' }
+        reason: { type: string, nullable: true }
+        before: { type: object, additionalProperties: true, nullable: true }
+        after: { type: object, additionalProperties: true, nullable: true }
+        traceId: { type: string }
+        createdAt: { type: string, format: date-time }
+    SubscriptionHistoryPage:
+      type: object
+      required: [items, page, size, totalElements, totalPages]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/SubscriptionAuditEvent' }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer }
+        totalPages: { type: integer }
+    ManualSubscriptionPayment:
+      type: object
+      required: [id, organizationId, money, method, receivedAt, verifiedByUserId, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        organizationId: { type: string, format: uuid }
+        subscriptionId: { type: string, format: uuid, nullable: true }
+        money: { $ref: '#/components/schemas/Money' }
+        method: { $ref: '#/components/schemas/PaymentMethod' }
+        reference: { type: string, nullable: true }
+        receivedAt: { type: string, format: date }
+        verifiedByUserId: { type: string, format: uuid }
+        note: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    PlanPage:
+      type: object
+      required: [items, page, size, totalElements, totalPages]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/SubscriptionPlan' }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer }
+        totalPages: { type: integer }
+    AdminOrganizationSummary:
+      type: object
+      required: [id, name, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        email: { type: string, format: email, nullable: true }
+        phone: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+    AdminOrganizationPage:
+      type: object
+      required: [items, page, size, totalElements, totalPages]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/AdminOrganizationSummary' }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer }
+        totalPages: { type: integer }
+    AdminManualPaymentRequest:
+      type: object
+      required: [money, method, receivedAt]
+      properties:
+        money: { $ref: '#/components/schemas/Money' }
+        method: { $ref: '#/components/schemas/PaymentMethod' }
+        reference: { type: string }
+        receivedAt: { type: string, format: date }
+        note: { type: string }
+    AdminActivateRequest:
+      type: object
+      required: [planCode, periodMonths]
+      properties:
+        planCode: { $ref: '#/components/schemas/PlanCode' }
+        periodMonths: { type: integer, minimum: 1 }
+        startsAt: { type: string, format: date-time }
+        reason: { type: string }
+        payment: { $ref: '#/components/schemas/AdminManualPaymentRequest' }
+    AdminExtendRequest:
+      type: object
+      required: [extensionMonths, reason]
+      properties:
+        extensionMonths: { type: integer, minimum: 1 }
+        reason: { type: string }
+    AdminChangePlanRequest:
+      type: object
+      required: [planCode, reason]
+      properties:
+        planCode: { $ref: '#/components/schemas/PlanCode' }
+        reason: { type: string }
+    AdminSuspendRequest:
+      type: object
+      required: [reason]
+      properties:
+        reason: { type: string }
+    AdminResumeRequest:
+      type: object
+      required: [reason]
+      properties:
+        reason: { type: string }
+    AdminGrantGraceRequest:
+      type: object
+      required: [graceDays, reason]
+      properties:
+        graceDays: { type: integer, minimum: 1 }
+        reason: { type: string }
+    HostelPage:
+      type: object
+      required: [items, page, size, totalElements, totalPages]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Hostel' }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer }
+        totalPages: { type: integer }
+    RoomPage:
+      type: object
+      required: [items, page, size, totalElements, totalPages]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Room' }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer }
+        totalPages: { type: integer }
+    BedPage:
+      type: object
+      required: [items, page, size, totalElements, totalPages]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Bed' }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer }
+        totalPages: { type: integer }
+    ResidentPage:
+      type: object
+      required: [items, page, size, totalElements, totalPages]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Resident' }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer }
+        totalPages: { type: integer }
+    ContractPage:
+      type: object
+      required: [items, page, size, totalElements, totalPages]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/StayContract' }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer }
+        totalPages: { type: integer }
+    ChargePage:
+      type: object
+      required: [items, page, size, totalElements, totalPages]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Charge' }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer }
+        totalPages: { type: integer }
+    PaymentPage:
+      type: object
+      required: [items, page, size, totalElements, totalPages]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Payment' }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer }
+        totalPages: { type: integer }
+    ExpensePage:
+      type: object
+      required: [items, page, size, totalElements, totalPages]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Expense' }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer }
+        totalPages: { type: integer }
+    Money:
+      type: object
+      required: [amount, currency]
+      properties:
+        amount: { type: integer, minimum: 0 }
+        currency: { type: string, enum: [AFN] }
+    UserSummary:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        fullName: { type: string }
+        createdAt: { type: string, format: date-time }
+    AuthSession:
+      type: object
+      required: [accessToken, refreshToken, expiresIn, user, memberships]
+      properties:
+        accessToken: { type: string }
+        refreshToken: { type: string }
+        expiresIn: { type: integer }
+        user: { $ref: '#/components/schemas/UserSummary' }
+        memberships:
+          type: array
+          items: { $ref: '#/components/schemas/MembershipSummary' }
+    RegisterRequest:
+      type: object
+      required: [email, password, fullName, organizationName]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8, maxLength: 72 }
+        fullName: { type: string, minLength: 1, maxLength: 200 }
+        organizationName: { type: string, minLength: 1, maxLength: 200 }
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+    RefreshRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken: { type: string }
+    ChangePasswordRequest:
+      type: object
+      required: [currentPassword, newPassword]
+      properties:
+        currentPassword: { type: string }
+        newPassword: { type: string, minLength: 8, maxLength: 72 }
+    OrganizationUpdateRequest:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 200 }
+        timezone: { type: string }
+        defaultCurrency: { type: string, enum: [AFN] }
+    InvitationRequest:
+      type: object
+      required: [email, role]
+      properties:
+        email: { type: string, format: email }
+        role: { $ref: '#/components/schemas/Role' }
+    Invitation:
+      type: object
+      required: [id, organizationId, email, role, status, expiresAt, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        organizationId: { type: string, format: uuid }
+        email: { type: string, format: email }
+        role: { $ref: '#/components/schemas/Role' }
+        status: { type: string, enum: [PENDING, ACCEPTED, REVOKED, EXPIRED] }
+        expiresAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+        acceptedAt: { type: string, format: date-time }
+    InvitationCreated:
+      type: object
+      required: [invitation, token]
+      properties:
+        invitation: { $ref: '#/components/schemas/Invitation' }
+        token: { type: string, description: raw one-time token shown only once }
+    InvitationAcceptRequest:
+      type: object
+      required: [token]
+      properties:
+        token: { type: string }
+    MembershipUpdateRequest:
+      type: object
+      properties:
+        role: { $ref: '#/components/schemas/Role' }
+        active: { type: boolean }
+    HostelRequest:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 200 }
+        address: { type: string, maxLength: 500 }
+        notes: { type: string, maxLength: 2000 }
+    RoomRequest:
+      type: object
+      required: [code, floor]
+      properties:
+        code: { type: string, minLength: 1, maxLength: 50 }
+        floor: { type: integer }
+        notes: { type: string, maxLength: 1000 }
+    BedRequest:
+      type: object
+      required: [code]
+      properties:
+        code: { type: string, minLength: 1, maxLength: 50 }
+        notes: { type: string, maxLength: 1000 }
+    ResidentRequest:
+      type: object
+      required: [fullName, type]
+      properties:
+        fullName: { type: string, minLength: 1, maxLength: 200 }
+        type: { $ref: '#/components/schemas/ResidentType' }
+        phone: { type: string, maxLength: 50 }
+        notes: { type: string, maxLength: 2000 }
+    ContractRequest:
+      type: object
+      required: [hostelId, residentId, startDate, rent]
+      properties:
+        hostelId: { type: string, format: uuid }
+        residentId: { type: string, format: uuid }
+        startDate: { type: string, format: date }
+        endDate: { type: string, format: date }
+        rent: { $ref: '#/components/schemas/Money' }
+        billingCycle: { type: string, enum: [MONTHLY] }
+        deposit: { $ref: '#/components/schemas/Money' }
+        notes: { type: string, maxLength: 2000 }
+    BedAssignmentRequest:
+      type: object
+      required: [bedId, residentId, contractId, startDate]
+      properties:
+        bedId: { type: string, format: uuid }
+        residentId: { type: string, format: uuid }
+        contractId: { type: string, format: uuid }
+        startDate: { type: string, format: date }
+        endDate: { type: string, format: date }
+    ChargeRequest:
+      type: object
+      required: [residentId, type, money, periodStart, periodEnd, dueDate]
+      properties:
+        residentId: { type: string, format: uuid }
+        contractId: { type: string, format: uuid }
+        type: { $ref: '#/components/schemas/ChargeType' }
+        money: { $ref: '#/components/schemas/Money' }
+        periodStart: { type: string, format: date }
+        periodEnd: { type: string, format: date }
+        dueDate: { type: string, format: date }
+        description: { type: string, maxLength: 1000 }
+    PaymentAllocationRequest:
+      type: object
+      required: [chargeId, money]
+      properties:
+        chargeId: { type: string, format: uuid }
+        money: { $ref: '#/components/schemas/Money' }
+    PaymentRequest:
+      type: object
+      required: [residentId, money, method, receivedAt, receiptNumber]
+      properties:
+        residentId: { type: string, format: uuid }
+        money: { $ref: '#/components/schemas/Money' }
+        method: { $ref: '#/components/schemas/PaymentMethod' }
+        receivedAt: { type: string, format: date }
+        receiptNumber: { type: string, minLength: 1, maxLength: 100 }
+        notes: { type: string, maxLength: 1000 }
+        allocations:
+          type: array
+          items: { $ref: '#/components/schemas/PaymentAllocationRequest' }
+    ReversalRequest:
+      type: object
+      required: [reason]
+      properties:
+        reason: { type: string, minLength: 1, maxLength: 500 }
+    DepositRequest:
+      type: object
+      required: [type, money]
+      properties:
+        type: { $ref: '#/components/schemas/DepositType' }
+        money: { $ref: '#/components/schemas/Money' }
+        receivedAt: { type: string, format: date }
+        reason: { type: string, maxLength: 500 }
+    ExpenseRequest:
+      type: object
+      required: [category, money, spentAt]
+      properties:
+        category: { type: string, minLength: 1, maxLength: 100 }
+        money: { $ref: '#/components/schemas/Money' }
+        spentAt: { type: string, format: date }
+        hostelId: { type: string, format: uuid }
+        paymentMethod: { $ref: '#/components/schemas/PaymentMethod' }
+        description: { type: string, maxLength: 1000 }
+    SyncDeviceRegisterRequest:
+      type: object
+      required: [deviceId, platform]
+      properties:
+        deviceId: { type: string, minLength: 1, maxLength: 200 }
+        platform: { type: string, enum: [ANDROID, IOS, OTHER] }
+        appVersion: { type: string, maxLength: 50 }
+    Role:
+      type: string
+      enum: [OWNER, ADMIN, OPERATOR, VIEWER]
+    ResidentType:
+      type: string
+      enum: [STUDENT, WORKER, OTHER]
+    ResidentStatus:
+      type: string
+      enum: [ACTIVE, INACTIVE, ARCHIVED]
+    ContractStatus:
+      type: string
+      enum: [DRAFT, ACTIVE, TERMINATED, CLOSED]
+    ChargeType:
+      type: string
+      enum: [RENT, UTILITY, DAMAGE, OTHER]
+    LedgerEntryStatus:
+      type: string
+      enum: [POSTED, REVERSED]
+    PaymentMethod:
+      type: string
+      enum: [CASH, BANK_TRANSFER, MOBILE_MONEY, OTHER]
+    DepositType:
+      type: string
+      enum: [RECEIVED, REFUNDED, FORFEITED]
+    AssignmentStatus:
+      type: string
+      enum: [ACTIVE, ENDED]
+    SyncAction:
+      type: string
+      enum: [UPSERT, TOMBSTONE]
+    Organization:
+      type: object
+      required: [id, version, name, timezone, defaultCurrency, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        version: { type: integer }
+        name: { type: string }
+        timezone: { type: string }
+        defaultCurrency: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    MembershipSummary:
+      type: object
+      required: [organizationId, organizationName, role, active]
+      properties:
+        membershipId: { type: string, format: uuid }
+        organizationId: { type: string, format: uuid }
+        organizationName: { type: string }
+        role: { $ref: '#/components/schemas/Role' }
+        active: { type: boolean }
+    Membership:
+      type: object
+      required: [id, userId, role, active, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        userId: { type: string, format: uuid }
+        role: { $ref: '#/components/schemas/Role' }
+        active: { type: boolean }
+        fullName: { type: string }
+        email: { type: string }
+        createdAt: { type: string, format: date-time }
+    Hostel:
+      type: object
+      required: [id, version, organizationId, name, status, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        version: { type: integer }
+        memberships:
+          type: array
+          items: { $ref: '#/components/schemas/MembershipSummary' }
+        name: { type: string }
+        address: { type: string }
+        notes: { type: string }
+        status: { type: string, enum: [ACTIVE, ARCHIVED] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    Room:
+      type: object
+      required: [id, version, organizationId, hostelId, code, floor, status, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        version: { type: integer }
+        memberships:
+          type: array
+          items: { $ref: '#/components/schemas/MembershipSummary' }
+        hostelId: { type: string, format: uuid }
+        code: { type: string }
+        floor: { type: integer }
+        notes: { type: string }
+        status: { type: string, enum: [ACTIVE, ARCHIVED] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    Bed:
+      type: object
+      required: [id, version, organizationId, roomId, code, status, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        version: { type: integer }
+        memberships:
+          type: array
+          items: { $ref: '#/components/schemas/MembershipSummary' }
+        roomId: { type: string, format: uuid }
+        code: { type: string }
+        notes: { type: string }
+        status: { type: string, enum: [ACTIVE, INACTIVE] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    Resident:
+      type: object
+      required: [id, version, organizationId, fullName, type, status, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        version: { type: integer }
+        memberships:
+          type: array
+          items: { $ref: '#/components/schemas/MembershipSummary' }
+        fullName: { type: string }
+        type: { $ref: '#/components/schemas/ResidentType' }
+        phone: { type: string }
+        notes: { type: string }
+        status: { $ref: '#/components/schemas/ResidentStatus' }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    StayContract:
+      type: object
+      required: [id, version, organizationId, hostelId, residentId, contractNumber, status, startDate, rent, billingCycle, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        version: { type: integer }
+        memberships:
+          type: array
+          items: { $ref: '#/components/schemas/MembershipSummary' }
+        hostelId: { type: string, format: uuid }
+        residentId: { type: string, format: uuid }
+        contractNumber: { type: string }
+        status: { $ref: '#/components/schemas/ContractStatus' }
+        startDate: { type: string, format: date }
+        endDate: { type: string, format: date }
+        rent: { $ref: '#/components/schemas/Money' }
+        billingCycle: { type: string }
+        deposit: { $ref: '#/components/schemas/Money' }
+        notes: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    BedAssignment:
+      type: object
+      required: [id, version, organizationId, bedId, residentId, contractId, status, startDate, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        version: { type: integer }
+        memberships:
+          type: array
+          items: { $ref: '#/components/schemas/MembershipSummary' }
+        bedId: { type: string, format: uuid }
+        residentId: { type: string, format: uuid }
+        contractId: { type: string, format: uuid }
+        status: { $ref: '#/components/schemas/AssignmentStatus' }
+        startDate: { type: string, format: date }
+        endDate: { type: string, format: date }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    Charge:
+      type: object
+      required: [id, version, organizationId, residentId, type, status, money, periodStart, periodEnd, dueDate, postedAt, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        version: { type: integer }
+        memberships:
+          type: array
+          items: { $ref: '#/components/schemas/MembershipSummary' }
+        residentId: { type: string, format: uuid }
+        contractId: { type: string, format: uuid }
+        type: { $ref: '#/components/schemas/ChargeType' }
+        status: { $ref: '#/components/schemas/LedgerEntryStatus' }
+        money: { $ref: '#/components/schemas/Money' }
+        periodStart: { type: string, format: date }
+        periodEnd: { type: string, format: date }
+        dueDate: { type: string, format: date }
+        description: { type: string }
+        reversedBy: { type: string, format: uuid }
+        postedAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    PaymentAllocation:
+      type: object
+      required: [id, paymentId, chargeId, money, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        paymentId: { type: string, format: uuid }
+        chargeId: { type: string, format: uuid }
+        money: { $ref: '#/components/schemas/Money' }
+        createdAt: { type: string, format: date-time }
+    Payment:
+      type: object
+      required: [id, version, organizationId, residentId, status, money, method, receivedAt, receiptNumber, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        version: { type: integer }
+        memberships:
+          type: array
+          items: { $ref: '#/components/schemas/MembershipSummary' }
+        residentId: { type: string, format: uuid }
+        status: { $ref: '#/components/schemas/LedgerEntryStatus' }
+        money: { $ref: '#/components/schemas/Money' }
+        method: { $ref: '#/components/schemas/PaymentMethod' }
+        receivedAt: { type: string, format: date }
+        receiptNumber: { type: string }
+        notes: { type: string }
+        reversedBy: { type: string, format: uuid }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        allocations:
+          type: array
+          items: { $ref: '#/components/schemas/PaymentAllocation' }
+    DepositTransaction:
+      type: object
+      required: [id, version, organizationId, residentId, type, status, money, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        version: { type: integer }
+        memberships:
+          type: array
+          items: { $ref: '#/components/schemas/MembershipSummary' }
+        residentId: { type: string, format: uuid }
+        type: { $ref: '#/components/schemas/DepositType' }
+        status: { $ref: '#/components/schemas/LedgerEntryStatus' }
+        money: { $ref: '#/components/schemas/Money' }
+        receivedAt: { type: string, format: date }
+        reason: { type: string }
+        reversedBy: { type: string, format: uuid }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    Expense:
+      type: object
+      required: [id, version, organizationId, category, status, money, spentAt, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        version: { type: integer }
+        memberships:
+          type: array
+          items: { $ref: '#/components/schemas/MembershipSummary' }
+        hostelId: { type: string, format: uuid }
+        category: { type: string }
+        status: { $ref: '#/components/schemas/LedgerEntryStatus' }
+        money: { $ref: '#/components/schemas/Money' }
+        spentAt: { type: string, format: date }
+        paymentMethod: { $ref: '#/components/schemas/PaymentMethod' }
+        description: { type: string }
+        reversedBy: { type: string, format: uuid }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    ResidentAccount:
+      type: object
+      required: [residentId, totalCharged, totalPaid, allocatedBalance, unallocatedCredit, outstandingBalance, depositBalance]
+      properties:
+        residentId: { type: string, format: uuid }
+        totalCharged: { type: integer }
+        totalPaid: { type: integer }
+        allocatedBalance: { type: integer }
+        unallocatedCredit: { type: integer }
+        outstandingBalance: { type: integer }
+        depositBalance: { type: integer }
+        charges:
+          type: array
+          items: { $ref: '#/components/schemas/Charge' }
+        payments:
+          type: array
+          items: { $ref: '#/components/schemas/Payment' }
+        depositTransactions:
+          type: array
+          items: { $ref: '#/components/schemas/DepositTransaction' }
+    ResidentTimeline:
+      type: object
+      properties:
+        residentId: { type: string, format: uuid }
+        contracts:
+          type: array
+          items: { $ref: '#/components/schemas/StayContract' }
+        assignments:
+          type: array
+          items: { $ref: '#/components/schemas/BedAssignment' }
+    DashboardReport:
+      type: object
+      required: [hostels, activeBeds, activeResidents, occupiedBeds, totalOutstanding, overdueCount]
+      properties:
+        hostels: { type: integer }
+        rooms: { type: integer }
+        activeBeds: { type: integer }
+        occupiedBeds: { type: integer }
+        activeResidents: { type: integer }
+        totalOutstanding: { type: integer }
+        overdueCount: { type: integer }
+    OccupancyReport:
+      type: object
+      required: [activeBeds, occupiedBeds, vacantBeds, occupancyRate]
+      properties:
+        activeBeds: { type: integer }
+        occupiedBeds: { type: integer }
+        vacantBeds: { type: integer }
+        occupancyRate: { type: number }
+    ReceivablesReport:
+      type: object
+      required: [items, totalOutstanding]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              residentId: { type: string, format: uuid }
+              residentName: { type: string }
+              chargeId: { type: string, format: uuid }
+              dueDate: { type: string, format: date }
+              outstanding: { type: integer }
+        totalOutstanding: { type: integer }
+    FinancialSummaryReport:
+      type: object
+      required: [from, to, totalCharged, totalCollected, totalReversedPayments, totalDepositReceived, totalDepositRefunded, totalExpenses]
+      properties:
+        from: { type: string, format: date }
+        to: { type: string, format: date }
+        totalCharged: { type: integer }
+        totalCollected: { type: integer }
+        totalReversedPayments: { type: string }
+        totalDepositReceived: { type: integer }
+        totalDepositRefunded: { type: integer }
+        totalExpenses: { type: integer }
+    ExpenseReport:
+      type: object
+      required: [from, to, total, items]
+      properties:
+        from: { type: string, format: date }
+        to: { type: string, format: date }
+        total: { type: string }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Expense' }
+    ResidentStatement:
+      type: object
+      required: [residentId, from, to, openingBalance, closingBalance, entries]
+      properties:
+        residentId: { type: string, format: uuid }
+        from: { type: string, format: date }
+        to: { type: string, format: date }
+        openingBalance: { type: integer }
+        closingBalance: { type: integer }
+        entries:
+          type: array
+          items:
+            type: object
+            properties:
+              date: { type: string, format: date }
+              type: { type: string }
+              description: { type: string }
+              amount: { type: integer }
+              balance: { type: integer }
+    SyncDevice:
+      type: object
+      required: [id, organizationId, deviceId, platform, lastCursor, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        memberships:
+          type: array
+          items: { $ref: '#/components/schemas/MembershipSummary' }
+        deviceId: { type: string }
+        platform: { type: string }
+        lastCursor: { type: integer }
+        createdAt: { type: string, format: date-time }
+    SyncChange:
+      type: object
+      required: [sequence, entityType, entityId, action, entityVersion, occurredAt]
+      properties:
+        sequence: { type: integer }
+        entityType: { type: string }
+        entityId: { type: string, format: uuid }
+        action: { $ref: '#/components/schemas/SyncAction' }
+        entityVersion: { type: integer }
+        occurredAt: { type: string, format: date-time }
+    SyncChangesResponse:
+      type: object
+      required: [changes, nextCursor, hasMore, schemaVersion]
+      properties:
+        changes:
+          type: array
+          items: { $ref: '#/components/schemas/SyncChange' }
+        nextCursor: { type: integer }
+        hasMore: { type: boolean }
+        minAvailableCursor: { type: integer }
+        schemaVersion: { type: integer }
+        resyncRequired: { type: boolean }
+    SyncStatus:
+      type: object
+      required: [currentCursor, schemaVersion]
+      properties:
+        currentCursor: { type: integer }
+        schemaVersion: { type: integer }
+        deviceLastCursor: { type: integer }
+        deviceId: { type: string }
