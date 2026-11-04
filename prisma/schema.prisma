@@ -7,13 +7,680 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  OWNER
+  ADMIN
+  OPERATOR
+  VIEWER
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+  EXPIRED
+}
+
+enum ArchiveStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum BedStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum ResidentType {
+  STUDENT
+  WORKER
+  OTHER
+}
+
+enum ResidentStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum ContractStatus {
+  DRAFT
+  ACTIVE
+  TERMINATED
+  CLOSED
+}
+
+enum AssignmentStatus {
+  ACTIVE
+  ENDED
+}
+
+enum ChargeType {
+  RENT
+  UTILITY
+  DAMAGE
+  OTHER
+}
+
+enum LedgerEntryStatus {
+  POSTED
+  REVERSED
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  MOBILE_MONEY
+  OTHER
+}
+
+enum DepositType {
+  RECEIVED
+  REFUNDED
+  FORFEITED
+}
+
+enum PlanCode {
+  FREE
+  PRO
+  BUSINESS
+}
+
+enum PlanStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  GRACE_PERIOD
+  FREE
+  EXPIRED
+  SUSPENDED
+}
+
+enum SubscriptionAction {
+  TRIAL_STARTED
+  TRIAL_ENDED
+  PLAN_ACTIVATED
+  PLAN_EXTENDED
+  PLAN_CHANGED
+  PLAN_DOWNGRADED
+  SUSPENDED
+  RESUMED
+  GRACE_GRANTED
+  PAYMENT_VERIFIED
+}
+
+enum SyncAction {
+  UPSERT
+  TOMBSTONE
+}
+
+enum SyncPlatform {
+  ANDROID
+  WINDOWS
+  OTHER
+}
+
 model Organization {
-  id              String   @id @default(uuid())
+  id              String   @id @default(uuid()) @db.Uuid
+  version         Int      @default(1)
   name            String
   timezone        String   @default("Asia/Kabul")
   defaultCurrency String   @default("AFN") @map("default_currency")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  memberships                OrganizationMembership[]
+  invitations                Invitation[]
+  hostels                    Hostel[]
+  rooms                      Room[]
+  beds                       Bed[]
+  residents                  Resident[]
+  stayContracts              StayContract[]
+  bedAssignments             BedAssignment[]
+  charges                    Charge[]
+  payments                   Payment[]
+  depositTransactions        DepositTransaction[]
+  expenses                   Expense[]
+  subscription               OrganizationSubscription?
+  subscriptionEvents         SubscriptionEvent[]
+  manualSubscriptionPayments ManualSubscriptionPayment[]
+  syncDevices                SyncDevice[]
+  syncChanges                SyncChange[]
+  syncState                  OrganizationSyncState?
+  idempotencyRecords         IdempotencyRecord[]
+  auditEvents                AuditEvent[]
 
   @@map("organizations")
+}
+
+model User {
+  id              String   @id @default(uuid()) @db.Uuid
+  email           String   @unique
+  passwordHash    String   @map("password_hash")
+  fullName        String   @map("full_name")
+  isPlatformAdmin Boolean  @default(false) @map("is_platform_admin")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  memberships            OrganizationMembership[]
+  refreshSessions        RefreshSession[]
+  invitationsInvited     Invitation[]                @relation("InvitationInviter")
+  invitationsAccepted    Invitation[]                @relation("InvitationAcceptor")
+  reversedCharges        Charge[]                    @relation("ChargeReversedBy")
+  reversedPayments       Payment[]                   @relation("PaymentReversedBy")
+  reversedDeposits       DepositTransaction[]        @relation("DepositReversedBy")
+  reversedExpenses       Expense[]                   @relation("ExpenseReversedBy")
+  subscriptionEvents     SubscriptionEvent[]         @relation("SubscriptionEventActor")
+  verifiedManualPayments ManualSubscriptionPayment[] @relation("ManualPaymentVerifiedBy")
+  auditEvents            AuditEvent[]                @relation("AuditEventActor")
+
+  @@map("users")
+}
+
+model OrganizationMembership {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  role           Role     @default(VIEWER)
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@map("organization_memberships")
+}
+
+model Invitation {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String           @map("organization_id") @db.Uuid
+  email          String
+  role           Role
+  status         InvitationStatus @default(PENDING)
+  tokenHash      String           @map("token_hash")
+  inviterUserId  String           @map("inviter_user_id") @db.Uuid
+  expiresAt      DateTime         @map("expires_at") @db.Timestamptz(3)
+  acceptedUserId String?          @map("accepted_user_id") @db.Uuid
+  acceptedAt     DateTime?        @map("accepted_at") @db.Timestamptz(3)
+  createdAt      DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  inviter      User         @relation("InvitationInviter", fields: [inviterUserId], references: [id], onDelete: Restrict)
+  acceptedBy   User?        @relation("InvitationAcceptor", fields: [acceptedUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, status])
+  @@index([email])
+  @@map("invitations")
+}
+
+model RefreshSession {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  family       String    @db.Uuid
+  tokenHash    String    @unique @map("token_hash")
+  expiresAt    DateTime  @map("expires_at") @db.Timestamptz(3)
+  replacedById String?   @unique @map("replaced_by_id") @db.Uuid
+  revokedAt    DateTime? @map("revoked_at") @db.Timestamptz(3)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  replacedBy  RefreshSession?  @relation("RefreshRotation", fields: [replacedById], references: [id], onDelete: SetNull)
+  rotatesFrom RefreshSession[] @relation("RefreshRotation")
+
+  @@index([userId, family])
+  @@map("refresh_sessions")
+}
+
+model Hostel {
+  id             String        @id @default(uuid()) @db.Uuid
+  version        Int           @default(1)
+  organizationId String        @map("organization_id") @db.Uuid
+  name           String
+  address        String?
+  notes          String?
+  status         ArchiveStatus @default(ACTIVE)
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  organization  Organization   @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  rooms         Room[]
+  stayContracts StayContract[]
+  expenses      Expense[]
+
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@map("hostels")
+}
+
+model Room {
+  id             String        @id @default(uuid()) @db.Uuid
+  version        Int           @default(1)
+  organizationId String        @map("organization_id") @db.Uuid
+  hostelId       String        @map("hostel_id") @db.Uuid
+  code           String
+  floor          Int
+  notes          String?
+  status         ArchiveStatus @default(ACTIVE)
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  hostel       Hostel       @relation(fields: [hostelId], references: [id], onDelete: Restrict)
+  beds         Bed[]
+
+  @@unique([hostelId, code])
+  @@index([organizationId])
+  @@map("rooms")
+}
+
+model Bed {
+  id             String    @id @default(uuid()) @db.Uuid
+  version        Int       @default(1)
+  organizationId String    @map("organization_id") @db.Uuid
+  roomId         String    @map("room_id") @db.Uuid
+  code           String
+  notes          String?
+  status         BedStatus @default(ACTIVE)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  room         Room            @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  assignments  BedAssignment[]
+
+  @@unique([roomId, code])
+  @@index([organizationId])
+  @@map("beds")
+}
+
+model Resident {
+  id             String         @id @default(uuid()) @db.Uuid
+  version        Int            @default(1)
+  organizationId String         @map("organization_id") @db.Uuid
+  fullName       String         @map("full_name")
+  type           ResidentType   @default(OTHER)
+  phone          String?
+  notes          String?
+  status         ResidentStatus @default(ACTIVE)
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  organization  Organization         @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  stayContracts StayContract[]
+  assignments   BedAssignment[]
+  charges       Charge[]
+  payments      Payment[]
+  deposits      DepositTransaction[]
+
+  @@index([organizationId])
+  @@index([organizationId, fullName])
+  @@index([organizationId, status])
+  @@map("residents")
+}
+
+model StayContract {
+  id             String         @id @default(uuid()) @db.Uuid
+  version        Int            @default(1)
+  organizationId String         @map("organization_id") @db.Uuid
+  hostelId       String         @map("hostel_id") @db.Uuid
+  residentId     String         @map("resident_id") @db.Uuid
+  contractNumber String         @map("contract_number")
+  status         ContractStatus @default(DRAFT)
+  startDate      DateTime       @map("start_date") @db.Date
+  endDate        DateTime?      @map("end_date") @db.Date
+  rentAmount     Int            @map("rent_amount")
+  billingCycle   BillingCycle   @default(MONTHLY) @map("billing_cycle")
+  depositAmount  Int?           @map("deposit_amount")
+  notes          String?
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  hostel       Hostel          @relation(fields: [hostelId], references: [id], onDelete: Restrict)
+  resident     Resident        @relation(fields: [residentId], references: [id], onDelete: Restrict)
+  assignments  BedAssignment[]
+  charges      Charge[]
+
+  @@unique([organizationId, contractNumber])
+  @@index([organizationId, residentId])
+  @@index([organizationId, hostelId])
+  @@map("stay_contracts")
+}
+
+model BedAssignment {
+  id             String           @id @default(uuid()) @db.Uuid
+  version        Int              @default(1)
+  organizationId String           @map("organization_id") @db.Uuid
+  bedId          String           @map("bed_id") @db.Uuid
+  residentId     String           @map("resident_id") @db.Uuid
+  contractId     String           @map("contract_id") @db.Uuid
+  status         AssignmentStatus @default(ACTIVE)
+  startDate      DateTime         @map("start_date") @db.Date
+  endDate        DateTime?        @map("end_date") @db.Date
+  createdAt      DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  bed          Bed          @relation(fields: [bedId], references: [id], onDelete: Restrict)
+  resident     Resident     @relation(fields: [residentId], references: [id], onDelete: Restrict)
+  contract     StayContract @relation(fields: [contractId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, bedId, status])
+  @@index([organizationId, residentId, status])
+  @@index([organizationId, contractId])
+  @@map("bed_assignments")
+}
+
+model Charge {
+  id             String            @id @default(uuid()) @db.Uuid
+  version        Int               @default(1)
+  organizationId String            @map("organization_id") @db.Uuid
+  residentId     String            @map("resident_id") @db.Uuid
+  contractId     String?           @map("contract_id") @db.Uuid
+  type           ChargeType
+  status         LedgerEntryStatus @default(POSTED)
+  amount         Int
+  periodStart    DateTime          @map("period_start") @db.Date
+  periodEnd      DateTime          @map("period_end") @db.Date
+  dueDate        DateTime          @map("due_date") @db.Date
+  description    String?
+  postedAt       DateTime          @default(now()) @map("posted_at") @db.Timestamptz(3)
+  reversedById   String?           @map("reversed_by_id") @db.Uuid
+  reversalReason String?           @map("reversal_reason")
+  reversedAt     DateTime?         @map("reversed_at") @db.Timestamptz(3)
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  organization Organization        @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  resident     Resident            @relation(fields: [residentId], references: [id], onDelete: Restrict)
+  contract     StayContract?       @relation(fields: [contractId], references: [id], onDelete: SetNull)
+  reversedBy   User?               @relation("ChargeReversedBy", fields: [reversedById], references: [id], onDelete: SetNull)
+  allocations  PaymentAllocation[]
+
+  @@index([organizationId, residentId, status])
+  @@index([organizationId, dueDate])
+  @@index([organizationId, contractId])
+  @@map("charges")
+}
+
+model Payment {
+  id             String            @id @default(uuid()) @db.Uuid
+  version        Int               @default(1)
+  organizationId String            @map("organization_id") @db.Uuid
+  residentId     String            @map("resident_id") @db.Uuid
+  status         LedgerEntryStatus @default(POSTED)
+  amount         Int
+  method         PaymentMethod
+  receivedAt     DateTime          @map("received_at") @db.Date
+  receiptNumber  String            @map("receipt_number")
+  notes          String?
+  reversedById   String?           @map("reversed_by_id") @db.Uuid
+  reversalReason String?           @map("reversal_reason")
+  reversedAt     DateTime?         @map("reversed_at") @db.Timestamptz(3)
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  organization Organization        @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  resident     Resident            @relation(fields: [residentId], references: [id], onDelete: Restrict)
+  reversedBy   User?               @relation("PaymentReversedBy", fields: [reversedById], references: [id], onDelete: SetNull)
+  allocations  PaymentAllocation[]
+
+  @@unique([organizationId, receiptNumber])
+  @@index([organizationId, residentId, status])
+  @@index([organizationId, receivedAt])
+  @@map("payments")
+}
+
+model PaymentAllocation {
+  id        String   @id @default(uuid()) @db.Uuid
+  paymentId String   @map("payment_id") @db.Uuid
+  chargeId  String   @map("charge_id") @db.Uuid
+  amount    Int
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  charge  Charge  @relation(fields: [chargeId], references: [id], onDelete: Restrict)
+
+  @@unique([paymentId, chargeId])
+  @@index([chargeId])
+  @@map("payment_allocations")
+}
+
+model DepositTransaction {
+  id             String            @id @default(uuid()) @db.Uuid
+  version        Int               @default(1)
+  organizationId String            @map("organization_id") @db.Uuid
+  residentId     String            @map("resident_id") @db.Uuid
+  type           DepositType
+  status         LedgerEntryStatus @default(POSTED)
+  amount         Int
+  receivedAt     DateTime?         @map("received_at") @db.Date
+  reason         String?
+  reversedById   String?           @map("reversed_by_id") @db.Uuid
+  reversalReason String?           @map("reversal_reason")
+  reversedAt     DateTime?         @map("reversed_at") @db.Timestamptz(3)
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  resident     Resident     @relation(fields: [residentId], references: [id], onDelete: Restrict)
+  reversedBy   User?        @relation("DepositReversedBy", fields: [reversedById], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, residentId])
+  @@index([organizationId, type])
+  @@map("deposit_transactions")
+}
+
+model Expense {
+  id             String            @id @default(uuid()) @db.Uuid
+  version        Int               @default(1)
+  organizationId String            @map("organization_id") @db.Uuid
+  hostelId       String?           @map("hostel_id") @db.Uuid
+  category       String
+  status         LedgerEntryStatus @default(POSTED)
+  amount         Int
+  spentAt        DateTime          @map("spent_at") @db.Date
+  paymentMethod  PaymentMethod?    @map("payment_method")
+  description    String?
+  reversedById   String?           @map("reversed_by_id") @db.Uuid
+  reversalReason String?           @map("reversal_reason")
+  reversedAt     DateTime?         @map("reversed_at") @db.Timestamptz(3)
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  hostel       Hostel?      @relation(fields: [hostelId], references: [id], onDelete: SetNull)
+  reversedBy   User?        @relation("ExpenseReversedBy", fields: [reversedById], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, spentAt])
+  @@index([organizationId, category])
+  @@map("expenses")
+}
+
+model SubscriptionPlan {
+  id              String       @id @default(uuid()) @db.Uuid
+  version         Int          @default(1)
+  code            PlanCode     @unique
+  name            String
+  description     String?
+  status          PlanStatus   @default(DRAFT)
+  currency        String       @default("AFN")
+  priceAmount     Int?         @map("price_amount")
+  billingCycle    BillingCycle @default(MONTHLY) @map("billing_cycle")
+  maxHostels      Int?         @map("max_hostels")
+  maxRooms        Int?         @map("max_rooms")
+  maxBeds         Int?         @map("max_beds")
+  maxResidents    Int?         @map("max_residents")
+  maxMembers      Int?         @map("max_members")
+  maxDevices      Int?         @map("max_devices")
+  advancedReports Boolean      @default(false) @map("advanced_reports")
+  csvExport       Boolean      @default(false) @map("csv_export")
+  detailedFinance Boolean      @default(false) @map("detailed_finance")
+  createdAt       DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  subscriptions OrganizationSubscription[]
+
+  @@map("subscription_plans")
+}
+
+model OrganizationSubscription {
+  id             String             @id @default(uuid()) @db.Uuid
+  organizationId String             @unique @map("organization_id") @db.Uuid
+  planId         String             @map("plan_id") @db.Uuid
+  status         SubscriptionStatus @default(TRIALING)
+  trialStartsAt  DateTime?          @map("trial_starts_at") @db.Timestamptz(3)
+  trialEndsAt    DateTime?          @map("trial_ends_at") @db.Timestamptz(3)
+  periodStartsAt DateTime?          @map("period_starts_at") @db.Timestamptz(3)
+  periodEndsAt   DateTime?          @map("period_ends_at") @db.Timestamptz(3)
+  graceEndsAt    DateTime?          @map("grace_ends_at") @db.Timestamptz(3)
+  version        Int                @default(1)
+  createdAt      DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  organization   Organization                @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  plan           SubscriptionPlan            @relation(fields: [planId], references: [id], onDelete: Restrict)
+  manualPayments ManualSubscriptionPayment[]
+
+  @@index([planId])
+  @@map("organization_subscriptions")
+}
+
+model SubscriptionEvent {
+  id             String             @id @default(uuid()) @db.Uuid
+  organizationId String             @map("organization_id") @db.Uuid
+  actorUserId    String?            @map("actor_user_id") @db.Uuid
+  action         SubscriptionAction
+  reason         String?
+  before         Json?
+  after          Json?
+  traceId        String             @map("trace_id")
+  createdAt      DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  actor        User?        @relation("SubscriptionEventActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@map("subscription_events")
+}
+
+model ManualSubscriptionPayment {
+  id               String        @id @default(uuid()) @db.Uuid
+  organizationId   String        @map("organization_id") @db.Uuid
+  subscriptionId   String?       @map("subscription_id") @db.Uuid
+  amount           Int
+  method           PaymentMethod
+  reference        String?
+  receivedAt       DateTime      @map("received_at") @db.Date
+  verifiedByUserId String        @map("verified_by_user_id") @db.Uuid
+  note             String?
+  createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  organization Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  subscription OrganizationSubscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  verifiedBy   User                      @relation("ManualPaymentVerifiedBy", fields: [verifiedByUserId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId])
+  @@map("manual_subscription_payments")
+}
+
+model SyncDevice {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  deviceId       String       @map("device_id")
+  platform       SyncPlatform
+  appVersion     String?      @map("app_version")
+  lastCursor     Int          @default(0) @map("last_cursor")
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, deviceId])
+  @@map("sync_devices")
+}
+
+model SyncChange {
+  id             BigInt     @id @default(autoincrement())
+  organizationId String     @map("organization_id") @db.Uuid
+  sequence       Int
+  entityType     String     @map("entity_type")
+  entityId       String     @map("entity_id") @db.Uuid
+  action         SyncAction
+  entityVersion  Int        @map("entity_version")
+  occurredAt     DateTime   @default(now()) @map("occurred_at") @db.Timestamptz(3)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, sequence])
+  @@index([organizationId, entityType, entityId])
+  @@map("sync_changes")
+}
+
+model OrganizationSyncState {
+  organizationId String   @id @map("organization_id") @db.Uuid
+  currentCursor  Int      @default(0) @map("current_cursor")
+  schemaVersion  Int      @default(1) @map("schema_version")
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("organization_sync_state")
+}
+
+model IdempotencyRecord {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  idempotencyKey String   @map("idempotency_key")
+  userId         String   @map("user_id") @db.Uuid
+  endpoint       String
+  requestHash    String   @map("request_hash")
+  responseHash   String?  @map("response_hash")
+  statusCode     Int?     @map("status_code")
+  responseBody   Json?    @map("response_body")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  expiresAt      DateTime @map("expires_at") @db.Timestamptz(3)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, idempotencyKey, endpoint])
+  @@index([expiresAt])
+  @@map("idempotency_records")
+}
+
+model AuditEvent {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  actorUserId    String?  @map("actor_user_id") @db.Uuid
+  action         String
+  entityType     String?  @map("entity_type")
+  entityId       String?  @map("entity_id") @db.Uuid
+  before         Json?
+  after          Json?
+  traceId        String   @map("trace_id")
+  ipAddress      String?  @map("ip_address")
+  userAgent      String?  @map("user_agent")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  actor        User?        @relation("AuditEventActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@index([actorUserId])
+  @@index([entityType, entityId])
+  @@map("audit_events")
 }

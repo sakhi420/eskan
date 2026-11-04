@@ -9,7 +9,181 @@
 * 🟢 You can import this file directly.
 */
 
+export const Role = {
+  OWNER: 'OWNER',
+  ADMIN: 'ADMIN',
+  OPERATOR: 'OPERATOR',
+  VIEWER: 'VIEWER'
+} as const
+
+export type Role = (typeof Role)[keyof typeof Role]
 
 
-// This file is empty because there are no enums in the schema.
-export {}
+export const InvitationStatus = {
+  PENDING: 'PENDING',
+  ACCEPTED: 'ACCEPTED',
+  REVOKED: 'REVOKED',
+  EXPIRED: 'EXPIRED'
+} as const
+
+export type InvitationStatus = (typeof InvitationStatus)[keyof typeof InvitationStatus]
+
+
+export const ArchiveStatus = {
+  ACTIVE: 'ACTIVE',
+  ARCHIVED: 'ARCHIVED'
+} as const
+
+export type ArchiveStatus = (typeof ArchiveStatus)[keyof typeof ArchiveStatus]
+
+
+export const BedStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE'
+} as const
+
+export type BedStatus = (typeof BedStatus)[keyof typeof BedStatus]
+
+
+export const ResidentType = {
+  STUDENT: 'STUDENT',
+  WORKER: 'WORKER',
+  OTHER: 'OTHER'
+} as const
+
+export type ResidentType = (typeof ResidentType)[keyof typeof ResidentType]
+
+
+export const ResidentStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  ARCHIVED: 'ARCHIVED'
+} as const
+
+export type ResidentStatus = (typeof ResidentStatus)[keyof typeof ResidentStatus]
+
+
+export const ContractStatus = {
+  DRAFT: 'DRAFT',
+  ACTIVE: 'ACTIVE',
+  TERMINATED: 'TERMINATED',
+  CLOSED: 'CLOSED'
+} as const
+
+export type ContractStatus = (typeof ContractStatus)[keyof typeof ContractStatus]
+
+
+export const AssignmentStatus = {
+  ACTIVE: 'ACTIVE',
+  ENDED: 'ENDED'
+} as const
+
+export type AssignmentStatus = (typeof AssignmentStatus)[keyof typeof AssignmentStatus]
+
+
+export const ChargeType = {
+  RENT: 'RENT',
+  UTILITY: 'UTILITY',
+  DAMAGE: 'DAMAGE',
+  OTHER: 'OTHER'
+} as const
+
+export type ChargeType = (typeof ChargeType)[keyof typeof ChargeType]
+
+
+export const LedgerEntryStatus = {
+  POSTED: 'POSTED',
+  REVERSED: 'REVERSED'
+} as const
+
+export type LedgerEntryStatus = (typeof LedgerEntryStatus)[keyof typeof LedgerEntryStatus]
+
+
+export const PaymentMethod = {
+  CASH: 'CASH',
+  BANK_TRANSFER: 'BANK_TRANSFER',
+  MOBILE_MONEY: 'MOBILE_MONEY',
+  OTHER: 'OTHER'
+} as const
+
+export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod]
+
+
+export const DepositType = {
+  RECEIVED: 'RECEIVED',
+  REFUNDED: 'REFUNDED',
+  FORFEITED: 'FORFEITED'
+} as const
+
+export type DepositType = (typeof DepositType)[keyof typeof DepositType]
+
+
+export const PlanCode = {
+  FREE: 'FREE',
+  PRO: 'PRO',
+  BUSINESS: 'BUSINESS'
+} as const
+
+export type PlanCode = (typeof PlanCode)[keyof typeof PlanCode]
+
+
+export const PlanStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+  ARCHIVED: 'ARCHIVED'
+} as const
+
+export type PlanStatus = (typeof PlanStatus)[keyof typeof PlanStatus]
+
+
+export const BillingCycle = {
+  MONTHLY: 'MONTHLY',
+  YEARLY: 'YEARLY'
+} as const
+
+export type BillingCycle = (typeof BillingCycle)[keyof typeof BillingCycle]
+
+
+export const SubscriptionStatus = {
+  TRIALING: 'TRIALING',
+  ACTIVE: 'ACTIVE',
+  GRACE_PERIOD: 'GRACE_PERIOD',
+  FREE: 'FREE',
+  EXPIRED: 'EXPIRED',
+  SUSPENDED: 'SUSPENDED'
+} as const
+
+export type SubscriptionStatus = (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus]
+
+
+export const SubscriptionAction = {
+  TRIAL_STARTED: 'TRIAL_STARTED',
+  TRIAL_ENDED: 'TRIAL_ENDED',
+  PLAN_ACTIVATED: 'PLAN_ACTIVATED',
+  PLAN_EXTENDED: 'PLAN_EXTENDED',
+  PLAN_CHANGED: 'PLAN_CHANGED',
+  PLAN_DOWNGRADED: 'PLAN_DOWNGRADED',
+  SUSPENDED: 'SUSPENDED',
+  RESUMED: 'RESUMED',
+  GRACE_GRANTED: 'GRACE_GRANTED',
+  PAYMENT_VERIFIED: 'PAYMENT_VERIFIED'
+} as const
+
+export type SubscriptionAction = (typeof SubscriptionAction)[keyof typeof SubscriptionAction]
+
+
+export const SyncAction = {
+  UPSERT: 'UPSERT',
+  TOMBSTONE: 'TOMBSTONE'
+} as const
+
+export type SyncAction = (typeof SyncAction)[keyof typeof SyncAction]
+
+
+export const SyncPlatform = {
+  ANDROID: 'ANDROID',
+  WINDOWS: 'WINDOWS',
+  OTHER: 'OTHER'
+} as const
+
+export type SyncPlatform = (typeof SyncPlatform)[keyof typeof SyncPlatform]

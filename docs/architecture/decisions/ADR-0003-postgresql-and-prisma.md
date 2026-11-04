@@ -18,7 +18,7 @@
 ## قواعد schema
 
 - tenant scoping صریح برای جدول‌های tenant-owned.
-- مبالغ `NUMERIC(19,2)`؛ در TS از `decimal.js`.
+- مبالغ به‌صورت **عدد صحیح AFN** (INTEGER) طبق تصمیم A-016؛ هرگز FLOAT/DOUBLE/DECIMAL.
 - uuid برای شناسهٔ داخلی؛ شمارهٔ سند/رسید sequence مجزا.
 - `timestamptz` برای زمان سیستم؛ `DATE` برای تاریخ کاری.
 - جلوگیری از overlap بستر با exclusion constraint `daterange` + `btree_gist`

@@ -20,12 +20,23 @@ export type OrganizationModel = runtime.Types.Result.DefaultSelection<Prisma.$Or
 
 export type AggregateOrganization = {
   _count: OrganizationCountAggregateOutputType | null
+  _avg: OrganizationAvgAggregateOutputType | null
+  _sum: OrganizationSumAggregateOutputType | null
   _min: OrganizationMinAggregateOutputType | null
   _max: OrganizationMaxAggregateOutputType | null
 }
 
+export type OrganizationAvgAggregateOutputType = {
+  version: number | null
+}
+
+export type OrganizationSumAggregateOutputType = {
+  version: number | null
+}
+
 export type OrganizationMinAggregateOutputType = {
   id: string | null
+  version: number | null
   name: string | null
   timezone: string | null
   defaultCurrency: string | null
@@ -35,6 +46,7 @@ export type OrganizationMinAggregateOutputType = {
 
 export type OrganizationMaxAggregateOutputType = {
   id: string | null
+  version: number | null
   name: string | null
   timezone: string | null
   defaultCurrency: string | null
@@ -44,6 +56,7 @@ export type OrganizationMaxAggregateOutputType = {
 
 export type OrganizationCountAggregateOutputType = {
   id: number
+  version: number
   name: number
   timezone: number
   defaultCurrency: number
@@ -53,8 +66,17 @@ export type OrganizationCountAggregateOutputType = {
 }
 
 
+export type OrganizationAvgAggregateInputType = {
+  version?: true
+}
+
+export type OrganizationSumAggregateInputType = {
+  version?: true
+}
+
 export type OrganizationMinAggregateInputType = {
   id?: true
+  version?: true
   name?: true
   timezone?: true
   defaultCurrency?: true
@@ -64,6 +86,7 @@ export type OrganizationMinAggregateInputType = {
 
 export type OrganizationMaxAggregateInputType = {
   id?: true
+  version?: true
   name?: true
   timezone?: true
   defaultCurrency?: true
@@ -73,6 +96,7 @@ export type OrganizationMaxAggregateInputType = {
 
 export type OrganizationCountAggregateInputType = {
   id?: true
+  version?: true
   name?: true
   timezone?: true
   defaultCurrency?: true
@@ -119,6 +143,18 @@ export type OrganizationAggregateArgs<ExtArgs extends runtime.Types.Extensions.I
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: OrganizationAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: OrganizationSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: OrganizationMinAggregateInputType
@@ -149,18 +185,23 @@ export type OrganizationGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   _count?: OrganizationCountAggregateInputType | true
+  _avg?: OrganizationAvgAggregateInputType
+  _sum?: OrganizationSumAggregateInputType
   _min?: OrganizationMinAggregateInputType
   _max?: OrganizationMaxAggregateInputType
 }
 
 export type OrganizationGroupByOutputType = {
   id: string
+  version: number
   name: string
   timezone: string
   defaultCurrency: string
   createdAt: Date
   updatedAt: Date
   _count: OrganizationCountAggregateOutputType | null
+  _avg: OrganizationAvgAggregateOutputType | null
+  _sum: OrganizationSumAggregateOutputType | null
   _min: OrganizationMinAggregateOutputType | null
   _max: OrganizationMaxAggregateOutputType | null
 }
@@ -184,21 +225,63 @@ export type OrganizationWhereInput = {
   AND?: Prisma.OrganizationWhereInput | Prisma.OrganizationWhereInput[]
   OR?: Prisma.OrganizationWhereInput[]
   NOT?: Prisma.OrganizationWhereInput | Prisma.OrganizationWhereInput[]
-  id?: Prisma.StringFilter<"Organization"> | string
+  id?: Prisma.UuidFilter<"Organization"> | string
+  version?: Prisma.IntFilter<"Organization"> | number
   name?: Prisma.StringFilter<"Organization"> | string
   timezone?: Prisma.StringFilter<"Organization"> | string
   defaultCurrency?: Prisma.StringFilter<"Organization"> | string
   createdAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
+  memberships?: Prisma.OrganizationMembershipListRelationFilter
+  invitations?: Prisma.InvitationListRelationFilter
+  hostels?: Prisma.HostelListRelationFilter
+  rooms?: Prisma.RoomListRelationFilter
+  beds?: Prisma.BedListRelationFilter
+  residents?: Prisma.ResidentListRelationFilter
+  stayContracts?: Prisma.StayContractListRelationFilter
+  bedAssignments?: Prisma.BedAssignmentListRelationFilter
+  charges?: Prisma.ChargeListRelationFilter
+  payments?: Prisma.PaymentListRelationFilter
+  depositTransactions?: Prisma.DepositTransactionListRelationFilter
+  expenses?: Prisma.ExpenseListRelationFilter
+  subscription?: Prisma.XOR<Prisma.OrganizationSubscriptionNullableScalarRelationFilter, Prisma.OrganizationSubscriptionWhereInput> | null
+  subscriptionEvents?: Prisma.SubscriptionEventListRelationFilter
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentListRelationFilter
+  syncDevices?: Prisma.SyncDeviceListRelationFilter
+  syncChanges?: Prisma.SyncChangeListRelationFilter
+  syncState?: Prisma.XOR<Prisma.OrganizationSyncStateNullableScalarRelationFilter, Prisma.OrganizationSyncStateWhereInput> | null
+  idempotencyRecords?: Prisma.IdempotencyRecordListRelationFilter
+  auditEvents?: Prisma.AuditEventListRelationFilter
 }
 
 export type OrganizationOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   name?: Prisma.SortOrder
   timezone?: Prisma.SortOrder
   defaultCurrency?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  memberships?: Prisma.OrganizationMembershipOrderByRelationAggregateInput
+  invitations?: Prisma.InvitationOrderByRelationAggregateInput
+  hostels?: Prisma.HostelOrderByRelationAggregateInput
+  rooms?: Prisma.RoomOrderByRelationAggregateInput
+  beds?: Prisma.BedOrderByRelationAggregateInput
+  residents?: Prisma.ResidentOrderByRelationAggregateInput
+  stayContracts?: Prisma.StayContractOrderByRelationAggregateInput
+  bedAssignments?: Prisma.BedAssignmentOrderByRelationAggregateInput
+  charges?: Prisma.ChargeOrderByRelationAggregateInput
+  payments?: Prisma.PaymentOrderByRelationAggregateInput
+  depositTransactions?: Prisma.DepositTransactionOrderByRelationAggregateInput
+  expenses?: Prisma.ExpenseOrderByRelationAggregateInput
+  subscription?: Prisma.OrganizationSubscriptionOrderByWithRelationInput
+  subscriptionEvents?: Prisma.SubscriptionEventOrderByRelationAggregateInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentOrderByRelationAggregateInput
+  syncDevices?: Prisma.SyncDeviceOrderByRelationAggregateInput
+  syncChanges?: Prisma.SyncChangeOrderByRelationAggregateInput
+  syncState?: Prisma.OrganizationSyncStateOrderByWithRelationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordOrderByRelationAggregateInput
+  auditEvents?: Prisma.AuditEventOrderByRelationAggregateInput
 }
 
 export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
@@ -206,30 +289,55 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.OrganizationWhereInput | Prisma.OrganizationWhereInput[]
   OR?: Prisma.OrganizationWhereInput[]
   NOT?: Prisma.OrganizationWhereInput | Prisma.OrganizationWhereInput[]
+  version?: Prisma.IntFilter<"Organization"> | number
   name?: Prisma.StringFilter<"Organization"> | string
   timezone?: Prisma.StringFilter<"Organization"> | string
   defaultCurrency?: Prisma.StringFilter<"Organization"> | string
   createdAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
+  memberships?: Prisma.OrganizationMembershipListRelationFilter
+  invitations?: Prisma.InvitationListRelationFilter
+  hostels?: Prisma.HostelListRelationFilter
+  rooms?: Prisma.RoomListRelationFilter
+  beds?: Prisma.BedListRelationFilter
+  residents?: Prisma.ResidentListRelationFilter
+  stayContracts?: Prisma.StayContractListRelationFilter
+  bedAssignments?: Prisma.BedAssignmentListRelationFilter
+  charges?: Prisma.ChargeListRelationFilter
+  payments?: Prisma.PaymentListRelationFilter
+  depositTransactions?: Prisma.DepositTransactionListRelationFilter
+  expenses?: Prisma.ExpenseListRelationFilter
+  subscription?: Prisma.XOR<Prisma.OrganizationSubscriptionNullableScalarRelationFilter, Prisma.OrganizationSubscriptionWhereInput> | null
+  subscriptionEvents?: Prisma.SubscriptionEventListRelationFilter
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentListRelationFilter
+  syncDevices?: Prisma.SyncDeviceListRelationFilter
+  syncChanges?: Prisma.SyncChangeListRelationFilter
+  syncState?: Prisma.XOR<Prisma.OrganizationSyncStateNullableScalarRelationFilter, Prisma.OrganizationSyncStateWhereInput> | null
+  idempotencyRecords?: Prisma.IdempotencyRecordListRelationFilter
+  auditEvents?: Prisma.AuditEventListRelationFilter
 }, "id">
 
 export type OrganizationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   name?: Prisma.SortOrder
   timezone?: Prisma.SortOrder
   defaultCurrency?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.OrganizationCountOrderByAggregateInput
+  _avg?: Prisma.OrganizationAvgOrderByAggregateInput
   _max?: Prisma.OrganizationMaxOrderByAggregateInput
   _min?: Prisma.OrganizationMinOrderByAggregateInput
+  _sum?: Prisma.OrganizationSumOrderByAggregateInput
 }
 
 export type OrganizationScalarWhereWithAggregatesInput = {
   AND?: Prisma.OrganizationScalarWhereWithAggregatesInput | Prisma.OrganizationScalarWhereWithAggregatesInput[]
   OR?: Prisma.OrganizationScalarWhereWithAggregatesInput[]
   NOT?: Prisma.OrganizationScalarWhereWithAggregatesInput | Prisma.OrganizationScalarWhereWithAggregatesInput[]
-  id?: Prisma.StringWithAggregatesFilter<"Organization"> | string
+  id?: Prisma.UuidWithAggregatesFilter<"Organization"> | string
+  version?: Prisma.IntWithAggregatesFilter<"Organization"> | number
   name?: Prisma.StringWithAggregatesFilter<"Organization"> | string
   timezone?: Prisma.StringWithAggregatesFilter<"Organization"> | string
   defaultCurrency?: Prisma.StringWithAggregatesFilter<"Organization"> | string
@@ -239,42 +347,127 @@ export type OrganizationScalarWhereWithAggregatesInput = {
 
 export type OrganizationCreateInput = {
   id?: string
+  version?: number
   name: string
   timezone?: string
   defaultCurrency?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateInput = {
   id?: string
+  version?: number
   name: string
   timezone?: string
   defaultCurrency?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateManyInput = {
   id?: string
+  version?: number
   name: string
   timezone?: string
   defaultCurrency?: string
@@ -284,6 +477,7 @@ export type OrganizationCreateManyInput = {
 
 export type OrganizationUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
@@ -293,6 +487,7 @@ export type OrganizationUpdateManyMutationInput = {
 
 export type OrganizationUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
@@ -302,6 +497,7 @@ export type OrganizationUncheckedUpdateManyInput = {
 
 export type OrganizationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   name?: Prisma.SortOrder
   timezone?: Prisma.SortOrder
   defaultCurrency?: Prisma.SortOrder
@@ -309,8 +505,13 @@ export type OrganizationCountOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
+export type OrganizationAvgOrderByAggregateInput = {
+  version?: Prisma.SortOrder
+}
+
 export type OrganizationMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   name?: Prisma.SortOrder
   timezone?: Prisma.SortOrder
   defaultCurrency?: Prisma.SortOrder
@@ -320,6 +521,7 @@ export type OrganizationMaxOrderByAggregateInput = {
 
 export type OrganizationMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   name?: Prisma.SortOrder
   timezone?: Prisma.SortOrder
   defaultCurrency?: Prisma.SortOrder
@@ -327,27 +529,3169 @@ export type OrganizationMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
+export type OrganizationSumOrderByAggregateInput = {
+  version?: Prisma.SortOrder
+}
+
+export type OrganizationScalarRelationFilter = {
+  is?: Prisma.OrganizationWhereInput
+  isNot?: Prisma.OrganizationWhereInput
+}
+
 export type StringFieldUpdateOperationsInput = {
   set?: string
+}
+
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
 }
 
+export type OrganizationCreateNestedOneWithoutMembershipsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutMembershipsInput, Prisma.OrganizationUncheckedCreateWithoutMembershipsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutMembershipsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutMembershipsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutMembershipsInput, Prisma.OrganizationUncheckedCreateWithoutMembershipsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutMembershipsInput
+  upsert?: Prisma.OrganizationUpsertWithoutMembershipsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutMembershipsInput, Prisma.OrganizationUpdateWithoutMembershipsInput>, Prisma.OrganizationUncheckedUpdateWithoutMembershipsInput>
+}
+
+export type OrganizationCreateNestedOneWithoutInvitationsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutInvitationsInput, Prisma.OrganizationUncheckedCreateWithoutInvitationsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutInvitationsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutInvitationsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutInvitationsInput, Prisma.OrganizationUncheckedCreateWithoutInvitationsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutInvitationsInput
+  upsert?: Prisma.OrganizationUpsertWithoutInvitationsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutInvitationsInput, Prisma.OrganizationUpdateWithoutInvitationsInput>, Prisma.OrganizationUncheckedUpdateWithoutInvitationsInput>
+}
+
+export type OrganizationCreateNestedOneWithoutHostelsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutHostelsInput, Prisma.OrganizationUncheckedCreateWithoutHostelsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutHostelsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutHostelsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutHostelsInput, Prisma.OrganizationUncheckedCreateWithoutHostelsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutHostelsInput
+  upsert?: Prisma.OrganizationUpsertWithoutHostelsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutHostelsInput, Prisma.OrganizationUpdateWithoutHostelsInput>, Prisma.OrganizationUncheckedUpdateWithoutHostelsInput>
+}
+
+export type OrganizationCreateNestedOneWithoutRoomsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutRoomsInput, Prisma.OrganizationUncheckedCreateWithoutRoomsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutRoomsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutRoomsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutRoomsInput, Prisma.OrganizationUncheckedCreateWithoutRoomsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutRoomsInput
+  upsert?: Prisma.OrganizationUpsertWithoutRoomsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutRoomsInput, Prisma.OrganizationUpdateWithoutRoomsInput>, Prisma.OrganizationUncheckedUpdateWithoutRoomsInput>
+}
+
+export type OrganizationCreateNestedOneWithoutBedsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutBedsInput, Prisma.OrganizationUncheckedCreateWithoutBedsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutBedsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutBedsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutBedsInput, Prisma.OrganizationUncheckedCreateWithoutBedsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutBedsInput
+  upsert?: Prisma.OrganizationUpsertWithoutBedsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutBedsInput, Prisma.OrganizationUpdateWithoutBedsInput>, Prisma.OrganizationUncheckedUpdateWithoutBedsInput>
+}
+
+export type OrganizationCreateNestedOneWithoutResidentsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutResidentsInput, Prisma.OrganizationUncheckedCreateWithoutResidentsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutResidentsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutResidentsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutResidentsInput, Prisma.OrganizationUncheckedCreateWithoutResidentsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutResidentsInput
+  upsert?: Prisma.OrganizationUpsertWithoutResidentsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutResidentsInput, Prisma.OrganizationUpdateWithoutResidentsInput>, Prisma.OrganizationUncheckedUpdateWithoutResidentsInput>
+}
+
+export type OrganizationCreateNestedOneWithoutStayContractsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutStayContractsInput, Prisma.OrganizationUncheckedCreateWithoutStayContractsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutStayContractsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutStayContractsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutStayContractsInput, Prisma.OrganizationUncheckedCreateWithoutStayContractsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutStayContractsInput
+  upsert?: Prisma.OrganizationUpsertWithoutStayContractsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutStayContractsInput, Prisma.OrganizationUpdateWithoutStayContractsInput>, Prisma.OrganizationUncheckedUpdateWithoutStayContractsInput>
+}
+
+export type OrganizationCreateNestedOneWithoutBedAssignmentsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutBedAssignmentsInput, Prisma.OrganizationUncheckedCreateWithoutBedAssignmentsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutBedAssignmentsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutBedAssignmentsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutBedAssignmentsInput, Prisma.OrganizationUncheckedCreateWithoutBedAssignmentsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutBedAssignmentsInput
+  upsert?: Prisma.OrganizationUpsertWithoutBedAssignmentsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutBedAssignmentsInput, Prisma.OrganizationUpdateWithoutBedAssignmentsInput>, Prisma.OrganizationUncheckedUpdateWithoutBedAssignmentsInput>
+}
+
+export type OrganizationCreateNestedOneWithoutChargesInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutChargesInput, Prisma.OrganizationUncheckedCreateWithoutChargesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutChargesInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutChargesNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutChargesInput, Prisma.OrganizationUncheckedCreateWithoutChargesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutChargesInput
+  upsert?: Prisma.OrganizationUpsertWithoutChargesInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutChargesInput, Prisma.OrganizationUpdateWithoutChargesInput>, Prisma.OrganizationUncheckedUpdateWithoutChargesInput>
+}
+
+export type OrganizationCreateNestedOneWithoutPaymentsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutPaymentsInput, Prisma.OrganizationUncheckedCreateWithoutPaymentsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutPaymentsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutPaymentsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutPaymentsInput, Prisma.OrganizationUncheckedCreateWithoutPaymentsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutPaymentsInput
+  upsert?: Prisma.OrganizationUpsertWithoutPaymentsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutPaymentsInput, Prisma.OrganizationUpdateWithoutPaymentsInput>, Prisma.OrganizationUncheckedUpdateWithoutPaymentsInput>
+}
+
+export type OrganizationCreateNestedOneWithoutDepositTransactionsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutDepositTransactionsInput, Prisma.OrganizationUncheckedCreateWithoutDepositTransactionsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutDepositTransactionsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutDepositTransactionsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutDepositTransactionsInput, Prisma.OrganizationUncheckedCreateWithoutDepositTransactionsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutDepositTransactionsInput
+  upsert?: Prisma.OrganizationUpsertWithoutDepositTransactionsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutDepositTransactionsInput, Prisma.OrganizationUpdateWithoutDepositTransactionsInput>, Prisma.OrganizationUncheckedUpdateWithoutDepositTransactionsInput>
+}
+
+export type OrganizationCreateNestedOneWithoutExpensesInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutExpensesInput, Prisma.OrganizationUncheckedCreateWithoutExpensesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutExpensesInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutExpensesNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutExpensesInput, Prisma.OrganizationUncheckedCreateWithoutExpensesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutExpensesInput
+  upsert?: Prisma.OrganizationUpsertWithoutExpensesInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutExpensesInput, Prisma.OrganizationUpdateWithoutExpensesInput>, Prisma.OrganizationUncheckedUpdateWithoutExpensesInput>
+}
+
+export type OrganizationCreateNestedOneWithoutSubscriptionInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutSubscriptionInput, Prisma.OrganizationUncheckedCreateWithoutSubscriptionInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutSubscriptionInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutSubscriptionNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutSubscriptionInput, Prisma.OrganizationUncheckedCreateWithoutSubscriptionInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutSubscriptionInput
+  upsert?: Prisma.OrganizationUpsertWithoutSubscriptionInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutSubscriptionInput, Prisma.OrganizationUpdateWithoutSubscriptionInput>, Prisma.OrganizationUncheckedUpdateWithoutSubscriptionInput>
+}
+
+export type OrganizationCreateNestedOneWithoutSubscriptionEventsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutSubscriptionEventsInput, Prisma.OrganizationUncheckedCreateWithoutSubscriptionEventsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutSubscriptionEventsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutSubscriptionEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutSubscriptionEventsInput, Prisma.OrganizationUncheckedCreateWithoutSubscriptionEventsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutSubscriptionEventsInput
+  upsert?: Prisma.OrganizationUpsertWithoutSubscriptionEventsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutSubscriptionEventsInput, Prisma.OrganizationUpdateWithoutSubscriptionEventsInput>, Prisma.OrganizationUncheckedUpdateWithoutSubscriptionEventsInput>
+}
+
+export type OrganizationCreateNestedOneWithoutManualSubscriptionPaymentsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutManualSubscriptionPaymentsInput, Prisma.OrganizationUncheckedCreateWithoutManualSubscriptionPaymentsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutManualSubscriptionPaymentsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutManualSubscriptionPaymentsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutManualSubscriptionPaymentsInput, Prisma.OrganizationUncheckedCreateWithoutManualSubscriptionPaymentsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutManualSubscriptionPaymentsInput
+  upsert?: Prisma.OrganizationUpsertWithoutManualSubscriptionPaymentsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutManualSubscriptionPaymentsInput, Prisma.OrganizationUpdateWithoutManualSubscriptionPaymentsInput>, Prisma.OrganizationUncheckedUpdateWithoutManualSubscriptionPaymentsInput>
+}
+
+export type OrganizationCreateNestedOneWithoutSyncDevicesInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutSyncDevicesInput, Prisma.OrganizationUncheckedCreateWithoutSyncDevicesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutSyncDevicesInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutSyncDevicesNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutSyncDevicesInput, Prisma.OrganizationUncheckedCreateWithoutSyncDevicesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutSyncDevicesInput
+  upsert?: Prisma.OrganizationUpsertWithoutSyncDevicesInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutSyncDevicesInput, Prisma.OrganizationUpdateWithoutSyncDevicesInput>, Prisma.OrganizationUncheckedUpdateWithoutSyncDevicesInput>
+}
+
+export type OrganizationCreateNestedOneWithoutSyncChangesInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutSyncChangesInput, Prisma.OrganizationUncheckedCreateWithoutSyncChangesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutSyncChangesInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutSyncChangesNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutSyncChangesInput, Prisma.OrganizationUncheckedCreateWithoutSyncChangesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutSyncChangesInput
+  upsert?: Prisma.OrganizationUpsertWithoutSyncChangesInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutSyncChangesInput, Prisma.OrganizationUpdateWithoutSyncChangesInput>, Prisma.OrganizationUncheckedUpdateWithoutSyncChangesInput>
+}
+
+export type OrganizationCreateNestedOneWithoutSyncStateInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutSyncStateInput, Prisma.OrganizationUncheckedCreateWithoutSyncStateInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutSyncStateInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutSyncStateNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutSyncStateInput, Prisma.OrganizationUncheckedCreateWithoutSyncStateInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutSyncStateInput
+  upsert?: Prisma.OrganizationUpsertWithoutSyncStateInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutSyncStateInput, Prisma.OrganizationUpdateWithoutSyncStateInput>, Prisma.OrganizationUncheckedUpdateWithoutSyncStateInput>
+}
+
+export type OrganizationCreateNestedOneWithoutIdempotencyRecordsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutIdempotencyRecordsInput, Prisma.OrganizationUncheckedCreateWithoutIdempotencyRecordsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutIdempotencyRecordsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutIdempotencyRecordsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutIdempotencyRecordsInput, Prisma.OrganizationUncheckedCreateWithoutIdempotencyRecordsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutIdempotencyRecordsInput
+  upsert?: Prisma.OrganizationUpsertWithoutIdempotencyRecordsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutIdempotencyRecordsInput, Prisma.OrganizationUpdateWithoutIdempotencyRecordsInput>, Prisma.OrganizationUncheckedUpdateWithoutIdempotencyRecordsInput>
+}
+
+export type OrganizationCreateNestedOneWithoutAuditEventsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutAuditEventsInput, Prisma.OrganizationUncheckedCreateWithoutAuditEventsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutAuditEventsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutAuditEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutAuditEventsInput, Prisma.OrganizationUncheckedCreateWithoutAuditEventsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutAuditEventsInput
+  upsert?: Prisma.OrganizationUpsertWithoutAuditEventsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutAuditEventsInput, Prisma.OrganizationUpdateWithoutAuditEventsInput>, Prisma.OrganizationUncheckedUpdateWithoutAuditEventsInput>
+}
+
+export type OrganizationCreateWithoutMembershipsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutMembershipsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutMembershipsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutMembershipsInput, Prisma.OrganizationUncheckedCreateWithoutMembershipsInput>
+}
+
+export type OrganizationUpsertWithoutMembershipsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutMembershipsInput, Prisma.OrganizationUncheckedUpdateWithoutMembershipsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutMembershipsInput, Prisma.OrganizationUncheckedCreateWithoutMembershipsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutMembershipsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutMembershipsInput, Prisma.OrganizationUncheckedUpdateWithoutMembershipsInput>
+}
+
+export type OrganizationUpdateWithoutMembershipsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutMembershipsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutInvitationsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutInvitationsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutInvitationsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutInvitationsInput, Prisma.OrganizationUncheckedCreateWithoutInvitationsInput>
+}
+
+export type OrganizationUpsertWithoutInvitationsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutInvitationsInput, Prisma.OrganizationUncheckedUpdateWithoutInvitationsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutInvitationsInput, Prisma.OrganizationUncheckedCreateWithoutInvitationsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutInvitationsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutInvitationsInput, Prisma.OrganizationUncheckedUpdateWithoutInvitationsInput>
+}
+
+export type OrganizationUpdateWithoutInvitationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutInvitationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutHostelsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutHostelsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutHostelsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutHostelsInput, Prisma.OrganizationUncheckedCreateWithoutHostelsInput>
+}
+
+export type OrganizationUpsertWithoutHostelsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutHostelsInput, Prisma.OrganizationUncheckedUpdateWithoutHostelsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutHostelsInput, Prisma.OrganizationUncheckedCreateWithoutHostelsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutHostelsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutHostelsInput, Prisma.OrganizationUncheckedUpdateWithoutHostelsInput>
+}
+
+export type OrganizationUpdateWithoutHostelsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutHostelsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutRoomsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutRoomsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutRoomsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutRoomsInput, Prisma.OrganizationUncheckedCreateWithoutRoomsInput>
+}
+
+export type OrganizationUpsertWithoutRoomsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutRoomsInput, Prisma.OrganizationUncheckedUpdateWithoutRoomsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutRoomsInput, Prisma.OrganizationUncheckedCreateWithoutRoomsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutRoomsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutRoomsInput, Prisma.OrganizationUncheckedUpdateWithoutRoomsInput>
+}
+
+export type OrganizationUpdateWithoutRoomsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutRoomsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutBedsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutBedsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutBedsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutBedsInput, Prisma.OrganizationUncheckedCreateWithoutBedsInput>
+}
+
+export type OrganizationUpsertWithoutBedsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutBedsInput, Prisma.OrganizationUncheckedUpdateWithoutBedsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutBedsInput, Prisma.OrganizationUncheckedCreateWithoutBedsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutBedsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutBedsInput, Prisma.OrganizationUncheckedUpdateWithoutBedsInput>
+}
+
+export type OrganizationUpdateWithoutBedsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutBedsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutResidentsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutResidentsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutResidentsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutResidentsInput, Prisma.OrganizationUncheckedCreateWithoutResidentsInput>
+}
+
+export type OrganizationUpsertWithoutResidentsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutResidentsInput, Prisma.OrganizationUncheckedUpdateWithoutResidentsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutResidentsInput, Prisma.OrganizationUncheckedCreateWithoutResidentsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutResidentsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutResidentsInput, Prisma.OrganizationUncheckedUpdateWithoutResidentsInput>
+}
+
+export type OrganizationUpdateWithoutResidentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutResidentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutStayContractsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutStayContractsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutStayContractsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutStayContractsInput, Prisma.OrganizationUncheckedCreateWithoutStayContractsInput>
+}
+
+export type OrganizationUpsertWithoutStayContractsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutStayContractsInput, Prisma.OrganizationUncheckedUpdateWithoutStayContractsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutStayContractsInput, Prisma.OrganizationUncheckedCreateWithoutStayContractsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutStayContractsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutStayContractsInput, Prisma.OrganizationUncheckedUpdateWithoutStayContractsInput>
+}
+
+export type OrganizationUpdateWithoutStayContractsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutStayContractsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutBedAssignmentsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutBedAssignmentsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutBedAssignmentsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutBedAssignmentsInput, Prisma.OrganizationUncheckedCreateWithoutBedAssignmentsInput>
+}
+
+export type OrganizationUpsertWithoutBedAssignmentsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutBedAssignmentsInput, Prisma.OrganizationUncheckedUpdateWithoutBedAssignmentsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutBedAssignmentsInput, Prisma.OrganizationUncheckedCreateWithoutBedAssignmentsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutBedAssignmentsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutBedAssignmentsInput, Prisma.OrganizationUncheckedUpdateWithoutBedAssignmentsInput>
+}
+
+export type OrganizationUpdateWithoutBedAssignmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutBedAssignmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutChargesInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutChargesInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutChargesInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutChargesInput, Prisma.OrganizationUncheckedCreateWithoutChargesInput>
+}
+
+export type OrganizationUpsertWithoutChargesInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutChargesInput, Prisma.OrganizationUncheckedUpdateWithoutChargesInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutChargesInput, Prisma.OrganizationUncheckedCreateWithoutChargesInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutChargesInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutChargesInput, Prisma.OrganizationUncheckedUpdateWithoutChargesInput>
+}
+
+export type OrganizationUpdateWithoutChargesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutChargesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutPaymentsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutPaymentsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutPaymentsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutPaymentsInput, Prisma.OrganizationUncheckedCreateWithoutPaymentsInput>
+}
+
+export type OrganizationUpsertWithoutPaymentsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutPaymentsInput, Prisma.OrganizationUncheckedUpdateWithoutPaymentsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutPaymentsInput, Prisma.OrganizationUncheckedCreateWithoutPaymentsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutPaymentsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutPaymentsInput, Prisma.OrganizationUncheckedUpdateWithoutPaymentsInput>
+}
+
+export type OrganizationUpdateWithoutPaymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutPaymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutDepositTransactionsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutDepositTransactionsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutDepositTransactionsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutDepositTransactionsInput, Prisma.OrganizationUncheckedCreateWithoutDepositTransactionsInput>
+}
+
+export type OrganizationUpsertWithoutDepositTransactionsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutDepositTransactionsInput, Prisma.OrganizationUncheckedUpdateWithoutDepositTransactionsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutDepositTransactionsInput, Prisma.OrganizationUncheckedCreateWithoutDepositTransactionsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutDepositTransactionsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutDepositTransactionsInput, Prisma.OrganizationUncheckedUpdateWithoutDepositTransactionsInput>
+}
+
+export type OrganizationUpdateWithoutDepositTransactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutDepositTransactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutExpensesInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutExpensesInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutExpensesInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutExpensesInput, Prisma.OrganizationUncheckedCreateWithoutExpensesInput>
+}
+
+export type OrganizationUpsertWithoutExpensesInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutExpensesInput, Prisma.OrganizationUncheckedUpdateWithoutExpensesInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutExpensesInput, Prisma.OrganizationUncheckedCreateWithoutExpensesInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutExpensesInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutExpensesInput, Prisma.OrganizationUncheckedUpdateWithoutExpensesInput>
+}
+
+export type OrganizationUpdateWithoutExpensesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutExpensesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutSubscriptionInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutSubscriptionInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutSubscriptionInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutSubscriptionInput, Prisma.OrganizationUncheckedCreateWithoutSubscriptionInput>
+}
+
+export type OrganizationUpsertWithoutSubscriptionInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutSubscriptionInput, Prisma.OrganizationUncheckedUpdateWithoutSubscriptionInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutSubscriptionInput, Prisma.OrganizationUncheckedCreateWithoutSubscriptionInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutSubscriptionInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutSubscriptionInput, Prisma.OrganizationUncheckedUpdateWithoutSubscriptionInput>
+}
+
+export type OrganizationUpdateWithoutSubscriptionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutSubscriptionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutSubscriptionEventsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutSubscriptionEventsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutSubscriptionEventsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutSubscriptionEventsInput, Prisma.OrganizationUncheckedCreateWithoutSubscriptionEventsInput>
+}
+
+export type OrganizationUpsertWithoutSubscriptionEventsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutSubscriptionEventsInput, Prisma.OrganizationUncheckedUpdateWithoutSubscriptionEventsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutSubscriptionEventsInput, Prisma.OrganizationUncheckedCreateWithoutSubscriptionEventsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutSubscriptionEventsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutSubscriptionEventsInput, Prisma.OrganizationUncheckedUpdateWithoutSubscriptionEventsInput>
+}
+
+export type OrganizationUpdateWithoutSubscriptionEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutSubscriptionEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutManualSubscriptionPaymentsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutManualSubscriptionPaymentsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutManualSubscriptionPaymentsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutManualSubscriptionPaymentsInput, Prisma.OrganizationUncheckedCreateWithoutManualSubscriptionPaymentsInput>
+}
+
+export type OrganizationUpsertWithoutManualSubscriptionPaymentsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutManualSubscriptionPaymentsInput, Prisma.OrganizationUncheckedUpdateWithoutManualSubscriptionPaymentsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutManualSubscriptionPaymentsInput, Prisma.OrganizationUncheckedCreateWithoutManualSubscriptionPaymentsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutManualSubscriptionPaymentsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutManualSubscriptionPaymentsInput, Prisma.OrganizationUncheckedUpdateWithoutManualSubscriptionPaymentsInput>
+}
+
+export type OrganizationUpdateWithoutManualSubscriptionPaymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutManualSubscriptionPaymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutSyncDevicesInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutSyncDevicesInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutSyncDevicesInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutSyncDevicesInput, Prisma.OrganizationUncheckedCreateWithoutSyncDevicesInput>
+}
+
+export type OrganizationUpsertWithoutSyncDevicesInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutSyncDevicesInput, Prisma.OrganizationUncheckedUpdateWithoutSyncDevicesInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutSyncDevicesInput, Prisma.OrganizationUncheckedCreateWithoutSyncDevicesInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutSyncDevicesInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutSyncDevicesInput, Prisma.OrganizationUncheckedUpdateWithoutSyncDevicesInput>
+}
+
+export type OrganizationUpdateWithoutSyncDevicesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutSyncDevicesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutSyncChangesInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutSyncChangesInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutSyncChangesInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutSyncChangesInput, Prisma.OrganizationUncheckedCreateWithoutSyncChangesInput>
+}
+
+export type OrganizationUpsertWithoutSyncChangesInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutSyncChangesInput, Prisma.OrganizationUncheckedUpdateWithoutSyncChangesInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutSyncChangesInput, Prisma.OrganizationUncheckedCreateWithoutSyncChangesInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutSyncChangesInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutSyncChangesInput, Prisma.OrganizationUncheckedUpdateWithoutSyncChangesInput>
+}
+
+export type OrganizationUpdateWithoutSyncChangesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutSyncChangesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutSyncStateInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutSyncStateInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutSyncStateInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutSyncStateInput, Prisma.OrganizationUncheckedCreateWithoutSyncStateInput>
+}
+
+export type OrganizationUpsertWithoutSyncStateInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutSyncStateInput, Prisma.OrganizationUncheckedUpdateWithoutSyncStateInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutSyncStateInput, Prisma.OrganizationUncheckedCreateWithoutSyncStateInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutSyncStateInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutSyncStateInput, Prisma.OrganizationUncheckedUpdateWithoutSyncStateInput>
+}
+
+export type OrganizationUpdateWithoutSyncStateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutSyncStateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutIdempotencyRecordsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutIdempotencyRecordsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutIdempotencyRecordsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutIdempotencyRecordsInput, Prisma.OrganizationUncheckedCreateWithoutIdempotencyRecordsInput>
+}
+
+export type OrganizationUpsertWithoutIdempotencyRecordsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutIdempotencyRecordsInput, Prisma.OrganizationUncheckedUpdateWithoutIdempotencyRecordsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutIdempotencyRecordsInput, Prisma.OrganizationUncheckedCreateWithoutIdempotencyRecordsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutIdempotencyRecordsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutIdempotencyRecordsInput, Prisma.OrganizationUncheckedUpdateWithoutIdempotencyRecordsInput>
+}
+
+export type OrganizationUpdateWithoutIdempotencyRecordsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutIdempotencyRecordsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutAuditEventsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutAuditEventsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutAuditEventsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutAuditEventsInput, Prisma.OrganizationUncheckedCreateWithoutAuditEventsInput>
+}
+
+export type OrganizationUpsertWithoutAuditEventsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutAuditEventsInput, Prisma.OrganizationUncheckedUpdateWithoutAuditEventsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutAuditEventsInput, Prisma.OrganizationUncheckedCreateWithoutAuditEventsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutAuditEventsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutAuditEventsInput, Prisma.OrganizationUncheckedUpdateWithoutAuditEventsInput>
+}
+
+export type OrganizationUpdateWithoutAuditEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutAuditEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+
+/**
+ * Count Type OrganizationCountOutputType
+ */
+
+export type OrganizationCountOutputType = {
+  memberships: number
+  invitations: number
+  hostels: number
+  rooms: number
+  beds: number
+  residents: number
+  stayContracts: number
+  bedAssignments: number
+  charges: number
+  payments: number
+  depositTransactions: number
+  expenses: number
+  subscriptionEvents: number
+  manualSubscriptionPayments: number
+  syncDevices: number
+  syncChanges: number
+  idempotencyRecords: number
+  auditEvents: number
+}
+
+export type OrganizationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  memberships?: boolean | OrganizationCountOutputTypeCountMembershipsArgs
+  invitations?: boolean | OrganizationCountOutputTypeCountInvitationsArgs
+  hostels?: boolean | OrganizationCountOutputTypeCountHostelsArgs
+  rooms?: boolean | OrganizationCountOutputTypeCountRoomsArgs
+  beds?: boolean | OrganizationCountOutputTypeCountBedsArgs
+  residents?: boolean | OrganizationCountOutputTypeCountResidentsArgs
+  stayContracts?: boolean | OrganizationCountOutputTypeCountStayContractsArgs
+  bedAssignments?: boolean | OrganizationCountOutputTypeCountBedAssignmentsArgs
+  charges?: boolean | OrganizationCountOutputTypeCountChargesArgs
+  payments?: boolean | OrganizationCountOutputTypeCountPaymentsArgs
+  depositTransactions?: boolean | OrganizationCountOutputTypeCountDepositTransactionsArgs
+  expenses?: boolean | OrganizationCountOutputTypeCountExpensesArgs
+  subscriptionEvents?: boolean | OrganizationCountOutputTypeCountSubscriptionEventsArgs
+  manualSubscriptionPayments?: boolean | OrganizationCountOutputTypeCountManualSubscriptionPaymentsArgs
+  syncDevices?: boolean | OrganizationCountOutputTypeCountSyncDevicesArgs
+  syncChanges?: boolean | OrganizationCountOutputTypeCountSyncChangesArgs
+  idempotencyRecords?: boolean | OrganizationCountOutputTypeCountIdempotencyRecordsArgs
+  auditEvents?: boolean | OrganizationCountOutputTypeCountAuditEventsArgs
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrganizationCountOutputType
+   */
+  select?: Prisma.OrganizationCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountMembershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OrganizationMembershipWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountInvitationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InvitationWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountHostelsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.HostelWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountRoomsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RoomWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountBedsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BedWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountResidentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ResidentWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountStayContractsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StayContractWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountBedAssignmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BedAssignmentWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountChargesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ChargeWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountPaymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PaymentWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountDepositTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DepositTransactionWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountExpensesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ExpenseWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountSubscriptionEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SubscriptionEventWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountManualSubscriptionPaymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ManualSubscriptionPaymentWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountSyncDevicesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SyncDeviceWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountSyncChangesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SyncChangeWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountIdempotencyRecordsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.IdempotencyRecordWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountAuditEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AuditEventWhereInput
+}
 
 
 export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  version?: boolean
   name?: boolean
   timezone?: boolean
   defaultCurrency?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  memberships?: boolean | Prisma.Organization$membershipsArgs<ExtArgs>
+  invitations?: boolean | Prisma.Organization$invitationsArgs<ExtArgs>
+  hostels?: boolean | Prisma.Organization$hostelsArgs<ExtArgs>
+  rooms?: boolean | Prisma.Organization$roomsArgs<ExtArgs>
+  beds?: boolean | Prisma.Organization$bedsArgs<ExtArgs>
+  residents?: boolean | Prisma.Organization$residentsArgs<ExtArgs>
+  stayContracts?: boolean | Prisma.Organization$stayContractsArgs<ExtArgs>
+  bedAssignments?: boolean | Prisma.Organization$bedAssignmentsArgs<ExtArgs>
+  charges?: boolean | Prisma.Organization$chargesArgs<ExtArgs>
+  payments?: boolean | Prisma.Organization$paymentsArgs<ExtArgs>
+  depositTransactions?: boolean | Prisma.Organization$depositTransactionsArgs<ExtArgs>
+  expenses?: boolean | Prisma.Organization$expensesArgs<ExtArgs>
+  subscription?: boolean | Prisma.Organization$subscriptionArgs<ExtArgs>
+  subscriptionEvents?: boolean | Prisma.Organization$subscriptionEventsArgs<ExtArgs>
+  manualSubscriptionPayments?: boolean | Prisma.Organization$manualSubscriptionPaymentsArgs<ExtArgs>
+  syncDevices?: boolean | Prisma.Organization$syncDevicesArgs<ExtArgs>
+  syncChanges?: boolean | Prisma.Organization$syncChangesArgs<ExtArgs>
+  syncState?: boolean | Prisma.Organization$syncStateArgs<ExtArgs>
+  idempotencyRecords?: boolean | Prisma.Organization$idempotencyRecordsArgs<ExtArgs>
+  auditEvents?: boolean | Prisma.Organization$auditEventsArgs<ExtArgs>
+  _count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["organization"]>
 
 export type OrganizationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  version?: boolean
   name?: boolean
   timezone?: boolean
   defaultCurrency?: boolean
@@ -357,6 +3701,7 @@ export type OrganizationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
 
 export type OrganizationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  version?: boolean
   name?: boolean
   timezone?: boolean
   defaultCurrency?: boolean
@@ -366,6 +3711,7 @@ export type OrganizationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
 
 export type OrganizationSelectScalar = {
   id?: boolean
+  version?: boolean
   name?: boolean
   timezone?: boolean
   defaultCurrency?: boolean
@@ -373,13 +3719,60 @@ export type OrganizationSelectScalar = {
   updatedAt?: boolean
 }
 
-export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "timezone" | "defaultCurrency" | "createdAt" | "updatedAt", ExtArgs["result"]["organization"]>
+export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "version" | "name" | "timezone" | "defaultCurrency" | "createdAt" | "updatedAt", ExtArgs["result"]["organization"]>
+export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  memberships?: boolean | Prisma.Organization$membershipsArgs<ExtArgs>
+  invitations?: boolean | Prisma.Organization$invitationsArgs<ExtArgs>
+  hostels?: boolean | Prisma.Organization$hostelsArgs<ExtArgs>
+  rooms?: boolean | Prisma.Organization$roomsArgs<ExtArgs>
+  beds?: boolean | Prisma.Organization$bedsArgs<ExtArgs>
+  residents?: boolean | Prisma.Organization$residentsArgs<ExtArgs>
+  stayContracts?: boolean | Prisma.Organization$stayContractsArgs<ExtArgs>
+  bedAssignments?: boolean | Prisma.Organization$bedAssignmentsArgs<ExtArgs>
+  charges?: boolean | Prisma.Organization$chargesArgs<ExtArgs>
+  payments?: boolean | Prisma.Organization$paymentsArgs<ExtArgs>
+  depositTransactions?: boolean | Prisma.Organization$depositTransactionsArgs<ExtArgs>
+  expenses?: boolean | Prisma.Organization$expensesArgs<ExtArgs>
+  subscription?: boolean | Prisma.Organization$subscriptionArgs<ExtArgs>
+  subscriptionEvents?: boolean | Prisma.Organization$subscriptionEventsArgs<ExtArgs>
+  manualSubscriptionPayments?: boolean | Prisma.Organization$manualSubscriptionPaymentsArgs<ExtArgs>
+  syncDevices?: boolean | Prisma.Organization$syncDevicesArgs<ExtArgs>
+  syncChanges?: boolean | Prisma.Organization$syncChangesArgs<ExtArgs>
+  syncState?: boolean | Prisma.Organization$syncStateArgs<ExtArgs>
+  idempotencyRecords?: boolean | Prisma.Organization$idempotencyRecordsArgs<ExtArgs>
+  auditEvents?: boolean | Prisma.Organization$auditEventsArgs<ExtArgs>
+  _count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type OrganizationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type OrganizationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Organization"
-  objects: {}
+  objects: {
+    memberships: Prisma.$OrganizationMembershipPayload<ExtArgs>[]
+    invitations: Prisma.$InvitationPayload<ExtArgs>[]
+    hostels: Prisma.$HostelPayload<ExtArgs>[]
+    rooms: Prisma.$RoomPayload<ExtArgs>[]
+    beds: Prisma.$BedPayload<ExtArgs>[]
+    residents: Prisma.$ResidentPayload<ExtArgs>[]
+    stayContracts: Prisma.$StayContractPayload<ExtArgs>[]
+    bedAssignments: Prisma.$BedAssignmentPayload<ExtArgs>[]
+    charges: Prisma.$ChargePayload<ExtArgs>[]
+    payments: Prisma.$PaymentPayload<ExtArgs>[]
+    depositTransactions: Prisma.$DepositTransactionPayload<ExtArgs>[]
+    expenses: Prisma.$ExpensePayload<ExtArgs>[]
+    subscription: Prisma.$OrganizationSubscriptionPayload<ExtArgs> | null
+    subscriptionEvents: Prisma.$SubscriptionEventPayload<ExtArgs>[]
+    manualSubscriptionPayments: Prisma.$ManualSubscriptionPaymentPayload<ExtArgs>[]
+    syncDevices: Prisma.$SyncDevicePayload<ExtArgs>[]
+    syncChanges: Prisma.$SyncChangePayload<ExtArgs>[]
+    syncState: Prisma.$OrganizationSyncStatePayload<ExtArgs> | null
+    idempotencyRecords: Prisma.$IdempotencyRecordPayload<ExtArgs>[]
+    auditEvents: Prisma.$AuditEventPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    version: number
     name: string
     timezone: string
     defaultCurrency: string
@@ -779,6 +4172,26 @@ readonly fields: OrganizationFieldRefs;
  */
 export interface Prisma__OrganizationClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  memberships<T extends Prisma.Organization$membershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrganizationMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  invitations<T extends Prisma.Organization$invitationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$invitationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvitationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  hostels<T extends Prisma.Organization$hostelsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$hostelsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$HostelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  rooms<T extends Prisma.Organization$roomsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$roomsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RoomPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  beds<T extends Prisma.Organization$bedsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$bedsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BedPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  residents<T extends Prisma.Organization$residentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$residentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ResidentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  stayContracts<T extends Prisma.Organization$stayContractsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$stayContractsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StayContractPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  bedAssignments<T extends Prisma.Organization$bedAssignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$bedAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BedAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  charges<T extends Prisma.Organization$chargesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$chargesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChargePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  payments<T extends Prisma.Organization$paymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  depositTransactions<T extends Prisma.Organization$depositTransactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$depositTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DepositTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  expenses<T extends Prisma.Organization$expensesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$expensesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ExpensePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  subscription<T extends Prisma.Organization$subscriptionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$subscriptionArgs<ExtArgs>>): Prisma.Prisma__OrganizationSubscriptionClient<runtime.Types.Result.GetResult<Prisma.$OrganizationSubscriptionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  subscriptionEvents<T extends Prisma.Organization$subscriptionEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$subscriptionEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubscriptionEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  manualSubscriptionPayments<T extends Prisma.Organization$manualSubscriptionPaymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$manualSubscriptionPaymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ManualSubscriptionPaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  syncDevices<T extends Prisma.Organization$syncDevicesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$syncDevicesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SyncDevicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  syncChanges<T extends Prisma.Organization$syncChangesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$syncChangesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SyncChangePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  syncState<T extends Prisma.Organization$syncStateArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$syncStateArgs<ExtArgs>>): Prisma.Prisma__OrganizationSyncStateClient<runtime.Types.Result.GetResult<Prisma.$OrganizationSyncStatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  idempotencyRecords<T extends Prisma.Organization$idempotencyRecordsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$idempotencyRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$IdempotencyRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  auditEvents<T extends Prisma.Organization$auditEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$auditEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -809,6 +4222,7 @@ export interface Prisma__OrganizationClient<T, Null = never, ExtArgs extends run
  */
 export interface OrganizationFieldRefs {
   readonly id: Prisma.FieldRef<"Organization", 'String'>
+  readonly version: Prisma.FieldRef<"Organization", 'Int'>
   readonly name: Prisma.FieldRef<"Organization", 'String'>
   readonly timezone: Prisma.FieldRef<"Organization", 'String'>
   readonly defaultCurrency: Prisma.FieldRef<"Organization", 'String'>
@@ -831,6 +4245,10 @@ export type OrganizationFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.
    */
   omit?: Prisma.OrganizationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrganizationInclude<ExtArgs> | null
+  /**
    * Filter, which Organization to fetch.
    */
   where: Prisma.OrganizationWhereUniqueInput
@@ -849,6 +4267,10 @@ export type OrganizationFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Exte
    */
   omit?: Prisma.OrganizationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrganizationInclude<ExtArgs> | null
+  /**
    * Filter, which Organization to fetch.
    */
   where: Prisma.OrganizationWhereUniqueInput
@@ -866,6 +4288,10 @@ export type OrganizationFindFirstArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the Organization
    */
   omit?: Prisma.OrganizationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrganizationInclude<ExtArgs> | null
   /**
    * Filter, which Organization to fetch.
    */
@@ -915,6 +4341,10 @@ export type OrganizationFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Exten
    */
   omit?: Prisma.OrganizationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrganizationInclude<ExtArgs> | null
+  /**
    * Filter, which Organization to fetch.
    */
   where?: Prisma.OrganizationWhereInput
@@ -962,6 +4392,10 @@ export type OrganizationFindManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the Organization
    */
   omit?: Prisma.OrganizationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrganizationInclude<ExtArgs> | null
   /**
    * Filter, which Organizations to fetch.
    */
@@ -1011,6 +4445,10 @@ export type OrganizationCreateArgs<ExtArgs extends runtime.Types.Extensions.Inte
    */
   omit?: Prisma.OrganizationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrganizationInclude<ExtArgs> | null
+  /**
    * The data needed to create a Organization.
    */
   data: Prisma.XOR<Prisma.OrganizationCreateInput, Prisma.OrganizationUncheckedCreateInput>
@@ -1058,6 +4496,10 @@ export type OrganizationUpdateArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the Organization
    */
   omit?: Prisma.OrganizationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrganizationInclude<ExtArgs> | null
   /**
    * The data needed to update a Organization.
    */
@@ -1125,6 +4567,10 @@ export type OrganizationUpsertArgs<ExtArgs extends runtime.Types.Extensions.Inte
    */
   omit?: Prisma.OrganizationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrganizationInclude<ExtArgs> | null
+  /**
    * The filter to search for the Organization to update in case it exists.
    */
   where: Prisma.OrganizationWhereUniqueInput
@@ -1151,6 +4597,10 @@ export type OrganizationDeleteArgs<ExtArgs extends runtime.Types.Extensions.Inte
    */
   omit?: Prisma.OrganizationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrganizationInclude<ExtArgs> | null
+  /**
    * Filter which Organization to delete.
    */
   where: Prisma.OrganizationWhereUniqueInput
@@ -1171,6 +4621,476 @@ export type OrganizationDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.
 }
 
 /**
+ * Organization.memberships
+ */
+export type Organization$membershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrganizationMembership
+   */
+  select?: Prisma.OrganizationMembershipSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OrganizationMembership
+   */
+  omit?: Prisma.OrganizationMembershipOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrganizationMembershipInclude<ExtArgs> | null
+  where?: Prisma.OrganizationMembershipWhereInput
+  orderBy?: Prisma.OrganizationMembershipOrderByWithRelationInput | Prisma.OrganizationMembershipOrderByWithRelationInput[]
+  cursor?: Prisma.OrganizationMembershipWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OrganizationMembershipScalarFieldEnum | Prisma.OrganizationMembershipScalarFieldEnum[]
+}
+
+/**
+ * Organization.invitations
+ */
+export type Organization$invitationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Invitation
+   */
+  select?: Prisma.InvitationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Invitation
+   */
+  omit?: Prisma.InvitationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InvitationInclude<ExtArgs> | null
+  where?: Prisma.InvitationWhereInput
+  orderBy?: Prisma.InvitationOrderByWithRelationInput | Prisma.InvitationOrderByWithRelationInput[]
+  cursor?: Prisma.InvitationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InvitationScalarFieldEnum | Prisma.InvitationScalarFieldEnum[]
+}
+
+/**
+ * Organization.hostels
+ */
+export type Organization$hostelsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Hostel
+   */
+  select?: Prisma.HostelSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Hostel
+   */
+  omit?: Prisma.HostelOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.HostelInclude<ExtArgs> | null
+  where?: Prisma.HostelWhereInput
+  orderBy?: Prisma.HostelOrderByWithRelationInput | Prisma.HostelOrderByWithRelationInput[]
+  cursor?: Prisma.HostelWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.HostelScalarFieldEnum | Prisma.HostelScalarFieldEnum[]
+}
+
+/**
+ * Organization.rooms
+ */
+export type Organization$roomsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Room
+   */
+  select?: Prisma.RoomSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Room
+   */
+  omit?: Prisma.RoomOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RoomInclude<ExtArgs> | null
+  where?: Prisma.RoomWhereInput
+  orderBy?: Prisma.RoomOrderByWithRelationInput | Prisma.RoomOrderByWithRelationInput[]
+  cursor?: Prisma.RoomWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RoomScalarFieldEnum | Prisma.RoomScalarFieldEnum[]
+}
+
+/**
+ * Organization.beds
+ */
+export type Organization$bedsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Bed
+   */
+  select?: Prisma.BedSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Bed
+   */
+  omit?: Prisma.BedOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BedInclude<ExtArgs> | null
+  where?: Prisma.BedWhereInput
+  orderBy?: Prisma.BedOrderByWithRelationInput | Prisma.BedOrderByWithRelationInput[]
+  cursor?: Prisma.BedWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BedScalarFieldEnum | Prisma.BedScalarFieldEnum[]
+}
+
+/**
+ * Organization.residents
+ */
+export type Organization$residentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Resident
+   */
+  select?: Prisma.ResidentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Resident
+   */
+  omit?: Prisma.ResidentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ResidentInclude<ExtArgs> | null
+  where?: Prisma.ResidentWhereInput
+  orderBy?: Prisma.ResidentOrderByWithRelationInput | Prisma.ResidentOrderByWithRelationInput[]
+  cursor?: Prisma.ResidentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ResidentScalarFieldEnum | Prisma.ResidentScalarFieldEnum[]
+}
+
+/**
+ * Organization.stayContracts
+ */
+export type Organization$stayContractsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StayContract
+   */
+  select?: Prisma.StayContractSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StayContract
+   */
+  omit?: Prisma.StayContractOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StayContractInclude<ExtArgs> | null
+  where?: Prisma.StayContractWhereInput
+  orderBy?: Prisma.StayContractOrderByWithRelationInput | Prisma.StayContractOrderByWithRelationInput[]
+  cursor?: Prisma.StayContractWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StayContractScalarFieldEnum | Prisma.StayContractScalarFieldEnum[]
+}
+
+/**
+ * Organization.bedAssignments
+ */
+export type Organization$bedAssignmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BedAssignment
+   */
+  select?: Prisma.BedAssignmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BedAssignment
+   */
+  omit?: Prisma.BedAssignmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BedAssignmentInclude<ExtArgs> | null
+  where?: Prisma.BedAssignmentWhereInput
+  orderBy?: Prisma.BedAssignmentOrderByWithRelationInput | Prisma.BedAssignmentOrderByWithRelationInput[]
+  cursor?: Prisma.BedAssignmentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BedAssignmentScalarFieldEnum | Prisma.BedAssignmentScalarFieldEnum[]
+}
+
+/**
+ * Organization.charges
+ */
+export type Organization$chargesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Charge
+   */
+  select?: Prisma.ChargeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Charge
+   */
+  omit?: Prisma.ChargeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ChargeInclude<ExtArgs> | null
+  where?: Prisma.ChargeWhereInput
+  orderBy?: Prisma.ChargeOrderByWithRelationInput | Prisma.ChargeOrderByWithRelationInput[]
+  cursor?: Prisma.ChargeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ChargeScalarFieldEnum | Prisma.ChargeScalarFieldEnum[]
+}
+
+/**
+ * Organization.payments
+ */
+export type Organization$paymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Payment
+   */
+  select?: Prisma.PaymentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Payment
+   */
+  omit?: Prisma.PaymentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentInclude<ExtArgs> | null
+  where?: Prisma.PaymentWhereInput
+  orderBy?: Prisma.PaymentOrderByWithRelationInput | Prisma.PaymentOrderByWithRelationInput[]
+  cursor?: Prisma.PaymentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PaymentScalarFieldEnum | Prisma.PaymentScalarFieldEnum[]
+}
+
+/**
+ * Organization.depositTransactions
+ */
+export type Organization$depositTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DepositTransaction
+   */
+  select?: Prisma.DepositTransactionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DepositTransaction
+   */
+  omit?: Prisma.DepositTransactionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DepositTransactionInclude<ExtArgs> | null
+  where?: Prisma.DepositTransactionWhereInput
+  orderBy?: Prisma.DepositTransactionOrderByWithRelationInput | Prisma.DepositTransactionOrderByWithRelationInput[]
+  cursor?: Prisma.DepositTransactionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DepositTransactionScalarFieldEnum | Prisma.DepositTransactionScalarFieldEnum[]
+}
+
+/**
+ * Organization.expenses
+ */
+export type Organization$expensesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Expense
+   */
+  select?: Prisma.ExpenseSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Expense
+   */
+  omit?: Prisma.ExpenseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ExpenseInclude<ExtArgs> | null
+  where?: Prisma.ExpenseWhereInput
+  orderBy?: Prisma.ExpenseOrderByWithRelationInput | Prisma.ExpenseOrderByWithRelationInput[]
+  cursor?: Prisma.ExpenseWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ExpenseScalarFieldEnum | Prisma.ExpenseScalarFieldEnum[]
+}
+
+/**
+ * Organization.subscription
+ */
+export type Organization$subscriptionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrganizationSubscription
+   */
+  select?: Prisma.OrganizationSubscriptionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OrganizationSubscription
+   */
+  omit?: Prisma.OrganizationSubscriptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrganizationSubscriptionInclude<ExtArgs> | null
+  where?: Prisma.OrganizationSubscriptionWhereInput
+}
+
+/**
+ * Organization.subscriptionEvents
+ */
+export type Organization$subscriptionEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SubscriptionEvent
+   */
+  select?: Prisma.SubscriptionEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SubscriptionEvent
+   */
+  omit?: Prisma.SubscriptionEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SubscriptionEventInclude<ExtArgs> | null
+  where?: Prisma.SubscriptionEventWhereInput
+  orderBy?: Prisma.SubscriptionEventOrderByWithRelationInput | Prisma.SubscriptionEventOrderByWithRelationInput[]
+  cursor?: Prisma.SubscriptionEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SubscriptionEventScalarFieldEnum | Prisma.SubscriptionEventScalarFieldEnum[]
+}
+
+/**
+ * Organization.manualSubscriptionPayments
+ */
+export type Organization$manualSubscriptionPaymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ManualSubscriptionPayment
+   */
+  select?: Prisma.ManualSubscriptionPaymentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ManualSubscriptionPayment
+   */
+  omit?: Prisma.ManualSubscriptionPaymentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ManualSubscriptionPaymentInclude<ExtArgs> | null
+  where?: Prisma.ManualSubscriptionPaymentWhereInput
+  orderBy?: Prisma.ManualSubscriptionPaymentOrderByWithRelationInput | Prisma.ManualSubscriptionPaymentOrderByWithRelationInput[]
+  cursor?: Prisma.ManualSubscriptionPaymentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ManualSubscriptionPaymentScalarFieldEnum | Prisma.ManualSubscriptionPaymentScalarFieldEnum[]
+}
+
+/**
+ * Organization.syncDevices
+ */
+export type Organization$syncDevicesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SyncDevice
+   */
+  select?: Prisma.SyncDeviceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SyncDevice
+   */
+  omit?: Prisma.SyncDeviceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SyncDeviceInclude<ExtArgs> | null
+  where?: Prisma.SyncDeviceWhereInput
+  orderBy?: Prisma.SyncDeviceOrderByWithRelationInput | Prisma.SyncDeviceOrderByWithRelationInput[]
+  cursor?: Prisma.SyncDeviceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SyncDeviceScalarFieldEnum | Prisma.SyncDeviceScalarFieldEnum[]
+}
+
+/**
+ * Organization.syncChanges
+ */
+export type Organization$syncChangesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SyncChange
+   */
+  select?: Prisma.SyncChangeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SyncChange
+   */
+  omit?: Prisma.SyncChangeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SyncChangeInclude<ExtArgs> | null
+  where?: Prisma.SyncChangeWhereInput
+  orderBy?: Prisma.SyncChangeOrderByWithRelationInput | Prisma.SyncChangeOrderByWithRelationInput[]
+  cursor?: Prisma.SyncChangeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SyncChangeScalarFieldEnum | Prisma.SyncChangeScalarFieldEnum[]
+}
+
+/**
+ * Organization.syncState
+ */
+export type Organization$syncStateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrganizationSyncState
+   */
+  select?: Prisma.OrganizationSyncStateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OrganizationSyncState
+   */
+  omit?: Prisma.OrganizationSyncStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrganizationSyncStateInclude<ExtArgs> | null
+  where?: Prisma.OrganizationSyncStateWhereInput
+}
+
+/**
+ * Organization.idempotencyRecords
+ */
+export type Organization$idempotencyRecordsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the IdempotencyRecord
+   */
+  select?: Prisma.IdempotencyRecordSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the IdempotencyRecord
+   */
+  omit?: Prisma.IdempotencyRecordOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.IdempotencyRecordInclude<ExtArgs> | null
+  where?: Prisma.IdempotencyRecordWhereInput
+  orderBy?: Prisma.IdempotencyRecordOrderByWithRelationInput | Prisma.IdempotencyRecordOrderByWithRelationInput[]
+  cursor?: Prisma.IdempotencyRecordWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.IdempotencyRecordScalarFieldEnum | Prisma.IdempotencyRecordScalarFieldEnum[]
+}
+
+/**
+ * Organization.auditEvents
+ */
+export type Organization$auditEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AuditEvent
+   */
+  select?: Prisma.AuditEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AuditEvent
+   */
+  omit?: Prisma.AuditEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuditEventInclude<ExtArgs> | null
+  where?: Prisma.AuditEventWhereInput
+  orderBy?: Prisma.AuditEventOrderByWithRelationInput | Prisma.AuditEventOrderByWithRelationInput[]
+  cursor?: Prisma.AuditEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AuditEventScalarFieldEnum | Prisma.AuditEventScalarFieldEnum[]
+}
+
+/**
  * Organization without action
  */
 export type OrganizationDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1182,4 +5102,8 @@ export type OrganizationDefaultArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the Organization
    */
   omit?: Prisma.OrganizationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrganizationInclude<ExtArgs> | null
 }

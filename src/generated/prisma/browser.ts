@@ -22,3 +22,123 @@ export * from './enums';
  * 
  */
 export type Organization = Prisma.OrganizationModel
+/**
+ * Model User
+ * 
+ */
+export type User = Prisma.UserModel
+/**
+ * Model OrganizationMembership
+ * 
+ */
+export type OrganizationMembership = Prisma.OrganizationMembershipModel
+/**
+ * Model Invitation
+ * 
+ */
+export type Invitation = Prisma.InvitationModel
+/**
+ * Model RefreshSession
+ * 
+ */
+export type RefreshSession = Prisma.RefreshSessionModel
+/**
+ * Model Hostel
+ * 
+ */
+export type Hostel = Prisma.HostelModel
+/**
+ * Model Room
+ * 
+ */
+export type Room = Prisma.RoomModel
+/**
+ * Model Bed
+ * 
+ */
+export type Bed = Prisma.BedModel
+/**
+ * Model Resident
+ * 
+ */
+export type Resident = Prisma.ResidentModel
+/**
+ * Model StayContract
+ * 
+ */
+export type StayContract = Prisma.StayContractModel
+/**
+ * Model BedAssignment
+ * 
+ */
+export type BedAssignment = Prisma.BedAssignmentModel
+/**
+ * Model Charge
+ * 
+ */
+export type Charge = Prisma.ChargeModel
+/**
+ * Model Payment
+ * 
+ */
+export type Payment = Prisma.PaymentModel
+/**
+ * Model PaymentAllocation
+ * 
+ */
+export type PaymentAllocation = Prisma.PaymentAllocationModel
+/**
+ * Model DepositTransaction
+ * 
+ */
+export type DepositTransaction = Prisma.DepositTransactionModel
+/**
+ * Model Expense
+ * 
+ */
+export type Expense = Prisma.ExpenseModel
+/**
+ * Model SubscriptionPlan
+ * 
+ */
+export type SubscriptionPlan = Prisma.SubscriptionPlanModel
+/**
+ * Model OrganizationSubscription
+ * 
+ */
+export type OrganizationSubscription = Prisma.OrganizationSubscriptionModel
+/**
+ * Model SubscriptionEvent
+ * 
+ */
+export type SubscriptionEvent = Prisma.SubscriptionEventModel
+/**
+ * Model ManualSubscriptionPayment
+ * 
+ */
+export type ManualSubscriptionPayment = Prisma.ManualSubscriptionPaymentModel
+/**
+ * Model SyncDevice
+ * 
+ */
+export type SyncDevice = Prisma.SyncDeviceModel
+/**
+ * Model SyncChange
+ * 
+ */
+export type SyncChange = Prisma.SyncChangeModel
+/**
+ * Model OrganizationSyncState
+ * 
+ */
+export type OrganizationSyncState = Prisma.OrganizationSyncStateModel
+/**
+ * Model IdempotencyRecord
+ * 
+ */
+export type IdempotencyRecord = Prisma.IdempotencyRecordModel
+/**
+ * Model AuditEvent
+ * 
+ */
+export type AuditEvent = Prisma.AuditEventModel
