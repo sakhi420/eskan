@@ -364,3 +364,56 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 ### Next actions
 
 - شروع فاز ۸ طبق قرارداد v0.4.0 (ساکن/پذیرش/قرارداد+بسته/تخصیص/انتقال/Check-out).
+## فاز ۸ — ساکنان، قرارداد+بسته، تخصیص تخت، انتقال/Check-out (2026-11-04)
+
+وضعیت فاز: **تکمیل و اعتبارسنجی‌شده (با شواهد واقعی)** — کامیت مستقل در انتهای گزارش.
+
+### ماژول‌های پیاده‌سازی‌شده
+
+| ماژول | endpointهای اصلی | نکات کلیدی |
+|---|---|---|
+| `residents` | `GET/POST /residents`, `GET/PATCH /residents/:id`, `POST /residents/:id/archive`, `GET /residents/:id/timeline` | تماس اضطراری اختیاری؛ بدون unique اجباری روی phone؛ archive فقط بدون قرارداد/تخصیص فعال |
+| `contracts` | `GET/POST /contracts`, `GET/PATCH /contracts/:id`, `POST .../activate`, `POST .../terminate`, `listByResident` | DRAFT→ACTIVE→TERMINATED؛ update فقط DRAFT؛ snapshot اجزای بسته server-side |
+| `assignments` | `POST /bed-assignments`, `POST .../end`, `GET /residents/:id/assignments` | overlap نیمه‌باز `[start,end)`؛ بلوک بستر خراب؛ concurrency-safe |
+| `packages` (تکمیل) | `maintenanceStatus` به بستر اضافه شد تا تست «بستر خراب» ممکن شود | — |
+
+### تصمیم‌ها و منطق دامنه
+
+- **بستهٔ اقامت = منبع snapshot:** قرارداد هنگام انتخاب بستهٔ فعال، اجزا را با نوع/نام/مبلغ/`deductibleOnAbsence` در `packageSnapshot` ثبت می‌کند؛ تغییر/آرشیو بعدی بسته روی قرارداد قبلی اثر ندارد (تست «snapshot stable»).
+- **Reconcile مبلغ:** اگر بسته انتخاب شود، `rent.amount` باید دقیقاً برابر مجموع اجزای بسته باشد؛ اختلاف → 422 (`rent.amount`).
+- **بستهٔ آرشیوشده** برای قرارداد جدید قابل انتخاب نیست (404).
+- **Overlap `[startDate, endDate)`:** migration `20261104180000_bed_assignment_half_open_range` مسیر exclusion را از `[]` به `[)` تغییر داد تا same-day handoff ممکن شود. race با transaction + exclusion `23P01` مهار می‌شود.
+- **قرارداد فعال شرط تخصیص** است (`CONTRACT_NOT_ACTIVE`)؛ ساکن/بستر/قرارداد باید هم‌سازمان و هم‌hostel باشند.
+- **transfer/checkout = ترکیب endpointهای موجود** (end assignment → terminate contract) بدون endpoint اختصاصی؛ سابقهٔ assignment حفظ می‌شود.
+- «پذیرش منسجم» از طریق زنجیرهٔ resident → contract(activate) → assignment با اعتبارسنجی cross-entity تأمین می‌شود؛ Charge/Payment در فاز ۸ ساخته نمی‌شود.
+
+### اعتبارسنجی واقعی
+
+| چک | نتیجه |
+|---|---|
+| `npx prisma migrate dev --name bed_assignment_half_open_range` | ✅ اعمال شد (`20261104180000_...`؛ DB در sync) |
+| `npm run build` | ✅ exit=0 (بدون خطای TS/DI) |
+| `scripts/smoke-phase8.cjs` (سرور واقعی) | ✅ **48/48 PASS** |
+| `scripts/smoke-phase7.cjs` (رگرسیون) | ✅ **42/42 PASS** |
+| `npm run openapi:validate` (Redocly) | ✅ valid؛ ۶ هشدار پیش‌موجود |
+| js-yaml parse | ✅ (قرارداد بدون تغییر؛ v0.4.0) |
+| `npm test` | ⚠️ `3 passed` فقط `configuration.spec.ts`؛ ۴ suite از محدودیت Jest 30/NestJS 12 (ESM) |
+
+### پوشش تست‌های پذیرش فاز ۸
+
+- ✅ دسترسی cross-tenant به resident (`404`)؛ انتخاب بستهٔ سازمان دیگر/آرشیوشده؛ مبلغ متناقض.
+- ✅ تخصیص هم‌زمان یک تخت (دو درخواست موازی) → یک `201` و یک `409 BED_ASSIGNMENT_OVERLAP`.
+- ✅ تخصیص بستر خراب (`OUT_OF_SERVICE`) → `409`؛ قرارداد غیرفعال → `409 CONTRACT_NOT_ACTIVE`؛ ساکن/قرارداد mismatch → `409`.
+- ✅ idempotency (replay/conflict/422) برای resident/contract/assignment.
+- ✅ same-day handoff؛ انتقال (end حفظ سابقه)؛ Check-out (terminate پس از پایان تخصیص)؛ archive ساکن تمیز/دارای قرارداد فعال.
+- ✅ snapshot ثابت پس از تغییر بسته.
+
+### Known limitations (ثبت‌صریح)
+
+- **Jest 30 + NestJS 12 (ESM):** تست‌های ماژول‌های Nest با `npm test` اجرا نمی‌شوند؛ رفتار با smoke واقعی + رگرسیون تأیید شد. رفع به فاز ۱۳ موکول است.
+- **شمارهٔ قرارداد** فعلاً `CNT-` + هشت‌گانهٔ تصادفی (بدون sequence رسمی در محدودهٔ org)؛ سیاست sequence/شماره برای رسیدها در فاز ۹ تثبیت می‌شود.
+- **هشدار رکورد تکراری ساکن** (نام/شماره مشابه) فعلاً فقط «ثبت اجازه» است نه «هشدار در پاسخ»؛ نیازمند فیلد `warnings` در قرارداد است (به فاز بعد موکول).
+
+### Next actions
+
+- فاز ۹: Charge/Payment/Allocation/Reversal + Deposit + Expense + منطق credit غیابت (بر پایهٔ snapshot بسته و مدل v0.4).

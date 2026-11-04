@@ -1,4 +1,5 @@
-import { IsOptional, IsString, Length, MaxLength } from 'class-validator';
+import { IsEnum, IsOptional, IsString, Length, MaxLength } from 'class-validator';
+import { MaintenanceStatus } from '../../generated/prisma/enums';
 
 export class BedDto {
   @IsString()
@@ -9,4 +10,8 @@ export class BedDto {
   @IsString()
   @MaxLength(1000)
   notes?: string;
+
+  @IsOptional()
+  @IsEnum(MaintenanceStatus)
+  maintenanceStatus?: MaintenanceStatus;
 }

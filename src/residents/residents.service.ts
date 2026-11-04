@@ -1,0 +1,117 @@
+import { Injectable } from '@nestjs/common';
+import { Prisma } from '../generated/prisma/client';
+import { PrismaService } from '../database/prisma.service';
+import { AppError } from '../common/errors/app-error';
+import { ErrorCode } from '../common/errors/error-codes';
+import { IdempotencyService } from '../common/idempotency/idempotency.service';
+import { AssignmentStatus, ContractStatus, ResidentStatus, ResidentType } from '../generated/prisma/enums';
+import { ResidentDto } from './dto/resident.dto';
+
+const RESIDENT_SELECT = {
+  id: true, version: true, organizationId: true, fullName: true, type: true, phone: true,
+  emergencyContactName: true, emergencyContactPhone: true, emergencyContactRelation: true,
+  notes: true, status: true, createdAt: true, updatedAt: true,
+} as const;
+
+interface ResidentRow {
+  id: string; version: number; organizationId: string; fullName: string; type: ResidentType;
+  phone: string | null; emergencyContactName: string | null; emergencyContactPhone: string | null;
+  emergencyContactRelation: string | null; notes: string | null; status: ResidentStatus;
+  createdAt: Date; updatedAt: Date;
+}
+
+function toResidentDto(row: ResidentRow) {
+  return {
+    id: row.id, version: row.version, organizationId: row.organizationId,
+    fullName: row.fullName, type: row.type, phone: row.phone,
+    emergencyContactName: row.emergencyContactName, emergencyContactPhone: row.emergencyContactPhone,
+    emergencyContactRelation: row.emergencyContactRelation, notes: row.notes, status: row.status,
+    createdAt: row.createdAt.toISOString(), updatedAt: row.updatedAt.toISOString(),
+  };
+}
+
+const CREATE_ENDPOINT = '/api/v1/residents';
+
+@Injectable()
+export class ResidentsService {
+  constructor(private readonly prisma: PrismaService, private readonly idempotency: IdempotencyService) {}
+
+  async list(organizationId: string, page: number, size: number, q?: string, type?: ResidentType, status?: ResidentStatus) {
+    const where: Prisma.ResidentWhereInput = {
+      organizationId,
+      ...(q ? { OR: [{ fullName: { contains: q, mode: 'insensitive' } }, { phone: { contains: q } }] } : {}),
+      ...(type ? { type } : {}),
+      ...(status ? { status } : {}),
+    };
+    const skip = (page - 1) * size;
+    const [rows, totalElements] = await this.prisma.$transaction([
+      this.prisma.resident.findMany({ where, orderBy: { createdAt: 'desc' }, skip, take: size, select: RESIDENT_SELECT }),
+      this.prisma.resident.count({ where }),
+    ]);
+    return { items: rows.map(toResidentDto), page, size, totalElements, totalPages: Math.ceil(totalElements / size) };
+  }
+
+  async create(organizationId: string, userId: string, dto: ResidentDto, idempotencyKey: string) {
+    const requestHash = this.idempotency.hash(dto);
+    const replay = await this.idempotency.getReplay<ReturnType<typeof toResidentDto>>(organizationId, idempotencyKey, CREATE_ENDPOINT, requestHash);
+    if (replay) return replay;
+
+    const resident = await this.prisma.resident.create({
+      data: {
+        organizationId, fullName: dto.fullName, type: dto.type, phone: dto.phone,
+        emergencyContactName: dto.emergencyContactName, emergencyContactPhone: dto.emergencyContactPhone,
+        emergencyContactRelation: dto.emergencyContactRelation, notes: dto.notes,
+      },
+      select: RESIDENT_SELECT,
+    });
+
+    const dtoResult = toResidentDto(resident);
+    await this.idempotency.save(organizationId, idempotencyKey, CREATE_ENDPOINT, userId, requestHash, 201, dtoResult);
+    return dtoResult;
+  }
+
+  async get(organizationId: string, residentId: string) {
+    const resident = await this.prisma.resident.findFirst({ where: { id: residentId, organizationId }, select: RESIDENT_SELECT });
+    if (!resident) throw AppError.notFound('Resident not found');
+    return toResidentDto(resident);
+  }
+
+  async update(organizationId: string, residentId: string, expectedVersion: number, dto: ResidentDto) {
+    const resident = await this.prisma.resident.findFirst({ where: { id: residentId, organizationId }, select: RESIDENT_SELECT });
+    if (!resident) throw AppError.notFound('Resident not found');
+    if (resident.version !== expectedVersion) {
+      throw AppError.conflict('Resident was modified by another request; refresh and retry', ErrorCode.RESOURCE_VERSION_CONFLICT);
+    }
+    const updated = await this.prisma.resident.update({
+      where: { id: residentId },
+      data: {
+        fullName: dto.fullName, type: dto.type, phone: dto.phone,
+        emergencyContactName: dto.emergencyContactName, emergencyContactPhone: dto.emergencyContactPhone,
+        emergencyContactRelation: dto.emergencyContactRelation, notes: dto.notes, version: { increment: 1 },
+      },
+      select: RESIDENT_SELECT,
+    });
+    return toResidentDto(updated);
+  }
+
+  async archive(organizationId: string, residentId: string) {
+    const resident = await this.prisma.resident.findFirst({ where: { id: residentId, organizationId }, select: RESIDENT_SELECT });
+    if (!resident) throw AppError.notFound('Resident not found');
+    if (resident.status === ResidentStatus.ARCHIVED) return toResidentDto(resident);
+
+    const [activeContracts, activeAssignments] = await this.prisma.$transaction([
+      this.prisma.stayContract.count({ where: { residentId, organizationId, status: ContractStatus.ACTIVE } }),
+      this.prisma.bedAssignment.count({ where: { residentId, organizationId, status: AssignmentStatus.ACTIVE } }),
+    ]);
+    if (activeContracts > 0 || activeAssignments > 0) {
+      throw AppError.conflict('Resident still has an active contract or bed assignment; resolve them first', ErrorCode.RESOURCE_HAS_ACTIVE_ASSIGNMENT);
+    }
+
+    const updated = await this.prisma.resident.update({
+      where: { id: residentId },
+      data: { status: ResidentStatus.ARCHIVED, version: { increment: 1 } },
+      select: RESIDENT_SELECT,
+    });
+    return toResidentDto(updated);
+  }
+}

@@ -9,6 +9,10 @@ import { OrganizationsModule } from './organizations/organizations.module';
 import { HostelsModule } from './hostels/hostels.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { BedsModule } from './beds/beds.module';
+import { PackagesModule } from './packages/packages.module';
+import { ResidentsModule } from './residents/residents.module';
+import { ContractsModule } from './contracts/contracts.module';
+import { AssignmentsModule } from './assignments/assignments.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { TraceIdMiddleware } from './common/middleware/trace-id.middleware';
 
@@ -26,6 +30,10 @@ import { TraceIdMiddleware } from './common/middleware/trace-id.middleware';
     HostelsModule,
     RoomsModule,
     BedsModule,
+    PackagesModule,
+    ResidentsModule,
+    ContractsModule,
+    AssignmentsModule,
   ],
   providers: [{ provide: APP_FILTER, useClass: HttpExceptionFilter }],
 })

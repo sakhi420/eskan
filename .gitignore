@@ -15,3 +15,10 @@ backups/
 .DS_Store
 Thumbs.db
 *.tsbuildinfo
+
+# local scratch files (never committed)
+/_*.txt
+/_*.err
+/_*.pid
+/_*.ps1
+/_*.cjs

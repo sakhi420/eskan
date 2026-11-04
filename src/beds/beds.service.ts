@@ -4,7 +4,7 @@ import { AppError } from '../common/errors/app-error';
 import { ErrorCode } from '../common/errors/error-codes';
 import { IdempotencyService } from '../common/idempotency/idempotency.service';
 import { isUniqueViolation } from '../common/prisma/unique-violation';
-import { AssignmentStatus, BedStatus } from '../generated/prisma/enums';
+import { AssignmentStatus, BedStatus, MaintenanceStatus } from '../generated/prisma/enums';
 import { BedDto } from './dto/bed.dto';
 
 const BED_SELECT = {
@@ -14,6 +14,7 @@ const BED_SELECT = {
   roomId: true,
   code: true,
   notes: true,
+  maintenanceStatus: true,
   status: true,
   createdAt: true,
   updatedAt: true,
@@ -26,6 +27,7 @@ interface BedRow {
   roomId: string;
   code: string;
   notes: string | null;
+  maintenanceStatus: MaintenanceStatus;
   status: BedStatus;
   createdAt: Date;
   updatedAt: Date;
@@ -39,6 +41,7 @@ function toBedDto(row: BedRow) {
     roomId: row.roomId,
     code: row.code,
     notes: row.notes,
+    maintenanceStatus: row.maintenanceStatus,
     status: row.status,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
@@ -104,7 +107,7 @@ export class BedsService {
 
     try {
       const bed = await this.prisma.bed.create({
-        data: { organizationId, roomId, code: dto.code, notes: dto.notes },
+        data: { organizationId, roomId, code: dto.code, notes: dto.notes, maintenanceStatus: dto.maintenanceStatus ?? MaintenanceStatus.OPERATIONAL },
         select: BED_SELECT,
       });
       const dtoResult = toBedDto(bed);
@@ -146,7 +149,7 @@ export class BedsService {
     try {
       const updated = await this.prisma.bed.update({
         where: { id: bedId },
-        data: { code: dto.code, notes: dto.notes, version: { increment: 1 } },
+        data: { code: dto.code, maintenanceStatus: dto.maintenanceStatus ?? bed.maintenanceStatus, notes: dto.notes, version: { increment: 1 } },
         select: BED_SELECT,
       });
       return toBedDto(updated);

@@ -33,6 +33,12 @@ export function parseSize(raw: string | undefined): number {
   return 20;
 }
 
+export function parseEnum<T extends Record<string, string>>(enumObj: T, raw: string | undefined): T[keyof T] | undefined {
+  if (!raw) return undefined;
+  const values = Object.values(enumObj) as string[];
+  return values.find((v) => v === raw) as T[keyof T] | undefined;
+}
+
 export function envelope(req: RequestWithTraceId, data: unknown): { data: unknown; meta: { traceId: string } } {
   return { data, meta: { traceId: req.traceId ?? 'unknown' } };
 }
