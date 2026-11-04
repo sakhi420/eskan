@@ -1,8 +1,16 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { APP_FILTER } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import configuration, { validate } from './common/config/configuration';
 import { HealthModule } from './health/health.module';
 import { PrismaModule } from './database/prisma.module';
+import { AuthModule } from './auth/auth.module';
+import { OrganizationsModule } from './organizations/organizations.module';
+import { HostelsModule } from './hostels/hostels.module';
+import { RoomsModule } from './rooms/rooms.module';
+import { BedsModule } from './beds/beds.module';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { TraceIdMiddleware } from './common/middleware/trace-id.middleware';
 
 @Module({
   imports: [
@@ -13,6 +21,16 @@ import { PrismaModule } from './database/prisma.module';
     }),
     PrismaModule,
     HealthModule,
+    AuthModule,
+    OrganizationsModule,
+    HostelsModule,
+    RoomsModule,
+    BedsModule,
   ],
+  providers: [{ provide: APP_FILTER, useClass: HttpExceptionFilter }],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(TraceIdMiddleware).forRoutes('*');
+  }
+}

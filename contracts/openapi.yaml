@@ -2614,7 +2614,7 @@ components:
       required: [deviceId, platform]
       properties:
         deviceId: { type: string, minLength: 1, maxLength: 200 }
-        platform: { type: string, enum: [ANDROID, IOS, OTHER] }
+        platform: { type: string, enum: [ANDROID, WINDOWS, OTHER] }
         appVersion: { type: string, maxLength: 50 }
     Role:
       type: string

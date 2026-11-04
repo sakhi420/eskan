@@ -2,6 +2,15 @@
 
 این سند scope را قفل می‌کند؛ هر endpoint/جدول به نیازمندی MVP وصل است.
 
+## پلتفرم‌های هدف (تصمیم ثبت‌شده)
+
+- کلاینت‌های اولیه: **Android** و **Windows Desktop** با **Flutter/Dart**.
+- Backend مشترک NestJS + PostgreSQL و API مشترک `/api/v1` برای هر دو کلاینت.
+- یک codebase مشترک Flutter؛ اشتراک منطق/مدل‌ها/API client/sync؛ UI سازگار با هر دو.
+- Windows Desktop: صفحه‌کلید، جدول، جست‌وجو، گزارش‌ها و چاپ رسید.
+- آفلاین: SQLite/Drift + sync با Backend.
+- iOS/macOS/Web خارج از اهداف اولیه (بررسی در مراحل بعد). در فاز 5 فقط Backend؛ بدون اپ Flutter.
+
 ## MUST (هستهٔ اقامت و مالی)
 
 | قابلیت | نیازمندی | ماژول/جدول |

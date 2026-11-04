@@ -4,12 +4,24 @@
 
 Modular Monolith (NestJS) + Prisma + PostgreSQL. نه microservices.
 
+## پلتفرم‌های هدف کلاینت
+
+- پلتفرم‌های هدف اولیهٔ کلاینت ESKAN: **Android** و **Windows Desktop** (هر دو با Flutter/Dart).
+- هر دو کلاینت از Backend مشترک NestJS + PostgreSQL و API مشترک (`/api/v1`) استفاده می‌کنند.
+- تا حد امکان از یک **codebase مشترک Flutter** استفاده می‌شود؛ منطق کسب‌وکار، مدل‌ها،
+  API client و منطق sync مشترک‌اند و فقط لایهٔ UI/UX به‌تناسب فرم‌فاکتور تنظیم می‌شود.
+- UI متناسب با موبایل (لیست/فرم لمسی) و دسکتاپ (صفحه‌کلید، جدول، جست‌وجو، گزارش، چاپ رسید) طراحی می‌شود.
+- ذخیره‌سازی آفلاین با **SQLite/Drift** و sync با Backend؛ سازگاری کتابخانه‌ها با هر دو
+  پلتفرم هنگام آغاز توسعهٔ کلاینت بررسی و آزموده می‌شود.
+- **iOS / macOS / Web** در حال حاضر جزو اهداف اولیه نیستند؛ ارزیابی در مراحل بعد.
+
 ## نمای runtime
 
 ```mermaid
 flowchart LR
-  subgraph Client
-    APP[Flutter Android App]
+  subgraph Client["Flutter Clients (shared codebase)"]
+    ANDROID[Android App]
+    DESKTOP[Windows Desktop]
   end
   subgraph Backend["NestJS (Express)"]
     GW[Global pipes / filters / interceptors]
@@ -25,7 +37,8 @@ flowchart LR
   subgraph DB
     PG[(PostgreSQL 17)]
   end
-  APP -->|HTTPS REST /api/v1| GW
+  ANDROID -->|HTTPS REST /api/v1| GW
+  DESKTOP -->|HTTPS REST /api/v1| GW
   GW --> AUTH
   AUTH --> PG
   ORG --> PG
