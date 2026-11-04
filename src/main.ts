@@ -1,7 +1,8 @@
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { RequestMethod } from '@nestjs/common';
+import { RequestMethod, HttpStatus } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { validationExceptionFactory } from './common/validation/validation-exception.factory';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,6 +17,8 @@ async function bootstrap() {
       transform: true,
       whitelist: true,
       forbidNonWhitelisted: true,
+      errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+      exceptionFactory: validationExceptionFactory,
     }),
   );
   app.enableShutdownHooks();
