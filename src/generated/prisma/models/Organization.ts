@@ -252,6 +252,8 @@ export type OrganizationWhereInput = {
   syncState?: Prisma.XOR<Prisma.OrganizationSyncStateNullableScalarRelationFilter, Prisma.OrganizationSyncStateWhereInput> | null
   idempotencyRecords?: Prisma.IdempotencyRecordListRelationFilter
   auditEvents?: Prisma.AuditEventListRelationFilter
+  packages?: Prisma.AccommodationPackageListRelationFilter
+  temporaryAbsences?: Prisma.TemporaryAbsenceListRelationFilter
 }
 
 export type OrganizationOrderByWithRelationInput = {
@@ -282,6 +284,8 @@ export type OrganizationOrderByWithRelationInput = {
   syncState?: Prisma.OrganizationSyncStateOrderByWithRelationInput
   idempotencyRecords?: Prisma.IdempotencyRecordOrderByRelationAggregateInput
   auditEvents?: Prisma.AuditEventOrderByRelationAggregateInput
+  packages?: Prisma.AccommodationPackageOrderByRelationAggregateInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceOrderByRelationAggregateInput
 }
 
 export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
@@ -315,6 +319,8 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   syncState?: Prisma.XOR<Prisma.OrganizationSyncStateNullableScalarRelationFilter, Prisma.OrganizationSyncStateWhereInput> | null
   idempotencyRecords?: Prisma.IdempotencyRecordListRelationFilter
   auditEvents?: Prisma.AuditEventListRelationFilter
+  packages?: Prisma.AccommodationPackageListRelationFilter
+  temporaryAbsences?: Prisma.TemporaryAbsenceListRelationFilter
 }, "id">
 
 export type OrganizationOrderByWithAggregationInput = {
@@ -373,6 +379,8 @@ export type OrganizationCreateInput = {
   syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateInput = {
@@ -403,6 +411,8 @@ export type OrganizationUncheckedCreateInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUpdateInput = {
@@ -433,6 +443,8 @@ export type OrganizationUpdateInput = {
   syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateInput = {
@@ -463,6 +475,8 @@ export type OrganizationUncheckedUpdateInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateManyInput = {
@@ -622,6 +636,34 @@ export type OrganizationUpdateOneRequiredWithoutBedsNestedInput = {
   upsert?: Prisma.OrganizationUpsertWithoutBedsInput
   connect?: Prisma.OrganizationWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutBedsInput, Prisma.OrganizationUpdateWithoutBedsInput>, Prisma.OrganizationUncheckedUpdateWithoutBedsInput>
+}
+
+export type OrganizationCreateNestedOneWithoutPackagesInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutPackagesInput, Prisma.OrganizationUncheckedCreateWithoutPackagesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutPackagesInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutPackagesNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutPackagesInput, Prisma.OrganizationUncheckedCreateWithoutPackagesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutPackagesInput
+  upsert?: Prisma.OrganizationUpsertWithoutPackagesInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutPackagesInput, Prisma.OrganizationUpdateWithoutPackagesInput>, Prisma.OrganizationUncheckedUpdateWithoutPackagesInput>
+}
+
+export type OrganizationCreateNestedOneWithoutTemporaryAbsencesInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutTemporaryAbsencesInput, Prisma.OrganizationUncheckedCreateWithoutTemporaryAbsencesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutTemporaryAbsencesInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutTemporaryAbsencesNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutTemporaryAbsencesInput, Prisma.OrganizationUncheckedCreateWithoutTemporaryAbsencesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutTemporaryAbsencesInput
+  upsert?: Prisma.OrganizationUpsertWithoutTemporaryAbsencesInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutTemporaryAbsencesInput, Prisma.OrganizationUpdateWithoutTemporaryAbsencesInput>, Prisma.OrganizationUncheckedUpdateWithoutTemporaryAbsencesInput>
 }
 
 export type OrganizationCreateNestedOneWithoutResidentsInput = {
@@ -861,6 +903,8 @@ export type OrganizationCreateWithoutMembershipsInput = {
   syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutMembershipsInput = {
@@ -890,6 +934,8 @@ export type OrganizationUncheckedCreateWithoutMembershipsInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutMembershipsInput = {
@@ -935,6 +981,8 @@ export type OrganizationUpdateWithoutMembershipsInput = {
   syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutMembershipsInput = {
@@ -964,6 +1012,8 @@ export type OrganizationUncheckedUpdateWithoutMembershipsInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutInvitationsInput = {
@@ -993,6 +1043,8 @@ export type OrganizationCreateWithoutInvitationsInput = {
   syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutInvitationsInput = {
@@ -1022,6 +1074,8 @@ export type OrganizationUncheckedCreateWithoutInvitationsInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutInvitationsInput = {
@@ -1067,6 +1121,8 @@ export type OrganizationUpdateWithoutInvitationsInput = {
   syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutInvitationsInput = {
@@ -1096,6 +1152,8 @@ export type OrganizationUncheckedUpdateWithoutInvitationsInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutHostelsInput = {
@@ -1125,6 +1183,8 @@ export type OrganizationCreateWithoutHostelsInput = {
   syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutHostelsInput = {
@@ -1154,6 +1214,8 @@ export type OrganizationUncheckedCreateWithoutHostelsInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutHostelsInput = {
@@ -1199,6 +1261,8 @@ export type OrganizationUpdateWithoutHostelsInput = {
   syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutHostelsInput = {
@@ -1228,6 +1292,8 @@ export type OrganizationUncheckedUpdateWithoutHostelsInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutRoomsInput = {
@@ -1257,6 +1323,8 @@ export type OrganizationCreateWithoutRoomsInput = {
   syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutRoomsInput = {
@@ -1286,6 +1354,8 @@ export type OrganizationUncheckedCreateWithoutRoomsInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutRoomsInput = {
@@ -1331,6 +1401,8 @@ export type OrganizationUpdateWithoutRoomsInput = {
   syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutRoomsInput = {
@@ -1360,6 +1432,8 @@ export type OrganizationUncheckedUpdateWithoutRoomsInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutBedsInput = {
@@ -1389,6 +1463,8 @@ export type OrganizationCreateWithoutBedsInput = {
   syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutBedsInput = {
@@ -1418,6 +1494,8 @@ export type OrganizationUncheckedCreateWithoutBedsInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutBedsInput = {
@@ -1463,6 +1541,8 @@ export type OrganizationUpdateWithoutBedsInput = {
   syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutBedsInput = {
@@ -1492,6 +1572,288 @@ export type OrganizationUncheckedUpdateWithoutBedsInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutPackagesInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutPackagesInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutPackagesInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutPackagesInput, Prisma.OrganizationUncheckedCreateWithoutPackagesInput>
+}
+
+export type OrganizationUpsertWithoutPackagesInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutPackagesInput, Prisma.OrganizationUncheckedUpdateWithoutPackagesInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutPackagesInput, Prisma.OrganizationUncheckedCreateWithoutPackagesInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutPackagesInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutPackagesInput, Prisma.OrganizationUncheckedUpdateWithoutPackagesInput>
+}
+
+export type OrganizationUpdateWithoutPackagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutPackagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutTemporaryAbsencesInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutTemporaryAbsencesInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutTemporaryAbsencesInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutTemporaryAbsencesInput, Prisma.OrganizationUncheckedCreateWithoutTemporaryAbsencesInput>
+}
+
+export type OrganizationUpsertWithoutTemporaryAbsencesInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutTemporaryAbsencesInput, Prisma.OrganizationUncheckedUpdateWithoutTemporaryAbsencesInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutTemporaryAbsencesInput, Prisma.OrganizationUncheckedCreateWithoutTemporaryAbsencesInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutTemporaryAbsencesInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutTemporaryAbsencesInput, Prisma.OrganizationUncheckedUpdateWithoutTemporaryAbsencesInput>
+}
+
+export type OrganizationUpdateWithoutTemporaryAbsencesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutTemporaryAbsencesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutResidentsInput = {
@@ -1521,6 +1883,8 @@ export type OrganizationCreateWithoutResidentsInput = {
   syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutResidentsInput = {
@@ -1550,6 +1914,8 @@ export type OrganizationUncheckedCreateWithoutResidentsInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutResidentsInput = {
@@ -1595,6 +1961,8 @@ export type OrganizationUpdateWithoutResidentsInput = {
   syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutResidentsInput = {
@@ -1624,6 +1992,8 @@ export type OrganizationUncheckedUpdateWithoutResidentsInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutStayContractsInput = {
@@ -1653,6 +2023,8 @@ export type OrganizationCreateWithoutStayContractsInput = {
   syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutStayContractsInput = {
@@ -1682,6 +2054,8 @@ export type OrganizationUncheckedCreateWithoutStayContractsInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutStayContractsInput = {
@@ -1727,6 +2101,8 @@ export type OrganizationUpdateWithoutStayContractsInput = {
   syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutStayContractsInput = {
@@ -1756,6 +2132,8 @@ export type OrganizationUncheckedUpdateWithoutStayContractsInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutBedAssignmentsInput = {
@@ -1785,6 +2163,8 @@ export type OrganizationCreateWithoutBedAssignmentsInput = {
   syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutBedAssignmentsInput = {
@@ -1814,6 +2194,8 @@ export type OrganizationUncheckedCreateWithoutBedAssignmentsInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutBedAssignmentsInput = {
@@ -1859,6 +2241,8 @@ export type OrganizationUpdateWithoutBedAssignmentsInput = {
   syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutBedAssignmentsInput = {
@@ -1888,6 +2272,8 @@ export type OrganizationUncheckedUpdateWithoutBedAssignmentsInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutChargesInput = {
@@ -1917,6 +2303,8 @@ export type OrganizationCreateWithoutChargesInput = {
   syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutChargesInput = {
@@ -1946,6 +2334,8 @@ export type OrganizationUncheckedCreateWithoutChargesInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutChargesInput = {
@@ -1991,6 +2381,8 @@ export type OrganizationUpdateWithoutChargesInput = {
   syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutChargesInput = {
@@ -2020,6 +2412,8 @@ export type OrganizationUncheckedUpdateWithoutChargesInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutPaymentsInput = {
@@ -2049,6 +2443,8 @@ export type OrganizationCreateWithoutPaymentsInput = {
   syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutPaymentsInput = {
@@ -2078,6 +2474,8 @@ export type OrganizationUncheckedCreateWithoutPaymentsInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutPaymentsInput = {
@@ -2123,6 +2521,8 @@ export type OrganizationUpdateWithoutPaymentsInput = {
   syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutPaymentsInput = {
@@ -2152,6 +2552,8 @@ export type OrganizationUncheckedUpdateWithoutPaymentsInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutDepositTransactionsInput = {
@@ -2181,6 +2583,8 @@ export type OrganizationCreateWithoutDepositTransactionsInput = {
   syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutDepositTransactionsInput = {
@@ -2210,6 +2614,8 @@ export type OrganizationUncheckedCreateWithoutDepositTransactionsInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutDepositTransactionsInput = {
@@ -2255,6 +2661,8 @@ export type OrganizationUpdateWithoutDepositTransactionsInput = {
   syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutDepositTransactionsInput = {
@@ -2284,6 +2692,8 @@ export type OrganizationUncheckedUpdateWithoutDepositTransactionsInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutExpensesInput = {
@@ -2313,6 +2723,8 @@ export type OrganizationCreateWithoutExpensesInput = {
   syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutExpensesInput = {
@@ -2342,6 +2754,8 @@ export type OrganizationUncheckedCreateWithoutExpensesInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutExpensesInput = {
@@ -2387,6 +2801,8 @@ export type OrganizationUpdateWithoutExpensesInput = {
   syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutExpensesInput = {
@@ -2416,6 +2832,8 @@ export type OrganizationUncheckedUpdateWithoutExpensesInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutSubscriptionInput = {
@@ -2445,6 +2863,8 @@ export type OrganizationCreateWithoutSubscriptionInput = {
   syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutSubscriptionInput = {
@@ -2474,6 +2894,8 @@ export type OrganizationUncheckedCreateWithoutSubscriptionInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutSubscriptionInput = {
@@ -2519,6 +2941,8 @@ export type OrganizationUpdateWithoutSubscriptionInput = {
   syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutSubscriptionInput = {
@@ -2548,6 +2972,8 @@ export type OrganizationUncheckedUpdateWithoutSubscriptionInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutSubscriptionEventsInput = {
@@ -2577,6 +3003,8 @@ export type OrganizationCreateWithoutSubscriptionEventsInput = {
   syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutSubscriptionEventsInput = {
@@ -2606,6 +3034,8 @@ export type OrganizationUncheckedCreateWithoutSubscriptionEventsInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutSubscriptionEventsInput = {
@@ -2651,6 +3081,8 @@ export type OrganizationUpdateWithoutSubscriptionEventsInput = {
   syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutSubscriptionEventsInput = {
@@ -2680,6 +3112,8 @@ export type OrganizationUncheckedUpdateWithoutSubscriptionEventsInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutManualSubscriptionPaymentsInput = {
@@ -2709,6 +3143,8 @@ export type OrganizationCreateWithoutManualSubscriptionPaymentsInput = {
   syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutManualSubscriptionPaymentsInput = {
@@ -2738,6 +3174,8 @@ export type OrganizationUncheckedCreateWithoutManualSubscriptionPaymentsInput = 
   syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutManualSubscriptionPaymentsInput = {
@@ -2783,6 +3221,8 @@ export type OrganizationUpdateWithoutManualSubscriptionPaymentsInput = {
   syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutManualSubscriptionPaymentsInput = {
@@ -2812,6 +3252,8 @@ export type OrganizationUncheckedUpdateWithoutManualSubscriptionPaymentsInput = 
   syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutSyncDevicesInput = {
@@ -2841,6 +3283,8 @@ export type OrganizationCreateWithoutSyncDevicesInput = {
   syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutSyncDevicesInput = {
@@ -2870,6 +3314,8 @@ export type OrganizationUncheckedCreateWithoutSyncDevicesInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutSyncDevicesInput = {
@@ -2915,6 +3361,8 @@ export type OrganizationUpdateWithoutSyncDevicesInput = {
   syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutSyncDevicesInput = {
@@ -2944,6 +3392,8 @@ export type OrganizationUncheckedUpdateWithoutSyncDevicesInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutSyncChangesInput = {
@@ -2973,6 +3423,8 @@ export type OrganizationCreateWithoutSyncChangesInput = {
   syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutSyncChangesInput = {
@@ -3002,6 +3454,8 @@ export type OrganizationUncheckedCreateWithoutSyncChangesInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutSyncChangesInput = {
@@ -3047,6 +3501,8 @@ export type OrganizationUpdateWithoutSyncChangesInput = {
   syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutSyncChangesInput = {
@@ -3076,6 +3532,8 @@ export type OrganizationUncheckedUpdateWithoutSyncChangesInput = {
   syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutSyncStateInput = {
@@ -3105,6 +3563,8 @@ export type OrganizationCreateWithoutSyncStateInput = {
   syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutSyncStateInput = {
@@ -3134,6 +3594,8 @@ export type OrganizationUncheckedCreateWithoutSyncStateInput = {
   syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutSyncStateInput = {
@@ -3179,6 +3641,8 @@ export type OrganizationUpdateWithoutSyncStateInput = {
   syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutSyncStateInput = {
@@ -3208,6 +3672,8 @@ export type OrganizationUncheckedUpdateWithoutSyncStateInput = {
   syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutIdempotencyRecordsInput = {
@@ -3237,6 +3703,8 @@ export type OrganizationCreateWithoutIdempotencyRecordsInput = {
   syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
   syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutIdempotencyRecordsInput = {
@@ -3266,6 +3734,8 @@ export type OrganizationUncheckedCreateWithoutIdempotencyRecordsInput = {
   syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
   syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutIdempotencyRecordsInput = {
@@ -3311,6 +3781,8 @@ export type OrganizationUpdateWithoutIdempotencyRecordsInput = {
   syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
   syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutIdempotencyRecordsInput = {
@@ -3340,6 +3812,8 @@ export type OrganizationUncheckedUpdateWithoutIdempotencyRecordsInput = {
   syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
   syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutAuditEventsInput = {
@@ -3369,6 +3843,8 @@ export type OrganizationCreateWithoutAuditEventsInput = {
   syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
   syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutAuditEventsInput = {
@@ -3398,6 +3874,8 @@ export type OrganizationUncheckedCreateWithoutAuditEventsInput = {
   syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
   syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutAuditEventsInput = {
@@ -3443,6 +3921,8 @@ export type OrganizationUpdateWithoutAuditEventsInput = {
   syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
   syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutAuditEventsInput = {
@@ -3472,6 +3952,8 @@ export type OrganizationUncheckedUpdateWithoutAuditEventsInput = {
   syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
   syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
   idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 
@@ -3498,6 +3980,8 @@ export type OrganizationCountOutputType = {
   syncChanges: number
   idempotencyRecords: number
   auditEvents: number
+  packages: number
+  temporaryAbsences: number
 }
 
 export type OrganizationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3519,6 +4003,8 @@ export type OrganizationCountOutputTypeSelect<ExtArgs extends runtime.Types.Exte
   syncChanges?: boolean | OrganizationCountOutputTypeCountSyncChangesArgs
   idempotencyRecords?: boolean | OrganizationCountOutputTypeCountIdempotencyRecordsArgs
   auditEvents?: boolean | OrganizationCountOutputTypeCountAuditEventsArgs
+  packages?: boolean | OrganizationCountOutputTypeCountPackagesArgs
+  temporaryAbsences?: boolean | OrganizationCountOutputTypeCountTemporaryAbsencesArgs
 }
 
 /**
@@ -3657,6 +4143,20 @@ export type OrganizationCountOutputTypeCountAuditEventsArgs<ExtArgs extends runt
   where?: Prisma.AuditEventWhereInput
 }
 
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountPackagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AccommodationPackageWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountTemporaryAbsencesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TemporaryAbsenceWhereInput
+}
+
 
 export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -3686,6 +4186,8 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   syncState?: boolean | Prisma.Organization$syncStateArgs<ExtArgs>
   idempotencyRecords?: boolean | Prisma.Organization$idempotencyRecordsArgs<ExtArgs>
   auditEvents?: boolean | Prisma.Organization$auditEventsArgs<ExtArgs>
+  packages?: boolean | Prisma.Organization$packagesArgs<ExtArgs>
+  temporaryAbsences?: boolean | Prisma.Organization$temporaryAbsencesArgs<ExtArgs>
   _count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["organization"]>
 
@@ -3741,6 +4243,8 @@ export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.Interna
   syncState?: boolean | Prisma.Organization$syncStateArgs<ExtArgs>
   idempotencyRecords?: boolean | Prisma.Organization$idempotencyRecordsArgs<ExtArgs>
   auditEvents?: boolean | Prisma.Organization$auditEventsArgs<ExtArgs>
+  packages?: boolean | Prisma.Organization$packagesArgs<ExtArgs>
+  temporaryAbsences?: boolean | Prisma.Organization$temporaryAbsencesArgs<ExtArgs>
   _count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type OrganizationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -3769,6 +4273,8 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     syncState: Prisma.$OrganizationSyncStatePayload<ExtArgs> | null
     idempotencyRecords: Prisma.$IdempotencyRecordPayload<ExtArgs>[]
     auditEvents: Prisma.$AuditEventPayload<ExtArgs>[]
+    packages: Prisma.$AccommodationPackagePayload<ExtArgs>[]
+    temporaryAbsences: Prisma.$TemporaryAbsencePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -4192,6 +4698,8 @@ export interface Prisma__OrganizationClient<T, Null = never, ExtArgs extends run
   syncState<T extends Prisma.Organization$syncStateArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$syncStateArgs<ExtArgs>>): Prisma.Prisma__OrganizationSyncStateClient<runtime.Types.Result.GetResult<Prisma.$OrganizationSyncStatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   idempotencyRecords<T extends Prisma.Organization$idempotencyRecordsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$idempotencyRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$IdempotencyRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditEvents<T extends Prisma.Organization$auditEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$auditEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  packages<T extends Prisma.Organization$packagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$packagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccommodationPackagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  temporaryAbsences<T extends Prisma.Organization$temporaryAbsencesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$temporaryAbsencesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TemporaryAbsencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5088,6 +5596,54 @@ export type Organization$auditEventsArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.AuditEventScalarFieldEnum | Prisma.AuditEventScalarFieldEnum[]
+}
+
+/**
+ * Organization.packages
+ */
+export type Organization$packagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AccommodationPackage
+   */
+  select?: Prisma.AccommodationPackageSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AccommodationPackage
+   */
+  omit?: Prisma.AccommodationPackageOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AccommodationPackageInclude<ExtArgs> | null
+  where?: Prisma.AccommodationPackageWhereInput
+  orderBy?: Prisma.AccommodationPackageOrderByWithRelationInput | Prisma.AccommodationPackageOrderByWithRelationInput[]
+  cursor?: Prisma.AccommodationPackageWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AccommodationPackageScalarFieldEnum | Prisma.AccommodationPackageScalarFieldEnum[]
+}
+
+/**
+ * Organization.temporaryAbsences
+ */
+export type Organization$temporaryAbsencesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TemporaryAbsence
+   */
+  select?: Prisma.TemporaryAbsenceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TemporaryAbsence
+   */
+  omit?: Prisma.TemporaryAbsenceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TemporaryAbsenceInclude<ExtArgs> | null
+  where?: Prisma.TemporaryAbsenceWhereInput
+  orderBy?: Prisma.TemporaryAbsenceOrderByWithRelationInput | Prisma.TemporaryAbsenceOrderByWithRelationInput[]
+  cursor?: Prisma.TemporaryAbsenceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TemporaryAbsenceScalarFieldEnum | Prisma.TemporaryAbsenceScalarFieldEnum[]
 }
 
 /**

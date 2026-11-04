@@ -405,6 +405,9 @@ export const ModelName = {
   Hostel: 'Hostel',
   Room: 'Room',
   Bed: 'Bed',
+  AccommodationPackage: 'AccommodationPackage',
+  AccommodationPackageComponent: 'AccommodationPackageComponent',
+  TemporaryAbsence: 'TemporaryAbsence',
   Resident: 'Resident',
   StayContract: 'StayContract',
   BedAssignment: 'BedAssignment',
@@ -437,7 +440,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "organization" | "user" | "organizationMembership" | "invitation" | "refreshSession" | "hostel" | "room" | "bed" | "resident" | "stayContract" | "bedAssignment" | "charge" | "payment" | "paymentAllocation" | "depositTransaction" | "expense" | "subscriptionPlan" | "organizationSubscription" | "subscriptionEvent" | "manualSubscriptionPayment" | "syncDevice" | "syncChange" | "organizationSyncState" | "idempotencyRecord" | "auditEvent"
+    modelProps: "organization" | "user" | "organizationMembership" | "invitation" | "refreshSession" | "hostel" | "room" | "bed" | "accommodationPackage" | "accommodationPackageComponent" | "temporaryAbsence" | "resident" | "stayContract" | "bedAssignment" | "charge" | "payment" | "paymentAllocation" | "depositTransaction" | "expense" | "subscriptionPlan" | "organizationSubscription" | "subscriptionEvent" | "manualSubscriptionPayment" | "syncDevice" | "syncChange" | "organizationSyncState" | "idempotencyRecord" | "auditEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1030,6 +1033,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.BedCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.BedCountAggregateOutputType> | number
+        }
+      }
+    }
+    AccommodationPackage: {
+      payload: Prisma.$AccommodationPackagePayload<ExtArgs>
+      fields: Prisma.AccommodationPackageFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AccommodationPackageFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccommodationPackagePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AccommodationPackageFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccommodationPackagePayload>
+        }
+        findFirst: {
+          args: Prisma.AccommodationPackageFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccommodationPackagePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AccommodationPackageFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccommodationPackagePayload>
+        }
+        findMany: {
+          args: Prisma.AccommodationPackageFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccommodationPackagePayload>[]
+        }
+        create: {
+          args: Prisma.AccommodationPackageCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccommodationPackagePayload>
+        }
+        createMany: {
+          args: Prisma.AccommodationPackageCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AccommodationPackageCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccommodationPackagePayload>[]
+        }
+        delete: {
+          args: Prisma.AccommodationPackageDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccommodationPackagePayload>
+        }
+        update: {
+          args: Prisma.AccommodationPackageUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccommodationPackagePayload>
+        }
+        deleteMany: {
+          args: Prisma.AccommodationPackageDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AccommodationPackageUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AccommodationPackageUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccommodationPackagePayload>[]
+        }
+        upsert: {
+          args: Prisma.AccommodationPackageUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccommodationPackagePayload>
+        }
+        aggregate: {
+          args: Prisma.AccommodationPackageAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAccommodationPackage>
+        }
+        groupBy: {
+          args: Prisma.AccommodationPackageGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AccommodationPackageGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AccommodationPackageCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AccommodationPackageCountAggregateOutputType> | number
+        }
+      }
+    }
+    AccommodationPackageComponent: {
+      payload: Prisma.$AccommodationPackageComponentPayload<ExtArgs>
+      fields: Prisma.AccommodationPackageComponentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AccommodationPackageComponentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccommodationPackageComponentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AccommodationPackageComponentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccommodationPackageComponentPayload>
+        }
+        findFirst: {
+          args: Prisma.AccommodationPackageComponentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccommodationPackageComponentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AccommodationPackageComponentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccommodationPackageComponentPayload>
+        }
+        findMany: {
+          args: Prisma.AccommodationPackageComponentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccommodationPackageComponentPayload>[]
+        }
+        create: {
+          args: Prisma.AccommodationPackageComponentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccommodationPackageComponentPayload>
+        }
+        createMany: {
+          args: Prisma.AccommodationPackageComponentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AccommodationPackageComponentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccommodationPackageComponentPayload>[]
+        }
+        delete: {
+          args: Prisma.AccommodationPackageComponentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccommodationPackageComponentPayload>
+        }
+        update: {
+          args: Prisma.AccommodationPackageComponentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccommodationPackageComponentPayload>
+        }
+        deleteMany: {
+          args: Prisma.AccommodationPackageComponentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AccommodationPackageComponentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AccommodationPackageComponentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccommodationPackageComponentPayload>[]
+        }
+        upsert: {
+          args: Prisma.AccommodationPackageComponentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccommodationPackageComponentPayload>
+        }
+        aggregate: {
+          args: Prisma.AccommodationPackageComponentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAccommodationPackageComponent>
+        }
+        groupBy: {
+          args: Prisma.AccommodationPackageComponentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AccommodationPackageComponentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AccommodationPackageComponentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AccommodationPackageComponentCountAggregateOutputType> | number
+        }
+      }
+    }
+    TemporaryAbsence: {
+      payload: Prisma.$TemporaryAbsencePayload<ExtArgs>
+      fields: Prisma.TemporaryAbsenceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TemporaryAbsenceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TemporaryAbsencePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TemporaryAbsenceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TemporaryAbsencePayload>
+        }
+        findFirst: {
+          args: Prisma.TemporaryAbsenceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TemporaryAbsencePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TemporaryAbsenceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TemporaryAbsencePayload>
+        }
+        findMany: {
+          args: Prisma.TemporaryAbsenceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TemporaryAbsencePayload>[]
+        }
+        create: {
+          args: Prisma.TemporaryAbsenceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TemporaryAbsencePayload>
+        }
+        createMany: {
+          args: Prisma.TemporaryAbsenceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TemporaryAbsenceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TemporaryAbsencePayload>[]
+        }
+        delete: {
+          args: Prisma.TemporaryAbsenceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TemporaryAbsencePayload>
+        }
+        update: {
+          args: Prisma.TemporaryAbsenceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TemporaryAbsencePayload>
+        }
+        deleteMany: {
+          args: Prisma.TemporaryAbsenceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TemporaryAbsenceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TemporaryAbsenceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TemporaryAbsencePayload>[]
+        }
+        upsert: {
+          args: Prisma.TemporaryAbsenceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TemporaryAbsencePayload>
+        }
+        aggregate: {
+          args: Prisma.TemporaryAbsenceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTemporaryAbsence>
+        }
+        groupBy: {
+          args: Prisma.TemporaryAbsenceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TemporaryAbsenceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TemporaryAbsenceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TemporaryAbsenceCountAggregateOutputType> | number
         }
       }
     }
@@ -2406,6 +2631,10 @@ export const HostelScalarFieldEnum = {
   organizationId: 'organizationId',
   name: 'name',
   address: 'address',
+  contactPhone: 'contactPhone',
+  defaultRentAmount: 'defaultRentAmount',
+  rentDueDayOfMonth: 'rentDueDayOfMonth',
+  absenceMinDays: 'absenceMinDays',
   notes: 'notes',
   status: 'status',
   createdAt: 'createdAt',
@@ -2423,6 +2652,7 @@ export const RoomScalarFieldEnum = {
   code: 'code',
   floor: 'floor',
   notes: 'notes',
+  maintenanceStatus: 'maintenanceStatus',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -2438,12 +2668,65 @@ export const BedScalarFieldEnum = {
   roomId: 'roomId',
   code: 'code',
   notes: 'notes',
+  maintenanceStatus: 'maintenanceStatus',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type BedScalarFieldEnum = (typeof BedScalarFieldEnum)[keyof typeof BedScalarFieldEnum]
+
+
+export const AccommodationPackageScalarFieldEnum = {
+  id: 'id',
+  version: 'version',
+  organizationId: 'organizationId',
+  hostelId: 'hostelId',
+  name: 'name',
+  description: 'description',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AccommodationPackageScalarFieldEnum = (typeof AccommodationPackageScalarFieldEnum)[keyof typeof AccommodationPackageScalarFieldEnum]
+
+
+export const AccommodationPackageComponentScalarFieldEnum = {
+  id: 'id',
+  packageId: 'packageId',
+  kind: 'kind',
+  name: 'name',
+  amount: 'amount',
+  deductibleOnAbsence: 'deductibleOnAbsence',
+  sortOrder: 'sortOrder'
+} as const
+
+export type AccommodationPackageComponentScalarFieldEnum = (typeof AccommodationPackageComponentScalarFieldEnum)[keyof typeof AccommodationPackageComponentScalarFieldEnum]
+
+
+export const TemporaryAbsenceScalarFieldEnum = {
+  id: 'id',
+  version: 'version',
+  organizationId: 'organizationId',
+  residentId: 'residentId',
+  contractId: 'contractId',
+  status: 'status',
+  plannedDepartureDate: 'plannedDepartureDate',
+  actualDepartureDate: 'actualDepartureDate',
+  expectedReturnDate: 'expectedReturnDate',
+  actualReturnDate: 'actualReturnDate',
+  reason: 'reason',
+  notes: 'notes',
+  requestedByUserId: 'requestedByUserId',
+  approvedByUserId: 'approvedByUserId',
+  approvedAt: 'approvedAt',
+  creditChargeId: 'creditChargeId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TemporaryAbsenceScalarFieldEnum = (typeof TemporaryAbsenceScalarFieldEnum)[keyof typeof TemporaryAbsenceScalarFieldEnum]
 
 
 export const ResidentScalarFieldEnum = {
@@ -2453,6 +2736,9 @@ export const ResidentScalarFieldEnum = {
   fullName: 'fullName',
   type: 'type',
   phone: 'phone',
+  emergencyContactName: 'emergencyContactName',
+  emergencyContactPhone: 'emergencyContactPhone',
+  emergencyContactRelation: 'emergencyContactRelation',
   notes: 'notes',
   status: 'status',
   createdAt: 'createdAt',
@@ -2475,6 +2761,8 @@ export const StayContractScalarFieldEnum = {
   rentAmount: 'rentAmount',
   billingCycle: 'billingCycle',
   depositAmount: 'depositAmount',
+  packageId: 'packageId',
+  packageSnapshot: 'packageSnapshot',
   notes: 'notes',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -2535,6 +2823,9 @@ export const PaymentScalarFieldEnum = {
   receivedAt: 'receivedAt',
   receiptNumber: 'receiptNumber',
   notes: 'notes',
+  payerName: 'payerName',
+  payerPhone: 'payerPhone',
+  payerRelation: 'payerRelation',
   reversedById: 'reversedById',
   reversalReason: 'reversalReason',
   reversedAt: 'reversedAt',
@@ -2885,6 +3176,20 @@ export type ListEnumArchiveStatusFieldRefInput<$PrismaModel> = FieldRefInputType
 
 
 /**
+ * Reference to a field of type 'MaintenanceStatus'
+ */
+export type EnumMaintenanceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MaintenanceStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'MaintenanceStatus[]'
+ */
+export type ListEnumMaintenanceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MaintenanceStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'BedStatus'
  */
 export type EnumBedStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BedStatus'>
@@ -2895,6 +3200,34 @@ export type EnumBedStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Prisma
  * Reference to a field of type 'BedStatus[]'
  */
 export type ListEnumBedStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BedStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'PackageComponentKind'
+ */
+export type EnumPackageComponentKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PackageComponentKind'>
+    
+
+
+/**
+ * Reference to a field of type 'PackageComponentKind[]'
+ */
+export type ListEnumPackageComponentKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PackageComponentKind[]'>
+    
+
+
+/**
+ * Reference to a field of type 'AbsenceStatus'
+ */
+export type EnumAbsenceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AbsenceStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'AbsenceStatus[]'
+ */
+export type ListEnumAbsenceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AbsenceStatus[]'>
     
 
 
@@ -2951,6 +3284,20 @@ export type EnumBillingCycleFieldRefInput<$PrismaModel> = FieldRefInputType<$Pri
  * Reference to a field of type 'BillingCycle[]'
  */
 export type ListEnumBillingCycleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BillingCycle[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -3077,20 +3424,6 @@ export type EnumSubscriptionActionFieldRefInput<$PrismaModel> = FieldRefInputTyp
  * Reference to a field of type 'SubscriptionAction[]'
  */
 export type ListEnumSubscriptionActionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubscriptionAction[]'>
-    
-
-
-/**
- * Reference to a field of type 'Json'
- */
-export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
-    
-
-
-/**
- * Reference to a field of type 'QueryMode'
- */
-export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -3308,6 +3641,9 @@ export type GlobalOmitConfig = {
   hostel?: Prisma.HostelOmit
   room?: Prisma.RoomOmit
   bed?: Prisma.BedOmit
+  accommodationPackage?: Prisma.AccommodationPackageOmit
+  accommodationPackageComponent?: Prisma.AccommodationPackageComponentOmit
+  temporaryAbsence?: Prisma.TemporaryAbsenceOmit
   resident?: Prisma.ResidentOmit
   stayContract?: Prisma.StayContractOmit
   bedAssignment?: Prisma.BedAssignmentOmit

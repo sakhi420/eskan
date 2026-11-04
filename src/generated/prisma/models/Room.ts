@@ -44,6 +44,7 @@ export type RoomMinAggregateOutputType = {
   code: string | null
   floor: number | null
   notes: string | null
+  maintenanceStatus: $Enums.MaintenanceStatus | null
   status: $Enums.ArchiveStatus | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -57,6 +58,7 @@ export type RoomMaxAggregateOutputType = {
   code: string | null
   floor: number | null
   notes: string | null
+  maintenanceStatus: $Enums.MaintenanceStatus | null
   status: $Enums.ArchiveStatus | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -70,6 +72,7 @@ export type RoomCountAggregateOutputType = {
   code: number
   floor: number
   notes: number
+  maintenanceStatus: number
   status: number
   createdAt: number
   updatedAt: number
@@ -95,6 +98,7 @@ export type RoomMinAggregateInputType = {
   code?: true
   floor?: true
   notes?: true
+  maintenanceStatus?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -108,6 +112,7 @@ export type RoomMaxAggregateInputType = {
   code?: true
   floor?: true
   notes?: true
+  maintenanceStatus?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -121,6 +126,7 @@ export type RoomCountAggregateInputType = {
   code?: true
   floor?: true
   notes?: true
+  maintenanceStatus?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -221,6 +227,7 @@ export type RoomGroupByOutputType = {
   code: string
   floor: number
   notes: string | null
+  maintenanceStatus: $Enums.MaintenanceStatus
   status: $Enums.ArchiveStatus
   createdAt: Date
   updatedAt: Date
@@ -257,6 +264,7 @@ export type RoomWhereInput = {
   code?: Prisma.StringFilter<"Room"> | string
   floor?: Prisma.IntFilter<"Room"> | number
   notes?: Prisma.StringNullableFilter<"Room"> | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFilter<"Room"> | $Enums.MaintenanceStatus
   status?: Prisma.EnumArchiveStatusFilter<"Room"> | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFilter<"Room"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Room"> | Date | string
@@ -273,6 +281,7 @@ export type RoomOrderByWithRelationInput = {
   code?: Prisma.SortOrder
   floor?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  maintenanceStatus?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -293,6 +302,7 @@ export type RoomWhereUniqueInput = Prisma.AtLeast<{
   code?: Prisma.StringFilter<"Room"> | string
   floor?: Prisma.IntFilter<"Room"> | number
   notes?: Prisma.StringNullableFilter<"Room"> | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFilter<"Room"> | $Enums.MaintenanceStatus
   status?: Prisma.EnumArchiveStatusFilter<"Room"> | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFilter<"Room"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Room"> | Date | string
@@ -309,6 +319,7 @@ export type RoomOrderByWithAggregationInput = {
   code?: Prisma.SortOrder
   floor?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  maintenanceStatus?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -330,6 +341,7 @@ export type RoomScalarWhereWithAggregatesInput = {
   code?: Prisma.StringWithAggregatesFilter<"Room"> | string
   floor?: Prisma.IntWithAggregatesFilter<"Room"> | number
   notes?: Prisma.StringNullableWithAggregatesFilter<"Room"> | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusWithAggregatesFilter<"Room"> | $Enums.MaintenanceStatus
   status?: Prisma.EnumArchiveStatusWithAggregatesFilter<"Room"> | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Room"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Room"> | Date | string
@@ -341,6 +353,7 @@ export type RoomCreateInput = {
   code: string
   floor: number
   notes?: string | null
+  maintenanceStatus?: $Enums.MaintenanceStatus
   status?: $Enums.ArchiveStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -357,6 +370,7 @@ export type RoomUncheckedCreateInput = {
   code: string
   floor: number
   notes?: string | null
+  maintenanceStatus?: $Enums.MaintenanceStatus
   status?: $Enums.ArchiveStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -369,6 +383,7 @@ export type RoomUpdateInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   floor?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -385,6 +400,7 @@ export type RoomUncheckedUpdateInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   floor?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -399,6 +415,7 @@ export type RoomCreateManyInput = {
   code: string
   floor: number
   notes?: string | null
+  maintenanceStatus?: $Enums.MaintenanceStatus
   status?: $Enums.ArchiveStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -410,6 +427,7 @@ export type RoomUpdateManyMutationInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   floor?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -423,6 +441,7 @@ export type RoomUncheckedUpdateManyInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   floor?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -451,6 +470,7 @@ export type RoomCountOrderByAggregateInput = {
   code?: Prisma.SortOrder
   floor?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  maintenanceStatus?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -469,6 +489,7 @@ export type RoomMaxOrderByAggregateInput = {
   code?: Prisma.SortOrder
   floor?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  maintenanceStatus?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -482,6 +503,7 @@ export type RoomMinOrderByAggregateInput = {
   code?: Prisma.SortOrder
   floor?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  maintenanceStatus?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -581,6 +603,10 @@ export type RoomUncheckedUpdateManyWithoutHostelNestedInput = {
   deleteMany?: Prisma.RoomScalarWhereInput | Prisma.RoomScalarWhereInput[]
 }
 
+export type EnumMaintenanceStatusFieldUpdateOperationsInput = {
+  set?: $Enums.MaintenanceStatus
+}
+
 export type RoomCreateNestedOneWithoutBedsInput = {
   create?: Prisma.XOR<Prisma.RoomCreateWithoutBedsInput, Prisma.RoomUncheckedCreateWithoutBedsInput>
   connectOrCreate?: Prisma.RoomCreateOrConnectWithoutBedsInput
@@ -601,6 +627,7 @@ export type RoomCreateWithoutOrganizationInput = {
   code: string
   floor: number
   notes?: string | null
+  maintenanceStatus?: $Enums.MaintenanceStatus
   status?: $Enums.ArchiveStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -615,6 +642,7 @@ export type RoomUncheckedCreateWithoutOrganizationInput = {
   code: string
   floor: number
   notes?: string | null
+  maintenanceStatus?: $Enums.MaintenanceStatus
   status?: $Enums.ArchiveStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -658,6 +686,7 @@ export type RoomScalarWhereInput = {
   code?: Prisma.StringFilter<"Room"> | string
   floor?: Prisma.IntFilter<"Room"> | number
   notes?: Prisma.StringNullableFilter<"Room"> | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFilter<"Room"> | $Enums.MaintenanceStatus
   status?: Prisma.EnumArchiveStatusFilter<"Room"> | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFilter<"Room"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Room"> | Date | string
@@ -669,6 +698,7 @@ export type RoomCreateWithoutHostelInput = {
   code: string
   floor: number
   notes?: string | null
+  maintenanceStatus?: $Enums.MaintenanceStatus
   status?: $Enums.ArchiveStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -683,6 +713,7 @@ export type RoomUncheckedCreateWithoutHostelInput = {
   code: string
   floor: number
   notes?: string | null
+  maintenanceStatus?: $Enums.MaintenanceStatus
   status?: $Enums.ArchiveStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -721,6 +752,7 @@ export type RoomCreateWithoutBedsInput = {
   code: string
   floor: number
   notes?: string | null
+  maintenanceStatus?: $Enums.MaintenanceStatus
   status?: $Enums.ArchiveStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -736,6 +768,7 @@ export type RoomUncheckedCreateWithoutBedsInput = {
   code: string
   floor: number
   notes?: string | null
+  maintenanceStatus?: $Enums.MaintenanceStatus
   status?: $Enums.ArchiveStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -763,6 +796,7 @@ export type RoomUpdateWithoutBedsInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   floor?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -778,6 +812,7 @@ export type RoomUncheckedUpdateWithoutBedsInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   floor?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -790,6 +825,7 @@ export type RoomCreateManyOrganizationInput = {
   code: string
   floor: number
   notes?: string | null
+  maintenanceStatus?: $Enums.MaintenanceStatus
   status?: $Enums.ArchiveStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -801,6 +837,7 @@ export type RoomUpdateWithoutOrganizationInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   floor?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -815,6 +852,7 @@ export type RoomUncheckedUpdateWithoutOrganizationInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   floor?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -828,6 +866,7 @@ export type RoomUncheckedUpdateManyWithoutOrganizationInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   floor?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -840,6 +879,7 @@ export type RoomCreateManyHostelInput = {
   code: string
   floor: number
   notes?: string | null
+  maintenanceStatus?: $Enums.MaintenanceStatus
   status?: $Enums.ArchiveStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -851,6 +891,7 @@ export type RoomUpdateWithoutHostelInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   floor?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -865,6 +906,7 @@ export type RoomUncheckedUpdateWithoutHostelInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   floor?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -878,6 +920,7 @@ export type RoomUncheckedUpdateManyWithoutHostelInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   floor?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -922,6 +965,7 @@ export type RoomSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   code?: boolean
   floor?: boolean
   notes?: boolean
+  maintenanceStatus?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -939,6 +983,7 @@ export type RoomSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   code?: boolean
   floor?: boolean
   notes?: boolean
+  maintenanceStatus?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -954,6 +999,7 @@ export type RoomSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   code?: boolean
   floor?: boolean
   notes?: boolean
+  maintenanceStatus?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -969,12 +1015,13 @@ export type RoomSelectScalar = {
   code?: boolean
   floor?: boolean
   notes?: boolean
+  maintenanceStatus?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type RoomOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "version" | "organizationId" | "hostelId" | "code" | "floor" | "notes" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["room"]>
+export type RoomOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "version" | "organizationId" | "hostelId" | "code" | "floor" | "notes" | "maintenanceStatus" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["room"]>
 export type RoomInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   hostel?: boolean | Prisma.HostelDefaultArgs<ExtArgs>
@@ -1005,6 +1052,7 @@ export type $RoomPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     code: string
     floor: number
     notes: string | null
+    maintenanceStatus: $Enums.MaintenanceStatus
     status: $Enums.ArchiveStatus
     createdAt: Date
     updatedAt: Date
@@ -1441,6 +1489,7 @@ export interface RoomFieldRefs {
   readonly code: Prisma.FieldRef<"Room", 'String'>
   readonly floor: Prisma.FieldRef<"Room", 'Int'>
   readonly notes: Prisma.FieldRef<"Room", 'String'>
+  readonly maintenanceStatus: Prisma.FieldRef<"Room", 'MaintenanceStatus'>
   readonly status: Prisma.FieldRef<"Room", 'ArchiveStatus'>
   readonly createdAt: Prisma.FieldRef<"Room", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Room", 'DateTime'>

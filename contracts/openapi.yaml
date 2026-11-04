@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: ESKAN Backend API
-  version: 0.3.0
+  version: 0.4.0
   description: |
     قرارداد رسمی API سامانهٔ اسکان (ESKAN) — مدیریت لیلیه‌های خصوصی.
     منبع حقیقت قرارداد: این فایل. مسیر محصول زیر `/api/v1`.
@@ -29,6 +29,10 @@ tags:
     description: residents and their accounts
   - name: contracts
     description: stay contracts
+  - name: packages
+    description: accommodation service packages
+  - name: absences
+    description: temporary absences and deductions
   - name: bed-assignments
     description: bed assignment lifecycle
   - name: charges
@@ -699,6 +703,121 @@ paths:
                 properties:
                   data: { $ref: '#/components/schemas/Bed' }
                   meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/hostels/{hostelId}/packages:
+    get:
+      tags: [packages]
+      summary: list accommodation packages for a hostel
+      operationId: packageList
+      parameters:
+        - { name: hostelId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: page, in: query, required: false, schema: { type: integer, default: 1 } }
+        - { name: size, in: query, required: false, schema: { type: integer, default: 20 } }
+      responses:
+        '200':
+          description: packages
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/AccommodationPackagePage' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [packages]
+      summary: create accommodation package
+      operationId: packageCreate
+      parameters:
+        - { name: hostelId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AccommodationPackageRequest' }
+      responses:
+        '201':
+          description: package created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/AccommodationPackage' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+  /api/v1/packages/{packageId}:
+    get:
+      tags: [packages]
+      summary: get accommodation package
+      operationId: packageGet
+      parameters:
+        - { name: packageId, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: package
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/AccommodationPackage' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/Error' }
+    patch:
+      tags: [packages]
+      summary: update accommodation package
+      operationId: packageUpdate
+      parameters:
+        - { name: packageId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: false, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AccommodationPackageRequest' }
+      responses:
+        '200':
+          description: package updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/AccommodationPackage' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+  /api/v1/packages/{packageId}/archive:
+    post:
+      tags: [packages]
+      summary: archive accommodation package
+      operationId: packageArchive
+      parameters: [{ name: packageId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: archived
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/AccommodationPackage' }
+                  meta: { $ref: '#/components/schemas/Meta' }
   /api/v1/residents:
     get:
       tags: [residents]
@@ -1050,6 +1169,101 @@ paths:
                 properties:
                   data: { $ref: '#/components/schemas/BedAssignment' }
                   meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/residents/{residentId}/absences:
+    get:
+      tags: [absences]
+      summary: list temporary absences for a resident
+      operationId: absenceListByResident
+      parameters:
+        - { name: residentId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: page, in: query, required: false, schema: { type: integer, default: 1 } }
+        - { name: size, in: query, required: false, schema: { type: integer, default: 20 } }
+      responses:
+        '200':
+          description: absences
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/TemporaryAbsencePage' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [absences]
+      summary: record temporary absence
+      operationId: absenceCreate
+      parameters:
+        - { name: residentId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TemporaryAbsenceRequest' }
+      responses:
+        '201':
+          description: absence created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/TemporaryAbsence' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+  /api/v1/absences/{absenceId}:
+    get:
+      tags: [absences]
+      summary: get temporary absence
+      operationId: absenceGet
+      parameters:
+        - { name: absenceId, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: absence
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/TemporaryAbsence' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/Error' }
+    patch:
+      tags: [absences]
+      summary: update / approve / close temporary absence
+      operationId: absenceUpdate
+      parameters:
+        - { name: absenceId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: false, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TemporaryAbsenceRequest' }
+      responses:
+        '200':
+          description: absence updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/TemporaryAbsence' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
   /api/v1/charges:
     get:
       tags: [charges]
@@ -2512,6 +2726,10 @@ components:
       properties:
         name: { type: string, minLength: 1, maxLength: 200 }
         address: { type: string, maxLength: 500 }
+        contactPhone: { type: string, maxLength: 50 }
+        defaultRentAmount: { type: integer, minimum: 0 }
+        rentDueDayOfMonth: { type: integer, minimum: 1, maximum: 31 }
+        absenceMinDays: { type: integer, minimum: 1 }
         notes: { type: string, maxLength: 2000 }
     RoomRequest:
       type: object
@@ -2519,12 +2737,14 @@ components:
       properties:
         code: { type: string, minLength: 1, maxLength: 50 }
         floor: { type: integer }
+        maintenanceStatus: { $ref: '#/components/schemas/MaintenanceStatus' }
         notes: { type: string, maxLength: 1000 }
     BedRequest:
       type: object
       required: [code]
       properties:
         code: { type: string, minLength: 1, maxLength: 50 }
+        maintenanceStatus: { $ref: '#/components/schemas/MaintenanceStatus' }
         notes: { type: string, maxLength: 1000 }
     ResidentRequest:
       type: object
@@ -2533,6 +2753,9 @@ components:
         fullName: { type: string, minLength: 1, maxLength: 200 }
         type: { $ref: '#/components/schemas/ResidentType' }
         phone: { type: string, maxLength: 50 }
+        emergencyContactName: { type: string, maxLength: 200 }
+        emergencyContactPhone: { type: string, maxLength: 50 }
+        emergencyContactRelation: { type: string, maxLength: 100 }
         notes: { type: string, maxLength: 2000 }
     ContractRequest:
       type: object
@@ -2545,6 +2768,10 @@ components:
         rent: { $ref: '#/components/schemas/Money' }
         billingCycle: { type: string, enum: [MONTHLY] }
         deposit: { $ref: '#/components/schemas/Money' }
+        packageId: { type: string, format: uuid }
+        packageComponents:
+          type: array
+          items: { $ref: '#/components/schemas/PackageComponent' }
         notes: { type: string, maxLength: 2000 }
     BedAssignmentRequest:
       type: object
@@ -2583,6 +2810,9 @@ components:
         receivedAt: { type: string, format: date }
         receiptNumber: { type: string, minLength: 1, maxLength: 100 }
         notes: { type: string, maxLength: 1000 }
+        payerName: { type: string, maxLength: 200 }
+        payerPhone: { type: string, maxLength: 50 }
+        payerRelation: { type: string, maxLength: 100 }
         allocations:
           type: array
           items: { $ref: '#/components/schemas/PaymentAllocationRequest' }
@@ -2630,7 +2860,7 @@ components:
       enum: [DRAFT, ACTIVE, TERMINATED, CLOSED]
     ChargeType:
       type: string
-      enum: [RENT, UTILITY, DAMAGE, OTHER]
+      enum: [RENT, UTILITY, DAMAGE, OTHER, ADJUSTMENT]
     LedgerEntryStatus:
       type: string
       enum: [POSTED, REVERSED]
@@ -2646,6 +2876,15 @@ components:
     SyncAction:
       type: string
       enum: [UPSERT, TOMBSTONE]
+    PackageComponentKind:
+      type: string
+      enum: [ACCOMMODATION, BOARD, SERVICE]
+    MaintenanceStatus:
+      type: string
+      enum: [OPERATIONAL, NEEDS_CLEANING, NEEDS_REPAIR, OUT_OF_SERVICE]
+    AbsenceStatus:
+      type: string
+      enum: [REQUESTED, APPROVED, ADJUSTED, CLOSED]
     Organization:
       type: object
       required: [id, version, name, timezone, defaultCurrency, createdAt, updatedAt]
@@ -2688,6 +2927,10 @@ components:
           items: { $ref: '#/components/schemas/MembershipSummary' }
         name: { type: string }
         address: { type: string }
+        contactPhone: { type: string }
+        defaultRentAmount: { type: integer }
+        rentDueDayOfMonth: { type: integer }
+        absenceMinDays: { type: integer }
         notes: { type: string }
         status: { type: string, enum: [ACTIVE, ARCHIVED] }
         createdAt: { type: string, format: date-time }
@@ -2705,6 +2948,7 @@ components:
         code: { type: string }
         floor: { type: integer }
         notes: { type: string }
+        maintenanceStatus: { $ref: '#/components/schemas/MaintenanceStatus' }
         status: { type: string, enum: [ACTIVE, ARCHIVED] }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
@@ -2720,6 +2964,7 @@ components:
         roomId: { type: string, format: uuid }
         code: { type: string }
         notes: { type: string }
+        maintenanceStatus: { $ref: '#/components/schemas/MaintenanceStatus' }
         status: { type: string, enum: [ACTIVE, INACTIVE] }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
@@ -2735,6 +2980,9 @@ components:
         fullName: { type: string }
         type: { $ref: '#/components/schemas/ResidentType' }
         phone: { type: string }
+        emergencyContactName: { type: string }
+        emergencyContactPhone: { type: string }
+        emergencyContactRelation: { type: string }
         notes: { type: string }
         status: { $ref: '#/components/schemas/ResidentStatus' }
         createdAt: { type: string, format: date-time }
@@ -2757,6 +3005,10 @@ components:
         rent: { $ref: '#/components/schemas/Money' }
         billingCycle: { type: string }
         deposit: { $ref: '#/components/schemas/Money' }
+        packageId: { type: string, format: uuid }
+        packageComponents:
+          type: array
+          items: { $ref: '#/components/schemas/PackageComponent' }
         notes: { type: string }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
@@ -2824,6 +3076,9 @@ components:
         receivedAt: { type: string, format: date }
         receiptNumber: { type: string }
         notes: { type: string }
+        payerName: { type: string }
+        payerPhone: { type: string }
+        payerRelation: { type: string }
         reversedBy: { type: string, format: uuid }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
@@ -2972,6 +3227,97 @@ components:
               description: { type: string }
               amount: { type: integer }
               balance: { type: integer }
+    PackageComponent:
+      type: object
+      required: [kind, name, amount, deductibleOnAbsence]
+      properties:
+        kind: { $ref: '#/components/schemas/PackageComponentKind' }
+        name: { type: string }
+        amount: { type: integer, minimum: 0 }
+        deductibleOnAbsence: { type: boolean }
+    AccommodationPackage:
+      type: object
+      required: [id, version, organizationId, name, status, components, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        version: { type: integer }
+        memberships:
+          type: array
+          items: { $ref: '#/components/schemas/MembershipSummary' }
+        hostelId: { type: string, format: uuid }
+        name: { type: string }
+        description: { type: string }
+        status: { type: string, enum: [ACTIVE, ARCHIVED] }
+        components:
+          type: array
+          items: { $ref: '#/components/schemas/PackageComponent' }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    AccommodationPackageRequest:
+      type: object
+      required: [name, components]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 200 }
+        description: { type: string, maxLength: 1000 }
+        components:
+          type: array
+          items: { $ref: '#/components/schemas/PackageComponent' }
+    AccommodationPackagePage:
+      type: object
+      required: [items, page, size, totalElements, totalPages]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/AccommodationPackage' }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer }
+        totalPages: { type: integer }
+    TemporaryAbsence:
+      type: object
+      required: [id, version, organizationId, residentId, contractId, status, plannedDepartureDate, expectedReturnDate, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        version: { type: integer }
+        memberships:
+          type: array
+          items: { $ref: '#/components/schemas/MembershipSummary' }
+        residentId: { type: string, format: uuid }
+        contractId: { type: string, format: uuid }
+        status: { $ref: '#/components/schemas/AbsenceStatus' }
+        plannedDepartureDate: { type: string, format: date }
+        actualDepartureDate: { type: string, format: date }
+        expectedReturnDate: { type: string, format: date }
+        actualReturnDate: { type: string, format: date }
+        reason: { type: string }
+        notes: { type: string }
+        requestedBy: { type: string, format: uuid }
+        approvedBy: { type: string, format: uuid }
+        approvedAt: { type: string, format: date-time }
+        creditChargeId: { type: string, format: uuid }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    TemporaryAbsenceRequest:
+      type: object
+      required: [contractId, plannedDepartureDate, expectedReturnDate]
+      properties:
+        contractId: { type: string, format: uuid }
+        plannedDepartureDate: { type: string, format: date }
+        actualDepartureDate: { type: string, format: date }
+        expectedReturnDate: { type: string, format: date }
+        reason: { type: string, maxLength: 500 }
+        notes: { type: string, maxLength: 2000 }
+    TemporaryAbsencePage:
+      type: object
+      required: [items, page, size, totalElements, totalPages]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/TemporaryAbsence' }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer }
+        totalPages: { type: integer }
     SyncDevice:
       type: object
       required: [id, organizationId, deviceId, platform, lastCursor, createdAt]

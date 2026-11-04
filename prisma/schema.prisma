@@ -60,6 +60,7 @@ enum ChargeType {
   UTILITY
   DAMAGE
   OTHER
+  ADJUSTMENT
 }
 
 enum LedgerEntryStatus {
@@ -130,6 +131,26 @@ enum SyncPlatform {
   OTHER
 }
 
+enum PackageComponentKind {
+  ACCOMMODATION
+  BOARD
+  SERVICE
+}
+
+enum MaintenanceStatus {
+  OPERATIONAL
+  NEEDS_CLEANING
+  NEEDS_REPAIR
+  OUT_OF_SERVICE
+}
+
+enum AbsenceStatus {
+  REQUESTED
+  APPROVED
+  ADJUSTED
+  CLOSED
+}
+
 model Organization {
   id              String   @id @default(uuid()) @db.Uuid
   version         Int      @default(1)
@@ -159,6 +180,8 @@ model Organization {
   syncState                  OrganizationSyncState?
   idempotencyRecords         IdempotencyRecord[]
   auditEvents                AuditEvent[]
+  packages                   AccommodationPackage[]
+  temporaryAbsences          TemporaryAbsence[]
 
   @@map("organizations")
 }
@@ -183,6 +206,8 @@ model User {
   subscriptionEvents     SubscriptionEvent[]         @relation("SubscriptionEventActor")
   verifiedManualPayments ManualSubscriptionPayment[] @relation("ManualPaymentVerifiedBy")
   auditEvents            AuditEvent[]                @relation("AuditEventActor")
+  requestedAbsences      TemporaryAbsence[]          @relation("AbsenceRequestedBy")
+  approvedAbsences       TemporaryAbsence[]          @relation("AbsenceApprovedBy")
 
   @@map("users")
 }
@@ -248,10 +273,14 @@ model Hostel {
   id             String        @id @default(uuid()) @db.Uuid
   version        Int           @default(1)
   organizationId String        @map("organization_id") @db.Uuid
-  name           String
-  address        String?
-  notes          String?
-  status         ArchiveStatus @default(ACTIVE)
+  name              String
+  address           String?
+  contactPhone      String? @map("contact_phone")
+  defaultRentAmount Int?    @map("default_rent_amount")
+  rentDueDayOfMonth Int?    @map("rent_due_day_of_month")
+  absenceMinDays    Int     @default(3) @map("absence_min_days")
+  notes             String?
+  status            ArchiveStatus @default(ACTIVE)
   createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt      DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
 
@@ -259,6 +288,7 @@ model Hostel {
   rooms         Room[]
   stayContracts StayContract[]
   expenses      Expense[]
+  packages      AccommodationPackage[]
 
   @@index([organizationId])
   @@index([organizationId, status])
@@ -270,10 +300,11 @@ model Room {
   version        Int           @default(1)
   organizationId String        @map("organization_id") @db.Uuid
   hostelId       String        @map("hostel_id") @db.Uuid
-  code           String
-  floor          Int
-  notes          String?
-  status         ArchiveStatus @default(ACTIVE)
+  code             String
+  floor            Int
+  notes            String?
+  maintenanceStatus MaintenanceStatus @default(OPERATIONAL) @map("maintenance_status")
+  status           ArchiveStatus @default(ACTIVE)
   createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt      DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
 
@@ -291,9 +322,10 @@ model Bed {
   version        Int       @default(1)
   organizationId String    @map("organization_id") @db.Uuid
   roomId         String    @map("room_id") @db.Uuid
-  code           String
-  notes          String?
-  status         BedStatus @default(ACTIVE)
+  code             String
+  notes            String?
+  maintenanceStatus MaintenanceStatus @default(OPERATIONAL) @map("maintenance_status")
+  status           BedStatus @default(ACTIVE)
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
 
@@ -306,15 +338,87 @@ model Bed {
   @@map("beds")
 }
 
+model AccommodationPackage {
+  id             String        @id @default(uuid()) @db.Uuid
+  version        Int           @default(1)
+  organizationId String        @map("organization_id") @db.Uuid
+  hostelId       String?       @map("hostel_id") @db.Uuid
+  name           String
+  description    String?
+  status         ArchiveStatus @default(ACTIVE)
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  organization Organization                  @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  hostel       Hostel?                      @relation(fields: [hostelId], references: [id], onDelete: SetNull)
+  components   AccommodationPackageComponent[]
+  contracts    StayContract[]
+
+  @@index([organizationId])
+  @@index([organizationId, hostelId])
+  @@map("accommodation_packages")
+}
+
+model AccommodationPackageComponent {
+  id                  String               @id @default(uuid()) @db.Uuid
+  packageId           String               @map("package_id") @db.Uuid
+  kind                PackageComponentKind
+  name                String
+  amount              Int
+  deductibleOnAbsence Boolean              @default(false) @map("deductible_on_absence")
+  sortOrder           Int                  @default(0) @map("sort_order")
+
+  package AccommodationPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@index([packageId])
+  @@map("accommodation_package_components")
+}
+
+model TemporaryAbsence {
+  id                   String        @id @default(uuid()) @db.Uuid
+  version              Int           @default(1)
+  organizationId       String        @map("organization_id") @db.Uuid
+  residentId           String        @map("resident_id") @db.Uuid
+  contractId           String        @map("contract_id") @db.Uuid
+  status               AbsenceStatus @default(REQUESTED)
+  plannedDepartureDate DateTime      @map("planned_departure_date") @db.Date
+  actualDepartureDate  DateTime?     @map("actual_departure_date") @db.Date
+  expectedReturnDate   DateTime      @map("expected_return_date") @db.Date
+  actualReturnDate     DateTime?     @map("actual_return_date") @db.Date
+  reason               String?
+  notes                String?
+  requestedByUserId    String        @map("requested_by_user_id") @db.Uuid
+  approvedByUserId     String?       @map("approved_by_user_id") @db.Uuid
+  approvedAt           DateTime?     @map("approved_at") @db.Timestamptz(3)
+  creditChargeId       String?       @unique @map("credit_charge_id") @db.Uuid
+  createdAt            DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  resident     Resident     @relation(fields: [residentId], references: [id], onDelete: Restrict)
+  contract     StayContract @relation(fields: [contractId], references: [id], onDelete: Restrict)
+  requestedBy  User         @relation("AbsenceRequestedBy", fields: [requestedByUserId], references: [id], onDelete: Restrict)
+  approvedBy   User?        @relation("AbsenceApprovedBy", fields: [approvedByUserId], references: [id], onDelete: SetNull)
+  creditCharge Charge?      @relation("AbsenceCreditCharge", fields: [creditChargeId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, residentId])
+  @@index([organizationId, contractId])
+  @@index([organizationId, status])
+  @@map("temporary_absences")
+}
+
 model Resident {
   id             String         @id @default(uuid()) @db.Uuid
   version        Int            @default(1)
   organizationId String         @map("organization_id") @db.Uuid
   fullName       String         @map("full_name")
   type           ResidentType   @default(OTHER)
-  phone          String?
-  notes          String?
-  status         ResidentStatus @default(ACTIVE)
+  phone                    String?
+  emergencyContactName     String? @map("emergency_contact_name")
+  emergencyContactPhone    String? @map("emergency_contact_phone")
+  emergencyContactRelation String? @map("emergency_contact_relation")
+  notes                    String?
+  status                   ResidentStatus @default(ACTIVE)
   createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt      DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
 
@@ -324,6 +428,7 @@ model Resident {
   charges       Charge[]
   payments      Payment[]
   deposits      DepositTransaction[]
+  absences      TemporaryAbsence[]
 
   @@index([organizationId])
   @@index([organizationId, fullName])
@@ -344,6 +449,8 @@ model StayContract {
   rentAmount     Int            @map("rent_amount")
   billingCycle   BillingCycle   @default(MONTHLY) @map("billing_cycle")
   depositAmount  Int?           @map("deposit_amount")
+  packageId      String?        @map("package_id") @db.Uuid
+  packageSnapshot Json?         @map("package_snapshot")
   notes          String?
   createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt      DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
@@ -351,8 +458,10 @@ model StayContract {
   organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   hostel       Hostel          @relation(fields: [hostelId], references: [id], onDelete: Restrict)
   resident     Resident        @relation(fields: [residentId], references: [id], onDelete: Restrict)
+  package      AccommodationPackage? @relation(fields: [packageId], references: [id], onDelete: SetNull)
   assignments  BedAssignment[]
   charges      Charge[]
+  absences     TemporaryAbsence[]
 
   @@unique([organizationId, contractNumber])
   @@index([organizationId, residentId])
@@ -409,6 +518,7 @@ model Charge {
   contract     StayContract?       @relation(fields: [contractId], references: [id], onDelete: SetNull)
   reversedBy   User?               @relation("ChargeReversedBy", fields: [reversedById], references: [id], onDelete: SetNull)
   allocations  PaymentAllocation[]
+  absence      TemporaryAbsence?  @relation("AbsenceCreditCharge")
 
   @@index([organizationId, residentId, status])
   @@index([organizationId, dueDate])
@@ -427,6 +537,9 @@ model Payment {
   receivedAt     DateTime          @map("received_at") @db.Date
   receiptNumber  String            @map("receipt_number")
   notes          String?
+  payerName      String?           @map("payer_name")
+  payerPhone     String?           @map("payer_phone")
+  payerRelation  String?           @map("payer_relation")
   reversedById   String?           @map("reversed_by_id") @db.Uuid
   reversalReason String?           @map("reversal_reason")
   reversedAt     DateTime?         @map("reversed_at") @db.Timestamptz(3)

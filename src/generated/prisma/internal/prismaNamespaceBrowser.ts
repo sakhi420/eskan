@@ -59,6 +59,9 @@ export const ModelName = {
   Hostel: 'Hostel',
   Room: 'Room',
   Bed: 'Bed',
+  AccommodationPackage: 'AccommodationPackage',
+  AccommodationPackageComponent: 'AccommodationPackageComponent',
+  TemporaryAbsence: 'TemporaryAbsence',
   Resident: 'Resident',
   StayContract: 'StayContract',
   BedAssignment: 'BedAssignment',
@@ -170,6 +173,10 @@ export const HostelScalarFieldEnum = {
   organizationId: 'organizationId',
   name: 'name',
   address: 'address',
+  contactPhone: 'contactPhone',
+  defaultRentAmount: 'defaultRentAmount',
+  rentDueDayOfMonth: 'rentDueDayOfMonth',
+  absenceMinDays: 'absenceMinDays',
   notes: 'notes',
   status: 'status',
   createdAt: 'createdAt',
@@ -187,6 +194,7 @@ export const RoomScalarFieldEnum = {
   code: 'code',
   floor: 'floor',
   notes: 'notes',
+  maintenanceStatus: 'maintenanceStatus',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -202,12 +210,65 @@ export const BedScalarFieldEnum = {
   roomId: 'roomId',
   code: 'code',
   notes: 'notes',
+  maintenanceStatus: 'maintenanceStatus',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type BedScalarFieldEnum = (typeof BedScalarFieldEnum)[keyof typeof BedScalarFieldEnum]
+
+
+export const AccommodationPackageScalarFieldEnum = {
+  id: 'id',
+  version: 'version',
+  organizationId: 'organizationId',
+  hostelId: 'hostelId',
+  name: 'name',
+  description: 'description',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AccommodationPackageScalarFieldEnum = (typeof AccommodationPackageScalarFieldEnum)[keyof typeof AccommodationPackageScalarFieldEnum]
+
+
+export const AccommodationPackageComponentScalarFieldEnum = {
+  id: 'id',
+  packageId: 'packageId',
+  kind: 'kind',
+  name: 'name',
+  amount: 'amount',
+  deductibleOnAbsence: 'deductibleOnAbsence',
+  sortOrder: 'sortOrder'
+} as const
+
+export type AccommodationPackageComponentScalarFieldEnum = (typeof AccommodationPackageComponentScalarFieldEnum)[keyof typeof AccommodationPackageComponentScalarFieldEnum]
+
+
+export const TemporaryAbsenceScalarFieldEnum = {
+  id: 'id',
+  version: 'version',
+  organizationId: 'organizationId',
+  residentId: 'residentId',
+  contractId: 'contractId',
+  status: 'status',
+  plannedDepartureDate: 'plannedDepartureDate',
+  actualDepartureDate: 'actualDepartureDate',
+  expectedReturnDate: 'expectedReturnDate',
+  actualReturnDate: 'actualReturnDate',
+  reason: 'reason',
+  notes: 'notes',
+  requestedByUserId: 'requestedByUserId',
+  approvedByUserId: 'approvedByUserId',
+  approvedAt: 'approvedAt',
+  creditChargeId: 'creditChargeId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TemporaryAbsenceScalarFieldEnum = (typeof TemporaryAbsenceScalarFieldEnum)[keyof typeof TemporaryAbsenceScalarFieldEnum]
 
 
 export const ResidentScalarFieldEnum = {
@@ -217,6 +278,9 @@ export const ResidentScalarFieldEnum = {
   fullName: 'fullName',
   type: 'type',
   phone: 'phone',
+  emergencyContactName: 'emergencyContactName',
+  emergencyContactPhone: 'emergencyContactPhone',
+  emergencyContactRelation: 'emergencyContactRelation',
   notes: 'notes',
   status: 'status',
   createdAt: 'createdAt',
@@ -239,6 +303,8 @@ export const StayContractScalarFieldEnum = {
   rentAmount: 'rentAmount',
   billingCycle: 'billingCycle',
   depositAmount: 'depositAmount',
+  packageId: 'packageId',
+  packageSnapshot: 'packageSnapshot',
   notes: 'notes',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -299,6 +365,9 @@ export const PaymentScalarFieldEnum = {
   receivedAt: 'receivedAt',
   receiptNumber: 'receiptNumber',
   notes: 'notes',
+  payerName: 'payerName',
+  payerPhone: 'payerPhone',
+  payerRelation: 'payerRelation',
   reversedById: 'reversedById',
   reversalReason: 'reversalReason',
   reversedAt: 'reversedAt',

@@ -58,6 +58,21 @@ export type Room = Prisma.RoomModel
  */
 export type Bed = Prisma.BedModel
 /**
+ * Model AccommodationPackage
+ * 
+ */
+export type AccommodationPackage = Prisma.AccommodationPackageModel
+/**
+ * Model AccommodationPackageComponent
+ * 
+ */
+export type AccommodationPackageComponent = Prisma.AccommodationPackageComponentModel
+/**
+ * Model TemporaryAbsence
+ * 
+ */
+export type TemporaryAbsence = Prisma.TemporaryAbsenceModel
+/**
  * Model Resident
  * 
  */

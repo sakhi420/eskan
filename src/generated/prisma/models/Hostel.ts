@@ -28,10 +28,16 @@ export type AggregateHostel = {
 
 export type HostelAvgAggregateOutputType = {
   version: number | null
+  defaultRentAmount: number | null
+  rentDueDayOfMonth: number | null
+  absenceMinDays: number | null
 }
 
 export type HostelSumAggregateOutputType = {
   version: number | null
+  defaultRentAmount: number | null
+  rentDueDayOfMonth: number | null
+  absenceMinDays: number | null
 }
 
 export type HostelMinAggregateOutputType = {
@@ -40,6 +46,10 @@ export type HostelMinAggregateOutputType = {
   organizationId: string | null
   name: string | null
   address: string | null
+  contactPhone: string | null
+  defaultRentAmount: number | null
+  rentDueDayOfMonth: number | null
+  absenceMinDays: number | null
   notes: string | null
   status: $Enums.ArchiveStatus | null
   createdAt: Date | null
@@ -52,6 +62,10 @@ export type HostelMaxAggregateOutputType = {
   organizationId: string | null
   name: string | null
   address: string | null
+  contactPhone: string | null
+  defaultRentAmount: number | null
+  rentDueDayOfMonth: number | null
+  absenceMinDays: number | null
   notes: string | null
   status: $Enums.ArchiveStatus | null
   createdAt: Date | null
@@ -64,6 +78,10 @@ export type HostelCountAggregateOutputType = {
   organizationId: number
   name: number
   address: number
+  contactPhone: number
+  defaultRentAmount: number
+  rentDueDayOfMonth: number
+  absenceMinDays: number
   notes: number
   status: number
   createdAt: number
@@ -74,10 +92,16 @@ export type HostelCountAggregateOutputType = {
 
 export type HostelAvgAggregateInputType = {
   version?: true
+  defaultRentAmount?: true
+  rentDueDayOfMonth?: true
+  absenceMinDays?: true
 }
 
 export type HostelSumAggregateInputType = {
   version?: true
+  defaultRentAmount?: true
+  rentDueDayOfMonth?: true
+  absenceMinDays?: true
 }
 
 export type HostelMinAggregateInputType = {
@@ -86,6 +110,10 @@ export type HostelMinAggregateInputType = {
   organizationId?: true
   name?: true
   address?: true
+  contactPhone?: true
+  defaultRentAmount?: true
+  rentDueDayOfMonth?: true
+  absenceMinDays?: true
   notes?: true
   status?: true
   createdAt?: true
@@ -98,6 +126,10 @@ export type HostelMaxAggregateInputType = {
   organizationId?: true
   name?: true
   address?: true
+  contactPhone?: true
+  defaultRentAmount?: true
+  rentDueDayOfMonth?: true
+  absenceMinDays?: true
   notes?: true
   status?: true
   createdAt?: true
@@ -110,6 +142,10 @@ export type HostelCountAggregateInputType = {
   organizationId?: true
   name?: true
   address?: true
+  contactPhone?: true
+  defaultRentAmount?: true
+  rentDueDayOfMonth?: true
+  absenceMinDays?: true
   notes?: true
   status?: true
   createdAt?: true
@@ -209,6 +245,10 @@ export type HostelGroupByOutputType = {
   organizationId: string
   name: string
   address: string | null
+  contactPhone: string | null
+  defaultRentAmount: number | null
+  rentDueDayOfMonth: number | null
+  absenceMinDays: number
   notes: string | null
   status: $Enums.ArchiveStatus
   createdAt: Date
@@ -244,6 +284,10 @@ export type HostelWhereInput = {
   organizationId?: Prisma.UuidFilter<"Hostel"> | string
   name?: Prisma.StringFilter<"Hostel"> | string
   address?: Prisma.StringNullableFilter<"Hostel"> | string | null
+  contactPhone?: Prisma.StringNullableFilter<"Hostel"> | string | null
+  defaultRentAmount?: Prisma.IntNullableFilter<"Hostel"> | number | null
+  rentDueDayOfMonth?: Prisma.IntNullableFilter<"Hostel"> | number | null
+  absenceMinDays?: Prisma.IntFilter<"Hostel"> | number
   notes?: Prisma.StringNullableFilter<"Hostel"> | string | null
   status?: Prisma.EnumArchiveStatusFilter<"Hostel"> | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFilter<"Hostel"> | Date | string
@@ -252,6 +296,7 @@ export type HostelWhereInput = {
   rooms?: Prisma.RoomListRelationFilter
   stayContracts?: Prisma.StayContractListRelationFilter
   expenses?: Prisma.ExpenseListRelationFilter
+  packages?: Prisma.AccommodationPackageListRelationFilter
 }
 
 export type HostelOrderByWithRelationInput = {
@@ -260,6 +305,10 @@ export type HostelOrderByWithRelationInput = {
   organizationId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   address?: Prisma.SortOrderInput | Prisma.SortOrder
+  contactPhone?: Prisma.SortOrderInput | Prisma.SortOrder
+  defaultRentAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  rentDueDayOfMonth?: Prisma.SortOrderInput | Prisma.SortOrder
+  absenceMinDays?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -268,6 +317,7 @@ export type HostelOrderByWithRelationInput = {
   rooms?: Prisma.RoomOrderByRelationAggregateInput
   stayContracts?: Prisma.StayContractOrderByRelationAggregateInput
   expenses?: Prisma.ExpenseOrderByRelationAggregateInput
+  packages?: Prisma.AccommodationPackageOrderByRelationAggregateInput
 }
 
 export type HostelWhereUniqueInput = Prisma.AtLeast<{
@@ -279,6 +329,10 @@ export type HostelWhereUniqueInput = Prisma.AtLeast<{
   organizationId?: Prisma.UuidFilter<"Hostel"> | string
   name?: Prisma.StringFilter<"Hostel"> | string
   address?: Prisma.StringNullableFilter<"Hostel"> | string | null
+  contactPhone?: Prisma.StringNullableFilter<"Hostel"> | string | null
+  defaultRentAmount?: Prisma.IntNullableFilter<"Hostel"> | number | null
+  rentDueDayOfMonth?: Prisma.IntNullableFilter<"Hostel"> | number | null
+  absenceMinDays?: Prisma.IntFilter<"Hostel"> | number
   notes?: Prisma.StringNullableFilter<"Hostel"> | string | null
   status?: Prisma.EnumArchiveStatusFilter<"Hostel"> | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFilter<"Hostel"> | Date | string
@@ -287,6 +341,7 @@ export type HostelWhereUniqueInput = Prisma.AtLeast<{
   rooms?: Prisma.RoomListRelationFilter
   stayContracts?: Prisma.StayContractListRelationFilter
   expenses?: Prisma.ExpenseListRelationFilter
+  packages?: Prisma.AccommodationPackageListRelationFilter
 }, "id">
 
 export type HostelOrderByWithAggregationInput = {
@@ -295,6 +350,10 @@ export type HostelOrderByWithAggregationInput = {
   organizationId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   address?: Prisma.SortOrderInput | Prisma.SortOrder
+  contactPhone?: Prisma.SortOrderInput | Prisma.SortOrder
+  defaultRentAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  rentDueDayOfMonth?: Prisma.SortOrderInput | Prisma.SortOrder
+  absenceMinDays?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -315,6 +374,10 @@ export type HostelScalarWhereWithAggregatesInput = {
   organizationId?: Prisma.UuidWithAggregatesFilter<"Hostel"> | string
   name?: Prisma.StringWithAggregatesFilter<"Hostel"> | string
   address?: Prisma.StringNullableWithAggregatesFilter<"Hostel"> | string | null
+  contactPhone?: Prisma.StringNullableWithAggregatesFilter<"Hostel"> | string | null
+  defaultRentAmount?: Prisma.IntNullableWithAggregatesFilter<"Hostel"> | number | null
+  rentDueDayOfMonth?: Prisma.IntNullableWithAggregatesFilter<"Hostel"> | number | null
+  absenceMinDays?: Prisma.IntWithAggregatesFilter<"Hostel"> | number
   notes?: Prisma.StringNullableWithAggregatesFilter<"Hostel"> | string | null
   status?: Prisma.EnumArchiveStatusWithAggregatesFilter<"Hostel"> | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Hostel"> | Date | string
@@ -326,6 +389,10 @@ export type HostelCreateInput = {
   version?: number
   name: string
   address?: string | null
+  contactPhone?: string | null
+  defaultRentAmount?: number | null
+  rentDueDayOfMonth?: number | null
+  absenceMinDays?: number
   notes?: string | null
   status?: $Enums.ArchiveStatus
   createdAt?: Date | string
@@ -334,6 +401,7 @@ export type HostelCreateInput = {
   rooms?: Prisma.RoomCreateNestedManyWithoutHostelInput
   stayContracts?: Prisma.StayContractCreateNestedManyWithoutHostelInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutHostelInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutHostelInput
 }
 
 export type HostelUncheckedCreateInput = {
@@ -342,6 +410,10 @@ export type HostelUncheckedCreateInput = {
   organizationId: string
   name: string
   address?: string | null
+  contactPhone?: string | null
+  defaultRentAmount?: number | null
+  rentDueDayOfMonth?: number | null
+  absenceMinDays?: number
   notes?: string | null
   status?: $Enums.ArchiveStatus
   createdAt?: Date | string
@@ -349,6 +421,7 @@ export type HostelUncheckedCreateInput = {
   rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutHostelInput
   stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutHostelInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutHostelInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutHostelInput
 }
 
 export type HostelUpdateInput = {
@@ -356,6 +429,10 @@ export type HostelUpdateInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultRentAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rentDueDayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  absenceMinDays?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -364,6 +441,7 @@ export type HostelUpdateInput = {
   rooms?: Prisma.RoomUpdateManyWithoutHostelNestedInput
   stayContracts?: Prisma.StayContractUpdateManyWithoutHostelNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutHostelNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutHostelNestedInput
 }
 
 export type HostelUncheckedUpdateInput = {
@@ -372,6 +450,10 @@ export type HostelUncheckedUpdateInput = {
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultRentAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rentDueDayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  absenceMinDays?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -379,6 +461,7 @@ export type HostelUncheckedUpdateInput = {
   rooms?: Prisma.RoomUncheckedUpdateManyWithoutHostelNestedInput
   stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutHostelNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutHostelNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutHostelNestedInput
 }
 
 export type HostelCreateManyInput = {
@@ -387,6 +470,10 @@ export type HostelCreateManyInput = {
   organizationId: string
   name: string
   address?: string | null
+  contactPhone?: string | null
+  defaultRentAmount?: number | null
+  rentDueDayOfMonth?: number | null
+  absenceMinDays?: number
   notes?: string | null
   status?: $Enums.ArchiveStatus
   createdAt?: Date | string
@@ -398,6 +485,10 @@ export type HostelUpdateManyMutationInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultRentAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rentDueDayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  absenceMinDays?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -410,6 +501,10 @@ export type HostelUncheckedUpdateManyInput = {
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultRentAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rentDueDayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  absenceMinDays?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -432,6 +527,10 @@ export type HostelCountOrderByAggregateInput = {
   organizationId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   address?: Prisma.SortOrder
+  contactPhone?: Prisma.SortOrder
+  defaultRentAmount?: Prisma.SortOrder
+  rentDueDayOfMonth?: Prisma.SortOrder
+  absenceMinDays?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -440,6 +539,9 @@ export type HostelCountOrderByAggregateInput = {
 
 export type HostelAvgOrderByAggregateInput = {
   version?: Prisma.SortOrder
+  defaultRentAmount?: Prisma.SortOrder
+  rentDueDayOfMonth?: Prisma.SortOrder
+  absenceMinDays?: Prisma.SortOrder
 }
 
 export type HostelMaxOrderByAggregateInput = {
@@ -448,6 +550,10 @@ export type HostelMaxOrderByAggregateInput = {
   organizationId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   address?: Prisma.SortOrder
+  contactPhone?: Prisma.SortOrder
+  defaultRentAmount?: Prisma.SortOrder
+  rentDueDayOfMonth?: Prisma.SortOrder
+  absenceMinDays?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -460,6 +566,10 @@ export type HostelMinOrderByAggregateInput = {
   organizationId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   address?: Prisma.SortOrder
+  contactPhone?: Prisma.SortOrder
+  defaultRentAmount?: Prisma.SortOrder
+  rentDueDayOfMonth?: Prisma.SortOrder
+  absenceMinDays?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -468,6 +578,9 @@ export type HostelMinOrderByAggregateInput = {
 
 export type HostelSumOrderByAggregateInput = {
   version?: Prisma.SortOrder
+  defaultRentAmount?: Prisma.SortOrder
+  rentDueDayOfMonth?: Prisma.SortOrder
+  absenceMinDays?: Prisma.SortOrder
 }
 
 export type HostelScalarRelationFilter = {
@@ -522,6 +635,14 @@ export type HostelUncheckedUpdateManyWithoutOrganizationNestedInput = {
   deleteMany?: Prisma.HostelScalarWhereInput | Prisma.HostelScalarWhereInput[]
 }
 
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type EnumArchiveStatusFieldUpdateOperationsInput = {
   set?: $Enums.ArchiveStatus
 }
@@ -538,6 +659,22 @@ export type HostelUpdateOneRequiredWithoutRoomsNestedInput = {
   upsert?: Prisma.HostelUpsertWithoutRoomsInput
   connect?: Prisma.HostelWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.HostelUpdateToOneWithWhereWithoutRoomsInput, Prisma.HostelUpdateWithoutRoomsInput>, Prisma.HostelUncheckedUpdateWithoutRoomsInput>
+}
+
+export type HostelCreateNestedOneWithoutPackagesInput = {
+  create?: Prisma.XOR<Prisma.HostelCreateWithoutPackagesInput, Prisma.HostelUncheckedCreateWithoutPackagesInput>
+  connectOrCreate?: Prisma.HostelCreateOrConnectWithoutPackagesInput
+  connect?: Prisma.HostelWhereUniqueInput
+}
+
+export type HostelUpdateOneWithoutPackagesNestedInput = {
+  create?: Prisma.XOR<Prisma.HostelCreateWithoutPackagesInput, Prisma.HostelUncheckedCreateWithoutPackagesInput>
+  connectOrCreate?: Prisma.HostelCreateOrConnectWithoutPackagesInput
+  upsert?: Prisma.HostelUpsertWithoutPackagesInput
+  disconnect?: Prisma.HostelWhereInput | boolean
+  delete?: Prisma.HostelWhereInput | boolean
+  connect?: Prisma.HostelWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.HostelUpdateToOneWithWhereWithoutPackagesInput, Prisma.HostelUpdateWithoutPackagesInput>, Prisma.HostelUncheckedUpdateWithoutPackagesInput>
 }
 
 export type HostelCreateNestedOneWithoutStayContractsInput = {
@@ -575,6 +712,10 @@ export type HostelCreateWithoutOrganizationInput = {
   version?: number
   name: string
   address?: string | null
+  contactPhone?: string | null
+  defaultRentAmount?: number | null
+  rentDueDayOfMonth?: number | null
+  absenceMinDays?: number
   notes?: string | null
   status?: $Enums.ArchiveStatus
   createdAt?: Date | string
@@ -582,6 +723,7 @@ export type HostelCreateWithoutOrganizationInput = {
   rooms?: Prisma.RoomCreateNestedManyWithoutHostelInput
   stayContracts?: Prisma.StayContractCreateNestedManyWithoutHostelInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutHostelInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutHostelInput
 }
 
 export type HostelUncheckedCreateWithoutOrganizationInput = {
@@ -589,6 +731,10 @@ export type HostelUncheckedCreateWithoutOrganizationInput = {
   version?: number
   name: string
   address?: string | null
+  contactPhone?: string | null
+  defaultRentAmount?: number | null
+  rentDueDayOfMonth?: number | null
+  absenceMinDays?: number
   notes?: string | null
   status?: $Enums.ArchiveStatus
   createdAt?: Date | string
@@ -596,6 +742,7 @@ export type HostelUncheckedCreateWithoutOrganizationInput = {
   rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutHostelInput
   stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutHostelInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutHostelInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutHostelInput
 }
 
 export type HostelCreateOrConnectWithoutOrganizationInput = {
@@ -633,6 +780,10 @@ export type HostelScalarWhereInput = {
   organizationId?: Prisma.UuidFilter<"Hostel"> | string
   name?: Prisma.StringFilter<"Hostel"> | string
   address?: Prisma.StringNullableFilter<"Hostel"> | string | null
+  contactPhone?: Prisma.StringNullableFilter<"Hostel"> | string | null
+  defaultRentAmount?: Prisma.IntNullableFilter<"Hostel"> | number | null
+  rentDueDayOfMonth?: Prisma.IntNullableFilter<"Hostel"> | number | null
+  absenceMinDays?: Prisma.IntFilter<"Hostel"> | number
   notes?: Prisma.StringNullableFilter<"Hostel"> | string | null
   status?: Prisma.EnumArchiveStatusFilter<"Hostel"> | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFilter<"Hostel"> | Date | string
@@ -644,6 +795,10 @@ export type HostelCreateWithoutRoomsInput = {
   version?: number
   name: string
   address?: string | null
+  contactPhone?: string | null
+  defaultRentAmount?: number | null
+  rentDueDayOfMonth?: number | null
+  absenceMinDays?: number
   notes?: string | null
   status?: $Enums.ArchiveStatus
   createdAt?: Date | string
@@ -651,6 +806,7 @@ export type HostelCreateWithoutRoomsInput = {
   organization: Prisma.OrganizationCreateNestedOneWithoutHostelsInput
   stayContracts?: Prisma.StayContractCreateNestedManyWithoutHostelInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutHostelInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutHostelInput
 }
 
 export type HostelUncheckedCreateWithoutRoomsInput = {
@@ -659,12 +815,17 @@ export type HostelUncheckedCreateWithoutRoomsInput = {
   organizationId: string
   name: string
   address?: string | null
+  contactPhone?: string | null
+  defaultRentAmount?: number | null
+  rentDueDayOfMonth?: number | null
+  absenceMinDays?: number
   notes?: string | null
   status?: $Enums.ArchiveStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutHostelInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutHostelInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutHostelInput
 }
 
 export type HostelCreateOrConnectWithoutRoomsInput = {
@@ -688,6 +849,10 @@ export type HostelUpdateWithoutRoomsInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultRentAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rentDueDayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  absenceMinDays?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -695,6 +860,7 @@ export type HostelUpdateWithoutRoomsInput = {
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutHostelsNestedInput
   stayContracts?: Prisma.StayContractUpdateManyWithoutHostelNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutHostelNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutHostelNestedInput
 }
 
 export type HostelUncheckedUpdateWithoutRoomsInput = {
@@ -703,10 +869,107 @@ export type HostelUncheckedUpdateWithoutRoomsInput = {
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultRentAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rentDueDayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  absenceMinDays?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutHostelNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutHostelNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutHostelNestedInput
+}
+
+export type HostelCreateWithoutPackagesInput = {
+  id?: string
+  version?: number
+  name: string
+  address?: string | null
+  contactPhone?: string | null
+  defaultRentAmount?: number | null
+  rentDueDayOfMonth?: number | null
+  absenceMinDays?: number
+  notes?: string | null
+  status?: $Enums.ArchiveStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutHostelsInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutHostelInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutHostelInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutHostelInput
+}
+
+export type HostelUncheckedCreateWithoutPackagesInput = {
+  id?: string
+  version?: number
+  organizationId: string
+  name: string
+  address?: string | null
+  contactPhone?: string | null
+  defaultRentAmount?: number | null
+  rentDueDayOfMonth?: number | null
+  absenceMinDays?: number
+  notes?: string | null
+  status?: $Enums.ArchiveStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutHostelInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutHostelInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutHostelInput
+}
+
+export type HostelCreateOrConnectWithoutPackagesInput = {
+  where: Prisma.HostelWhereUniqueInput
+  create: Prisma.XOR<Prisma.HostelCreateWithoutPackagesInput, Prisma.HostelUncheckedCreateWithoutPackagesInput>
+}
+
+export type HostelUpsertWithoutPackagesInput = {
+  update: Prisma.XOR<Prisma.HostelUpdateWithoutPackagesInput, Prisma.HostelUncheckedUpdateWithoutPackagesInput>
+  create: Prisma.XOR<Prisma.HostelCreateWithoutPackagesInput, Prisma.HostelUncheckedCreateWithoutPackagesInput>
+  where?: Prisma.HostelWhereInput
+}
+
+export type HostelUpdateToOneWithWhereWithoutPackagesInput = {
+  where?: Prisma.HostelWhereInput
+  data: Prisma.XOR<Prisma.HostelUpdateWithoutPackagesInput, Prisma.HostelUncheckedUpdateWithoutPackagesInput>
+}
+
+export type HostelUpdateWithoutPackagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultRentAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rentDueDayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  absenceMinDays?: Prisma.IntFieldUpdateOperationsInput | number
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutHostelsNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutHostelNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutHostelNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutHostelNestedInput
+}
+
+export type HostelUncheckedUpdateWithoutPackagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultRentAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rentDueDayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  absenceMinDays?: Prisma.IntFieldUpdateOperationsInput | number
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutHostelNestedInput
   stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutHostelNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutHostelNestedInput
 }
@@ -716,6 +979,10 @@ export type HostelCreateWithoutStayContractsInput = {
   version?: number
   name: string
   address?: string | null
+  contactPhone?: string | null
+  defaultRentAmount?: number | null
+  rentDueDayOfMonth?: number | null
+  absenceMinDays?: number
   notes?: string | null
   status?: $Enums.ArchiveStatus
   createdAt?: Date | string
@@ -723,6 +990,7 @@ export type HostelCreateWithoutStayContractsInput = {
   organization: Prisma.OrganizationCreateNestedOneWithoutHostelsInput
   rooms?: Prisma.RoomCreateNestedManyWithoutHostelInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutHostelInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutHostelInput
 }
 
 export type HostelUncheckedCreateWithoutStayContractsInput = {
@@ -731,12 +999,17 @@ export type HostelUncheckedCreateWithoutStayContractsInput = {
   organizationId: string
   name: string
   address?: string | null
+  contactPhone?: string | null
+  defaultRentAmount?: number | null
+  rentDueDayOfMonth?: number | null
+  absenceMinDays?: number
   notes?: string | null
   status?: $Enums.ArchiveStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutHostelInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutHostelInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutHostelInput
 }
 
 export type HostelCreateOrConnectWithoutStayContractsInput = {
@@ -760,6 +1033,10 @@ export type HostelUpdateWithoutStayContractsInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultRentAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rentDueDayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  absenceMinDays?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -767,6 +1044,7 @@ export type HostelUpdateWithoutStayContractsInput = {
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutHostelsNestedInput
   rooms?: Prisma.RoomUpdateManyWithoutHostelNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutHostelNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutHostelNestedInput
 }
 
 export type HostelUncheckedUpdateWithoutStayContractsInput = {
@@ -775,12 +1053,17 @@ export type HostelUncheckedUpdateWithoutStayContractsInput = {
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultRentAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rentDueDayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  absenceMinDays?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   rooms?: Prisma.RoomUncheckedUpdateManyWithoutHostelNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutHostelNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutHostelNestedInput
 }
 
 export type HostelCreateWithoutExpensesInput = {
@@ -788,6 +1071,10 @@ export type HostelCreateWithoutExpensesInput = {
   version?: number
   name: string
   address?: string | null
+  contactPhone?: string | null
+  defaultRentAmount?: number | null
+  rentDueDayOfMonth?: number | null
+  absenceMinDays?: number
   notes?: string | null
   status?: $Enums.ArchiveStatus
   createdAt?: Date | string
@@ -795,6 +1082,7 @@ export type HostelCreateWithoutExpensesInput = {
   organization: Prisma.OrganizationCreateNestedOneWithoutHostelsInput
   rooms?: Prisma.RoomCreateNestedManyWithoutHostelInput
   stayContracts?: Prisma.StayContractCreateNestedManyWithoutHostelInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutHostelInput
 }
 
 export type HostelUncheckedCreateWithoutExpensesInput = {
@@ -803,12 +1091,17 @@ export type HostelUncheckedCreateWithoutExpensesInput = {
   organizationId: string
   name: string
   address?: string | null
+  contactPhone?: string | null
+  defaultRentAmount?: number | null
+  rentDueDayOfMonth?: number | null
+  absenceMinDays?: number
   notes?: string | null
   status?: $Enums.ArchiveStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutHostelInput
   stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutHostelInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutHostelInput
 }
 
 export type HostelCreateOrConnectWithoutExpensesInput = {
@@ -832,6 +1125,10 @@ export type HostelUpdateWithoutExpensesInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultRentAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rentDueDayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  absenceMinDays?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -839,6 +1136,7 @@ export type HostelUpdateWithoutExpensesInput = {
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutHostelsNestedInput
   rooms?: Prisma.RoomUpdateManyWithoutHostelNestedInput
   stayContracts?: Prisma.StayContractUpdateManyWithoutHostelNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutHostelNestedInput
 }
 
 export type HostelUncheckedUpdateWithoutExpensesInput = {
@@ -847,12 +1145,17 @@ export type HostelUncheckedUpdateWithoutExpensesInput = {
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultRentAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rentDueDayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  absenceMinDays?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   rooms?: Prisma.RoomUncheckedUpdateManyWithoutHostelNestedInput
   stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutHostelNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutHostelNestedInput
 }
 
 export type HostelCreateManyOrganizationInput = {
@@ -860,6 +1163,10 @@ export type HostelCreateManyOrganizationInput = {
   version?: number
   name: string
   address?: string | null
+  contactPhone?: string | null
+  defaultRentAmount?: number | null
+  rentDueDayOfMonth?: number | null
+  absenceMinDays?: number
   notes?: string | null
   status?: $Enums.ArchiveStatus
   createdAt?: Date | string
@@ -871,6 +1178,10 @@ export type HostelUpdateWithoutOrganizationInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultRentAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rentDueDayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  absenceMinDays?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -878,6 +1189,7 @@ export type HostelUpdateWithoutOrganizationInput = {
   rooms?: Prisma.RoomUpdateManyWithoutHostelNestedInput
   stayContracts?: Prisma.StayContractUpdateManyWithoutHostelNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutHostelNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutHostelNestedInput
 }
 
 export type HostelUncheckedUpdateWithoutOrganizationInput = {
@@ -885,6 +1197,10 @@ export type HostelUncheckedUpdateWithoutOrganizationInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultRentAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rentDueDayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  absenceMinDays?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -892,6 +1208,7 @@ export type HostelUncheckedUpdateWithoutOrganizationInput = {
   rooms?: Prisma.RoomUncheckedUpdateManyWithoutHostelNestedInput
   stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutHostelNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutHostelNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutHostelNestedInput
 }
 
 export type HostelUncheckedUpdateManyWithoutOrganizationInput = {
@@ -899,6 +1216,10 @@ export type HostelUncheckedUpdateManyWithoutOrganizationInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultRentAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rentDueDayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  absenceMinDays?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -914,12 +1235,14 @@ export type HostelCountOutputType = {
   rooms: number
   stayContracts: number
   expenses: number
+  packages: number
 }
 
 export type HostelCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   rooms?: boolean | HostelCountOutputTypeCountRoomsArgs
   stayContracts?: boolean | HostelCountOutputTypeCountStayContractsArgs
   expenses?: boolean | HostelCountOutputTypeCountExpensesArgs
+  packages?: boolean | HostelCountOutputTypeCountPackagesArgs
 }
 
 /**
@@ -953,6 +1276,13 @@ export type HostelCountOutputTypeCountExpensesArgs<ExtArgs extends runtime.Types
   where?: Prisma.ExpenseWhereInput
 }
 
+/**
+ * HostelCountOutputType without action
+ */
+export type HostelCountOutputTypeCountPackagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AccommodationPackageWhereInput
+}
+
 
 export type HostelSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -960,6 +1290,10 @@ export type HostelSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   organizationId?: boolean
   name?: boolean
   address?: boolean
+  contactPhone?: boolean
+  defaultRentAmount?: boolean
+  rentDueDayOfMonth?: boolean
+  absenceMinDays?: boolean
   notes?: boolean
   status?: boolean
   createdAt?: boolean
@@ -968,6 +1302,7 @@ export type HostelSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   rooms?: boolean | Prisma.Hostel$roomsArgs<ExtArgs>
   stayContracts?: boolean | Prisma.Hostel$stayContractsArgs<ExtArgs>
   expenses?: boolean | Prisma.Hostel$expensesArgs<ExtArgs>
+  packages?: boolean | Prisma.Hostel$packagesArgs<ExtArgs>
   _count?: boolean | Prisma.HostelCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["hostel"]>
 
@@ -977,6 +1312,10 @@ export type HostelSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   organizationId?: boolean
   name?: boolean
   address?: boolean
+  contactPhone?: boolean
+  defaultRentAmount?: boolean
+  rentDueDayOfMonth?: boolean
+  absenceMinDays?: boolean
   notes?: boolean
   status?: boolean
   createdAt?: boolean
@@ -990,6 +1329,10 @@ export type HostelSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   organizationId?: boolean
   name?: boolean
   address?: boolean
+  contactPhone?: boolean
+  defaultRentAmount?: boolean
+  rentDueDayOfMonth?: boolean
+  absenceMinDays?: boolean
   notes?: boolean
   status?: boolean
   createdAt?: boolean
@@ -1003,18 +1346,23 @@ export type HostelSelectScalar = {
   organizationId?: boolean
   name?: boolean
   address?: boolean
+  contactPhone?: boolean
+  defaultRentAmount?: boolean
+  rentDueDayOfMonth?: boolean
+  absenceMinDays?: boolean
   notes?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type HostelOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "version" | "organizationId" | "name" | "address" | "notes" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["hostel"]>
+export type HostelOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "version" | "organizationId" | "name" | "address" | "contactPhone" | "defaultRentAmount" | "rentDueDayOfMonth" | "absenceMinDays" | "notes" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["hostel"]>
 export type HostelInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   rooms?: boolean | Prisma.Hostel$roomsArgs<ExtArgs>
   stayContracts?: boolean | Prisma.Hostel$stayContractsArgs<ExtArgs>
   expenses?: boolean | Prisma.Hostel$expensesArgs<ExtArgs>
+  packages?: boolean | Prisma.Hostel$packagesArgs<ExtArgs>
   _count?: boolean | Prisma.HostelCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type HostelIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1031,6 +1379,7 @@ export type $HostelPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     rooms: Prisma.$RoomPayload<ExtArgs>[]
     stayContracts: Prisma.$StayContractPayload<ExtArgs>[]
     expenses: Prisma.$ExpensePayload<ExtArgs>[]
+    packages: Prisma.$AccommodationPackagePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1038,6 +1387,10 @@ export type $HostelPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     organizationId: string
     name: string
     address: string | null
+    contactPhone: string | null
+    defaultRentAmount: number | null
+    rentDueDayOfMonth: number | null
+    absenceMinDays: number
     notes: string | null
     status: $Enums.ArchiveStatus
     createdAt: Date
@@ -1440,6 +1793,7 @@ export interface Prisma__HostelClient<T, Null = never, ExtArgs extends runtime.T
   rooms<T extends Prisma.Hostel$roomsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Hostel$roomsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RoomPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   stayContracts<T extends Prisma.Hostel$stayContractsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Hostel$stayContractsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StayContractPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   expenses<T extends Prisma.Hostel$expensesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Hostel$expensesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ExpensePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  packages<T extends Prisma.Hostel$packagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Hostel$packagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccommodationPackagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1474,6 +1828,10 @@ export interface HostelFieldRefs {
   readonly organizationId: Prisma.FieldRef<"Hostel", 'String'>
   readonly name: Prisma.FieldRef<"Hostel", 'String'>
   readonly address: Prisma.FieldRef<"Hostel", 'String'>
+  readonly contactPhone: Prisma.FieldRef<"Hostel", 'String'>
+  readonly defaultRentAmount: Prisma.FieldRef<"Hostel", 'Int'>
+  readonly rentDueDayOfMonth: Prisma.FieldRef<"Hostel", 'Int'>
+  readonly absenceMinDays: Prisma.FieldRef<"Hostel", 'Int'>
   readonly notes: Prisma.FieldRef<"Hostel", 'String'>
   readonly status: Prisma.FieldRef<"Hostel", 'ArchiveStatus'>
   readonly createdAt: Prisma.FieldRef<"Hostel", 'DateTime'>
@@ -1948,6 +2306,30 @@ export type Hostel$expensesArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.ExpenseScalarFieldEnum | Prisma.ExpenseScalarFieldEnum[]
+}
+
+/**
+ * Hostel.packages
+ */
+export type Hostel$packagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AccommodationPackage
+   */
+  select?: Prisma.AccommodationPackageSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AccommodationPackage
+   */
+  omit?: Prisma.AccommodationPackageOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AccommodationPackageInclude<ExtArgs> | null
+  where?: Prisma.AccommodationPackageWhereInput
+  orderBy?: Prisma.AccommodationPackageOrderByWithRelationInput | Prisma.AccommodationPackageOrderByWithRelationInput[]
+  cursor?: Prisma.AccommodationPackageWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AccommodationPackageScalarFieldEnum | Prisma.AccommodationPackageScalarFieldEnum[]
 }
 
 /**

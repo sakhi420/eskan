@@ -287,4 +287,80 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 
 ### Next actions
 
-- فاز 8: ساکن/قرارداد/تخصیص بستر (overlap و concurrency) طبق قرارداد.
+- فاز 8 به‌طور موقت **متوقف** شد؛ نخست «بازبینی دامنهٔ محصول» انجام و مستند شد (بخش زیر).
+## بازبینی دامنهٔ محصول پیش از فاز ۸ — انجام شد (2026-11-04)
+
+- **تصمیم:** فاز ۷ تکمیل‌شده محسوب شد (کامیت `5ea0667`)؛ **فاز ۸ آغاز نشد.** به‌جای آن بازبینی دامنهٔ ESKAN برای بازار افغانستان انجام شد.
+- **قید اجرایی:** هیچ migration جدید، تغییر Prisma Schema، یا تغییر OpenAPI/کد اجرایی انجام **نشد**. فقط تحقیق/تحلیل/مستندسازی.
+
+### اسناد جدید
+
+1. `docs/research/afghanistan-private-hostel-operating-model.md` — یافته‌های تحقیق بازار با منابع و تفکیک اعتبار.
+2. `docs/product/hostel-service-packages-and-absence-policy.md` — بستهٔ اقامت + سیاست غیابت موقت.
+3. `docs/product/hostel-domain-requirements-v1.md` — نیازمندی‌های دامنه (وضعیت EXISTING/PARTIAL/MISSING/NEEDS_REDESIGN/FUTURE).
+4. `docs/architecture/domain-model-and-workflows.md` — مدل موجودیت‌ها و جریان‌های کاری.
+5. `docs/api/api-gap-analysis-v0.3.md` — شکاف بین API/Schema/کد و نیازها.
+6. `docs/product/mvp-prioritization.md` — P0/P1/P2.
+
+### یافته‌های کلیدی (شکاف اصلی)
+
+- **بستهٔ اقامت** (اقامت/اعاشه/خدمات با اجزای مالی و پرچم «قابل‌کسر در غیاب») — MISSING.
+- **غیابت موقت** (`TemporaryAbsence` + Credit/Adjustment) — MISSING.
+- **پرداخت‌کننده جدا از ساکن** (`Payer`) — MISSING.
+- **وضعیت نگهداری اتاق/تخت** + درخواست تعمیر/نظافت — MISSING (مسترپرامپت فقط `maintenance_requests` را «در صورت شمول MVP» داشت).
+- **تماس اضطراری ساکن** و **تنظیمات عملیاتی لیلیه** — MISSING.
+- پلتفرم دستگاه Android/Windows — **برطرف‌شده** (در فاز ۷ ثابت شد).
+
+### تصمیم‌های باز برای مالک
+
+- آیا «بستهٔ اقامت + غیابت موقت» به قرارداد v0.4 اضافه شود؟
+- مقدار پیش‌فرض «حداقل روز غیابت» (پیشنهاد ۳ روز برای پایلوت) و سیاست کسر.
+- کدام فیلدها P0 اجباری و کدام P1.
+
+### Next actions
+
+- قرارداد v0.4.0 + schema تکمیل شد (بخش زیر)؛ آمادهٔ آغاز فاز ۸.
+
+## اصلاح قرارداد v0.4.0 + schema (2026-11-04) — مبنای فاز ۸
+
+بازبینی دامنه تأیید شد و طراحی‌های ناقص **فقط در لایهٔ قرارداد/دیتابیس** (نه کد فازهای قبل) اصلاح شد:
+
+| تغییر | لایه | منطقِ پیاده‌سازی |
+|---|---|---|
+| `AccommodationPackage` + `AccommodationPackageComponent` | contract + schema | فاز ۸/۹ |
+| `StayContract.packageId` + `packageSnapshot` | schema | فاز ۹ (محاسبهٔ بسته) |
+| `TemporaryAbsence` + `AbsenceStatus` + credit (`ChargeType.ADJUSTMENT`) | contract + schema | فاز ۹ |
+| پرداخت‌کنندهٔ جدا (`payerName/Phone/Relation`) | contract + schema | فاز ۹ |
+| `maintenanceStatus` اتاق/تخت (`MaintenanceStatus`) | contract + schema | فاز ۱۱ |
+| تماس اضطراری ساکن | contract + schema | فاز ۸ |
+| تنظیمات لیلیه (`contactPhone`, `absenceMinDays`, `rentDueDayOfMonth`, `defaultRentAmount`) | contract + schema | فاز ۸ |
+
+### اعتبارسنجی واقعی
+
+| چک | نتیجه |
+|---|---|
+| `npx prisma validate` | ✅ exit=0 |
+| `npx prisma migrate dev --name service_packages_absence_operational_status` | ✅ اعمال شد (migration `20261104151922_...`) |
+| `npx prisma generate` → `npm run build` | ✅ exit=0 |
+| js-yaml parse | ✅ `version=0.4.0, paths=78, schemas=107` |
+| Redocly lint | ✅ valid؛ ۶ هشدار پیش‌موجود |
+| `scripts/smoke-phase7.cjs` (رگرسیون) | ✅ 42/42 PASS |
+
+### ترتیب فازها (نهایی)
+
+- **فاز ۸:** ساکنان، پذیرش، قرارداد (+بسته)، تخصیص تخت، انتقال/Check-out.
+- **فاز ۹:** شارژ/پرداخت/ودیعه/مصارف + منطق مالی بسته‌ها و غیابت (credit).
+- **فاز ۱۰:** گزارش‌ها، داشبورد، رسید، صندوق ساده.
+- **فاز ۱۱:** تعمیرات، نظافت، وضعیت عملیاتی پیشرفته.
+
+### تأیید نهایی مالک (2026-11-04)
+
+تمام پنج تغییر بنیادین v0.4 **تأیید** شدند؛ بسته به‌عنوان جزء اصلی مدل قرارداد، غیابت مستقل از خروج،
+پرداخت‌کنندهٔ ساده روی Payment، وضعیت نگهداری مستقل از اشغال، و تماس اضطراری اختیاری. سیاست غیابت
+(حداقل ۳ روز قابل‌تنظیم، کسر از اولین روز کامل، فقط اجزای `deductibleOnAbsence=true`، credit پس از تأیید
+بازگشت واقعی، بدون بازنویسی) ثبت شد. endpoint مستقل `POST /packages/{packageId}/archive` نیز به قرارداد
+اضافه شد (بستهٔ آرشیوشده برای قرارداد جدید قابل انتخاب نیست؛ snapshot قبلی دست‌نخورده می‌ماند).
+
+### Next actions
+
+- شروع فاز ۸ طبق قرارداد v0.4.0 (ساکن/پذیرش/قرارداد+بسته/تخصیص/انتقال/Check-out).

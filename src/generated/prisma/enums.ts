@@ -85,7 +85,8 @@ export const ChargeType = {
   RENT: 'RENT',
   UTILITY: 'UTILITY',
   DAMAGE: 'DAMAGE',
-  OTHER: 'OTHER'
+  OTHER: 'OTHER',
+  ADJUSTMENT: 'ADJUSTMENT'
 } as const
 
 export type ChargeType = (typeof ChargeType)[keyof typeof ChargeType]
@@ -187,3 +188,32 @@ export const SyncPlatform = {
 } as const
 
 export type SyncPlatform = (typeof SyncPlatform)[keyof typeof SyncPlatform]
+
+
+export const PackageComponentKind = {
+  ACCOMMODATION: 'ACCOMMODATION',
+  BOARD: 'BOARD',
+  SERVICE: 'SERVICE'
+} as const
+
+export type PackageComponentKind = (typeof PackageComponentKind)[keyof typeof PackageComponentKind]
+
+
+export const MaintenanceStatus = {
+  OPERATIONAL: 'OPERATIONAL',
+  NEEDS_CLEANING: 'NEEDS_CLEANING',
+  NEEDS_REPAIR: 'NEEDS_REPAIR',
+  OUT_OF_SERVICE: 'OUT_OF_SERVICE'
+} as const
+
+export type MaintenanceStatus = (typeof MaintenanceStatus)[keyof typeof MaintenanceStatus]
+
+
+export const AbsenceStatus = {
+  REQUESTED: 'REQUESTED',
+  APPROVED: 'APPROVED',
+  ADJUSTED: 'ADJUSTED',
+  CLOSED: 'CLOSED'
+} as const
+
+export type AbsenceStatus = (typeof AbsenceStatus)[keyof typeof AbsenceStatus]

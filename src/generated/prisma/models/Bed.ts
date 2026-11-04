@@ -41,6 +41,7 @@ export type BedMinAggregateOutputType = {
   roomId: string | null
   code: string | null
   notes: string | null
+  maintenanceStatus: $Enums.MaintenanceStatus | null
   status: $Enums.BedStatus | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -53,6 +54,7 @@ export type BedMaxAggregateOutputType = {
   roomId: string | null
   code: string | null
   notes: string | null
+  maintenanceStatus: $Enums.MaintenanceStatus | null
   status: $Enums.BedStatus | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -65,6 +67,7 @@ export type BedCountAggregateOutputType = {
   roomId: number
   code: number
   notes: number
+  maintenanceStatus: number
   status: number
   createdAt: number
   updatedAt: number
@@ -87,6 +90,7 @@ export type BedMinAggregateInputType = {
   roomId?: true
   code?: true
   notes?: true
+  maintenanceStatus?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -99,6 +103,7 @@ export type BedMaxAggregateInputType = {
   roomId?: true
   code?: true
   notes?: true
+  maintenanceStatus?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -111,6 +116,7 @@ export type BedCountAggregateInputType = {
   roomId?: true
   code?: true
   notes?: true
+  maintenanceStatus?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -210,6 +216,7 @@ export type BedGroupByOutputType = {
   roomId: string
   code: string
   notes: string | null
+  maintenanceStatus: $Enums.MaintenanceStatus
   status: $Enums.BedStatus
   createdAt: Date
   updatedAt: Date
@@ -245,6 +252,7 @@ export type BedWhereInput = {
   roomId?: Prisma.UuidFilter<"Bed"> | string
   code?: Prisma.StringFilter<"Bed"> | string
   notes?: Prisma.StringNullableFilter<"Bed"> | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFilter<"Bed"> | $Enums.MaintenanceStatus
   status?: Prisma.EnumBedStatusFilter<"Bed"> | $Enums.BedStatus
   createdAt?: Prisma.DateTimeFilter<"Bed"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Bed"> | Date | string
@@ -260,6 +268,7 @@ export type BedOrderByWithRelationInput = {
   roomId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  maintenanceStatus?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -279,6 +288,7 @@ export type BedWhereUniqueInput = Prisma.AtLeast<{
   roomId?: Prisma.UuidFilter<"Bed"> | string
   code?: Prisma.StringFilter<"Bed"> | string
   notes?: Prisma.StringNullableFilter<"Bed"> | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFilter<"Bed"> | $Enums.MaintenanceStatus
   status?: Prisma.EnumBedStatusFilter<"Bed"> | $Enums.BedStatus
   createdAt?: Prisma.DateTimeFilter<"Bed"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Bed"> | Date | string
@@ -294,6 +304,7 @@ export type BedOrderByWithAggregationInput = {
   roomId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  maintenanceStatus?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -314,6 +325,7 @@ export type BedScalarWhereWithAggregatesInput = {
   roomId?: Prisma.UuidWithAggregatesFilter<"Bed"> | string
   code?: Prisma.StringWithAggregatesFilter<"Bed"> | string
   notes?: Prisma.StringNullableWithAggregatesFilter<"Bed"> | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusWithAggregatesFilter<"Bed"> | $Enums.MaintenanceStatus
   status?: Prisma.EnumBedStatusWithAggregatesFilter<"Bed"> | $Enums.BedStatus
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Bed"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Bed"> | Date | string
@@ -324,6 +336,7 @@ export type BedCreateInput = {
   version?: number
   code: string
   notes?: string | null
+  maintenanceStatus?: $Enums.MaintenanceStatus
   status?: $Enums.BedStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -339,6 +352,7 @@ export type BedUncheckedCreateInput = {
   roomId: string
   code: string
   notes?: string | null
+  maintenanceStatus?: $Enums.MaintenanceStatus
   status?: $Enums.BedStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -350,6 +364,7 @@ export type BedUpdateInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
   status?: Prisma.EnumBedStatusFieldUpdateOperationsInput | $Enums.BedStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -365,6 +380,7 @@ export type BedUncheckedUpdateInput = {
   roomId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
   status?: Prisma.EnumBedStatusFieldUpdateOperationsInput | $Enums.BedStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -378,6 +394,7 @@ export type BedCreateManyInput = {
   roomId: string
   code: string
   notes?: string | null
+  maintenanceStatus?: $Enums.MaintenanceStatus
   status?: $Enums.BedStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -388,6 +405,7 @@ export type BedUpdateManyMutationInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
   status?: Prisma.EnumBedStatusFieldUpdateOperationsInput | $Enums.BedStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -400,6 +418,7 @@ export type BedUncheckedUpdateManyInput = {
   roomId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
   status?: Prisma.EnumBedStatusFieldUpdateOperationsInput | $Enums.BedStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -427,6 +446,7 @@ export type BedCountOrderByAggregateInput = {
   roomId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  maintenanceStatus?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -443,6 +463,7 @@ export type BedMaxOrderByAggregateInput = {
   roomId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  maintenanceStatus?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -455,6 +476,7 @@ export type BedMinOrderByAggregateInput = {
   roomId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  maintenanceStatus?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -576,6 +598,7 @@ export type BedCreateWithoutOrganizationInput = {
   version?: number
   code: string
   notes?: string | null
+  maintenanceStatus?: $Enums.MaintenanceStatus
   status?: $Enums.BedStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -589,6 +612,7 @@ export type BedUncheckedCreateWithoutOrganizationInput = {
   roomId: string
   code: string
   notes?: string | null
+  maintenanceStatus?: $Enums.MaintenanceStatus
   status?: $Enums.BedStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -631,6 +655,7 @@ export type BedScalarWhereInput = {
   roomId?: Prisma.UuidFilter<"Bed"> | string
   code?: Prisma.StringFilter<"Bed"> | string
   notes?: Prisma.StringNullableFilter<"Bed"> | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFilter<"Bed"> | $Enums.MaintenanceStatus
   status?: Prisma.EnumBedStatusFilter<"Bed"> | $Enums.BedStatus
   createdAt?: Prisma.DateTimeFilter<"Bed"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Bed"> | Date | string
@@ -641,6 +666,7 @@ export type BedCreateWithoutRoomInput = {
   version?: number
   code: string
   notes?: string | null
+  maintenanceStatus?: $Enums.MaintenanceStatus
   status?: $Enums.BedStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -654,6 +680,7 @@ export type BedUncheckedCreateWithoutRoomInput = {
   organizationId: string
   code: string
   notes?: string | null
+  maintenanceStatus?: $Enums.MaintenanceStatus
   status?: $Enums.BedStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -691,6 +718,7 @@ export type BedCreateWithoutAssignmentsInput = {
   version?: number
   code: string
   notes?: string | null
+  maintenanceStatus?: $Enums.MaintenanceStatus
   status?: $Enums.BedStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -705,6 +733,7 @@ export type BedUncheckedCreateWithoutAssignmentsInput = {
   roomId: string
   code: string
   notes?: string | null
+  maintenanceStatus?: $Enums.MaintenanceStatus
   status?: $Enums.BedStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -731,6 +760,7 @@ export type BedUpdateWithoutAssignmentsInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
   status?: Prisma.EnumBedStatusFieldUpdateOperationsInput | $Enums.BedStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -745,6 +775,7 @@ export type BedUncheckedUpdateWithoutAssignmentsInput = {
   roomId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
   status?: Prisma.EnumBedStatusFieldUpdateOperationsInput | $Enums.BedStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -756,6 +787,7 @@ export type BedCreateManyOrganizationInput = {
   roomId: string
   code: string
   notes?: string | null
+  maintenanceStatus?: $Enums.MaintenanceStatus
   status?: $Enums.BedStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -766,6 +798,7 @@ export type BedUpdateWithoutOrganizationInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
   status?: Prisma.EnumBedStatusFieldUpdateOperationsInput | $Enums.BedStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -779,6 +812,7 @@ export type BedUncheckedUpdateWithoutOrganizationInput = {
   roomId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
   status?: Prisma.EnumBedStatusFieldUpdateOperationsInput | $Enums.BedStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -791,6 +825,7 @@ export type BedUncheckedUpdateManyWithoutOrganizationInput = {
   roomId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
   status?: Prisma.EnumBedStatusFieldUpdateOperationsInput | $Enums.BedStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -802,6 +837,7 @@ export type BedCreateManyRoomInput = {
   organizationId: string
   code: string
   notes?: string | null
+  maintenanceStatus?: $Enums.MaintenanceStatus
   status?: $Enums.BedStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -812,6 +848,7 @@ export type BedUpdateWithoutRoomInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
   status?: Prisma.EnumBedStatusFieldUpdateOperationsInput | $Enums.BedStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -825,6 +862,7 @@ export type BedUncheckedUpdateWithoutRoomInput = {
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
   status?: Prisma.EnumBedStatusFieldUpdateOperationsInput | $Enums.BedStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -837,6 +875,7 @@ export type BedUncheckedUpdateManyWithoutRoomInput = {
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
   status?: Prisma.EnumBedStatusFieldUpdateOperationsInput | $Enums.BedStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -880,6 +919,7 @@ export type BedSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   roomId?: boolean
   code?: boolean
   notes?: boolean
+  maintenanceStatus?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -896,6 +936,7 @@ export type BedSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extension
   roomId?: boolean
   code?: boolean
   notes?: boolean
+  maintenanceStatus?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -910,6 +951,7 @@ export type BedSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extension
   roomId?: boolean
   code?: boolean
   notes?: boolean
+  maintenanceStatus?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -924,12 +966,13 @@ export type BedSelectScalar = {
   roomId?: boolean
   code?: boolean
   notes?: boolean
+  maintenanceStatus?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type BedOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "version" | "organizationId" | "roomId" | "code" | "notes" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["bed"]>
+export type BedOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "version" | "organizationId" | "roomId" | "code" | "notes" | "maintenanceStatus" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["bed"]>
 export type BedInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   room?: boolean | Prisma.RoomDefaultArgs<ExtArgs>
@@ -959,6 +1002,7 @@ export type $BedPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     roomId: string
     code: string
     notes: string | null
+    maintenanceStatus: $Enums.MaintenanceStatus
     status: $Enums.BedStatus
     createdAt: Date
     updatedAt: Date
@@ -1394,6 +1438,7 @@ export interface BedFieldRefs {
   readonly roomId: Prisma.FieldRef<"Bed", 'String'>
   readonly code: Prisma.FieldRef<"Bed", 'String'>
   readonly notes: Prisma.FieldRef<"Bed", 'String'>
+  readonly maintenanceStatus: Prisma.FieldRef<"Bed", 'MaintenanceStatus'>
   readonly status: Prisma.FieldRef<"Bed", 'BedStatus'>
   readonly createdAt: Prisma.FieldRef<"Bed", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Bed", 'DateTime'>
