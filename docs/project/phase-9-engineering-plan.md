@@ -1,9 +1,8 @@
-# فاز ۹ — پلان مهندسی مالی (نسخهٔ ۰.۲ — Design Lock)
+# فاز ۹ — پلان مهندسی مالی (نسخهٔ ۰.۳ — Design Lock)
 
-> **وضعیت:** Design Lock نهایی‌شده برای مبلغ، تاریخ، FK مرکب، Allocation/Reversal،
-> anti-duplicate، غیابت چندماهه، Idempotency مالی و Receipt، با ترتیب Contract-first.
-> این سند جمع‌بندی Findingهای ممیزی 0.2 است و **پیش از M-1/M-2 هیچ migration مالی
-> اجرا نمی‌شود**.
+> **وضعیت v0.3:** قفل نهایی برای مبلغ/جهت، تاریخ، FK مرکب tenant+resident،
+> Allocation/Reversal append-only، anti-duplicate، غیابت چندماهه، Idempotency مالی و
+> Receipt، با ترتیب Contract-first. **پیش از M-1/M-2 هیچ migration مالی اجرا نمی‌شود.**
 >
 > موارد با برچسب **تصمیم باز (D-xx)** نیازمند تصمیم صریح مالک محصول‌اند و تا آن
 > تصمیم، در کد به‌عنوان قانون قطعی hard-code نمی‌شوند.
@@ -46,11 +45,14 @@ export function exclusiveEndForInclusiveLastDay(lastDay: string): string; // las
   و در proration درست یک شب/روز شمرده می‌شود. guard فعلی بر این اساس بازنویسی شود.
 - **Transfer:** تاریخ انتقال مرز مشترک است؛ `old.endDate = transitionStart` (بدون `+1`)
   و `new.startDate = transitionStart`. به هیچ‌وجه `+1` اعمال نمی‌شود.
-- **Terminate (پایان مؤثر):** فیلد `endDate` مؤثر ثبت می‌شود (نه فقط `status=TERMINATED`).
-  - تصمیم D-01 (تصمیم باز): Terminate روی `DRAFT` به معنی «لغو» است یا ممنوع؟ (پیشنهاد: DRAFT → لغو،
-    ACTIVE → پایان مؤثر؛ بدون backdate در MVP مگر نظر مالک).
-  - مؤثر بودن بازهٔ کرایه: `[startDate, terminatedEndDateExclusive)`.
-  - `reversalReason`/`reversedBy`/`reversedAt` روی terminate ثبت شود.
+- **Terminate (خاتمهٔ قرارداد، نه Reversal مالی):** خاتمهٔ قرارداد با مفاهیم اقامتی ثبت می‌شود، نه
+  واژگان مالی برگشت: `terminationReason`, `terminatedBy`, `terminatedAt`, `effectiveEndDate`.
+  - D-01 (تصمیم باز → پیشنهاد پیش‌فرض): قرارداد `DRAFT` صرفاً «لغو» می‌شود؛ قرارداد `ACTIVE`
+    منحصراً از مسیر **Checkout اتمیک** خاتمه می‌یابد (بستن قرارداد + پایان‌دادن همهٔ تخصیص‌های
+    فعال در یک تراکنش با یک `effectiveEndDate`). هیچ قرارداد ACTIVE بدون بسته‌شدن تخصیص فعالِ
+    تخت خاتمه نمی‌یابد.
+  - بدون backdate در MVP؛ مبنای تاریخ `Asia/Kabul`.
+  - بازهٔ کرایه: `[startDate, effectiveEndDateExclusive)`. مبتنی بر date، نه `new Date()`.
 
 ### سیاست داده‌های legacy (F-20.3)
 - **پاک‌سازی blanket `+1 day` ممنوع.** برخی `endDate`های فعلی حاصل Transfer هستند (مرز دقیق) و
@@ -77,9 +79,12 @@ export function exclusiveEndForInclusiveLastDay(lastDay: string): string; // las
 - یک enum `LedgerSide { DEBIT, CREDIT }` اضافه شود؛ `Charge.entrySide` پیش‌فرض `DEBIT`.
   - بدهی عادی = `DEBIT` (ماندهٔ ساکن را افزایش می‌دهد).
   - اعتبار غیابت/تخفیف = `CREDIT` (مانده را به‌صورت مثبت کاهش می‌دهد، بدون مبلغ منفی).
-- **Reversal مستقل از Credit:** Reversal یک سند منفیِ متقارن نمی‌سازد؛ سند اصلی
-  `status=REVERSED` می‌شود و یک `LedgerReversal` append-only با `amount > 0`,
-  `direction` همان‌طرف سند اصلی، و reference به سند اولیه ثبت می‌شود.
+- **Reversal مستقل از Credit (جهت مخالف):** Reversal یک سند منفیِ متقارن نمی‌سازد؛ سند اصلی
+  `status=REVERSED` می‌شود و یک `LedgerReversal` append-only با `amount > 0` و
+  `direction` **مخالفِ** سند اصلی (DEBIT↔CREDIT) ثبت می‌شود تا اثر قبلی خنثی شود.
+  - **قاعدهٔ محاسبهٔ ledger:** posting اصلی در دفتر **باقی می‌ماند** و `REVERSED` آن را از جمع
+    مانده حذف نمی‌کند؛ فقط رویداد معکوسِ مخالف‌جهت اثر آن را خنثی می‌کند. هرگز نباید سند اصلی حذف و
+    هم‌زمان رویداد معکوس هم اعمال شود (اثر دوباره‌برگشت).
 - حد range مبلغ: DTO با `@Min(1)` و سقف صریح `2_147_483_647` (int32). صفر برای سند مالی رد می‌شود.
 - جمع/نسبت: `decimal.js` برای proration و rounding half-up؛ هرگز Float/Double.
 - Aggregate گزارش (جمع مانده/دریافت) از `bigint`/`decimal` در SQL استفاده کند و بدون
@@ -122,10 +127,13 @@ model PaymentAllocation {
   Resident باشد.
 - `TemporaryAbsence → Charge` و هر relation دیگر دارای resident نیز همین قاعده.
 
-### قفل‌گذاری tenant-scoped (F-07)
-- `LockService.lockForUpdate` امضای `(tx, entity, id, organizationId?)` بگیرد و در صورت
-  وجود، `WHERE id=$1 AND organization_id=$2 FOR UPDATE` اجرا کند تا یک tenant نتواند ردیف
-  tenant دیگر را قفل/Block کند (کاهش DoS بین سازمان‌ها).
+### قفل‌گذاری tenant-scoped اجباری (F-07)
+- `LockService.lockForUpdate(tx, entity, id, organizationId)` برای **تمام جدول‌های org-scoped**
+  پارامتر `organizationId` را **اجباری** بگیرد و همیشه
+  `WHERE id=$1 AND organization_id=$2 FOR UPDATE` اجرا کند تا یک tenant نتواند ردیف tenant
+  دیگر را قفل/Block کند (کاهش DoS بین سازمان‌ها).
+- برای جدول‌های سراسری (خود `Organization`، `User`، `RefreshSession`) متد جداگانهٔ
+  `lockGlobal(tx, entity, id)` باشد؛ نه اینکه پارامتر امنیتی متد اصلی **اختیاری** شود.
 
 ### مهاجرت غیرمخرب (M-2)
 1. preflight: شمارش cross-tenant **و** cross-resident referenceها (query های ممیزی)؛
@@ -161,6 +169,10 @@ CREATE UNIQUE INDEX uq_charge_rent_period
 - **حذف** `@@unique([paymentId, chargeId])`: یک Payment می‌تواند در عملیات‌های بعدی دوباره
   به همان Charge (پس از release) تخصیص یابد. uniqueness بر اساس `operation id/idempotency
   source` است، نه محدودیت مادام‌العمر Payment+Charge.
+- **کنترل هم‌زمانی AllocationRelease (F-03):** مجموع releaseها با `CHECK` (که فقط یک ردیف را
+  می‌بیند) تضمین نمی‌شود؛ در یک تراکنش: قفل ردیف `Allocation` اصلی → جمع releaseهای قبلی →
+  بررسی `sum(released) + new.release <= allocation.amount` → درج release جدید. هرگز از amount
+  اصلی بیشتر نمی‌شود.
 
 ### invariant اتمیک (در یک transaction)
 1. قفل Resident (طبق ترتیب سراسری)؛
@@ -191,17 +203,22 @@ CREATE UNIQUE INDEX uq_charge_rent_period
 model AbsenceCredit {
   id             String   @id @default(uuid()) @db.Uuid
   organizationId String   @map("organization_id") @db.Uuid
-  absenceId      String   @map("absence_id")  @db.Uuid
-  chargeId       String   @map("charge_id")   @db.Uuid
+  residentId     String   @map("resident_id")  @db.Uuid
+  absenceId      String   @map("absence_id")   @db.Uuid
+  chargeId       String   @map("charge_id")    @db.Uuid
   periodStart    DateTime @map("period_start") @db.Date
   periodEnd      DateTime @map("period_end")   @db.Date
   amount         Int      // > 0
 
-  absence TemporaryAbsence @relation(fields: [organizationId, absenceId], references: [organizationId, id])
-  charge  Charge           @relation(fields: [organizationId, residentId, chargeId], references: [organizationId, residentId, id])
-  // @@unique([organizationId, absenceId, periodStart, periodEnd])
+  // هر دو relation باید organizationId + residentId را شامل شوند تا تطابق ساکن تضمین شود.
+  absence TemporaryAbsence @relation(fields: [organizationId, residentId, absenceId], references: [organizationId, residentId, id])
+  charge  Charge           @relation(fields: [organizationId, residentId, chargeId],  references: [organizationId, residentId, id])
+
+  @@unique([organizationId, absenceId, periodStart, periodEnd])
 }
 ```
+- برای این رابطهٔ مرکب، `TemporaryAbsence` باید کلید مرجع `@@unique([organizationId, residentId, id])`
+  نیز داشته باشد (Prisma تطابق فهرست relation fields را با کلید یکتای مرجع الزامی می‌کند).
 - یک غیابت → چند سطر `AbsenceCredit` (یک سطر به ازای هر ماه).
 - unique = absence + دوره (نه صرفاً absence) تا نتوان دو Credit برای یک ماه ساخت.
 - Credit مربوطه از نوع `Charge` با `entrySide = CREDIT` و `amount > 0` است.
@@ -238,8 +255,8 @@ ADR-0004: OpenAPI منبع حقیقت است؛ پس قرارداد مالی **پ
 
 | مرحله | محتوا | خروجی / Gate |
 |---|---|---|
-| **Gate 0 — Design Lock** | رفع تناقض‌های فوق + تصویب D-01..D-18 | این سند (نسخهٔ 0.2) commit شود؛ هیچ P0 باز نماند |
-| **Gate 1 — Contract Lock** | OpenAPI برای Charge/Allocation/AllocationRelease/Deposit/Expense/Credit/Account/Statement، enum خطاها، `lastOccupiedDateInclusive` vs `endDateExclusive`، permission matrix، replay | `openapi:validate` سبز؛ **قبل از هر Controller** |
+| **Gate 0 — Design Lock** | رفع تناقض‌های فوق + تصویب D-01..D-18 | این سند (نسخهٔ 0.3) commit شود؛ هیچ P0 باز نماند |
+| **Gate 1 — Contract Lock** | OpenAPI برای **Charge / Payment / Allocation / AllocationRelease / LedgerReversal / PaymentRefund / Deposit / Expense / Credit / AbsenceCredit / Receipt / Account / Statement**، enum خطاها، `lastOccupiedDateInclusive` vs `endDateExclusive`، permission matrix، replay | `openapi:validate` سبز؛ **مجوز شروع طراحی — قرارداد هنوز قفل نشده و پیش از Controller تکمیل می‌شود** |
 | **M-1 — Date + Amount** | helper تاریخ، اصلاح `end`/`checkout`/`terminate`، same-day، CHECK های amount/period، preflight legacy date (بدون blanket +1) | test تاریخ + oracle |
 | **M-2 — Composite FK** | unique مرکب (tenant+resident)، ستون‌های org/resident در Allocation، preflight cross-org/resident، swap FK | rehearsal روی clone |
 | **M-3a — Charge/Credit Engine** | Charge، natural key، cycle/proration، credit/adjustment، idempotency، audit + oracle ماه‌های ۲۸..۳۱ |
@@ -257,7 +274,7 @@ ADR-0004: OpenAPI منبع حقیقت است؛ پس قرارداد مالی **پ
 | فعالیت | تصمیم |
 |---|---|
 | ادامهٔ Phase 9-A (اصلاح پلن و قفل تصمیم‌ها) | **GO** |
-| قفل OpenAPI مالی (Gate 1) | **GO — پیش از Controller** |
+| شروع طراحی OpenAPI مالی (Gate 1) | **GO — مجوز شروع طراحی؛ قفل نشده تا تکمیل + validate** |
 | اجرای M-1 | **NO-GO** تا تصویب D-01 (terminate) و D-04 (legacy cutover) و amount>0 |
 | اجرای M-2 | **NO-GO** تا finalization resident-consistency و preflight |
 | پیاده‌سازی Charge/Payment/Allocation | **NO-GO** تا Gate 0/1 و رفع F-03/F-04/F-05/F-06/F-17..F-26 |
@@ -267,15 +284,26 @@ ADR-0004: OpenAPI منبع حقیقت است؛ پس قرارداد مالی **پ
 
 ## ۱۰. تصمیم‌های باز مالک محصول (D-xx)
 
-| شناسه | تصمیم | پیشنهاد مهندسی |
-|---|---|---|
-| D-01 | Terminate روی DRAFT (= لغو) یا ممنوع | DRAFT = لغو؛ ACTIVE = پایان مؤثر؛ بدون backdate در MVP |
-| D-02 | partial reversal لازم است؟ | MVP: full void + refund کامل |
-| D-03 | نیاز به gap-less receipt number | gap مجاز؛ unique و پایدار کافی است |
-| D-04 | سیاست cutover تاریخ legacy | preflight/preview + تأیید صریح؛ انتقال پایان‌ها بدون +1 |
-| D-05 | آیا ساکن می‌تواند با پیش‌پرداخت/credit بدهی ساکن دیگر را تسویه کند؟ | خیر؛ FK/قفل resident همواره یکسان |
-| D-06 | `NEEDS_REPAIR` روی منبع اشغال‌شده مجاز؟ | جدول transition مجاز Maintenance تعریف شود (پیش‌از Release سند شود) |
-| D-07..D-18 | voucher، deposit refund جزئی، statement format، partial credit و … | در assumptions/open-questions ثبت و با مالک تصویب شود |
+| شناسه | تصمیم پیشنهادی (سیاست پیش‌فرض ESKAN — نیازمند تأیید مالک) |
+|---|---|
+| D-01 | قرارداد `DRAFT` قابل لغو؛ `ACTIVE` فقط از مسیر Checkout اتمیک خاتمه یابد؛ بدون backdate در MVP؛ مبنای `Asia/Kabul`. |
+| D-02 | بدون partial reversal در MVP؛ سند اشتباه full void + اصلاح جزئی با Credit/Debit مستقل مثبت؛ refund واقعی رویداد جدا. |
+| D-03 | Gap در شمارهٔ رسید مجاز؛ شماره هرگز دوباره استفاده نشود؛ شمارندهٔ پیوسته در سطح Organization (نه محدود به سال تقویمی). |
+| D-04 | بدون اصلاح خودکار/کورکورانهٔ تاریخ‌های قدیمی؛ انتقال فقط با شواهد رکورد بعدی قطعی شود؛ بقیه بررسی دستی. |
+| D-05 | تسویهٔ بدهی ساکن با Payment ساکن دیگر ممنوع؛ شخص ثالث می‌تواند پرداخت‌کننده باشد، اما بدهکار همچنان Resident ثبت‌شده در Payment است. |
+| D-06 | تغییر منبع اشغال‌شده به `NEEDS_REPAIR`/`OUT_OF_SERVICE` ممنوع؛ نظافت به‌صورت وضعیت/کار عملیاتی بدون خراب‌کردن اشغال. |
+| D-07 | بدون Voucher/Coupon در MVP؛ تخفیف دستی فقط با Credit مثبت + دلیل + Actor. |
+| D-08 | Refund ودیعه کامل/جزئی مجاز؛ مجموع Refund + مصرف از مبلغ قابل‌استفاده بیشتر نشود. |
+| D-09 | ضبط/کسر ودیعه جزئی/کامل فقط با دلیل + Actor + تأیید؛ نه خودکار. |
+| D-10 | استفاده از ودیعه برای تسویهٔ بدهی فقط با اقدام صریح مدیر هنگام تسویهٔ نهایی؛ نه کسر خودکار/پنهانی. |
+| D-11 | سیاست غیابت تأییدشده حفظ شود: حداقل مدت قابل تنظیم، کسر از نخستین روز کامل غیابت، عدم کسر Accommodation، فقط اجزای مجاز snapshot. |
+| D-12 | Credit غیابت پس از تأیید بازگشت واقعی؛ غیابت چندماهه به دوره‌های ماهانه؛ سند ثبت‌شده بعداً بازنویسی نشود. |
+| D-13 | مشخصات پرداخت‌کنندهٔ ثالث اختیاری؛ Payment همچنان به Resident بدهکار متصل بماند. |
+| D-14 | Expense در MVP فقط هزینهٔ واقعاً پرداخت‌شده؛ بدون حساب‌های پرداختنی/بدهی به فروشنده. |
+| D-15 | صورت‌حساب ساکن شامل ماندهٔ آغازین + بدهی‌ها + Creditها + پرداخت‌ها + تخصیص‌ها + برگشت‌ها + ماندهٔ پایانی؛ گردش ودیعه جدا. |
+| D-16 | روش‌های پرداخت دستی (Cash, Bank Transfer)؛ بدون وابستگی به درگاه پرداخت در MVP. |
+| D-17 | ثبت آفلاین با شناسهٔ موقت محلی؛ رسید رسمی و شمارهٔ نهایی فقط پس از ثبت موفق سرور. |
+| D-18 | اسناد مالی حذف فیزیکی نشوند؛ Void/Refund/Forfeit/Adjustment با مجوز + دلیل + Actor + Audit ثبت شوند. |
 
 ---
 
