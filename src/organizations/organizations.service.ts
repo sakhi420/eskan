@@ -73,29 +73,33 @@ export class OrganizationsService {
   }
 
   async updateCurrent(organizationId: string, expectedVersion: number, dto: UpdateOrganizationDto) {
-    const org = await this.prisma.organization.findUnique({
-      where: { id: organizationId },
-      select: ORGANIZATION_SELECT,
-    });
-    if (!org) throw AppError.notFound('Organization not found');
-    if (org.version !== expectedVersion) {
-      throw AppError.conflict(
-        'Organization was modified by another request; refresh and retry',
-        ErrorCode.RESOURCE_VERSION_CONFLICT,
-      );
-    }
-
-    const updated = await this.prisma.organization.update({
-      where: { id: organizationId },
+    // Compare-and-swap update: only applies when version still matches.
+    const result = await this.prisma.organization.updateMany({
+      where: { id: organizationId, version: expectedVersion },
       data: {
         name: dto.name,
         timezone: dto.timezone,
         defaultCurrency: dto.defaultCurrency,
         version: { increment: 1 },
       },
+    });
+    if (result.count === 0) {
+      const exists = await this.prisma.organization.findUnique({
+        where: { id: organizationId },
+        select: { id: true },
+      });
+      if (!exists) throw AppError.notFound('Organization not found');
+      throw AppError.conflict(
+        'Organization was modified by another request; refresh and retry',
+        ErrorCode.RESOURCE_VERSION_CONFLICT,
+      );
+    }
+
+    const updated = await this.prisma.organization.findUnique({
+      where: { id: organizationId },
       select: ORGANIZATION_SELECT,
     });
-    return toOrganizationDto(updated);
+    return toOrganizationDto(updated!);
   }
 
   async listMembers(organizationId: string) {

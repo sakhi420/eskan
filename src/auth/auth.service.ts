@@ -151,19 +151,36 @@ export class AuthService {
       throw AppError.unauthorized('Refresh token has expired');
     }
 
-    const { raw, hash } = this.tokens.generateRefreshToken();
-    const next = await this.prisma.refreshSession.create({
-      data: {
-        userId: session.userId,
-        family: session.family,
-        tokenHash: hash,
-        expiresAt: this.tokens.refreshExpiresAt(),
-      },
+    const { hash } = this.tokens.generateRefreshToken();
+    // Rotate atomically: two concurrent refresh calls with the same token can
+    // only one wins the compare-and-swap on the old session. The loser is
+    // treated as a reuse and the whole family is revoked.
+    const rotated = await this.prisma.$transaction(async (tx) => {
+      const claimed = await tx.refreshSession.updateMany({
+        where: { id: session.id, replacedById: null, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+      if (claimed.count === 0) return false;
+
+      const next = await tx.refreshSession.create({
+        data: {
+          userId: session.userId,
+          family: session.family,
+          tokenHash: hash,
+          expiresAt: this.tokens.refreshExpiresAt(),
+        },
+      });
+      await tx.refreshSession.update({
+        where: { id: session.id },
+        data: { replacedById: next.id },
+      });
+      return true;
     });
-    await this.prisma.refreshSession.update({
-      where: { id: session.id },
-      data: { replacedById: next.id, revokedAt: new Date() },
-    });
+
+    if (!rotated) {
+      await this.revokeFamily(session.userId, session.family);
+      throw AppError.unauthorized('Refresh token has been reused and was revoked');
+    }
 
     return this.buildSession(session.user);
   }

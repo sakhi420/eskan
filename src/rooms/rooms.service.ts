@@ -4,7 +4,7 @@ import { AppError } from '../common/errors/app-error';
 import { ErrorCode } from '../common/errors/error-codes';
 import { IdempotencyService } from '../common/idempotency/idempotency.service';
 import { isUniqueViolation } from '../common/prisma/unique-violation';
-import { ArchiveStatus, BedStatus } from '../generated/prisma/enums';
+import { ArchiveStatus, BedStatus, MaintenanceStatus } from '../generated/prisma/enums';
 import { RoomDto } from './dto/room.dto';
 
 const ROOM_SELECT = {
@@ -15,6 +15,7 @@ const ROOM_SELECT = {
   code: true,
   floor: true,
   notes: true,
+  maintenanceStatus: true,
   status: true,
   createdAt: true,
   updatedAt: true,
@@ -28,6 +29,7 @@ interface RoomRow {
   code: string;
   floor: number;
   notes: string | null;
+  maintenanceStatus: MaintenanceStatus;
   status: ArchiveStatus;
   createdAt: Date;
   updatedAt: Date;
@@ -42,6 +44,7 @@ function toRoomDto(row: RoomRow) {
     code: row.code,
     floor: row.floor,
     notes: row.notes,
+    maintenanceStatus: row.maintenanceStatus,
     status: row.status,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
@@ -58,9 +61,15 @@ export class RoomsService {
   private async assertHostel(organizationId: string, hostelId: string): Promise<void> {
     const hostel = await this.prisma.hostel.findFirst({
       where: { id: hostelId, organizationId },
-      select: { id: true },
+      select: { id: true, status: true },
     });
     if (!hostel) throw AppError.notFound('Hostel not found');
+    if (hostel.status === ArchiveStatus.ARCHIVED) {
+      throw AppError.conflict(
+        'Hostel is archived; no new rooms can be added',
+        ErrorCode.BUSINESS_RULE_VIOLATION,
+      );
+    }
   }
 
   async list(organizationId: string, hostelId: string, page: number, size: number) {
@@ -97,37 +106,33 @@ export class RoomsService {
 
     const endpoint = `/api/v1/hostels/${hostelId}/rooms`;
     const requestHash = this.idempotency.hash(dto);
-    const replay = await this.idempotency.getReplay<ReturnType<typeof toRoomDto>>(
-      organizationId,
-      idempotencyKey,
-      endpoint,
-      requestHash,
+    return this.idempotency.runAtomic<ReturnType<typeof toRoomDto>>(
+      { organizationId, key: idempotencyKey, endpoint, userId, requestHash, statusCode: 201 },
+      async (tx) => {
+        try {
+          const room = await tx.room.create({
+            data: {
+              organizationId,
+              hostelId,
+              code: dto.code,
+              floor: dto.floor,
+              maintenanceStatus: dto.maintenanceStatus,
+              notes: dto.notes,
+            },
+            select: ROOM_SELECT,
+          });
+          return toRoomDto(room);
+        } catch (err) {
+          if (isUniqueViolation(err)) {
+            throw AppError.conflict(
+              'A room with this code already exists in this hostel',
+              ErrorCode.DUPLICATE_CODE,
+            );
+          }
+          throw err;
+        }
+      },
     );
-    if (replay) return replay;
-
-    try {
-      const room = await this.prisma.room.create({
-        data: {
-          organizationId,
-          hostelId,
-          code: dto.code,
-          floor: dto.floor,
-          notes: dto.notes,
-        },
-        select: ROOM_SELECT,
-      });
-      const dtoResult = toRoomDto(room);
-      await this.idempotency.save(organizationId, idempotencyKey, endpoint, userId, requestHash, 201, dtoResult);
-      return dtoResult;
-    } catch (err) {
-      if (isUniqueViolation(err)) {
-        throw AppError.conflict(
-          'A room with this code already exists in this hostel',
-          ErrorCode.DUPLICATE_CODE,
-        );
-      }
-      throw err;
-    }
   }
 
   async get(organizationId: string, roomId: string) {
@@ -140,30 +145,34 @@ export class RoomsService {
   }
 
   async update(organizationId: string, roomId: string, expectedVersion: number, dto: RoomDto) {
-    const room = await this.prisma.room.findFirst({
-      where: { id: roomId, organizationId },
-      select: ROOM_SELECT,
-    });
-    if (!room) throw AppError.notFound('Room not found');
-    if (room.version !== expectedVersion) {
-      throw AppError.conflict(
-        'Room was modified by another request; refresh and retry',
-        ErrorCode.RESOURCE_VERSION_CONFLICT,
-      );
-    }
-
     try {
-      const updated = await this.prisma.room.update({
-        where: { id: roomId },
+      // Compare-and-swap update: only applies when version still matches.
+      const result = await this.prisma.room.updateMany({
+        where: { id: roomId, organizationId, version: expectedVersion },
         data: {
           code: dto.code,
           floor: dto.floor,
+          maintenanceStatus: dto.maintenanceStatus,
           notes: dto.notes,
           version: { increment: 1 },
         },
+      });
+      if (result.count === 0) {
+        const exists = await this.prisma.room.findFirst({
+          where: { id: roomId, organizationId },
+          select: { id: true },
+        });
+        if (!exists) throw AppError.notFound('Room not found');
+        throw AppError.conflict(
+          'Room was modified by another request; refresh and retry',
+          ErrorCode.RESOURCE_VERSION_CONFLICT,
+        );
+      }
+      const updated = await this.prisma.room.findFirst({
+        where: { id: roomId, organizationId },
         select: ROOM_SELECT,
       });
-      return toRoomDto(updated);
+      return toRoomDto(updated!);
     } catch (err) {
       if (isUniqueViolation(err)) {
         throw AppError.conflict(

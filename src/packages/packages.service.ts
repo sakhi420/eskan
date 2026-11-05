@@ -98,9 +98,15 @@ export class PackagesService {
   private async assertHostel(organizationId: string, hostelId: string): Promise<void> {
     const hostel = await this.prisma.hostel.findFirst({
       where: { id: hostelId, organizationId },
-      select: { id: true },
+      select: { id: true, status: true },
     });
     if (!hostel) throw AppError.notFound('Hostel not found');
+    if (hostel.status === ArchiveStatus.ARCHIVED) {
+      throw AppError.conflict(
+        'Hostel is archived; no new packages can be added',
+        ErrorCode.BUSINESS_RULE_VIOLATION,
+      );
+    }
   }
 
   async list(organizationId: string, hostelId: string, page: number, size: number) {
@@ -138,36 +144,22 @@ export class PackagesService {
 
     const endpoint = `/api/v1/hostels/${hostelId}/packages`;
     const requestHash = this.idempotency.hash(dto);
-    const replay = await this.idempotency.getReplay<ReturnType<typeof toPackageDto>>(
-      organizationId,
-      idempotencyKey,
-      endpoint,
-      requestHash,
-    );
-    if (replay) return replay;
-
-    const pkg = await this.prisma.accommodationPackage.create({
-      data: {
-        organizationId,
-        hostelId,
-        name: dto.name,
-        description: dto.description,
-        components: { create: componentsToCreate(dto.components) },
+    return this.idempotency.runAtomic<ReturnType<typeof toPackageDto>>(
+      { organizationId, key: idempotencyKey, endpoint, userId, requestHash, statusCode: 201 },
+      async (tx) => {
+        const pkg = await tx.accommodationPackage.create({
+          data: {
+            organizationId,
+            hostelId,
+            name: dto.name,
+            description: dto.description,
+            components: { create: componentsToCreate(dto.components) },
+          },
+          select: PACKAGE_SELECT,
+        });
+        return toPackageDto(pkg);
       },
-      select: PACKAGE_SELECT,
-    });
-
-    const dtoResult = toPackageDto(pkg);
-    await this.idempotency.save(
-      organizationId,
-      idempotencyKey,
-      endpoint,
-      userId,
-      requestHash,
-      201,
-      dtoResult,
     );
-    return dtoResult;
   }
 
   async get(organizationId: string, packageId: string) {
@@ -186,32 +178,39 @@ export class PackagesService {
     dto: PackageDto,
   ) {
     validateComposition(dto.components);
-    const pkg = await this.prisma.accommodationPackage.findFirst({
-      where: { id: packageId, organizationId },
-      select: PACKAGE_SELECT,
-    });
-    if (!pkg) throw AppError.notFound('Package not found');
-    if (pkg.version !== expectedVersion) {
-      throw AppError.conflict(
-        'Package was modified by another request; refresh and retry',
-        ErrorCode.RESOURCE_VERSION_CONFLICT,
-      );
-    }
 
-    const updated = await this.prisma.accommodationPackage.update({
-      where: { id: packageId },
-      data: {
-        name: dto.name,
-        description: dto.description,
-        components: {
-          deleteMany: {},
-          create: componentsToCreate(dto.components),
+    // Atomic + version-guarded: the conditional `updateMany` serializes on the
+    // row lock, so two concurrent updates with the same version cannot both
+    // succeed, and component replacement rolls back together with the header.
+    return this.prisma.$transaction(async (tx) => {
+      const guard = await tx.accommodationPackage.updateMany({
+        where: { id: packageId, organizationId, version: expectedVersion },
+        data: {
+          name: dto.name,
+          description: dto.description,
+          version: { increment: 1 },
         },
-        version: { increment: 1 },
-      },
-      select: PACKAGE_SELECT,
+      });
+      if (guard.count === 0) {
+        const exists = await tx.accommodationPackage.findFirst({
+          where: { id: packageId, organizationId },
+          select: { id: true },
+        });
+        if (!exists) throw AppError.notFound('Package not found');
+        throw AppError.conflict(
+          'Package was modified by another request; refresh and retry',
+          ErrorCode.RESOURCE_VERSION_CONFLICT,
+        );
+      }
+
+      await tx.accommodationPackageComponent.deleteMany({ where: { packageId } });
+      const updated = await tx.accommodationPackage.update({
+        where: { id: packageId },
+        data: { components: { create: componentsToCreate(dto.components) } },
+        select: PACKAGE_SELECT,
+      });
+      return toPackageDto(updated);
     });
-    return toPackageDto(updated);
   }
 
   async archive(organizationId: string, packageId: string) {

@@ -12,6 +12,10 @@ const HOSTEL_SELECT = {
   organizationId: true,
   name: true,
   address: true,
+  contactPhone: true,
+  defaultRentAmount: true,
+  rentDueDayOfMonth: true,
+  absenceMinDays: true,
   notes: true,
   status: true,
   createdAt: true,
@@ -24,6 +28,10 @@ interface HostelRow {
   organizationId: string;
   name: string;
   address: string | null;
+  contactPhone: string | null;
+  defaultRentAmount: number | null;
+  rentDueDayOfMonth: number | null;
+  absenceMinDays: number;
   notes: string | null;
   status: ArchiveStatus;
   createdAt: Date;
@@ -37,6 +45,10 @@ function toHostelDto(row: HostelRow) {
     organizationId: row.organizationId,
     name: row.name,
     address: row.address,
+    contactPhone: row.contactPhone,
+    defaultRentAmount: row.defaultRentAmount,
+    rentDueDayOfMonth: row.rentDueDayOfMonth,
+    absenceMinDays: row.absenceMinDays,
     notes: row.notes,
     status: row.status,
     createdAt: row.createdAt.toISOString(),
@@ -85,35 +97,25 @@ export class HostelsService {
     idempotencyKey: string,
   ) {
     const requestHash = this.idempotency.hash(dto);
-    const replay = await this.idempotency.getReplay<ReturnType<typeof toHostelDto>>(
-      organizationId,
-      idempotencyKey,
-      CREATE_ENDPOINT,
-      requestHash,
-    );
-    if (replay) return replay;
-
-    const hostel = await this.prisma.hostel.create({
-      data: {
-        organizationId,
-        name: dto.name,
-        address: dto.address,
-        notes: dto.notes,
+    return this.idempotency.runAtomic<ReturnType<typeof toHostelDto>>(
+      { organizationId, key: idempotencyKey, endpoint: CREATE_ENDPOINT, userId, requestHash, statusCode: 201 },
+      async (tx) => {
+        const hostel = await tx.hostel.create({
+          data: {
+            organizationId,
+            name: dto.name,
+            address: dto.address,
+            contactPhone: dto.contactPhone,
+            defaultRentAmount: dto.defaultRentAmount,
+            rentDueDayOfMonth: dto.rentDueDayOfMonth,
+            absenceMinDays: dto.absenceMinDays,
+            notes: dto.notes,
+          },
+          select: HOSTEL_SELECT,
+        });
+        return toHostelDto(hostel);
       },
-      select: HOSTEL_SELECT,
-    });
-
-    const dtoResult = toHostelDto(hostel);
-    await this.idempotency.save(
-      organizationId,
-      idempotencyKey,
-      CREATE_ENDPOINT,
-      userId,
-      requestHash,
-      201,
-      dtoResult,
     );
-    return dtoResult;
   }
 
   async get(organizationId: string, hostelId: string) {
@@ -131,29 +133,38 @@ export class HostelsService {
     expectedVersion: number,
     dto: HostelDto,
   ) {
-    const hostel = await this.prisma.hostel.findFirst({
-      where: { id: hostelId, organizationId },
-      select: HOSTEL_SELECT,
+    // Conditional (compare-and-swap) update so two concurrent requests with the
+    // same X-Expected-Version cannot both overwrite the record.
+    const updated = await this.prisma.hostel.updateMany({
+      where: { id: hostelId, organizationId, version: expectedVersion },
+      data: {
+        name: dto.name,
+        address: dto.address,
+        contactPhone: dto.contactPhone,
+        defaultRentAmount: dto.defaultRentAmount,
+        rentDueDayOfMonth: dto.rentDueDayOfMonth,
+        absenceMinDays: dto.absenceMinDays,
+        notes: dto.notes,
+        version: { increment: 1 },
+      },
     });
-    if (!hostel) throw AppError.notFound('Hostel not found');
-    if (hostel.version !== expectedVersion) {
+    if (updated.count === 0) {
+      const exists = await this.prisma.hostel.findFirst({
+        where: { id: hostelId, organizationId },
+        select: { id: true },
+      });
+      if (!exists) throw AppError.notFound('Hostel not found');
       throw AppError.conflict(
         'Hostel was modified by another request; refresh and retry',
         ErrorCode.RESOURCE_VERSION_CONFLICT,
       );
     }
 
-    const updated = await this.prisma.hostel.update({
-      where: { id: hostelId },
-      data: {
-        name: dto.name,
-        address: dto.address,
-        notes: dto.notes,
-        version: { increment: 1 },
-      },
+    const row = await this.prisma.hostel.findFirst({
+      where: { id: hostelId, organizationId },
       select: HOSTEL_SELECT,
     });
-    return toHostelDto(updated);
+    return toHostelDto(row!);
   }
 
   async archive(organizationId: string, hostelId: string) {

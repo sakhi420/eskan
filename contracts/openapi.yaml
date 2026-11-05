@@ -1123,6 +1123,26 @@ paths:
                 properties:
                   data: { $ref: '#/components/schemas/StayContract' }
                   meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/contracts/{contractId}/checkout:
+    post:
+      tags: [contracts]
+      summary: checkout contract (end assignments and close)
+      operationId: contractCheckout
+      parameters: [{ name: contractId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: checked out
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/StayContract' }
+                  meta: { $ref: '#/components/schemas/Meta' }
   /api/v1/bed-assignments:
     post:
       tags: [bed-assignments]
@@ -1168,6 +1188,43 @@ paths:
                 required: [data, meta]
                 properties:
                   data: { $ref: '#/components/schemas/BedAssignment' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/bed-assignments/{assignmentId}/transfer:
+    post:
+      tags: [bed-assignments]
+      summary: transfer resident to another bed (end current + start new)
+      operationId: assignmentTransfer
+      parameters: [{ name: assignmentId, in: path, required: true, schema: { type: string, format: uuid } }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [bedId, startDate]
+              properties:
+                bedId: { type: string, format: uuid }
+                startDate: { type: string, format: date }
+                endDate: { type: string, format: date }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: transferred
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: object
+                    required: [previous, assignment]
+                    properties:
+                      previous: { $ref: '#/components/schemas/BedAssignment' }
+                      assignment: { $ref: '#/components/schemas/BedAssignment' }
                   meta: { $ref: '#/components/schemas/Meta' }
   /api/v1/residents/{residentId}/absences:
     get:
@@ -2348,6 +2405,7 @@ components:
         - REGISTRATION_DISABLED
         - DUPLICATE_CODE
         - RESOURCE_HAS_ACTIVE_ASSIGNMENT
+        - ORGANIZATION_CONTEXT_REQUIRED
         - INTERNAL_ERROR
     PlanCode:
       type: string

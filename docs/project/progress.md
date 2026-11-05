@@ -15,7 +15,8 @@
 | 5   | دیتابیس و migration | ✅ انجام شد (۲۵+ جدول، constraint test ۸/۸) | prisma schema |
 | 6   | احراز هویت و tenancy | ✅ انجام شد (build/seed/smoke واقعی) | auth, refresh, BOLA |
 | 7   | سازمان/لیلیه/اتاق/بستر | ✅ انجام شد (کد + smoke واقعی ۴۲/۴۲) | CRUD, archive |
-| 8   | ساکن/قرارداد/تخصیص | ⏳ در انتظار | overlap, concurrency |
+| 8   | ساکن/قرارداد/تخصیص | ✅ انجام شد (کد + smoke واقعی ۴۸/۴۸) | overlap, concurrency |
+| 8.1 | سخت‌سازی صحت/سازگاری (بازبینی) | ✅ انجام شد (smoke جدید ۱۴/۱۴ + build/migrate/generate) | atomic idempotency, CAS locking, resident overlap, transfer/checkout |
 | 9   | مالی (charge/payment/deposit) | ⏳ در انتظار | decimal, reversal |
 | 10  | مصارف و گزارش | ⏳ در انتظار | reports |
 | 11  | idempotency/audit/sync | ⏳ در انتظار | cursor, tombstone |
@@ -417,3 +418,26 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 ### Next actions
 
 - فاز ۹: Charge/Payment/Allocation/Reversal + Deposit + Expense + منطق credit غیابت (بر پایهٔ snapshot بسته و مدل v0.4).
+## فاز 8.1 — سخت‌سازی صحت/سازگاری (انجام شد)
+
+### هدف
+بستن یافته‌های P0 بازبینی خارجی پیش از شروع فاز مالی ۹.
+
+### تغییرات کد
+- `src/common/validation/date.ts` + `is-date-only.decorator.ts`: اعتبارسنجی سخت `YYYY-MM-DD` (رد `2026-02-31`) در DTOهای قرارداد/تخصیص/انتقال.
+- `hostels.service`/`rooms.service`: فیلدهای v0.4 (`contactPhone`, `defaultRentAmount`, `rentDueDayOfMonth`, `absenceMinDays`, `maintenanceStatus`) ذخیره/بازگشت.
+- قفل خوش‌بینانه اتمی (compare-and-swap) با `updateMany({ where: { version } })` در org/hostel/room/bed/package/resident/contract؛ `count === 0 → 409 RESOURCE_VERSION_CONFLICT`.
+- idempotency اتمی: `IdempotencyService.runAtomic` (claim → mutate → complete در یک transaction)؛ duplicate key → replay ذخیره‌شده بدون اثر جانبی؛ retention ۳۰ روزه برای صف آفلاین (غیر مالی).
+- هم‌پوشانی ساکن: چک app-level + exclusion constraint مهاجرت `20261104190000_bed_assignment_resident_no_overlap` (با backfill deconflict داده‌های پیشین).
+- parent archive/maintenance: ساخت فرزند زیر hostel/room آرشیوشده و تخصیص روی room/hostel آرشیو/خارج‌سرویس ممنوع شد.
+- transfer (پایان + شروع در یک transaction) و checkout (پایان تخصیص + close قرارداد اتمی، حفظ سابقه) + قرارداد OpenAPI به‌روز شد.
+- refresh rotation هم‌روند امن شد (compare-and-swap روی session قدیمی).
+- `X-Organization-Id` هنگام چند عضویت فعال اجباری شد (`ORGANIZATION_CONTEXT_REQUIRED`).
+
+### اعتبارسنجی واقعی
+- `npx prisma migrate dev` ✅ (پس از backfill deconflict) و `npx prisma generate` ✅.
+- `npm run build` ✅ exit=0.
+- `scripts/smoke-phase81.cjs` ✅ **۱۴/۱۴ PASS** (idempotency هم‌روند، قفل خوش‌بینانه هم‌روند، ساکن دو-تخت، parent archive، تاریخ نامعتبر، transfer/checkout).
+
+### Next actions
+- فاز ۹ مالی.

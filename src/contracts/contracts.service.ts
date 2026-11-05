@@ -6,7 +6,7 @@ import { AppError } from '../common/errors/app-error';
 import { ErrorCode } from '../common/errors/error-codes';
 import { IdempotencyService } from '../common/idempotency/idempotency.service';
 import { isUniqueViolation } from '../common/prisma/unique-violation';
-import { ArchiveStatus, BillingCycle, ContractStatus, PackageComponentKind } from '../generated/prisma/enums';
+import { ArchiveStatus, AssignmentStatus, BillingCycle, ContractStatus, PackageComponentKind } from '../generated/prisma/enums';
 import { ContractDto } from './dto/contract.dto';
 
 const CONTRACT_SELECT = {
@@ -90,8 +90,11 @@ export class ContractsService {
     return toStayContractDto(contract);
   }
 private async resolve(organizationId: string, dto: ContractDto): Promise<{ rentAmount: number; snapshot: ComponentSnapshot[] }> {
-    const hostel = await this.prisma.hostel.findFirst({ where: { id: dto.hostelId, organizationId }, select: { id: true } });
+    const hostel = await this.prisma.hostel.findFirst({ where: { id: dto.hostelId, organizationId }, select: { id: true, status: true } });
     if (!hostel) throw AppError.notFound('Hostel not found');
+    if (hostel.status === ArchiveStatus.ARCHIVED) {
+      throw AppError.conflict('Hostel is archived; no new contracts can be created', ErrorCode.BUSINESS_RULE_VIOLATION);
+    }
     const resident = await this.prisma.resident.findFirst({ where: { id: dto.residentId, organizationId }, select: { id: true } });
     if (!resident) throw AppError.notFound('Resident not found');
 
@@ -120,45 +123,38 @@ private async resolve(organizationId: string, dto: ContractDto): Promise<{ rentA
     const { rentAmount, snapshot } = await this.resolve(organizationId, dto);
 
     const requestHash = this.idempotency.hash(dto);
-    const replay = await this.idempotency.getReplay<ReturnType<typeof toStayContractDto>>(organizationId, idempotencyKey, CREATE_ENDPOINT, requestHash);
-    if (replay) return replay;
-
-    try {
-      const contract = await this.prisma.stayContract.create({
-        data: {
-          organizationId, hostelId: dto.hostelId, residentId: dto.residentId,
-          contractNumber: generateContractNumber(), startDate: toDateOnly(dto.startDate),
-          endDate: dto.endDate ? toDateOnly(dto.endDate) : null, rentAmount,
-          billingCycle: dto.billingCycle ?? BillingCycle.MONTHLY,
-          depositAmount: dto.deposit?.amount ?? null, packageId: dto.packageId ?? null,
-          packageSnapshot: snapshot.length ? (snapshot as unknown as Prisma.InputJsonValue) : Prisma.JsonNull,
-          notes: dto.notes,
-        },
-        select: CONTRACT_SELECT,
-      });
-      const dtoResult = toStayContractDto(contract);
-      await this.idempotency.save(organizationId, idempotencyKey, CREATE_ENDPOINT, userId, requestHash, 201, dtoResult);
-      return dtoResult;
-    } catch (err) {
-      if (isUniqueViolation(err)) {
-        throw AppError.conflict('Failed to allocate a unique contract number; retry', ErrorCode.BUSINESS_RULE_VIOLATION);
-      }
-      throw err;
-    }
+    return this.idempotency.runAtomic<ReturnType<typeof toStayContractDto>>(
+      { organizationId, key: idempotencyKey, endpoint: CREATE_ENDPOINT, userId, requestHash, statusCode: 201 },
+      async (tx) => {
+        try {
+          const contract = await tx.stayContract.create({
+            data: {
+              organizationId, hostelId: dto.hostelId, residentId: dto.residentId,
+              contractNumber: generateContractNumber(), startDate: toDateOnly(dto.startDate),
+              endDate: dto.endDate ? toDateOnly(dto.endDate) : null, rentAmount,
+              billingCycle: dto.billingCycle ?? BillingCycle.MONTHLY,
+              depositAmount: dto.deposit?.amount ?? null, packageId: dto.packageId ?? null,
+              packageSnapshot: snapshot.length ? (snapshot as unknown as Prisma.InputJsonValue) : Prisma.JsonNull,
+              notes: dto.notes,
+            },
+            select: CONTRACT_SELECT,
+          });
+          return toStayContractDto(contract);
+        } catch (err) {
+          if (isUniqueViolation(err)) {
+            throw AppError.conflict('Failed to allocate a unique contract number; retry', ErrorCode.BUSINESS_RULE_VIOLATION);
+          }
+          throw err;
+        }
+      },
+    );
   }
 async update(organizationId: string, contractId: string, expectedVersion: number, dto: ContractDto) {
-    const contract = await this.prisma.stayContract.findFirst({ where: { id: contractId, organizationId }, select: CONTRACT_SELECT });
-    if (!contract) throw AppError.notFound('Contract not found');
-    if (contract.status !== ContractStatus.DRAFT) {
-      throw AppError.conflict('Only DRAFT contracts can be edited', ErrorCode.BUSINESS_RULE_VIOLATION);
-    }
-    if (contract.version !== expectedVersion) {
-      throw AppError.conflict('Contract was modified by another request; refresh and retry', ErrorCode.RESOURCE_VERSION_CONFLICT);
-    }
     const { rentAmount, snapshot } = await this.resolve(organizationId, dto);
 
-    const updated = await this.prisma.stayContract.update({
-      where: { id: contractId },
+    // Compare-and-swap update guarded by both status (DRAFT) and version.
+    const result = await this.prisma.stayContract.updateMany({
+      where: { id: contractId, organizationId, status: ContractStatus.DRAFT, version: expectedVersion },
       data: {
         hostelId: dto.hostelId, residentId: dto.residentId, startDate: toDateOnly(dto.startDate),
         endDate: dto.endDate ? toDateOnly(dto.endDate) : null, rentAmount,
@@ -167,9 +163,24 @@ async update(organizationId: string, contractId: string, expectedVersion: number
         packageSnapshot: snapshot.length ? (snapshot as unknown as Prisma.InputJsonValue) : Prisma.JsonNull,
         notes: dto.notes, version: { increment: 1 },
       },
+    });
+    if (result.count === 0) {
+      const existing = await this.prisma.stayContract.findFirst({
+        where: { id: contractId, organizationId },
+        select: { id: true, status: true },
+      });
+      if (!existing) throw AppError.notFound('Contract not found');
+      if (existing.status !== ContractStatus.DRAFT) {
+        throw AppError.conflict('Only DRAFT contracts can be edited', ErrorCode.BUSINESS_RULE_VIOLATION);
+      }
+      throw AppError.conflict('Contract was modified by another request; refresh and retry', ErrorCode.RESOURCE_VERSION_CONFLICT);
+    }
+
+    const updated = await this.prisma.stayContract.findFirst({
+      where: { id: contractId, organizationId },
       select: CONTRACT_SELECT,
     });
-    return toStayContractDto(updated);
+    return toStayContractDto(updated!);
   }
 
   async activate(organizationId: string, contractId: string) {
@@ -208,5 +219,37 @@ async update(organizationId: string, contractId: string, expectedVersion: number
       select: CONTRACT_SELECT,
     });
     return toStayContractDto(updated);
+  }
+
+  /**
+   * Checkout: atomically end all active bed assignments for the contract and
+   * close the contract. History is preserved — rows are updated, never deleted.
+   */
+  async checkout(organizationId: string, contractId: string) {
+    const contract = await this.prisma.stayContract.findFirst({
+      where: { id: contractId, organizationId },
+      select: { id: true, status: true },
+    });
+    if (!contract) throw AppError.notFound('Contract not found');
+    if (contract.status === ContractStatus.CLOSED) {
+      return this.get(organizationId, contractId);
+    }
+    if (contract.status !== ContractStatus.ACTIVE) {
+      throw AppError.conflict('Only ACTIVE contracts can be checked out', ErrorCode.BUSINESS_RULE_VIOLATION);
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const now = new Date();
+      await tx.bedAssignment.updateMany({
+        where: { contractId, organizationId, status: AssignmentStatus.ACTIVE },
+        data: { status: AssignmentStatus.ENDED, endDate: now, version: { increment: 1 } },
+      });
+      const updated = await tx.stayContract.update({
+        where: { id: contractId },
+        data: { status: ContractStatus.CLOSED, endDate: now, version: { increment: 1 } },
+        select: CONTRACT_SELECT,
+      });
+      return toStayContractDto(updated);
+    });
   }
 }

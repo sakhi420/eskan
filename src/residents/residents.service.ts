@@ -53,21 +53,20 @@ export class ResidentsService {
 
   async create(organizationId: string, userId: string, dto: ResidentDto, idempotencyKey: string) {
     const requestHash = this.idempotency.hash(dto);
-    const replay = await this.idempotency.getReplay<ReturnType<typeof toResidentDto>>(organizationId, idempotencyKey, CREATE_ENDPOINT, requestHash);
-    if (replay) return replay;
-
-    const resident = await this.prisma.resident.create({
-      data: {
-        organizationId, fullName: dto.fullName, type: dto.type, phone: dto.phone,
-        emergencyContactName: dto.emergencyContactName, emergencyContactPhone: dto.emergencyContactPhone,
-        emergencyContactRelation: dto.emergencyContactRelation, notes: dto.notes,
+    return this.idempotency.runAtomic<ReturnType<typeof toResidentDto>>(
+      { organizationId, key: idempotencyKey, endpoint: CREATE_ENDPOINT, userId, requestHash, statusCode: 201 },
+      async (tx) => {
+        const resident = await tx.resident.create({
+          data: {
+            organizationId, fullName: dto.fullName, type: dto.type, phone: dto.phone,
+            emergencyContactName: dto.emergencyContactName, emergencyContactPhone: dto.emergencyContactPhone,
+            emergencyContactRelation: dto.emergencyContactRelation, notes: dto.notes,
+          },
+          select: RESIDENT_SELECT,
+        });
+        return toResidentDto(resident);
       },
-      select: RESIDENT_SELECT,
-    });
-
-    const dtoResult = toResidentDto(resident);
-    await this.idempotency.save(organizationId, idempotencyKey, CREATE_ENDPOINT, userId, requestHash, 201, dtoResult);
-    return dtoResult;
+    );
   }
 
   async get(organizationId: string, residentId: string) {
@@ -77,21 +76,22 @@ export class ResidentsService {
   }
 
   async update(organizationId: string, residentId: string, expectedVersion: number, dto: ResidentDto) {
-    const resident = await this.prisma.resident.findFirst({ where: { id: residentId, organizationId }, select: RESIDENT_SELECT });
-    if (!resident) throw AppError.notFound('Resident not found');
-    if (resident.version !== expectedVersion) {
-      throw AppError.conflict('Resident was modified by another request; refresh and retry', ErrorCode.RESOURCE_VERSION_CONFLICT);
-    }
-    const updated = await this.prisma.resident.update({
-      where: { id: residentId },
+    // Compare-and-swap update: only applies when version still matches.
+    const result = await this.prisma.resident.updateMany({
+      where: { id: residentId, organizationId, version: expectedVersion },
       data: {
         fullName: dto.fullName, type: dto.type, phone: dto.phone,
         emergencyContactName: dto.emergencyContactName, emergencyContactPhone: dto.emergencyContactPhone,
         emergencyContactRelation: dto.emergencyContactRelation, notes: dto.notes, version: { increment: 1 },
       },
-      select: RESIDENT_SELECT,
     });
-    return toResidentDto(updated);
+    if (result.count === 0) {
+      const exists = await this.prisma.resident.findFirst({ where: { id: residentId, organizationId }, select: { id: true } });
+      if (!exists) throw AppError.notFound('Resident not found');
+      throw AppError.conflict('Resident was modified by another request; refresh and retry', ErrorCode.RESOURCE_VERSION_CONFLICT);
+    }
+    const updated = await this.prisma.resident.findFirst({ where: { id: residentId, organizationId }, select: RESIDENT_SELECT });
+    return toResidentDto(updated!);
   }
 
   async archive(organizationId: string, residentId: string) {

@@ -70,4 +70,11 @@ export class ContractsController {
   async terminate(@CurrentMembership() m: MembershipContext, @Param('contractId') contractId: string, @Req() req: RequestWithAuth) {
     return envelope(req, await this.contracts.terminate(m.organizationId, contractId));
   }
+
+  @Post('contracts/:contractId/checkout')
+  @Roles(Role.OWNER, Role.ADMIN, Role.OPERATOR)
+  @HttpCode(HttpStatus.OK)
+  async checkout(@CurrentMembership() m: MembershipContext, @Param('contractId') contractId: string, @Req() req: RequestWithAuth) {
+    return envelope(req, await this.contracts.checkout(m.organizationId, contractId));
+  }
 }

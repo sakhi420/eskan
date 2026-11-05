@@ -9,6 +9,7 @@ import { AuthUser, MembershipContext, RequestWithAuth } from '../auth/auth.types
 import { Role } from '../generated/prisma/enums';
 import { envelope, requireIdempotencyKey } from '../common/http/http-utils';
 import { BedAssignmentDto } from './dto/assignment.dto';
+import { TransferDto } from './dto/transfer.dto';
 
 @Controller()
 @UseGuards(TenantGuard, RolesGuard)
@@ -33,6 +34,18 @@ export class AssignmentsController {
   @HttpCode(HttpStatus.OK)
   async end(@CurrentMembership() m: MembershipContext, @Param('assignmentId') assignmentId: string, @Req() req: RequestWithAuth) {
     return envelope(req, await this.assignments.end(m.organizationId, assignmentId));
+  }
+
+  @Post('bed-assignments/:assignmentId/transfer')
+  @Roles(Role.OWNER, Role.ADMIN, Role.OPERATOR)
+  @HttpCode(HttpStatus.OK)
+  async transfer(
+    @CurrentMembership() m: MembershipContext,
+    @Param('assignmentId') assignmentId: string,
+    @Body() dto: TransferDto,
+    @Req() req: RequestWithAuth,
+  ) {
+    return envelope(req, await this.assignments.transfer(m.organizationId, assignmentId, dto));
   }
 
   @Get('residents/:residentId/assignments')

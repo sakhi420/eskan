@@ -55,6 +55,10 @@ export class AppError extends HttpException {
     return new AppError(ErrorCode.RESOURCE_NOT_FOUND, HttpStatus.NOT_FOUND, detail);
   }
 
+  static badRequest(detail = 'Bad request', code: ErrorCode = ErrorCode.VALIDATION_ERROR): AppError {
+    return new AppError(code, HttpStatus.BAD_REQUEST, detail);
+  }
+
   static conflict(detail: string, code: ErrorCode = ErrorCode.BUSINESS_RULE_VIOLATION): AppError {
     return new AppError(code, HttpStatus.CONFLICT, detail);
   }

@@ -4,7 +4,7 @@ import { AppError } from '../common/errors/app-error';
 import { ErrorCode } from '../common/errors/error-codes';
 import { IdempotencyService } from '../common/idempotency/idempotency.service';
 import { isUniqueViolation } from '../common/prisma/unique-violation';
-import { AssignmentStatus, BedStatus, MaintenanceStatus } from '../generated/prisma/enums';
+import { ArchiveStatus, AssignmentStatus, BedStatus, MaintenanceStatus } from '../generated/prisma/enums';
 import { BedDto } from './dto/bed.dto';
 
 const BED_SELECT = {
@@ -58,9 +58,15 @@ export class BedsService {
   private async assertRoom(organizationId: string, roomId: string): Promise<void> {
     const room = await this.prisma.room.findFirst({
       where: { id: roomId, organizationId },
-      select: { id: true },
+      select: { id: true, status: true },
     });
     if (!room) throw AppError.notFound('Room not found');
+    if (room.status === ArchiveStatus.ARCHIVED) {
+      throw AppError.conflict(
+        'Room is archived; no new beds can be added',
+        ErrorCode.BUSINESS_RULE_VIOLATION,
+      );
+    }
   }
 
   async listByRoom(organizationId: string, roomId: string, page: number, size: number) {
@@ -97,31 +103,26 @@ export class BedsService {
 
     const endpoint = `/api/v1/rooms/${roomId}/beds`;
     const requestHash = this.idempotency.hash(dto);
-    const replay = await this.idempotency.getReplay<ReturnType<typeof toBedDto>>(
-      organizationId,
-      idempotencyKey,
-      endpoint,
-      requestHash,
+    return this.idempotency.runAtomic<ReturnType<typeof toBedDto>>(
+      { organizationId, key: idempotencyKey, endpoint, userId, requestHash, statusCode: 201 },
+      async (tx) => {
+        try {
+          const bed = await tx.bed.create({
+            data: { organizationId, roomId, code: dto.code, notes: dto.notes, maintenanceStatus: dto.maintenanceStatus ?? MaintenanceStatus.OPERATIONAL },
+            select: BED_SELECT,
+          });
+          return toBedDto(bed);
+        } catch (err) {
+          if (isUniqueViolation(err)) {
+            throw AppError.conflict(
+              'A bed with this code already exists in this room',
+              ErrorCode.DUPLICATE_CODE,
+            );
+          }
+          throw err;
+        }
+      },
     );
-    if (replay) return replay;
-
-    try {
-      const bed = await this.prisma.bed.create({
-        data: { organizationId, roomId, code: dto.code, notes: dto.notes, maintenanceStatus: dto.maintenanceStatus ?? MaintenanceStatus.OPERATIONAL },
-        select: BED_SELECT,
-      });
-      const dtoResult = toBedDto(bed);
-      await this.idempotency.save(organizationId, idempotencyKey, endpoint, userId, requestHash, 201, dtoResult);
-      return dtoResult;
-    } catch (err) {
-      if (isUniqueViolation(err)) {
-        throw AppError.conflict(
-          'A bed with this code already exists in this room',
-          ErrorCode.DUPLICATE_CODE,
-        );
-      }
-      throw err;
-    }
   }
 
   async get(organizationId: string, bedId: string) {
@@ -134,25 +135,33 @@ export class BedsService {
   }
 
   async update(organizationId: string, bedId: string, expectedVersion: number, dto: BedDto) {
-    const bed = await this.prisma.bed.findFirst({
-      where: { id: bedId, organizationId },
-      select: BED_SELECT,
-    });
-    if (!bed) throw AppError.notFound('Bed not found');
-    if (bed.version !== expectedVersion) {
-      throw AppError.conflict(
-        'Bed was modified by another request; refresh and retry',
-        ErrorCode.RESOURCE_VERSION_CONFLICT,
-      );
-    }
-
     try {
-      const updated = await this.prisma.bed.update({
-        where: { id: bedId },
-        data: { code: dto.code, maintenanceStatus: dto.maintenanceStatus ?? bed.maintenanceStatus, notes: dto.notes, version: { increment: 1 } },
+      // Compare-and-swap update: only applies when version still matches.
+      const result = await this.prisma.bed.updateMany({
+        where: { id: bedId, organizationId, version: expectedVersion },
+        data: {
+          code: dto.code,
+          maintenanceStatus: dto.maintenanceStatus,
+          notes: dto.notes,
+          version: { increment: 1 },
+        },
+      });
+      if (result.count === 0) {
+        const exists = await this.prisma.bed.findFirst({
+          where: { id: bedId, organizationId },
+          select: { id: true },
+        });
+        if (!exists) throw AppError.notFound('Bed not found');
+        throw AppError.conflict(
+          'Bed was modified by another request; refresh and retry',
+          ErrorCode.RESOURCE_VERSION_CONFLICT,
+        );
+      }
+      const updated = await this.prisma.bed.findFirst({
+        where: { id: bedId, organizationId },
         select: BED_SELECT,
       });
-      return toBedDto(updated);
+      return toBedDto(updated!);
     } catch (err) {
       if (isUniqueViolation(err)) {
         throw AppError.conflict(

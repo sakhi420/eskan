@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
+import { Prisma } from '../generated/prisma/client';
 import { AppError } from '../common/errors/app-error';
 import { ErrorCode } from '../common/errors/error-codes';
 import { IdempotencyService } from '../common/idempotency/idempotency.service';
-import { AssignmentStatus, BedStatus, ContractStatus, MaintenanceStatus } from '../generated/prisma/enums';
+import { ArchiveStatus, AssignmentStatus, BedStatus, ContractStatus, MaintenanceStatus } from '../generated/prisma/enums';
 import { BedAssignmentDto } from './dto/assignment.dto';
+import { TransferDto } from './dto/transfer.dto';
 
 const ASSIGNMENT_SELECT = {
   id: true, version: true, organizationId: true, bedId: true, residentId: true, contractId: true,
@@ -76,7 +78,16 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
 
     const bed = await this.prisma.bed.findFirst({
       where: { id: dto.bedId, organizationId },
-      include: { room: { select: { hostelId: true } } },
+      include: {
+        room: {
+          select: {
+            hostelId: true,
+            status: true,
+            maintenanceStatus: true,
+            hostel: { select: { status: true } },
+          },
+        },
+      },
     });
     if (!bed) throw AppError.notFound('Bed not found');
     if (bed.status !== BedStatus.ACTIVE) {
@@ -84,6 +95,15 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
     }
     if (bed.maintenanceStatus === MaintenanceStatus.OUT_OF_SERVICE || bed.maintenanceStatus === MaintenanceStatus.NEEDS_REPAIR) {
       throw AppError.conflict('Bed is not usable due to its maintenance status', ErrorCode.BUSINESS_RULE_VIOLATION);
+    }
+    if (bed.room.status === ArchiveStatus.ARCHIVED) {
+      throw AppError.conflict('Room is archived; assignment cannot be created', ErrorCode.BUSINESS_RULE_VIOLATION);
+    }
+    if (bed.room.hostel.status === ArchiveStatus.ARCHIVED) {
+      throw AppError.conflict('Hostel is archived; assignment cannot be created', ErrorCode.BUSINESS_RULE_VIOLATION);
+    }
+    if (bed.room.maintenanceStatus === MaintenanceStatus.OUT_OF_SERVICE || bed.room.maintenanceStatus === MaintenanceStatus.NEEDS_REPAIR) {
+      throw AppError.conflict('Room is not usable due to its maintenance status', ErrorCode.BUSINESS_RULE_VIOLATION);
     }
 
     const resident = await this.prisma.resident.findFirst({ where: { id: dto.residentId, organizationId }, select: { id: true } });
@@ -105,33 +125,55 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
     }
 
     const requestHash = this.idempotency.hash(dto);
-    const replay = await this.idempotency.getReplay<ReturnType<typeof toAssignmentDto>>(organizationId, idempotencyKey, CREATE_ENDPOINT, requestHash);
-    if (replay) return replay;
-
-    try {
-      const assignment = await this.prisma.$transaction(async (tx) => {
-        const existing = await tx.bedAssignment.findMany({
-          where: { bedId: dto.bedId, status: AssignmentStatus.ACTIVE }, select: ASSIGNMENT_SELECT,
-        });
-        if (overlapsOver(existing, dto.startDate, dto.endDate)) {
-          throw AppError.conflict('Bed is already assigned within this period', ErrorCode.BED_ASSIGNMENT_OVERLAP);
+    return this.idempotency.runAtomic<ReturnType<typeof toAssignmentDto>>(
+      { organizationId, key: idempotencyKey, endpoint: CREATE_ENDPOINT, userId, requestHash, statusCode: 201 },
+      async (tx) => {
+        await this.assertNoOverlap(tx, dto.bedId, dto.residentId, dto.startDate, dto.endDate);
+        try {
+          const assignment = await tx.bedAssignment.create({
+            data: {
+              organizationId, bedId: dto.bedId, residentId: dto.residentId, contractId: dto.contractId,
+              startDate: toDateOnly(dto.startDate), endDate: dto.endDate ? toDateOnly(dto.endDate) : null,
+            },
+            select: ASSIGNMENT_SELECT,
+          });
+          return toAssignmentDto(assignment);
+        } catch (err) {
+          if (isExclusionViolation(err)) {
+            throw AppError.conflict('Bed or resident is already assigned within this period', ErrorCode.BED_ASSIGNMENT_OVERLAP);
+          }
+          throw err;
         }
-        return tx.bedAssignment.create({
-          data: {
-            organizationId, bedId: dto.bedId, residentId: dto.residentId, contractId: dto.contractId,
-            startDate: toDateOnly(dto.startDate), endDate: dto.endDate ? toDateOnly(dto.endDate) : null,
-          },
-          select: ASSIGNMENT_SELECT,
-        });
-      });
-      const dtoResult = toAssignmentDto(assignment);
-      await this.idempotency.save(organizationId, idempotencyKey, CREATE_ENDPOINT, userId, requestHash, 201, dtoResult);
-      return dtoResult;
-    } catch (err) {
-      if (isExclusionViolation(err)) {
-        throw AppError.conflict('Bed is already assigned within this period', ErrorCode.BED_ASSIGNMENT_OVERLAP);
-      }
-      throw err;
+      },
+    );
+  }
+
+  /**
+   * App-level overlap guard (backed by the DB exclusion constraints). Enforces
+   * both bed-level availability and the rule that a resident cannot hold two
+   * concurrent assignments.
+   */
+  private async assertNoOverlap(
+    tx: Prisma.TransactionClient,
+    bedId: string,
+    residentId: string,
+    startDate: string,
+    endDate?: string,
+  ): Promise<void> {
+    const bedRows = await tx.bedAssignment.findMany({
+      where: { bedId, status: AssignmentStatus.ACTIVE },
+      select: ASSIGNMENT_SELECT,
+    });
+    if (overlapsOver(bedRows, startDate, endDate)) {
+      throw AppError.conflict('Bed is already assigned within this period', ErrorCode.BED_ASSIGNMENT_OVERLAP);
+    }
+
+    const residentRows = await tx.bedAssignment.findMany({
+      where: { residentId, status: AssignmentStatus.ACTIVE },
+      select: ASSIGNMENT_SELECT,
+    });
+    if (overlapsOver(residentRows, startDate, endDate)) {
+      throw AppError.conflict('Resident already has an assignment within this period', ErrorCode.BED_ASSIGNMENT_OVERLAP);
     }
   }
 
@@ -146,5 +188,88 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
       select: ASSIGNMENT_SELECT,
     });
     return toAssignmentDto(updated);
+  }
+
+  /**
+   * Transfer: atomically end the current assignment and start a new one on a
+   * different bed, preserving the outgoing assignment as history.
+   */
+  async transfer(organizationId: string, assignmentId: string, dto: TransferDto) {
+    if (dto.endDate && dto.endDate <= dto.startDate) {
+      throw AppError.validation('endDate must be after startDate', [
+        { field: 'endDate', code: 'invalid', message: 'must be after startDate' },
+      ]);
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const current = await tx.bedAssignment.findFirst({
+        where: { id: assignmentId, organizationId },
+        select: ASSIGNMENT_SELECT,
+      });
+      if (!current) throw AppError.notFound('Assignment not found');
+      if (current.status === AssignmentStatus.ENDED) {
+        throw AppError.conflict('Assignment has already ended', ErrorCode.BUSINESS_RULE_VIOLATION);
+      }
+
+      const bed = await tx.bed.findFirst({
+        where: { id: dto.bedId, organizationId },
+        include: {
+          room: {
+            select: {
+              hostelId: true,
+              status: true,
+              maintenanceStatus: true,
+              hostel: { select: { status: true } },
+            },
+          },
+        },
+      });
+      if (!bed) throw AppError.notFound('Bed not found');
+      if (bed.status !== BedStatus.ACTIVE) throw AppError.conflict('Bed is inactive', ErrorCode.BUSINESS_RULE_VIOLATION);
+      if (bed.maintenanceStatus === MaintenanceStatus.OUT_OF_SERVICE || bed.maintenanceStatus === MaintenanceStatus.NEEDS_REPAIR) {
+        throw AppError.conflict('Destination bed is not usable due to its maintenance status', ErrorCode.BUSINESS_RULE_VIOLATION);
+      }
+      if (bed.room.status === ArchiveStatus.ARCHIVED) throw AppError.conflict('Destination room is archived', ErrorCode.BUSINESS_RULE_VIOLATION);
+      if (bed.room.hostel.status === ArchiveStatus.ARCHIVED) throw AppError.conflict('Destination hostel is archived', ErrorCode.BUSINESS_RULE_VIOLATION);
+      if (bed.room.maintenanceStatus === MaintenanceStatus.OUT_OF_SERVICE || bed.room.maintenanceStatus === MaintenanceStatus.NEEDS_REPAIR) {
+        throw AppError.conflict('Destination room is not usable due to its maintenance status', ErrorCode.BUSINESS_RULE_VIOLATION);
+      }
+
+      const contract = await tx.stayContract.findFirst({
+        where: { id: current.contractId, organizationId },
+        select: { hostelId: true, status: true },
+      });
+      if (!contract) throw AppError.notFound('Contract not found');
+      if (contract.status !== ContractStatus.ACTIVE) {
+        throw AppError.conflict('Contract is not active', ErrorCode.CONTRACT_NOT_ACTIVE);
+      }
+      if (contract.hostelId !== bed.room.hostelId) {
+        throw AppError.conflict('New bed does not belong to the contract hostel', ErrorCode.BUSINESS_RULE_VIOLATION);
+      }
+
+      const ended = await tx.bedAssignment.update({
+        where: { id: assignmentId },
+        data: { status: AssignmentStatus.ENDED, endDate: new Date(), version: { increment: 1 } },
+        select: ASSIGNMENT_SELECT,
+      });
+
+      const existing = await tx.bedAssignment.findMany({
+        where: { bedId: dto.bedId, status: AssignmentStatus.ACTIVE },
+        select: ASSIGNMENT_SELECT,
+      });
+      if (overlapsOver(existing, dto.startDate, dto.endDate)) {
+        throw AppError.conflict('Destination bed is already assigned within this period', ErrorCode.BED_ASSIGNMENT_OVERLAP);
+      }
+
+      const created = await tx.bedAssignment.create({
+        data: {
+          organizationId, bedId: dto.bedId, residentId: current.residentId, contractId: current.contractId,
+          startDate: toDateOnly(dto.startDate), endDate: dto.endDate ? toDateOnly(dto.endDate) : null,
+        },
+        select: ASSIGNMENT_SELECT,
+      });
+
+      return { previous: toAssignmentDto(ended), assignment: toAssignmentDto(created) };
+    });
   }
 }

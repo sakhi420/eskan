@@ -1,6 +1,5 @@
-import { IsOptional, IsUUID, Matches } from 'class-validator';
-
-const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+import { IsOptional, IsUUID } from 'class-validator';
+import { IsDateOnly } from '../../common/validation/is-date-only.decorator';
 
 export class BedAssignmentDto {
   @IsUUID()
@@ -12,10 +11,10 @@ export class BedAssignmentDto {
   @IsUUID()
   contractId!: string;
 
-  @Matches(DATE_RE)
+  @IsDateOnly()
   startDate!: string;
 
   @IsOptional()
-  @Matches(DATE_RE)
+  @IsDateOnly()
   endDate?: string;
 }

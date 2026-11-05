@@ -1,10 +1,9 @@
-import { IsEnum, IsOptional, IsString, IsUUID, Length, Matches, MaxLength, ValidateNested } from 'class-validator';
+import { IsEnum, IsOptional, IsString, IsUUID, MaxLength, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { BillingCycle } from '../../generated/prisma/enums';
 import { MoneyDto } from '../../common/money/money.dto';
 import { PackageComponentDto } from '../../packages/dto/package.dto';
-
-const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+import { IsDateOnly } from '../../common/validation/is-date-only.decorator';
 
 export class ContractDto {
   @IsUUID()
@@ -13,11 +12,11 @@ export class ContractDto {
   @IsUUID()
   residentId!: string;
 
-  @Matches(DATE_RE)
+  @IsDateOnly()
   startDate!: string;
 
   @IsOptional()
-  @Matches(DATE_RE)
+  @IsDateOnly()
   endDate?: string;
 
   @ValidateNested()
