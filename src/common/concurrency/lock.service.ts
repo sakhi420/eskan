@@ -18,7 +18,7 @@ import { Prisma } from '../../generated/prisma/client';
  * does not exist, returns no row (and therefore holds no lock) which the
  * caller detects via the subsequent existence check in the same transaction.
  */
-type LockableEntity = 'hostel' | 'room' | 'bed' | 'resident' | 'contract';
+type LockableEntity = 'hostel' | 'room' | 'bed' | 'resident' | 'contract' | 'organization';
 
 const TABLE_SQL: Record<LockableEntity, string> = {
   hostel: '"hostels"',
@@ -26,6 +26,7 @@ const TABLE_SQL: Record<LockableEntity, string> = {
   bed: '"beds"',
   resident: '"residents"',
   contract: '"stay_contracts"',
+  organization: '"organizations"',
 };
 
 @Injectable()
@@ -53,5 +54,15 @@ export class LockService {
 
   async lockContract(tx: Prisma.TransactionClient, id: string): Promise<void> {
     await this.lockForUpdate(tx, 'contract', id);
+  }
+
+  /**
+   * Row lock on the owning organisation, used for org-level invariants such as
+   * the "never demote/deactivate the last active owner" rule. It is orthogonal
+   * to the living-hall chain (Hostel -> Room -> Bed -> Resident -> Contract),
+   * so take it first when both are needed in the same transaction.
+   */
+  async lockOrganization(tx: Prisma.TransactionClient, id: string): Promise<void> {
+    await this.lockForUpdate(tx, 'organization', id);
   }
 }

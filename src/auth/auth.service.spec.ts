@@ -92,10 +92,11 @@ describe('AuthService', () => {
       await expect(promise).rejects.toMatchObject({ code: 'REGISTRATION_DISABLED' });
     });
 
-    it('rejects a duplicate email with a conflict', async () => {
+    it('rejects a duplicate email with a conflict when the password does not match', async () => {
       const prisma = prismaMock();
-      prisma.user.findUnique.mockResolvedValue({ id: 'existing' });
-      const { svc } = makeService({ prisma });
+      prisma.user.findUnique.mockResolvedValue({ ...USER, passwordHash: 'stored-hash' });
+      const passwords = { hash: jest.fn(), verify: jest.fn().mockResolvedValue(false) };
+      const { svc } = makeService({ prisma, passwords });
 
       const promise = svc.register(
         { email: 'a@b.c', password: 'password123', fullName: 'Alice', organizationName: 'Org One' },
@@ -103,6 +104,23 @@ describe('AuthService', () => {
       );
       await expect(promise).rejects.toBeInstanceOf(AppError);
       await expect(promise).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION', status: 409 });
+    });
+
+    it('recovers a lost-registration retry by issuing a fresh session when the password matches', async () => {
+      const prisma = prismaMock();
+      prisma.user.findUnique.mockResolvedValue({ ...USER, passwordHash: 'stored-hash' });
+      prisma.refreshSession.create.mockResolvedValue({});
+      const passwords = { hash: jest.fn(), verify: jest.fn().mockResolvedValue(true) };
+      const { svc } = makeService({ prisma, passwords });
+
+      const session = await svc.register(
+        { email: 'a@b.c', password: 'correct', fullName: 'Alice', organizationName: 'Org One' },
+        'trace-1',
+      );
+
+      expect(prisma.$transaction).not.toHaveBeenCalled();
+      expect(session.accessToken).toBe('access');
+      expect(session.refreshToken).toBe('refresh-raw');
     });
 
     it('creates user + organization + OWNER membership + trial subscription', async () => {
@@ -230,7 +248,7 @@ describe('AuthService', () => {
       const { svc } = makeService({ prisma });
 
       const promise = svc.refresh({ refreshToken: 'reused-token' } as RefreshDto);
-      await expect(promise).rejects.toMatchObject({ code: 'UNAUTHENTICATED' });
+      await expect(promise).rejects.toMatchObject({ code: 'REFRESH_TOKEN_REUSED' });
       expect(prisma.refreshSession.updateMany).toHaveBeenCalledWith({
         where: { userId: 'u-1', family: 'fam-1', revokedAt: null },
         data: { revokedAt: expect.any(Date) },

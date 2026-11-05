@@ -6,7 +6,7 @@ import { ErrorCode } from '../common/errors/error-codes';
 import { IdempotencyService } from '../common/idempotency/idempotency.service';
 import { LockService } from '../common/concurrency/lock.service';
 import { isUniqueViolation } from '../common/prisma/unique-violation';
-import { ArchiveStatus, BedStatus, MaintenanceStatus } from '../generated/prisma/enums';
+import { ArchiveStatus, AssignmentStatus, BedStatus, MaintenanceStatus } from '../generated/prisma/enums';
 import { RoomDto } from './dto/room.dto';
 
 const ROOM_SELECT = {
@@ -169,34 +169,58 @@ export class RoomsService {
   }
 
   async update(organizationId: string, roomId: string, expectedVersion: number, dto: RoomDto) {
+    const blockMaintenance =
+      dto.maintenanceStatus === MaintenanceStatus.OUT_OF_SERVICE ||
+      dto.maintenanceStatus === MaintenanceStatus.NEEDS_REPAIR;
+
     try {
-      // Compare-and-swap update: only applies when version still matches.
-      const result = await this.prisma.room.updateMany({
-        where: { id: roomId, organizationId, version: expectedVersion },
-        data: {
-          code: dto.code,
-          floor: dto.floor,
-          maintenanceStatus: dto.maintenanceStatus,
-          notes: dto.notes,
-          version: { increment: 1 },
-        },
-      });
-      if (result.count === 0) {
-        const exists = await this.prisma.room.findFirst({
+      return await this.prisma.$transaction(async (tx) => {
+        // Lock the room so a concurrent assignment create (which locks the room in
+        // the canonical order) serializes before the maintenance-status guard below.
+        await this.locks.lockRoom(tx, roomId);
+
+        const room = await tx.room.findFirst({
           where: { id: roomId, organizationId },
           select: { id: true },
         });
-        if (!exists) throw AppError.notFound('Room not found');
-        throw AppError.conflict(
-          'Room was modified by another request; refresh and retry',
-          ErrorCode.RESOURCE_VERSION_CONFLICT,
-        );
-      }
-      const updated = await this.prisma.room.findFirst({
-        where: { id: roomId, organizationId },
-        select: ROOM_SELECT,
+        if (!room) throw AppError.notFound('Room not found');
+
+        if (blockMaintenance) {
+          const activeAssignments = await tx.bedAssignment.count({
+            where: { bed: { roomId }, status: AssignmentStatus.ACTIVE },
+          });
+          if (activeAssignments > 0) {
+            throw AppError.conflict(
+              'Room still has an active assignment; it cannot be taken out of service',
+              ErrorCode.RESOURCE_HAS_ACTIVE_ASSIGNMENT,
+            );
+          }
+        }
+
+        // Compare-and-swap update: only applies when version still matches.
+        const result = await tx.room.updateMany({
+          where: { id: roomId, organizationId, version: expectedVersion },
+          data: {
+            code: dto.code,
+            floor: dto.floor,
+            maintenanceStatus: dto.maintenanceStatus,
+            notes: dto.notes,
+            version: { increment: 1 },
+          },
+        });
+        if (result.count === 0) {
+          throw AppError.conflict(
+            'Room was modified by another request; refresh and retry',
+            ErrorCode.RESOURCE_VERSION_CONFLICT,
+          );
+        }
+
+        const updated = await tx.room.findFirst({
+          where: { id: roomId, organizationId },
+          select: ROOM_SELECT,
+        });
+        return toRoomDto(updated!);
       });
-      return toRoomDto(updated!);
     } catch (err) {
       if (isUniqueViolation(err)) {
         throw AppError.conflict(

@@ -159,33 +159,57 @@ export class BedsService {
   }
 
   async update(organizationId: string, bedId: string, expectedVersion: number, dto: BedDto) {
+    const blockMaintenance =
+      dto.maintenanceStatus === MaintenanceStatus.OUT_OF_SERVICE ||
+      dto.maintenanceStatus === MaintenanceStatus.NEEDS_REPAIR;
+
     try {
-      // Compare-and-swap update: only applies when version still matches.
-      const result = await this.prisma.bed.updateMany({
-        where: { id: bedId, organizationId, version: expectedVersion },
-        data: {
-          code: dto.code,
-          maintenanceStatus: dto.maintenanceStatus,
-          notes: dto.notes,
-          version: { increment: 1 },
-        },
-      });
-      if (result.count === 0) {
-        const exists = await this.prisma.bed.findFirst({
+      return await this.prisma.$transaction(async (tx) => {
+        // Lock the bed so a concurrent assignment create (which locks the bed in
+        // the canonical order) serializes before the maintenance-status guard below.
+        await this.locks.lockBed(tx, bedId);
+
+        const bed = await tx.bed.findFirst({
           where: { id: bedId, organizationId },
           select: { id: true },
         });
-        if (!exists) throw AppError.notFound('Bed not found');
-        throw AppError.conflict(
-          'Bed was modified by another request; refresh and retry',
-          ErrorCode.RESOURCE_VERSION_CONFLICT,
-        );
-      }
-      const updated = await this.prisma.bed.findFirst({
-        where: { id: bedId, organizationId },
-        select: BED_SELECT,
+        if (!bed) throw AppError.notFound('Bed not found');
+
+        if (blockMaintenance) {
+          const activeAssignments = await tx.bedAssignment.count({
+            where: { bedId, status: AssignmentStatus.ACTIVE },
+          });
+          if (activeAssignments > 0) {
+            throw AppError.conflict(
+              'Bed still has an active assignment; it cannot be taken out of service',
+              ErrorCode.RESOURCE_HAS_ACTIVE_ASSIGNMENT,
+            );
+          }
+        }
+
+        // Compare-and-swap update: only applies when version still matches.
+        const result = await tx.bed.updateMany({
+          where: { id: bedId, organizationId, version: expectedVersion },
+          data: {
+            code: dto.code,
+            maintenanceStatus: dto.maintenanceStatus,
+            notes: dto.notes,
+            version: { increment: 1 },
+          },
+        });
+        if (result.count === 0) {
+          throw AppError.conflict(
+            'Bed was modified by another request; refresh and retry',
+            ErrorCode.RESOURCE_VERSION_CONFLICT,
+          );
+        }
+
+        const updated = await tx.bed.findFirst({
+          where: { id: bedId, organizationId },
+          select: BED_SELECT,
+        });
+        return toBedDto(updated!);
       });
-      return toBedDto(updated!);
     } catch (err) {
       if (isUniqueViolation(err)) {
         throw AppError.conflict(

@@ -1059,6 +1059,7 @@ paths:
     patch:
       tags: [contracts]
       summary: update contract (before finalization)
+      description: DRAFT-only. `hostelId` and `residentId` are immutable once a contract is created; changing them returns 409 BUSINESS_RULE_VIOLATION. To move a resident or hostel, create a new contract.
       operationId: contractUpdate
       parameters:
         - { name: contractId, in: path, required: true, schema: { type: string, format: uuid } }
@@ -2408,6 +2409,8 @@ components:
         - REGISTRATION_DISABLED
         - DUPLICATE_CODE
         - RESOURCE_HAS_ACTIVE_ASSIGNMENT
+        - REFRESH_TOKEN_REUSED
+        - REFRESH_TOKEN_ROTATION_CONFLICT
         - ORGANIZATION_CONTEXT_REQUIRED
         - INTERNAL_ERROR
     PlanCode:
@@ -2745,7 +2748,7 @@ components:
       type: object
       properties:
         name: { type: string, minLength: 1, maxLength: 200 }
-        timezone: { type: string }
+        timezone: { type: string, description: IANA timezone name, example: Asia/Kabul }
         defaultCurrency: { type: string, enum: [AFN] }
     InvitationRequest:
       type: object
@@ -3054,9 +3057,7 @@ components:
       properties:
         id: { type: string, format: uuid }
         version: { type: integer }
-        memberships:
-          type: array
-          items: { $ref: '#/components/schemas/MembershipSummary' }
+        organizationId: { type: string, format: uuid }
         hostelId: { type: string, format: uuid }
         residentId: { type: string, format: uuid }
         contractNumber: { type: string }
@@ -3079,9 +3080,7 @@ components:
       properties:
         id: { type: string, format: uuid }
         version: { type: integer }
-        memberships:
-          type: array
-          items: { $ref: '#/components/schemas/MembershipSummary' }
+        organizationId: { type: string, format: uuid }
         bedId: { type: string, format: uuid }
         residentId: { type: string, format: uuid }
         contractId: { type: string, format: uuid }
@@ -3096,9 +3095,7 @@ components:
       properties:
         id: { type: string, format: uuid }
         version: { type: integer }
-        memberships:
-          type: array
-          items: { $ref: '#/components/schemas/MembershipSummary' }
+        organizationId: { type: string, format: uuid }
         residentId: { type: string, format: uuid }
         contractId: { type: string, format: uuid }
         type: { $ref: '#/components/schemas/ChargeType' }

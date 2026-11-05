@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { AppError } from '../common/errors/app-error';
 import { ErrorCode } from '../common/errors/error-codes';
+import { LockService } from '../common/concurrency/lock.service';
 import { Role } from '../generated/prisma/enums';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
@@ -61,7 +62,7 @@ function toMembershipDto(row: MembershipRow) {
 
 @Injectable()
 export class OrganizationsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService, private readonly locks: LockService) {}
 
   async getCurrent(organizationId: string) {
     const org = await this.prisma.organization.findUnique({
@@ -118,34 +119,41 @@ export class OrganizationsService {
       ]);
     }
 
-    const target = await this.prisma.organizationMembership.findFirst({
-      where: { id: membershipId, organizationId },
-      include: { user: { select: { id: true, fullName: true, email: true } } },
-    });
-    if (!target) throw AppError.notFound('Membership not found');
+    return this.prisma.$transaction(async (tx) => {
+      // Serialize concurrent membership changes on the organisation row so the
+      // "last active owner" check-and-set cannot race (two requests both observe
+      // two owners, then both demote/deactivate a different one).
+      await this.locks.lockOrganization(tx, organizationId);
 
-    const nextRole = dto.role ?? target.role;
-    const nextActive = dto.active ?? target.active;
-    const demotingOwner =
-      target.role === Role.OWNER && (nextRole !== Role.OWNER || nextActive === false);
-
-    if (demotingOwner) {
-      const owners = await this.prisma.organizationMembership.count({
-        where: { organizationId, role: Role.OWNER, active: true },
+      const target = await tx.organizationMembership.findFirst({
+        where: { id: membershipId, organizationId },
+        include: { user: { select: { id: true, fullName: true, email: true } } },
       });
-      if (owners <= 1) {
-        throw AppError.conflict(
-          'Cannot demote or deactivate the last active owner of the organization',
-          ErrorCode.BUSINESS_RULE_VIOLATION,
-        );
-      }
-    }
+      if (!target) throw AppError.notFound('Membership not found');
 
-    const updated = await this.prisma.organizationMembership.update({
-      where: { id: membershipId },
-      data: { role: nextRole, active: nextActive },
-      include: { user: { select: { id: true, fullName: true, email: true } } },
+      const nextRole = dto.role ?? target.role;
+      const nextActive = dto.active ?? target.active;
+      const demotingOwner =
+        target.role === Role.OWNER && (nextRole !== Role.OWNER || nextActive === false);
+
+      if (demotingOwner) {
+        const owners = await tx.organizationMembership.count({
+          where: { organizationId, role: Role.OWNER, active: true },
+        });
+        if (owners <= 1) {
+          throw AppError.conflict(
+            'Cannot demote or deactivate the last active owner of the organization',
+            ErrorCode.BUSINESS_RULE_VIOLATION,
+          );
+        }
+      }
+
+      const updated = await tx.organizationMembership.update({
+        where: { id: membershipId },
+        data: { role: nextRole, active: nextActive },
+        include: { user: { select: { id: true, fullName: true, email: true } } },
+      });
+      return toMembershipDto(updated);
     });
-    return toMembershipDto(updated);
   }
 }

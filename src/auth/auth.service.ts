@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'node:crypto';
 import { PrismaService } from '../database/prisma.service';
 import { AppError } from '../common/errors/app-error';
+import { ErrorCode } from '../common/errors/error-codes';
+import { isUniqueViolation } from '../common/prisma/unique-violation';
 import { MembershipContext } from './auth.types';
 import { PasswordService } from './password.service';
 import { TokenService } from './token.service';
@@ -53,8 +55,17 @@ export class AuthService {
     }
 
     const email = dto.email.trim().toLowerCase();
+
+    // Recoverable replay: if the account (and its trial org/subscription) was
+    // already created for this email and the caller still knows the password,
+    // this is a retry whose earlier response may have been lost (e.g. a session
+    // build failure after the account transaction committed). Issuing a fresh
+    // session keeps registration recoverable WITHOUT persisting raw tokens.
     const existing = await this.prisma.user.findUnique({ where: { email } });
     if (existing) {
+      if (await this.passwords.verify(existing.passwordHash, dto.password)) {
+        return this.buildSession(existing);
+      }
       throw AppError.conflict('An account with this email already exists');
     }
 
@@ -63,7 +74,9 @@ export class AuthService {
     const now = new Date();
     const trialEndsAt = new Date(now.getTime() + trialDays * 24 * 60 * 60 * 1000);
 
-    const user = await this.prisma.$transaction(async (tx) => {
+    let user: UserRecord;
+    try {
+      user = await this.prisma.$transaction(async (tx) => {
       const free = await tx.subscriptionPlan.findUnique({ where: { code: 'FREE' } });
       if (!free) {
         throw AppError.conflict('Subscription plans are not seeded (FREE plan missing)');
@@ -106,6 +119,17 @@ export class AuthService {
 
       return createdUser;
     });
+    } catch (err) {
+      if (isUniqueViolation(err)) {
+        // Lost a concurrent registration for the same email.
+        const winner = await this.prisma.user.findUnique({ where: { email } });
+        if (winner && (await this.passwords.verify(winner.passwordHash, dto.password))) {
+          return this.buildSession(winner);
+        }
+        throw AppError.conflict('An account with this email already exists');
+      }
+      throw err;
+    }
 
     return this.buildSession(user);
   }
@@ -151,12 +175,12 @@ export class AuthService {
       const successorConsumed = !successor || successor.replacedById !== null || successor.revokedAt !== null;
       if (successorConsumed) {
         await this.revokeFamily(session.userId, session.family);
-        throw AppError.unauthorized('Refresh token has been reused and was revoked');
+        throw AppError.unauthorized('Refresh token has been reused and was revoked', ErrorCode.REFRESH_TOKEN_REUSED);
       }
       // The successor is still the active tip: this is a concurrent double-submit
       // of the same token, not a proven reuse. Reject WITHOUT revoking the family
       // (revoking here would log out the legitimate client that just won).
-      throw AppError.unauthorized('Refresh token rotation conflict; retry with the new token');
+      throw AppError.unauthorized('Refresh token rotation conflict; retry with the new token', ErrorCode.REFRESH_TOKEN_ROTATION_CONFLICT);
     }
     if (session.revokedAt !== null) {
       // Explicitly revoked (logout / logout-all / change-password).
@@ -212,7 +236,7 @@ export class AuthService {
     });
 
     if (!rotated) {
-      throw AppError.unauthorized('Refresh token rotation conflict; retry with the new token');
+      throw AppError.unauthorized('Refresh token rotation conflict; retry with the new token', ErrorCode.REFRESH_TOKEN_ROTATION_CONFLICT);
     }
 
     return { ...payload, refreshToken: raw };

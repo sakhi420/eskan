@@ -43,8 +43,8 @@ export class AppError extends HttpException {
     this.errors = options.errors;
   }
 
-  static unauthorized(detail = 'Authentication required'): AppError {
-    return new AppError(ErrorCode.UNAUTHENTICATED, HttpStatus.UNAUTHORIZED, detail);
+  static unauthorized(detail = 'Authentication required', code: ErrorCode = ErrorCode.UNAUTHENTICATED): AppError {
+    return new AppError(code, HttpStatus.UNAUTHORIZED, detail);
   }
 
   static forbidden(detail = 'Forbidden', code: ErrorCode = ErrorCode.FORBIDDEN): AppError {
