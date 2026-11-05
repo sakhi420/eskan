@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../database/prisma.service';
 import { AppError } from '../common/errors/app-error';
 import { ErrorCode } from '../common/errors/error-codes';
 import { IdempotencyService } from '../common/idempotency/idempotency.service';
+import { LockService } from '../common/concurrency/lock.service';
 import { isUniqueViolation } from '../common/prisma/unique-violation';
 import { ArchiveStatus, BedStatus, MaintenanceStatus } from '../generated/prisma/enums';
 import { RoomDto } from './dto/room.dto';
@@ -56,10 +58,31 @@ export class RoomsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly idempotency: IdempotencyService,
+    private readonly locks: LockService,
   ) {}
 
   private async assertHostel(organizationId: string, hostelId: string): Promise<void> {
     const hostel = await this.prisma.hostel.findFirst({
+      where: { id: hostelId, organizationId },
+      select: { id: true, status: true },
+    });
+    if (!hostel) throw AppError.notFound('Hostel not found');
+    if (hostel.status === ArchiveStatus.ARCHIVED) {
+      throw AppError.conflict(
+        'Hostel is archived; no new rooms can be added',
+        ErrorCode.BUSINESS_RULE_VIOLATION,
+      );
+    }
+  }
+
+  /** Authoritative, lock-guarded hostel check used inside the create transaction. */
+  private async assertHostelForCreate(
+    tx: Prisma.TransactionClient,
+    organizationId: string,
+    hostelId: string,
+  ): Promise<void> {
+    await this.locks.lockHostel(tx, hostelId);
+    const hostel = await tx.hostel.findFirst({
       where: { id: hostelId, organizationId },
       select: { id: true, status: true },
     });
@@ -102,13 +125,14 @@ export class RoomsService {
     dto: RoomDto,
     idempotencyKey: string,
   ) {
-    await this.assertHostel(organizationId, hostelId);
-
+    // Replay must be checked before any domain reads (runAtomic does so), so the
+    // parent-hostel assertion happens only inside the transaction below.
     const endpoint = `/api/v1/hostels/${hostelId}/rooms`;
     const requestHash = this.idempotency.hash(dto);
     return this.idempotency.runAtomic<ReturnType<typeof toRoomDto>>(
       { organizationId, key: idempotencyKey, endpoint, userId, requestHash, statusCode: 201 },
       async (tx) => {
+        await this.assertHostelForCreate(tx, organizationId, hostelId);
         try {
           const room = await tx.room.create({
             data: {

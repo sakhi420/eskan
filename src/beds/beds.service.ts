@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../database/prisma.service';
 import { AppError } from '../common/errors/app-error';
 import { ErrorCode } from '../common/errors/error-codes';
 import { IdempotencyService } from '../common/idempotency/idempotency.service';
+import { LockService } from '../common/concurrency/lock.service';
 import { isUniqueViolation } from '../common/prisma/unique-violation';
 import { ArchiveStatus, AssignmentStatus, BedStatus, MaintenanceStatus } from '../generated/prisma/enums';
 import { BedDto } from './dto/bed.dto';
@@ -53,10 +55,31 @@ export class BedsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly idempotency: IdempotencyService,
+    private readonly locks: LockService,
   ) {}
 
   private async assertRoom(organizationId: string, roomId: string): Promise<void> {
     const room = await this.prisma.room.findFirst({
+      where: { id: roomId, organizationId },
+      select: { id: true, status: true },
+    });
+    if (!room) throw AppError.notFound('Room not found');
+    if (room.status === ArchiveStatus.ARCHIVED) {
+      throw AppError.conflict(
+        'Room is archived; no new beds can be added',
+        ErrorCode.BUSINESS_RULE_VIOLATION,
+      );
+    }
+  }
+
+  /** Authoritative, lock-guarded room check used inside the create transaction. */
+  private async assertRoomForCreate(
+    tx: Prisma.TransactionClient,
+    organizationId: string,
+    roomId: string,
+  ): Promise<void> {
+    await this.locks.lockRoom(tx, roomId);
+    const room = await tx.room.findFirst({
       where: { id: roomId, organizationId },
       select: { id: true, status: true },
     });
@@ -99,13 +122,14 @@ export class BedsService {
     dto: BedDto,
     idempotencyKey: string,
   ) {
-    await this.assertRoom(organizationId, roomId);
-
+    // Replay must be checked before any domain reads (runAtomic does so), so the
+    // parent-room assertion happens only inside the transaction below.
     const endpoint = `/api/v1/rooms/${roomId}/beds`;
     const requestHash = this.idempotency.hash(dto);
     return this.idempotency.runAtomic<ReturnType<typeof toBedDto>>(
       { organizationId, key: idempotencyKey, endpoint, userId, requestHash, statusCode: 201 },
       async (tx) => {
+        await this.assertRoomForCreate(tx, organizationId, roomId);
         try {
           const bed = await tx.bed.create({
             data: { organizationId, roomId, code: dto.code, notes: dto.notes, maintenanceStatus: dto.maintenanceStatus ?? MaintenanceStatus.OPERATIONAL },

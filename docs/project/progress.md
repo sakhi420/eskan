@@ -17,6 +17,7 @@
 | 7   | سازمان/لیلیه/اتاق/بستر | ✅ انجام شد (کد + smoke واقعی ۴۲/۴۲) | CRUD, archive |
 | 8   | ساکن/قرارداد/تخصیص | ✅ انجام شد (کد + smoke واقعی ۴۸/۴۸) | overlap, concurrency |
 | 8.1 | سخت‌سازی صحت/سازگاری (بازبینی) | ✅ انجام شد (P0 fixes + smoke ۱۴۴/۱۴۴ = 42+16+48+14+24) | atomic idempotency, CAS locking, resident overlap, transfer/checkout, fail-fast migration |
+| 8.2 | چرخه‌حیات هم‌روندی و یکپارچگی داده | ✅ انجام شد (LockService + business date + overlap contract + smoke ۱۵۷/۱۵۷ = 42+16+48+14+24+13) | resident contract overlap, row locks, business date, idempotency expiry |
 | 9   | مالی (charge/payment/deposit) | ⏳ در انتظار | decimal, reversal |
 | 10  | مصارف و گزارش | ⏳ در انتظار | reports |
 | 11  | idempotency/audit/sync | ⏳ در انتظار | cursor, tombstone |
@@ -454,6 +455,38 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
   - `smoke-phase8` ✅ **۴۸/۴۸**
   - `smoke-phase81` ✅ **۱۴/۱۴**
   - `smoke-phase82` ✅ **۲۴/۲۴** (رفرش هم‌روند + reuse/ابطال family، idempotency/اتمی بودن transfer، تاریخ‌های خارج از بازهٔ قرارداد، replay پس از checkout، idempotency/CAS فعال‌سازی/خاتمه/checkout)
+
+## فاز 8.2 — چرخه‌حیات هم‌روندی و یکپارچگی داده (انجام شد)
+
+### هدف
+پیش‌نیاز فاز مالی ۹: یکپارچگی داده‌ها در مسیرهای چرخه‌حیات (ساخت/فعال‌سازی/خاتمه/checkout تخصیص و قرارداد) با قفل‌گذاری سطری و «تاریخ کسب‌وکار» و ممانعت از قرارداد ACTIVE هم‌پوشان برای یک ساکن.
+
+### تصمیم
+- **سیاست هم‌پوشانی قرارداد:** هر ساکن حداکثر یک قرارداد ACTIVE بدون هم‌پوشانی با بازهٔ نیمه‌باز `[startDate, endDate)`؛ `endDate = null` یعنی بی‌نهایت؛ قراردادهای DRAFT مستثنا هستند. خطای `RESIDENT_CONTRACT_OVERLAP`.
+
+### تغییرات کد
+- `src/common/concurrency/lock.service.ts` (جدید): قفل ردیف `SELECT ... FOR UPDATE` با ترتیب سراسری Hostel → Room → Bed → Resident → Contract.
+- `src/common/date/business-date.ts` (جدید): `businessTodayForOrg` با `Intl.DateTimeFormat` و timezone سازمان (`Asia/Kabul`) بدون وابستگی به ساعت سرور؛ `DEFAULT_TIMEZONE`.
+- `src/common/common.module.ts`: ثبت و export `LockService`.
+- `src/common/errors/error-codes.ts`: افزودن `RESIDENT_CONTRACT_OVERLAP`.
+- `src/common/idempotency/idempotency.service.ts`: انقضای lazy در `getReplay` (رکورد منقضی درجا حذف و «غایب» تلقی می‌شود).
+- `assignments.service.ts`/`contracts.service.ts`: قفل‌گذاری create/transfer/activate/terminate/checkout؛ `resolve` قرارداد تراکنشی شد؛ `end` تخصیص و `checkout` قرارداد با «تاریخ کسب‌وکار» به‌جای `new Date()`؛ `assertNoActiveOverlap` ساکن.
+- `rooms/beds/packages/residents.service.ts`: parent-lock در ساخت فرزند (room/bed/package) و قفل resident در archive (مهار race با ساخت قرارداد/تخصیص).
+- `contracts/openapi.yaml` + `docs/api/error-model.md`: افزودن `RESIDENT_CONTRACT_OVERLAP` به enum خطا.
+- مهاجرت `20261104195000_stay_contract_active_resident_no_overlap`: `EXCLUDE USING gist` روی `stay_contracts` برای `resident_id` با `daterange(..., '[)')` فقط‌جا که `status = 'ACTIVE'` (بدون mutate سطرهای موجود؛ fail-fast).
+- `auth.service.ts`: تفکیک «استفادهٔ مجدد هم‌روند» از «استفادهٔ مجدد واقعی» در refresh (reuse واقعی family را ابطال می‌کند؛ بازندهٔ هم‌روندی تنها 401 می‌شود).
+
+### اعتبارسنجی واقعی
+- `npm run build` ✅ exit=0.
+- `npx prisma migrate deploy` ✅ (پس از رفع دو قرارداد ACTIVE هم‌پوشانِ دادهٔ dev خارج از مهاجرت؛ مهاجرت fail-fast ماند).
+- `npm run openapi:validate` ✅ (معتبر؛ ۶ warning از پیش‌موجود).
+- Smoke واقعی، همگی PASS:
+  - `smoke-phase7` ✅ **۴۲/۴۲**
+  - `smoke-phase8-packages` ✅ **۱۶/۱۶**
+  - `smoke-phase8` ✅ **۴۸/۴۸**
+  - `smoke-phase81` ✅ **۱۴/۱۴**
+  - `smoke-phase82` ✅ **۲۴/۲۴**
+  - `smoke-phase83` ✅ **۱۳/۱۳** (فعال‌سازی هم‌روند دو قرارداد هم‌پوشان → یک 409 RESIDENT_CONTRACT_OVERLAP، تاریخ کسب‌وکار در end/checkout، race تخصیص vs terminate، انقضای lazy idempotency، parent-lock revalidation)
 
 ### Next actions
 - فاز ۹ مالی.

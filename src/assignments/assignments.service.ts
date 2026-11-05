@@ -4,6 +4,8 @@ import { Prisma } from '../generated/prisma/client';
 import { AppError } from '../common/errors/app-error';
 import { ErrorCode } from '../common/errors/error-codes';
 import { IdempotencyService } from '../common/idempotency/idempotency.service';
+import { LockService } from '../common/concurrency/lock.service';
+import { businessTodayForOrg, toDateOnly as toBusinessDateOnly } from '../common/date/business-date';
 import { ArchiveStatus, AssignmentStatus, BedStatus, ContractStatus, MaintenanceStatus, ResidentStatus } from '../generated/prisma/enums';
 import { BedAssignmentDto } from './dto/assignment.dto';
 import { TransferDto } from './dto/transfer.dto';
@@ -59,7 +61,36 @@ const CREATE_ENDPOINT = '/api/v1/bed-assignments';
 
 @Injectable()
 export class AssignmentsService {
-  constructor(private readonly prisma: PrismaService, private readonly idempotency: IdempotencyService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly idempotency: IdempotencyService,
+    private readonly locks: LockService,
+  ) {}
+
+  /**
+   * Acquires the parent-chain locks in the canonical global order
+   * (Hostel -> Room -> Bed -> Resident -> Contract) so a concurrent archive,
+   * checkout or terminate -- which also locks these rows -- serializes before
+   * this assignment is committed.
+   */
+  private async lockCreateContext(
+    tx: Prisma.TransactionClient,
+    organizationId: string,
+    bedId: string,
+    residentId: string,
+    contractId: string,
+  ): Promise<void> {
+    const bed = await tx.bed.findFirst({
+      where: { id: bedId, organizationId },
+      select: { roomId: true, room: { select: { hostelId: true } } },
+    });
+    if (!bed) throw AppError.notFound('Bed not found');
+    await this.locks.lockHostel(tx, bed.room.hostelId);
+    await this.locks.lockRoom(tx, bed.roomId);
+    await this.locks.lockBed(tx, bedId);
+    await this.locks.lockResident(tx, residentId);
+    await this.locks.lockContract(tx, contractId);
+  }
 
   async listByResident(organizationId: string, residentId: string) {
     const resident = await this.prisma.resident.findFirst({ where: { id: residentId, organizationId }, select: { id: true } });
@@ -107,6 +138,7 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
     return this.idempotency.runAtomic<ReturnType<typeof toAssignmentDto>>(
       { organizationId, key: idempotencyKey, endpoint: CREATE_ENDPOINT, userId, requestHash, statusCode: 201 },
       async (tx) => {
+        await this.lockCreateContext(tx, organizationId, dto.bedId, dto.residentId, dto.contractId);
         await this.assertAssignable(tx, organizationId, dto);
         await this.assertNoOverlap(tx, dto.bedId, dto.residentId, dto.startDate, dto.endDate);
         try {
@@ -223,17 +255,38 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
   }
 
   async end(organizationId: string, assignmentId: string) {
-    const result = await this.prisma.bedAssignment.updateMany({
-      where: { id: assignmentId, organizationId, status: AssignmentStatus.ACTIVE },
-      data: { status: AssignmentStatus.ENDED, endDate: new Date(), version: { increment: 1 } },
+    return this.prisma.$transaction(async (tx) => {
+      const assignment = await tx.bedAssignment.findFirst({
+        where: { id: assignmentId, organizationId },
+        select: ASSIGNMENT_SELECT,
+      });
+      if (!assignment) throw AppError.notFound('Assignment not found');
+      if (assignment.status === AssignmentStatus.ENDED) return toAssignmentDto(assignment); // idempotent
+
+      // The end date is a business date in the org's timezone, never `new Date()`
+      // (which would truncate inconsistently and could even land on the start date).
+      const today = await businessTodayForOrg(tx, organizationId);
+      const startDate = toISODate(assignment.startDate);
+      if (!startDate) {
+        throw AppError.conflict('Assignment is missing its start date', ErrorCode.BUSINESS_RULE_VIOLATION);
+      }
+      if (today <= startDate) {
+        throw AppError.conflict(
+          'Assignment cannot be ended on or before its start date',
+          ErrorCode.BUSINESS_RULE_VIOLATION,
+        );
+      }
+
+      const result = await tx.bedAssignment.updateMany({
+        where: { id: assignmentId, organizationId, status: AssignmentStatus.ACTIVE },
+        data: { status: AssignmentStatus.ENDED, endDate: toBusinessDateOnly(today), version: { increment: 1 } },
+      });
+      if (result.count === 0) {
+        throw AppError.conflict('Assignment was modified concurrently; refresh and retry', ErrorCode.RESOURCE_VERSION_CONFLICT);
+      }
+      const updated = await tx.bedAssignment.findFirst({ where: { id: assignmentId, organizationId }, select: ASSIGNMENT_SELECT });
+      return toAssignmentDto(updated!);
     });
-    if (result.count === 0) {
-      const existing = await this.prisma.bedAssignment.findFirst({ where: { id: assignmentId, organizationId }, select: ASSIGNMENT_SELECT });
-      if (!existing) throw AppError.notFound('Assignment not found');
-      return toAssignmentDto(existing); // already ended — idempotent
-    }
-    const updated = await this.prisma.bedAssignment.findFirst({ where: { id: assignmentId, organizationId }, select: ASSIGNMENT_SELECT });
-    return toAssignmentDto(updated!);
   }
 
   /**
@@ -287,6 +340,15 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
           },
         });
         if (!bed) throw AppError.notFound('Bed not found');
+
+        // Serialize against concurrent archive/checkout/terminate before any
+        // status re-check. Lock order: Hostel -> Room -> Bed -> Resident -> Contract.
+        await this.locks.lockHostel(tx, bed.room.hostelId);
+        await this.locks.lockRoom(tx, bed.roomId);
+        await this.locks.lockBed(tx, dto.bedId);
+        await this.locks.lockResident(tx, current.residentId);
+        await this.locks.lockContract(tx, current.contractId);
+
         if (bed.status !== BedStatus.ACTIVE) throw AppError.conflict('Bed is inactive', ErrorCode.BUSINESS_RULE_VIOLATION);
         if (bed.maintenanceStatus === MaintenanceStatus.OUT_OF_SERVICE || bed.maintenanceStatus === MaintenanceStatus.NEEDS_REPAIR) {
           throw AppError.conflict('Destination bed is not usable due to its maintenance status', ErrorCode.BUSINESS_RULE_VIOLATION);

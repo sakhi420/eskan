@@ -4,6 +4,7 @@ import { PrismaService } from '../database/prisma.service';
 import { AppError } from '../common/errors/app-error';
 import { ErrorCode } from '../common/errors/error-codes';
 import { IdempotencyService } from '../common/idempotency/idempotency.service';
+import { LockService } from '../common/concurrency/lock.service';
 import { AssignmentStatus, ContractStatus, ResidentStatus, ResidentType } from '../generated/prisma/enums';
 import { ResidentDto } from './dto/resident.dto';
 
@@ -34,7 +35,11 @@ const CREATE_ENDPOINT = '/api/v1/residents';
 
 @Injectable()
 export class ResidentsService {
-  constructor(private readonly prisma: PrismaService, private readonly idempotency: IdempotencyService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly idempotency: IdempotencyService,
+    private readonly locks: LockService,
+  ) {}
 
   async list(organizationId: string, page: number, size: number, q?: string, type?: ResidentType, status?: ResidentStatus) {
     const where: Prisma.ResidentWhereInput = {
@@ -95,23 +100,27 @@ export class ResidentsService {
   }
 
   async archive(organizationId: string, residentId: string) {
-    const resident = await this.prisma.resident.findFirst({ where: { id: residentId, organizationId }, select: RESIDENT_SELECT });
-    if (!resident) throw AppError.notFound('Resident not found');
-    if (resident.status === ResidentStatus.ARCHIVED) return toResidentDto(resident);
+    return this.prisma.$transaction(async (tx) => {
+      // Lock the resident first so a concurrent contract/assignment create
+      // (which also locks the resident) cannot interleave with the
+      // "active contract/assignment" guard below.
+      await this.locks.lockResident(tx, residentId);
+      const resident = await tx.resident.findFirst({ where: { id: residentId, organizationId }, select: RESIDENT_SELECT });
+      if (!resident) throw AppError.notFound('Resident not found');
+      if (resident.status === ResidentStatus.ARCHIVED) return toResidentDto(resident);
 
-    const [activeContracts, activeAssignments] = await this.prisma.$transaction([
-      this.prisma.stayContract.count({ where: { residentId, organizationId, status: ContractStatus.ACTIVE } }),
-      this.prisma.bedAssignment.count({ where: { residentId, organizationId, status: AssignmentStatus.ACTIVE } }),
-    ]);
-    if (activeContracts > 0 || activeAssignments > 0) {
-      throw AppError.conflict('Resident still has an active contract or bed assignment; resolve them first', ErrorCode.RESOURCE_HAS_ACTIVE_ASSIGNMENT);
-    }
+      const activeContracts = await tx.stayContract.count({ where: { residentId, organizationId, status: ContractStatus.ACTIVE } });
+      const activeAssignments = await tx.bedAssignment.count({ where: { residentId, organizationId, status: AssignmentStatus.ACTIVE } });
+      if (activeContracts > 0 || activeAssignments > 0) {
+        throw AppError.conflict('Resident still has an active contract or bed assignment; resolve them first', ErrorCode.RESOURCE_HAS_ACTIVE_ASSIGNMENT);
+      }
 
-    const updated = await this.prisma.resident.update({
-      where: { id: residentId },
-      data: { status: ResidentStatus.ARCHIVED, version: { increment: 1 } },
-      select: RESIDENT_SELECT,
+      const updated = await tx.resident.update({
+        where: { id: residentId },
+        data: { status: ResidentStatus.ARCHIVED, version: { increment: 1 } },
+        select: RESIDENT_SELECT,
+      });
+      return toResidentDto(updated);
     });
-    return toResidentDto(updated);
   }
 }

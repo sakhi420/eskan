@@ -64,6 +64,15 @@ export class IdempotencyService {
     });
 
     if (!existing) return null;
+
+    // Enforce the retention policy lazily: a record past its expiry is treated
+    // as absent (the key can be safely reused) and is removed now so it no
+    // longer occupies storage or participates in the unique index.
+    if (existing.expiresAt != null && existing.expiresAt.getTime() <= Date.now()) {
+      await this.prisma.idempotencyRecord.deleteMany({ where: { id: existing.id } });
+      return null;
+    }
+
     if (existing.requestHash !== requestHash) {
       throw AppError.conflict(
         'Idempotency-Key was reused with a different request body',

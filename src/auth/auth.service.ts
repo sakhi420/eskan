@@ -140,11 +140,27 @@ export class AuthService {
       throw AppError.unauthorized('Invalid refresh token');
     }
 
-    // Reuse detection: a token whose session was already rotated (or revoked)
-    // is presented again -> assume compromise and revoke the whole family.
-    if (session.replacedById !== null || session.revokedAt !== null) {
-      await this.revokeFamily(session.userId, session.family);
-      throw AppError.unauthorized('Refresh token has been reused and was revoked');
+    // Reuse detection: distinguish a genuine later reuse of an already-rotated
+    // token (compromise -> revoke the whole family) from a legitimate concurrent
+    // double-submit of the same token (one winner, one benign 401 loser).
+    if (session.replacedById !== null) {
+      const successor = await this.prisma.refreshSession.findUnique({
+        where: { id: session.replacedById },
+        select: { replacedById: true, revokedAt: true },
+      });
+      const successorConsumed = !successor || successor.replacedById !== null || successor.revokedAt !== null;
+      if (successorConsumed) {
+        await this.revokeFamily(session.userId, session.family);
+        throw AppError.unauthorized('Refresh token has been reused and was revoked');
+      }
+      // The successor is still the active tip: this is a concurrent double-submit
+      // of the same token, not a proven reuse. Reject WITHOUT revoking the family
+      // (revoking here would log out the legitimate client that just won).
+      throw AppError.unauthorized('Refresh token rotation conflict; retry with the new token');
+    }
+    if (session.revokedAt !== null) {
+      // Explicitly revoked (logout / logout-all / change-password).
+      throw AppError.unauthorized('Refresh token has been revoked');
     }
 
     if (session.expiresAt.getTime() <= Date.now()) {
