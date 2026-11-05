@@ -1,206 +1,287 @@
-# فاز ۹ — پلان مهندسی مالی (Ledger / Charge / Payment / Allocation)
+# فاز ۹ — پلان مهندسی مالی (نسخهٔ ۰.۲ — Design Lock)
 
-> وضعیت: **پیش‌طراحی (Design Lock)** — این سند تصمیم‌های بنیادی فاز مالی را پیش از نوشتن
-> خط کد نهایی می‌کند. اقلام P0 این سند پیش از تولید Charge/Payment پیاده نمی‌شوند.
+> **وضعیت:** Design Lock نهایی‌شده برای مبلغ، تاریخ، FK مرکب، Allocation/Reversal،
+> anti-duplicate، غیابت چندماهه، Idempotency مالی و Receipt، با ترتیب Contract-first.
+> این سند جمع‌بندی Findingهای ممیزی 0.2 است و **پیش از M-1/M-2 هیچ migration مالی
+> اجرا نمی‌شود**.
 >
-> هدف: با توجه به اینکه اشتباه در Ledger قابل «اصلاح سادهٔ UI» نیست، درستی داده از سرعتِ
-> افزودن Endpoint مهم‌تر است. فاز انتقالی 8.2.x نقص‌های هم‌روندی چرخه‌حیات را بست؛ این
-> سند آن را به لایهٔ مالی تعمیم می‌دهد.
+> موارد با برچسب **تصمیم باز (D-xx)** نیازمند تصمیم صریح مالک محصول‌اند و تا آن
+> تصمیم، در کد به‌عنوان قانون قطعی hard-code نمی‌شوند.
 
 ---
 
-## ۰. وضعیت و پیش‌نیازها
+## ۰. اصول تقدم و مراجع لازم‌الاجرا
 
-حاصل فاز 8.2.x: قفل سطری (`LockService`) با ترتیب سراسری، idempotency org-scope
-(`organizationId + idempotencyKey + endpoint`)، تاریخ کاری برای تصمیم‌های زمانی، و
-بسته‌شدن race های activate/update/archive/deactivate/transfer/checkout.
-
-سه تصمیم زیر هنوز باز است و **پیش از پیاده‌سازی مالی** قفل می‌شوند:
-
-| اولویت | تصمیم | نتیجهٔ این سند |
-|---|---|---|
-| P0 | معنای تاریخ پایان و ثبت `endDate` مؤثر در `terminate` | بخش ۱ |
-| P0 | Foreign Key مرکب برای ایزولاسیون Tenant/Resident در روابط مالی | بخش ۳ |
-| P0 | قواعد مبلغ/Allocation/Reversal و جلوگیری از Charge تکراری | بخش‌های ۲، ۴–۶ |
+- A-016: `Money = { amount: integer, currency: "AFN" }`؛ **فقط AFN**؛ بدون Float/Double.
+- ADR-0008: اسناد مالی posted حذف نمی‌شوند؛ اصلاح با status/metadata و event معکوس
+  انجام می‌شود؛ **مبلغ منفی مجاز نیست**.
+- ADR-0004: OpenAPI منبع حقیقت قرارداد API است و باید **پیش از ساخت Controller** تثبیت شود.
+- ADR-0009: روز شروع و روز آخر اقامت هر دو در proration شمرده می‌شوند.
+- PostgreSQL: `CHECK` نمی‌تواند aggregate چندردیفی را تضمین کند؛ سقف مجموع با
+  قفل/transaction/trigger اتمیک پیاده می‌شود. FK مرکب به Unique/PK مرجع و index سمت
+  فرزند نیاز دارد؛ deadlock با ترتیب سراسری قفل + retry محدود مدیریت می‌شود.
 
 ---
 
-## ۱. تصمیم نهایی معنای تاریخ (Date/Range Semantics)
+## ۱. معنای تاریخ پایان — قطعی (F-20)
 
-**تصمیم:** مدل داخلی دیتابیس **نیمه‌باز `[startDate, endDate)`** می‌ماند؛ اما «روز آخر
-اقامت» که کاربر اعلام می‌کند باید **شاملِ** باشد، پس هر عملیات پایان‌دهنده باید
-`endDate` را برابر **روز بعد از آخرین شب** ذخیره کند.
+**تصمیم:** مدل DB و API نیمه‌باز `[startDate, endDate)` می‌ماند؛ «آخرین روز اقامت» که
+به کاربر نشان داده می‌شود **شاملِ** است. پس هر پایانِ ناشی از «آخرین شب اقامت» باید
+`endDate = lastDay + 1` ذخیره کند.
 
-- تعداد شب اقامت در یک بازه = `(endDate - startDate)` بر حسب روز.
-- اگر ساکن از اول تا ۳۱ جنوری اقامت داشته و ۳۱ جنوری عازم است:
-  `startDate = 2026-01-01` ، `endDate = 2026-02-01` → **۳۱ شب** (نه ۳۰).
-- «مرز مشترک» انتقال بستر بدون تغییر می‌ماند: تخصیص قبلی در روز `transitionStart`
-  تمام می‌شود (endDate = transitionStart) و تخصیص جدید همان روز شروع می‌شود؛ این با
-  نیمه‌باز سازگار است و تداخلی با قاعدهٔ inclusived آخرین شب ندارد.
+```
+occupiedDays  = endDate - startDate        (بر حسب روز، در قالب int/bigint)
+lastOccupiedInclusive = endDate - 1
+```
 
 ### helper واحد
 ```ts
 // src/common/date/business-date.ts
-export function exclusiveEndForInclusiveLastDay(lastDay: string): string {
-  // lastDay + 1 روز؛ خروجی YYYY-MM-DD بدون وابستگی به ساعت سرور
+export function exclusiveEndForInclusiveLastDay(lastDay: string): string; // lastDay + 1
+```
+
+### قواعد پایان
+- **Checkout/Assignment.end (خروج در روز D):** `endDate = D + 1`؛ یعنی `exclusiveEnd > startDate`
+  شرط validity است (نه `today <= startDate`). یک اقامت یک‌روزه (خروج همان روز شروع) **معتبر** است
+  و در proration درست یک شب/روز شمرده می‌شود. guard فعلی بر این اساس بازنویسی شود.
+- **Transfer:** تاریخ انتقال مرز مشترک است؛ `old.endDate = transitionStart` (بدون `+1`)
+  و `new.startDate = transitionStart`. به هیچ‌وجه `+1` اعمال نمی‌شود.
+- **Terminate (پایان مؤثر):** فیلد `endDate` مؤثر ثبت می‌شود (نه فقط `status=TERMINATED`).
+  - تصمیم D-01 (تصمیم باز): Terminate روی `DRAFT` به معنی «لغو» است یا ممنوع؟ (پیشنهاد: DRAFT → لغو،
+    ACTIVE → پایان مؤثر؛ بدون backdate در MVP مگر نظر مالک).
+  - مؤثر بودن بازهٔ کرایه: `[startDate, terminatedEndDateExclusive)`.
+  - `reversalReason`/`reversedBy`/`reversedAt` روی terminate ثبت شود.
+
+### سیاست داده‌های legacy (F-20.3)
+- **پاک‌سازی blanket `+1 day` ممنوع.** برخی `endDate`های فعلی حاصل Transfer هستند (مرز دقیق) و
+  نباید جابه‌جا شوند.
+- از این نسخه، `BedAssignment.endReason` (enum: `CHECKOUT | TRANSFER | TERMINATE | MANUAL_END`)
+  اضافه شود تا علت پایان ذخیره باشد. برای رکوردهای قبلی، یک **preflight/preview** بنویس که
+  هرAssignment فعال‌خاتمه‌یافته را دسته‌بندی کند (transfer vs end) و:
+  1. نتیجه را به‌صورت گزارش (تعداد/نمونه) نمایش دهد؛
+  2. فقط پس از تأیید صریح، backfill کند؛
+  3. پایان‌های Transfer را دست نخورده نگه دارد.
+- API بین `lastOccupiedDateInclusive` (UX) و `endDateExclusive` (DB/API) تمایز روشن داشته باشد؛
+  نام `endDate` در قرارداد با description صریح شود.
+
+### آزمون اجباری تاریخ
+اقامت یک‌روزه، خروج روز شروع، خروج آخر ماه، عبور از مرز ماه، انتقال همان‌روز، terminate،
+و تطابق `occupiedDays` با الگوی independent oracle برای ماه‌های ۲۸/۲۹/۳۰/۳۱روزه.
+
+## ۲. قواعد مبلغ و جهت — قطعی (F-17, F-04, F-26)
+
+**تصمیم قطعی:** هیچ مبلغ منفی در هیچ مدل مالی ذخیره/منتقل نمی‌شود. مبلغ همهٔ اسناد
+(`Charge`, `Payment`, `Allocation`, `Deposit`, `Expense`, `Credit`, `Reversal event`)
+**بزرگ‌تر از صفر** است. جهت اثر مالی با فیلد صریح بیان می‌شود، نه با علامت مبلغ.
+
+- یک enum `LedgerSide { DEBIT, CREDIT }` اضافه شود؛ `Charge.entrySide` پیش‌فرض `DEBIT`.
+  - بدهی عادی = `DEBIT` (ماندهٔ ساکن را افزایش می‌دهد).
+  - اعتبار غیابت/تخفیف = `CREDIT` (مانده را به‌صورت مثبت کاهش می‌دهد، بدون مبلغ منفی).
+- **Reversal مستقل از Credit:** Reversal یک سند منفیِ متقارن نمی‌سازد؛ سند اصلی
+  `status=REVERSED` می‌شود و یک `LedgerReversal` append-only با `amount > 0`,
+  `direction` همان‌طرف سند اصلی، و reference به سند اولیه ثبت می‌شود.
+- حد range مبلغ: DTO با `@Min(1)` و سقف صریح `2_147_483_647` (int32). صفر برای سند مالی رد می‌شود.
+- جمع/نسبت: `decimal.js` برای proration و rounding half-up؛ هرگز Float/Double.
+- Aggregate گزارش (جمع مانده/دریافت) از `bigint`/`decimal` در SQL استفاده کند و بدون
+  ازدست‌دادن دقت به response serialize شود.
+
+---
+
+## ۳. یکپارچگی Tenant و Resident با FK مرکب — قطعی (F-18, F-07)
+
+### مسئلهٔ اضافه نسبت به نسخهٔ قبل
+FK مرکبِ فقط `(organizationId, id)` جلوی این حالت را نمی‌گیرد: Payment متعلق به Resident A
+و Charge متعلق به Resident B، در یک Organization. لذا **Resident نیز باید در FK دخیل شود**.
+
+### کلیدهای مرجع
+```prisma
+model Resident     { @@unique([organizationId, id]) }
+model StayContract { @@unique([organizationId, id])  @@unique([organizationId, residentId, id]) }
+model Charge       { @@unique([organizationId, id])  @@unique([organizationId, residentId, id]) }
+model Payment      { @@unique([organizationId, id])  @@unique([organizationId, residentId, id]) }
+```
+
+### PaymentAllocation (تغییر ساختار)
+```prisma
+model PaymentAllocation {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  residentId     String @map("resident_id")  @db.Uuid
+  paymentId      String @map("payment_id")   @db.Uuid
+  chargeId       String @map("charge_id")    @db.Uuid
+  amount         Int    // > 0
+  // append-only؛ بدون mutate/delete
+
+  payment Payment @relation(fields: [organizationId, residentId, paymentId], references: [organizationId, residentId, id])
+  charge  Charge  @relation(fields: [organizationId, residentId, chargeId],  references: [organizationId, residentId, id])
 }
 ```
+- در نتیجه Payment و Charge همواره هم‌Organization و هم‌Resident اند.
+- `Charge → StayContract` (وقتی `contractId` غیر null): FK مرکب
+  `(organizationId, residentId, contractId)` → StayContract، تا Contract متعلق به همان
+  Resident باشد.
+- `TemporaryAbsence → Charge` و هر relation دیگر دارای resident نیز همین قاعده.
 
-### عملیات‌هایی که اصلاح می‌شوند (در ابتدای فاز ۹)
-1. `AssignmentsService.end()`: به‌جای `endDate = businessToday` ، از
-   `exclusiveEndForInclusiveLastDay(businessToday)` استفاده شود.
-2. `ContractsService.checkout()`: همان قاعده؛ `endDate = روز بعد از امروز`.
-3. `ContractsService.terminate()`: **فیلد `endDate` مؤثر** ثبت شود (امروز پایان
-   مؤثر است → `endDate = exclusiveEndForInclusiveLastDay(businessToday)`). این دقیقاً
-   همان خلأ «قرارداد از چه روزی دیگر کرایه تولید نکند» را می‌بندد.
-   - قرارداد در طول بازهٔ `[startDate, terminatedEndDate)` کرایه تولید می‌کند.
-4. CHECK های DB بازه (`end_date > start_date` و `daterange [)` ) بدون تغییر می‌مانند؛
-   فقط مقدارِ ذخیره‌شده اکنون «انحصاری» است.
+### قفل‌گذاری tenant-scoped (F-07)
+- `LockService.lockForUpdate` امضای `(tx, entity, id, organizationId?)` بگیرد و در صورت
+  وجود، `WHERE id=$1 AND organization_id=$2 FOR UPDATE` اجرا کند تا یک tenant نتواند ردیف
+  tenant دیگر را قفل/Block کند (کاهش DoS بین سازمان‌ها).
 
-> ADR-0009 («روز شروع و روز آخر هر دو حساب شوند») با این قاعده **اجرا** می‌شود: چون
-> `endDate` انحصاری است، روز آخر به‌صورت طبیعی داخل بازه می‌ماند.
+### مهاجرت غیرمخرب (M-2)
+1. preflight: شمارش cross-tenant **و** cross-resident referenceها (query های ممیزی)؛
+   در صورت وجود، fail-fast بدون mutate.
+2. ساخت unique های مرکب روی والدها.
+3. `ADD COLUMN organization_id/resident_id` (nullable) + backfill از والدها.
+4. NOT NULL نهایی؛ `DROP` FK ساده و `ADD` FK مرکب با حفظ onDelete و ساخت index فرزند.
+5. rehearsal روی clone/staging الزامی است.
 
----
+## ۴. جلوگیری از Charge تکراری — قطعی (F-23, F-06)
 
-## ۲. قواعد پول و مبلغ
+`Idempotency-Key` فقط retry را حل می‌کند؛ جلوگیری از سند تکراری با **unique business key**:
 
-- واحد: AFN؛ ذخیرهٔ صحیح `Int` (واحد فرعی، یعنی «افغانی» کامل). **ممنوعیت کامل float/double**.
-- قیود مثبت‌بودن در دیتابیس (نه فقط در لایهٔ برنامه):
-  - `Charge.amount > 0` (به جز `ChargeType = ADJUSTMENT` که می‌تواند منفیِ مجاز را
-    به‌صورت صریح تجاری بپذیرد؛ در این صورت `amount != 0`).
-  - `Payment.amount > 0` ، `DepositTransaction.amount > 0` ، `Expense.amount > 0`.
-  - `PaymentAllocation.amount > 0`.
-- بازهٔ Charge: `CHECK (period_end > period_start)`.
-- API مبلغ را به‌صورت `{ amount, currency }` منتقل می‌کند (الگوی موجود `MoneyDto`).
-
-## ۳. یکپارچگی Tenant با Foreign Key مرکب
-
-### مسئله
-روابط مالی فعلاً فقط به `id` والد اشاره می‌کنند (مثلاً `PaymentAllocation.paymentId`
-و `chargeId`). این فقط «وجود» والد را تضمین می‌کند، نه «تعلق والد به همان سازمان/ساکن».
-سناریوی خطرناک: Payment ساکنِ سازمان A به Charge ساکنِ سازمان B تخصیص یابد.
-
-### راه‌حل: FK مرکب روی `(organizationId, id)`
-برای آنکه دیتابیس «والد و فرزند هم‌سازمان‌اند» را تضمین کند:
-
-1. به هر والد یک **یکتایی مرکب** اضافه شود:
-   ```prisma
-   // Resident, StayContract, Hostel, Bed, Room، و در صورت نیاز User را هم شامل می‌شود
-   @@unique([organizationId, id])
-   ```
-2. فرزندها `organizationId` را نگه می‌دارند و FK مرکب می‌گیرند. مثلاً:
-   ```prisma
-   model PaymentAllocation {
-     id             String @id @default(uuid()) @db.Uuid
-     organizationId String @map("organization_id") @db.Uuid
-     paymentId      String @map("payment_id")      @db.Uuid
-     chargeId       String @map("charge_id")       @db.Uuid
-     amount         Int
-     // ...
-     payment Payment @relation(fields: [organizationId, paymentId], references: [organizationId, id])
-     charge  Charge  @relation(fields: [organizationId, chargeId],  references: [organizationId, id])
-   }
-   ```
-3. روابط کلیدی که باید مرکب شوند (فهرست کامل تصویب شده):
-   - `PaymentAllocation → Payment` و `PaymentAllocation → Charge` (P0).
-   - `Charge → Resident` و `Charge → StayContract` (P0).
-   - `Payment → Resident` (P0).
-   - `DepositTransaction → Resident` ، `Expense → Hostel` (P0).
-   - (اختیاری) `BedAssignment → Bed/Resident/StayContract`؛ اینها فعلاً در لایهٔ برنامه
-     محافظت می‌شوند و در یک مرحلهٔ بعدی مرکب می‌شوند.
-
-### استراتژی مهاجرت غیرمخرب
-Prisma کاهش FK موجود و جایگزینی مرکب را یکجا نمی‌سازد؛ بنابراین مهاجرت چندمرحله‌ای:
-1. `ADD COLUMN organization_id` (بدون NOT NULL) به `payment_allocations` + backfill از والد.
-2. ساخت `UNIQUE (organization_id, id)` روی والدها (id قبلاً PK است؛ unique مرکب بی‌خطا بازمی‌گردد).
-3. `UPDATE` نهایی NOT NULL؛ سپس `DROP` FK ساده و `ADD` FK مرکب.
-4. اعتبارسنجی fail-fast: سطرهای ناسازگار (که نباید وجود داشته باشند) پیش از step 3 رفع می‌شوند.
-
-### قفل‌گذاری و ترتیب سراسری (توسعهٔ LockService)
-برای Allocation و Reversal، ترتیب قفل ثابت می‌شود تا deadlock نشود:
-`Organization → Resident → StayContract → Charge → Payment`.
-
----
-
-## ۴. جلوگیری از Charge تکراری (بدون اتکای صرف به Idempotency-Key)
-
-دو درخواست با دو کلید متفاوت برای یک دورهٔ یکسان نباید دو Charge بسازند؛ پس یک
-**کلید منطقی یکتا** لازم است:
-
-```prisma
-// stay_contracts / charges
-@@index([organizationId, residentId, type, periodStart, periodEnd])
+```sql
+-- کرایهٔ ماهانه: فقط یک Charge به ازای (contract, period)
+CREATE UNIQUE INDEX uq_charge_rent_period
+  ON charges (organization_id, contract_id, period_start, period_end)
+  WHERE type = 'RENT' AND contract_id IS NOT NULL;
 ```
 
-- برای صدور دوره‌ای (مثلاً کرایهٔ ماهیانه) از `INSERT ... ON CONFLICT DO NOTHING` با
-  یک partial unique index روی `(organizationId, residentId, contractId, type,
-  periodStart, periodEnd)` استفاده شود تا دو worker هم‌زمان فقط یک Charge بسازند.
-- `Idempotency-Key` همچنان برای «پاسخ تکراری همان درخواست» استفاده می‌شود؛ کلید منطقی
-  برای «منطق کسب‌وکارِ بدون تکرار» مکمل آن است.
-
-## ۵. قواعد Allocation (تسویهٔ اتمی)
-
-هدف: مجموع Allocation های یک Payment هرگز از «مبلغ تخصیص‌نیافته» بیشتر نشود و مجموع
-Allocation های یک Charge هرگز از «ماندهٔ پرداخت‌نشده» بیشتر نشود.
-
-- Allocation همیشه داخل **یک تراکنش** با قفل والدهای `Charge` و `Payment` (به ترتیب
-  سراسری بخش ۳) انجام می‌شود:
-  1. قفل `Charge` و `Payment`.
-  2. خواندن `allocated` فعلی هر دو (بعد از قفل).
-  3. بررسی: `amount <= payment.unallocated` و `amount <= charge.outstanding`.
-  4. درج Allocation + به‌روزرسانی counters (در صورت نگهداری `allocatedAmount` میان‌جمعی)
-     یا محاسبهٔ زندهٔ مجموع با `SELECT ... FOR UPDATE` روی والدها.
-- «تسویهٔ کامل» وقتی Charge → وضعیت `SETTLED` (در صورت نیاز افزودن مقدار به enum
-  `LedgerEntryStatus` یا یک ستون `settledAt` مجزا) فقط با CAS بر وضعیت/نسخه.
-- race دو پرداخت هم‌زمان یک بدهی: قفل والد + بررسی ماندهٔ پس از قفل، مجموع را مهار می‌کند.
-
-## ۶. Reversal سازگار با Allocation ها
-
-- Reversal **حذف نمی‌کند**: یک رکورد جدید با `status = REVERSED` نمی‌سازد؛ بلکه رکورد
-  اصلی به `REVERSED` و یک رکورد معکوسِ متقارن (منفی مبلغ) POSTED می‌شود (رویکرد
-  دفترداری دوطرفه). تاریخچه همیشه کامل می‌ماند.
-- قبل از Reversal یک Charge:
-  - اگر Charge هنوز Allocation دارد، Reversal باید ابتدا Allocation ها را آزاد
-    (un-allocate) و ماندهٔ Payment مربوطه را برگرداند، سپس Charge را معکوس کند —
-    همه در یک تراکنش با CAS روی `version/status`.
-  - اگر Charge `SETTLED` است، Reversal پرداخت‌های تخصیص‌یافته را به‌صورت `unapplied`
-    باقی می‌گذارد و ماندهٔ ساکن را چشمهٔ قابل پیش‌بینی به‌روز می‌کند.
-- قبل از Reversal یک Payment: Allocation ها برگردانده شوند؛ Charge ها دوباره باز (unsettled)
-  می‌شوند؛ Payment معکوس می‌شود.
-- ثبت `reversalReason` (اجباری) و `reversedBy` و `reversedAt`.
-
-## ۷. Idempotency مالی و Audit Writer
-
-- **Idempotency مالی:** هر mutating مالی (`chargeCreate`, `paymentCreate`,
-  `allocationCreate`, `reversalX`) از `IdempotencyService.runAtomic` با scope
-  `(organizationId, key, endpoint)` استفاده می‌کند و پاسخ ذخیره‌شده را بازمی‌گرداند.
-  - نکته: انقضای lazy فعلی برای سند مالی قابل قبول نیست؛ برای اسناد مالی یک **retention
-    ابدی/audit-aware** (بدون پاک‌سازی فیزیکی) در نظر گرفته شود، چون replay یک پرداخت
-    حتی ماه‌ها بعد باید به همان رکورد اشاره کند، نه رکورد جدید.
-- **Audit Writer (P1):** یک سرویس `AuditService` که Actor را از `CurrentUser` می‌گیرد و
-  برای هر عملیات مالی `AuditEvent` (با `actorUserId`، `entityType`, `entityId`, `before`,
-  `after`, `traceId`, `ipAddress`, `userAgent`) ثبت می‌کند. رکوردهای مالی بدون Actor
-  ثبت نمی‌شوند (رد درخواست بدون توکن معتبر).
+- Charge نوع `RENT` باید `contractId` غیر null داشته باشد (validation + CHECK).
+- برای credit/Adjustment غیابت، key منبع یکتا: `(organization_id, source_type, source_id, period_start, period_end)`.
+- درج با `INSERT ... ON CONFLICT DO NOTHING` (یا `createMany/skipDuplicates`) تا دو worker فقط یک ردیف بسازند.
 
 ---
 
-## ۸. ترتیب اجرای مهاجرت‌ها و ریسک انتشار
+## ۵. Allocation و Reversal — قطعی (F-19, F-03, F-05)
 
-مرحله‌بندی (هر مرحله خروجی قابل تست دارد):
+### Allocation append-only
+- `PaymentAllocation` فقط append می‌شود؛ **amount تغییر نمی‌کند و row حذف نمی‌شود**.
+- برگشت تخصیص با یک رخداد مستقل `AllocationRelease` (append-only, amount>0) با reference
+  به Allocation ثبت می‌شود؛ مجموع releaseها هرگز از amount اصلی بیشتر نمی‌شود.
+- **حذف** `@@unique([paymentId, chargeId])`: یک Payment می‌تواند در عملیات‌های بعدی دوباره
+  به همان Charge (پس از release) تخصیص یابد. uniqueness بر اساس `operation id/idempotency
+  source` است، نه محدودیت مادام‌العمر Payment+Charge.
 
-1. **M-1 (قواعد بازه/مبلغ):** helper تاریخ + اصلاح `end`/`checkout`/`terminate` +
-   CHECK های مبلغ و بازه. بدون تغییر ساختار جدول (فقط constraint).
-2. **M-2 (FK مرکب):** مراحل غیرمخرب بخش ۳ (ستون `organizationId` + unique مرکب + swap FK).
-3. **M-3 (مالی هسته):** ماژول Charge/Payment/Allocation/Deposit/Expense + lock order +
-   anti-duplicate index + allocation اتمی + reversal + idempotency + audit.
-4. **M-4 (API/OpenAPI):** مستندسازی نهایی endpoint ها و enum خطاهای مالی؛
-   `openapi:validate` سبز.
+### invariant اتمیک (در یک transaction)
+1. قفل Resident (طبق ترتیب سراسری)؛
+2. قفل Chargeهای درگیر (مرتب بر اساس UUID) و Payment؛
+3. بازخوانی status و جمع Allocationهای فعال **پس از قفل**؛
+4. کنترل: `allocation.amount <= charge.outstanding` و `<= payment.unallocated`؛
+5. درج Allocation (و در صورت لزوم بروزرسانی cached settlement با CAS).
 
-## ۹. وضعیت تست و CI
+### تفکیک وضعیت اعتبار از وضعیت تسویه
+- `LedgerEntryStatus { POSTED, REVERSED }` فقط وضعیت **اعتبار** سند است.
+- وضعیت تسویه (`OPEN | PARTIAL | SETTLED`) derived (از outstanding) یا به‌صورت cached field
+  با نگهداری اتمیک باشد؛ در `LedgerEntryStatus` مشترک مخلوط نشود.
 
-- هر مرحله با smoke واقعی (HTTP + بررسی وضعیت نهایی DB) پوشش داده می‌شود؛ برای آزمون
-  race های مالی از barrier کنترل‌شده دو درخواست هم‌زمان استفاده می‌شود.
-- CI (پیش‌از انتشار): job های `build`، `openapi:validate`، `migrate deploy` روی
-  PostgreSQL تمیز، و smoke های فاز مالی. (حال حاضر CI وجود ندارد — به‌عنوان P2 اضافه شود.)
-- NOTE محیط فعلی: `jest` (unit) به‌دلیل ناسازگاری ESM در Node حاضر اجرا نمی‌شود؛
-  اجرای unit-test ها مستلزم `transformIgnorePatterns`/Node ≥ 24.9 است (جدا از این سند).
+### Reversal (void) و refund واقعی جدایند
+- **Void (باطل‌کردن سند اشتباه):** سند اصلی `REVERSED` + `LedgerReversal` append-only؛
+  Allocationهای معتبرِ Charge در صورت وجود باید ابتدا release/تعیین‌تکلیف شوند، وگرنه reversal
+  block می‌شود.
+- **Refund واقعی (خروج وجه):** یک رویداد خروج وجه مستقل (مثلاً `PaymentRefund`)؛ با void یکی نیست.
+- تصمیم D-02 (تصمیم باز): آیا partial reversal لازم است؟ (پیشنهاد MVP: فقط full void + refund کامل؛
+  partial در صورت نیاز بعدی).
+
+## ۶. غیابت چندماهه و Credit — قطعی (F-21, F-04)
+
+یک `TemporaryAbsence` عبوری از مرز ماه چند Credit ماهانه تولید می‌کند؛ `creditChargeId`
+تک‌مقداری کافی نیست. بنابراین:
+
+```prisma
+model AbsenceCredit {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  absenceId      String   @map("absence_id")  @db.Uuid
+  chargeId       String   @map("charge_id")   @db.Uuid
+  periodStart    DateTime @map("period_start") @db.Date
+  periodEnd      DateTime @map("period_end")   @db.Date
+  amount         Int      // > 0
+
+  absence TemporaryAbsence @relation(fields: [organizationId, absenceId], references: [organizationId, id])
+  charge  Charge           @relation(fields: [organizationId, residentId, chargeId], references: [organizationId, residentId, id])
+  // @@unique([organizationId, absenceId, periodStart, periodEnd])
+}
+```
+- یک غیابت → چند سطر `AbsenceCredit` (یک سطر به ازای هر ماه).
+- unique = absence + دوره (نه صرفاً absence) تا نتوان دو Credit برای یک ماه ساخت.
+- Credit مربوطه از نوع `Charge` با `entrySide = CREDIT` و `amount > 0` است.
+
+---
+
+## ۷. Idempotency مالی و Receipt numbering — قطعی (F-22, F-16, F-25)
+
+### Idempotency مالی (بدون انقضای lazy)
+- `IdempotencyRecord.expiresAt` nullable شود + افزودن `retentionClass` (مثلاً
+  `TRANSIENT | PERMANENT`). رکورد `PERMANENT` در `getReplay` **هرگز lazy-delete نمی‌شود**.
+- `runAtomic` باید `retentionClass` بگیرد؛ مسیر مالی از `PERMANENT` استفاده کند تا replay
+  یک پرداخت، ماه‌ها بعد به همان رکورد اشاره کند (نه رکورد جدید).
+- رکورد مالی فقط fingerprint/response canonical نگه می‌دارد؛ **secrets/raw refresh token
+  ذخیره نمی‌شود**؛ purge policy نباید رکورد مالی را دوباره قابل اجرا کند (یا soft-archive).
+
+### Receipt numbering
+- شمارنده به ازای `(organizationId, period)` (مثلاً سال) باشد؛ درج اتمی با قفل ردیف روی
+  `ReceiptCounter`.
+- **gap policy (تصمیم D-03):** شمارهٔ رسید unique و پایدار است؛ gapless بودن تضمین نمی‌شود
+  مگر الزام حقوقی/عملیاتی صریح باشد.
+- **Offline:** دستگاه آفلاین یک `provisionalReceiptId` محلی می‌سازد؛ شمارهٔ قطعی سازمانی فقط
+  سمت سرور صادر می‌شود و در sync بازگردانده می‌شود. دو شناسه جدا نگه داشته شوند.
+
+### ترتیب سراسری قفل (F-03, F-07) و deadlock
+`Organization → Resident → StayContract → Charge* (مرتب بر اساس UUID) → Payment* (مرتب)
+→ Allocation* (مرتب) → ReceiptCounter → SyncState`
+- همهٔ mutationهای مالی از همین ترتیب استفاده کنند؛ deadlock با retry محدود + خطای
+  serialization آگاهانه مدیریت شود.
+
+## ۸. ترتیب اجرا — Contract-first — قطعی (F-24)
+
+ADR-0004: OpenAPI منبع حقیقت است؛ پس قرارداد مالی **پیش از Controller** قفل می‌شود.
+
+| مرحله | محتوا | خروجی / Gate |
+|---|---|---|
+| **Gate 0 — Design Lock** | رفع تناقض‌های فوق + تصویب D-01..D-18 | این سند (نسخهٔ 0.2) commit شود؛ هیچ P0 باز نماند |
+| **Gate 1 — Contract Lock** | OpenAPI برای Charge/Allocation/AllocationRelease/Deposit/Expense/Credit/Account/Statement، enum خطاها، `lastOccupiedDateInclusive` vs `endDateExclusive`، permission matrix، replay | `openapi:validate` سبز؛ **قبل از هر Controller** |
+| **M-1 — Date + Amount** | helper تاریخ، اصلاح `end`/`checkout`/`terminate`، same-day، CHECK های amount/period، preflight legacy date (بدون blanket +1) | test تاریخ + oracle |
+| **M-2 — Composite FK** | unique مرکب (tenant+resident)، ستون‌های org/resident در Allocation، preflight cross-org/resident، swap FK | rehearsal روی clone |
+| **M-3a — Charge/Credit Engine** | Charge، natural key، cycle/proration، credit/adjustment، idempotency، audit + oracle ماه‌های ۲۸..۳۱ |
+| **M-3b — Payment/Allocation Engine** | Payment + receipt + allocation/release append-only + invariant اتمی + race test |
+| **M-3c — Deposit/Expense/Reversal** | deposit scope، refund/forfeit، expense، void/refund واقعی، reconcile |
+| **M-3d — Account/Statement/Audit/Sync** | read models، statement، append-only audit + outbox در همان transaction |
+| **M-4 — Parity & Release** | Controllerها طبق OpenAPI قفل‌شده، CI، Jest ESM fix، integration، migration rehearsal |
+
+> M-4 دیگر «اولین طراحی API» نیست؛ مرحلهٔ تطبیق نهایی و Release Gate است.
+
+---
+
+## ۹. وضعیت GO / NO-GO
+
+| فعالیت | تصمیم |
+|---|---|
+| ادامهٔ Phase 9-A (اصلاح پلن و قفل تصمیم‌ها) | **GO** |
+| قفل OpenAPI مالی (Gate 1) | **GO — پیش از Controller** |
+| اجرای M-1 | **NO-GO** تا تصویب D-01 (terminate) و D-04 (legacy cutover) و amount>0 |
+| اجرای M-2 | **NO-GO** تا finalization resident-consistency و preflight |
+| پیاده‌سازی Charge/Payment/Allocation | **NO-GO** تا Gate 0/1 و رفع F-03/F-04/F-05/F-06/F-17..F-26 |
+| انتشار عمومی | **NO-GO** تا CI/Jest، tenant-scoped lock، OpenAPI drift و Refresh recovery |
+
+---
+
+## ۱۰. تصمیم‌های باز مالک محصول (D-xx)
+
+| شناسه | تصمیم | پیشنهاد مهندسی |
+|---|---|---|
+| D-01 | Terminate روی DRAFT (= لغو) یا ممنوع | DRAFT = لغو؛ ACTIVE = پایان مؤثر؛ بدون backdate در MVP |
+| D-02 | partial reversal لازم است؟ | MVP: full void + refund کامل |
+| D-03 | نیاز به gap-less receipt number | gap مجاز؛ unique و پایدار کافی است |
+| D-04 | سیاست cutover تاریخ legacy | preflight/preview + تأیید صریح؛ انتقال پایان‌ها بدون +1 |
+| D-05 | آیا ساکن می‌تواند با پیش‌پرداخت/credit بدهی ساکن دیگر را تسویه کند؟ | خیر؛ FK/قفل resident همواره یکسان |
+| D-06 | `NEEDS_REPAIR` روی منبع اشغال‌شده مجاز؟ | جدول transition مجاز Maintenance تعریف شود (پیش‌از Release سند شود) |
+| D-07..D-18 | voucher، deposit refund جزئی، statement format، partial credit و … | در assumptions/open-questions ثبت و با مالک تصویب شود |
+
+---
+
+## پیوست — آدرس منابع ممیزی 0.2
+
+خروجی این سند، اعمال یافته‌های زیر از گزارش 0.2 است: F-17 منفی/جهت، F-18 resident-consistency،
+F-19 append-only allocation/reversal، F-20 legacy/same-day/terminate، F-21 multi-month credit،
+F-22 idempotency permanent، F-23 unique business key، F-24 contract-first، F-26 int/overflow،
+F-03/F-05/F-07 قفل و refund واقعی. مبلغ مثبت، بدون signed-negative، مطابق A-016 و ADR-0008.

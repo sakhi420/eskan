@@ -514,7 +514,9 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 - NOTE: unit-test `jest` در Node حاضر به‌دلیل ESM اجرا نمی‌شود (ناسازگاری از پیش‌موجود؛ رفع در CI).
 
 ## پلان مهندسی فاز ۹
-- سند کامل تصمیم‌ها: `docs/project/phase-9-engineering-plan.md` (معنای تاریخ پایان، FK مرکب، قواعد مالی/Allocation/Reversal، idempotency مالی، Audit، اجرای مهاجرت‌ها، CI).
+- سند کامل تصمیم‌ها: `docs/project/phase-9-engineering-plan.md` (نسخهٔ **0.2 — Design Lock** پس از ممیزی 0.2).
+- رفع تناقض‌های P0 ممیزی: مبلغ بدون منفی/جهت `DEBIT|CREDIT`، FK مرکب tenant+resident، Allocation append-only + انتشار، anti-duplicate با partial UNIQUE، legacy date cutover و same-day، غیابت چندماهه، Idempotency مالی PERMANENT، Receipt numbering، ترتیب Contract-first.
+- **وضعیت:** Gate 0 (Design Lock) و Gate 1 (OpenAPI مالی) GO؛ **M-1 و M-2 فعلاً NO-GO** تا تصویب تصمیم‌های باز D-01..D-18 توسط مالک محصول.
 
 ### Next actions
 - فاز ۹ مالی.
