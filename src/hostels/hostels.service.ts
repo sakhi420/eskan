@@ -3,7 +3,8 @@ import { PrismaService } from '../database/prisma.service';
 import { AppError } from '../common/errors/app-error';
 import { ErrorCode } from '../common/errors/error-codes';
 import { IdempotencyService } from '../common/idempotency/idempotency.service';
-import { ArchiveStatus } from '../generated/prisma/enums';
+import { LockService } from '../common/concurrency/lock.service';
+import { ArchiveStatus, AssignmentStatus, ContractStatus } from '../generated/prisma/enums';
 import { HostelDto } from './dto/hostel.dto';
 
 const HOSTEL_SELECT = {
@@ -63,6 +64,7 @@ export class HostelsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly idempotency: IdempotencyService,
+    private readonly locks: LockService,
   ) {}
 
   async list(organizationId: string, page: number, size: number, q?: string) {
@@ -168,29 +170,60 @@ export class HostelsService {
   }
 
   async archive(organizationId: string, hostelId: string) {
-    const hostel = await this.prisma.hostel.findFirst({
-      where: { id: hostelId, organizationId },
-      select: HOSTEL_SELECT,
-    });
-    if (!hostel) throw AppError.notFound('Hostel not found');
+    return this.prisma.$transaction(async (tx) => {
+      // Lock the hostel row so a concurrent room/contract/assignment create
+      // (which also locks the hostel in the canonical order) serializes before
+      // the archive check-and-set below.
+      await this.locks.lockHostel(tx, hostelId);
 
-    if (hostel.status === ArchiveStatus.ARCHIVED) return toHostelDto(hostel);
+      const hostel = await tx.hostel.findFirst({
+        where: { id: hostelId, organizationId },
+        select: HOSTEL_SELECT,
+      });
+      if (!hostel) throw AppError.notFound('Hostel not found');
 
-    const activeRooms = await this.prisma.room.count({
-      where: { hostelId, status: ArchiveStatus.ACTIVE },
-    });
-    if (activeRooms > 0) {
-      throw AppError.conflict(
-        'Hostel still has active rooms; archive them first',
-        ErrorCode.RESOURCE_HAS_ACTIVE_ASSIGNMENT,
-      );
-    }
+      if (hostel.status === ArchiveStatus.ARCHIVED) return toHostelDto(hostel);
 
-    const updated = await this.prisma.hostel.update({
-      where: { id: hostelId },
-      data: { status: ArchiveStatus.ARCHIVED, version: { increment: 1 } },
-      select: HOSTEL_SELECT,
+      const activeRooms = await tx.room.count({
+        where: { hostelId, status: ArchiveStatus.ACTIVE },
+      });
+      if (activeRooms > 0) {
+        throw AppError.conflict(
+          'Hostel still has active rooms; archive them first',
+          ErrorCode.RESOURCE_HAS_ACTIVE_ASSIGNMENT,
+        );
+      }
+
+      const activeContracts = await tx.stayContract.count({
+        where: { hostelId, organizationId, status: ContractStatus.ACTIVE },
+      });
+      if (activeContracts > 0) {
+        throw AppError.conflict(
+          'Hostel still has active contracts; close them first',
+          ErrorCode.RESOURCE_HAS_ACTIVE_ASSIGNMENT,
+        );
+      }
+
+      const activeAssignments = await tx.bedAssignment.count({
+        where: {
+          organizationId,
+          status: AssignmentStatus.ACTIVE,
+          bed: { room: { hostelId } },
+        },
+      });
+      if (activeAssignments > 0) {
+        throw AppError.conflict(
+          'Hostel still has active assignments; end them first',
+          ErrorCode.RESOURCE_HAS_ACTIVE_ASSIGNMENT,
+        );
+      }
+
+      const updated = await tx.hostel.update({
+        where: { id: hostelId },
+        data: { status: ArchiveStatus.ARCHIVED, version: { increment: 1 } },
+        select: HOSTEL_SELECT,
+      });
+      return toHostelDto(updated);
     });
-    return toHostelDto(updated);
   }
 }

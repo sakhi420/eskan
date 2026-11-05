@@ -50,6 +50,33 @@ function overlapsOver(existing: AssignmentRow[], startDate: string, endDate?: st
   });
 }
 
+/**
+ * Asserts that a proposed `[start, end)` assignment/transfer range falls inside
+ * a contract's half-open `[contractStart, contractEnd)` range. `end === null`
+ * means open-ended (allowed up to, but not including, the contract end).
+ */
+function assertRangeWithinContract(
+  start: Date,
+  end: Date | null,
+  contractStart: Date,
+  contractEnd: Date | null,
+  label: string,
+): void {
+  const s = start.getTime();
+  if (s < contractStart.getTime()) {
+    throw AppError.conflict(`${label} startDate is before the contract start date`, ErrorCode.BUSINESS_RULE_VIOLATION);
+  }
+  if (contractEnd) {
+    const ce = contractEnd.getTime();
+    if (s >= ce) {
+      throw AppError.conflict(`${label} startDate is on or after the contract end date`, ErrorCode.BUSINESS_RULE_VIOLATION);
+    }
+    if (end && end.getTime() > ce) {
+      throw AppError.conflict(`${label} extends beyond the contract end date`, ErrorCode.BUSINESS_RULE_VIOLATION);
+    }
+  }
+}
+
 function isExclusionViolation(err: unknown): boolean {
   if (typeof err !== 'object' || err === null) return false;
   const e = err as { code?: string; message?: string };
@@ -208,21 +235,16 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
       throw AppError.conflict('Contract is not active', ErrorCode.CONTRACT_NOT_ACTIVE);
     }
 
-    // Assignment must fall within the contract's active date range. An open-ended
-    // assignment is allowed, but its startDate must not fall after the contract's
-    // end date and an explicit endDate must not extend past the contract's end.
-    const start = dateMs(toDateOnly(dto.startDate));
-    if (start < dateMs(contract.startDate)) {
-      throw AppError.conflict('Assignment startDate is before the contract start date', ErrorCode.BUSINESS_RULE_VIOLATION);
-    }
-    if (contract.endDate) {
-      if (start > dateMs(contract.endDate)) {
-        throw AppError.conflict('Assignment startDate is after the contract end date', ErrorCode.BUSINESS_RULE_VIOLATION);
-      }
-      if (dto.endDate != null && dateMs(toDateOnly(dto.endDate)) > dateMs(contract.endDate)) {
-        throw AppError.conflict('Assignment extends beyond the contract end date', ErrorCode.BUSINESS_RULE_VIOLATION);
-      }
-    }
+    // Assignment must fall within the contract's half-open [startDate, endDate).
+    // An open-ended assignment is allowed, but its startDate must not be on/after
+    // the contract end and an explicit endDate must not extend past the contract.
+    assertRangeWithinContract(
+      toDateOnly(dto.startDate),
+      dto.endDate ? toDateOnly(dto.endDate) : null,
+      contract.startDate,
+      contract.endDate,
+      'Assignment',
+    );
   }
 
   /**
@@ -319,13 +341,30 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
         }
 
         const transitionStart = toDateOnly(dto.startDate);
-        if (dateMs(transitionStart) < dateMs(current.startDate)) {
-          throw AppError.conflict('Transfer startDate cannot be before the current assignment start date', ErrorCode.BUSINESS_RULE_VIOLATION);
+        if (dateMs(transitionStart) <= dateMs(current.startDate)) {
+          throw AppError.conflict('Transfer startDate must be after the current assignment start date', ErrorCode.BUSINESS_RULE_VIOLATION);
         }
         if (current.endDate && dateMs(transitionStart) > dateMs(current.endDate)) {
           throw AppError.conflict('Transfer startDate cannot be after the current assignment end date', ErrorCode.BUSINESS_RULE_VIOLATION);
         }
 
+        // Discover destination parents for lock order, then re-read the bed
+        // AFTER locking so status decisions never use a pre-lock snapshot.
+        const dest = await tx.bed.findFirst({
+          where: { id: dto.bedId, organizationId },
+          select: { roomId: true, room: { select: { hostelId: true } } },
+        });
+        if (!dest) throw AppError.notFound('Bed not found');
+
+        // Serialize against concurrent archive/checkout/terminate before any
+        // status re-check. Lock order: Hostel -> Room -> Bed -> Resident -> Contract.
+        await this.locks.lockHostel(tx, dest.room.hostelId);
+        await this.locks.lockRoom(tx, dest.roomId);
+        await this.locks.lockBed(tx, dto.bedId);
+        await this.locks.lockResident(tx, current.residentId);
+        await this.locks.lockContract(tx, current.contractId);
+
+        // Authoritative destination re-read after acquiring the locks.
         const bed = await tx.bed.findFirst({
           where: { id: dto.bedId, organizationId },
           include: {
@@ -340,14 +379,6 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
           },
         });
         if (!bed) throw AppError.notFound('Bed not found');
-
-        // Serialize against concurrent archive/checkout/terminate before any
-        // status re-check. Lock order: Hostel -> Room -> Bed -> Resident -> Contract.
-        await this.locks.lockHostel(tx, bed.room.hostelId);
-        await this.locks.lockRoom(tx, bed.roomId);
-        await this.locks.lockBed(tx, dto.bedId);
-        await this.locks.lockResident(tx, current.residentId);
-        await this.locks.lockContract(tx, current.contractId);
 
         if (bed.status !== BedStatus.ACTIVE) throw AppError.conflict('Bed is inactive', ErrorCode.BUSINESS_RULE_VIOLATION);
         if (bed.maintenanceStatus === MaintenanceStatus.OUT_OF_SERVICE || bed.maintenanceStatus === MaintenanceStatus.NEEDS_REPAIR) {
@@ -370,12 +401,16 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
         if (contract.hostelId !== bed.room.hostelId) {
           throw AppError.conflict('New bed does not belong to the contract hostel', ErrorCode.BUSINESS_RULE_VIOLATION);
         }
-        if (dateMs(transitionStart) < dateMs(contract.startDate)) {
-          throw AppError.conflict('Transfer startDate is before the contract start date', ErrorCode.BUSINESS_RULE_VIOLATION);
-        }
-        if (contract.endDate && dateMs(transitionStart) > dateMs(contract.endDate)) {
-          throw AppError.conflict('Transfer startDate is after the contract end date', ErrorCode.BUSINESS_RULE_VIOLATION);
-        }
+
+        // Transfer range (including any explicit new endDate) must stay within
+        // the contract's half-open [startDate, endDate) window.
+        assertRangeWithinContract(
+          transitionStart,
+          dto.endDate ? toDateOnly(dto.endDate) : null,
+          contract.startDate,
+          contract.endDate,
+          'Transfer',
+        );
 
       // CAS: end the current assignment only if still ACTIVE and unmodified.
         const endedResult = await tx.bedAssignment.updateMany({

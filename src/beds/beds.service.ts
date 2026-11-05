@@ -198,28 +198,34 @@ export class BedsService {
   }
 
   async deactivate(organizationId: string, bedId: string) {
-    const bed = await this.prisma.bed.findFirst({
-      where: { id: bedId, organizationId },
-      select: BED_SELECT,
-    });
-    if (!bed) throw AppError.notFound('Bed not found');
-    if (bed.status === BedStatus.INACTIVE) return toBedDto(bed);
+    return this.prisma.$transaction(async (tx) => {
+      // Lock the bed row so a concurrent assignment create (which locks the bed
+      // in the canonical order) serializes before the check-and-set below.
+      await this.locks.lockBed(tx, bedId);
 
-    const activeAssignments = await this.prisma.bedAssignment.count({
-      where: { bedId, status: AssignmentStatus.ACTIVE },
-    });
-    if (activeAssignments > 0) {
-      throw AppError.conflict(
-        'Bed still has an active assignment; end it first',
-        ErrorCode.RESOURCE_HAS_ACTIVE_ASSIGNMENT,
-      );
-    }
+      const bed = await tx.bed.findFirst({
+        where: { id: bedId, organizationId },
+        select: BED_SELECT,
+      });
+      if (!bed) throw AppError.notFound('Bed not found');
+      if (bed.status === BedStatus.INACTIVE) return toBedDto(bed);
 
-    const updated = await this.prisma.bed.update({
-      where: { id: bedId },
-      data: { status: BedStatus.INACTIVE, version: { increment: 1 } },
-      select: BED_SELECT,
+      const activeAssignments = await tx.bedAssignment.count({
+        where: { bedId, status: AssignmentStatus.ACTIVE },
+      });
+      if (activeAssignments > 0) {
+        throw AppError.conflict(
+          'Bed still has an active assignment; end it first',
+          ErrorCode.RESOURCE_HAS_ACTIVE_ASSIGNMENT,
+        );
+      }
+
+      const updated = await tx.bed.update({
+        where: { id: bedId },
+        data: { status: BedStatus.INACTIVE, version: { increment: 1 } },
+        select: BED_SELECT,
+      });
+      return toBedDto(updated);
     });
-    return toBedDto(updated);
   }
 }

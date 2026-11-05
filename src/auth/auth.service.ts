@@ -167,6 +167,13 @@ export class AuthService {
       throw AppError.unauthorized('Refresh token has expired');
     }
 
+    // Build the response payload BEFORE rotating so a failure here (e.g. a
+    // transient membership read) cannot strand the client: rotation commits the
+    // new token, so if payload construction failed afterwards the old token would
+    // already be revoked and the raw new token would never reach the client.
+    // Building first keeps a failed refresh fully recoverable (retry same token).
+    const payload = await this.buildSessionPayload(session.user);
+
     const { raw, hash } = this.tokens.generateRefreshToken();
     const now = new Date();
 
@@ -208,7 +215,6 @@ export class AuthService {
       throw AppError.unauthorized('Refresh token rotation conflict; retry with the new token');
     }
 
-    const payload = await this.buildSessionPayload(session.user);
     return { ...payload, refreshToken: raw };
   }
 

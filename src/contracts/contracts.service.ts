@@ -39,6 +39,10 @@ function toDateOnly(d: string): Date {
   return new Date(`${d}T00:00:00.000Z`);
 }
 
+function dateMs(d: Date | string): number {
+  return new Date(d).getTime();
+}
+
 function snapshotToComponents(snapshot: Prisma.JsonValue | null): ComponentSnapshot[] {
   if (!snapshot || !Array.isArray(snapshot)) return [];
   return (snapshot as unknown as ComponentSnapshot[]).map((c) => ({
@@ -220,7 +224,7 @@ async update(organizationId: string, contractId: string, expectedVersion: number
       // conflict code instead of an unrelated validation error.
       const existing = await tx.stayContract.findFirst({
         where: { id: contractId, organizationId },
-        select: { id: true, status: true, version: true },
+        select: { id: true, status: true, version: true, hostelId: true, residentId: true },
       });
       if (!existing) throw AppError.notFound('Contract not found');
       if (existing.status !== ContractStatus.DRAFT) {
@@ -229,15 +233,27 @@ async update(organizationId: string, contractId: string, expectedVersion: number
       if (existing.version !== expectedVersion) {
         throw AppError.conflict('Contract was modified by another request; refresh and retry', ErrorCode.RESOURCE_VERSION_CONFLICT);
       }
+      // Hostel/resident are immutable once a contract exists: re-parenting a
+      // DRAFT would resurrect the activate-vs-update race, so the identity of
+      // the tenant/bed context must be fixed here (create a new contract to
+      // move a resident to another hostel). This also keeps Phase 9 financial
+      // allocation anchored to a stable resident/hostel.
+      if (dto.hostelId !== existing.hostelId || dto.residentId !== existing.residentId) {
+        throw AppError.conflict(
+          'Contract hostel/resident cannot be changed after creation; create a new contract',
+          ErrorCode.BUSINESS_RULE_VIOLATION,
+        );
+      }
 
-      await this.lockContractParents(tx, dto.hostelId, dto.residentId);
+      await this.lockContractParents(tx, existing.hostelId, existing.residentId);
+      await this.locks.lockContract(tx, contractId);
       const { rentAmount, snapshot } = await this.resolve(tx, organizationId, dto);
 
       // Compare-and-swap update guarded by both status (DRAFT) and version.
       const result = await tx.stayContract.updateMany({
         where: { id: contractId, organizationId, status: ContractStatus.DRAFT, version: expectedVersion },
         data: {
-          hostelId: dto.hostelId, residentId: dto.residentId, startDate: toDateOnly(dto.startDate),
+          hostelId: existing.hostelId, residentId: existing.residentId, startDate: toDateOnly(dto.startDate),
           endDate: dto.endDate ? toDateOnly(dto.endDate) : null, rentAmount,
           billingCycle: dto.billingCycle ?? BillingCycle.MONTHLY, depositAmount: dto.deposit?.amount ?? null,
           packageId: dto.packageId ?? null,
@@ -261,39 +277,50 @@ async update(organizationId: string, contractId: string, expectedVersion: number
     return this.prisma.$transaction(async (tx) => {
       const contract = await tx.stayContract.findFirst({
         where: { id: contractId, organizationId },
-        select: { id: true, status: true, hostelId: true, residentId: true, startDate: true, endDate: true },
+        select: { id: true, status: true, hostelId: true, residentId: true },
       });
       if (!contract) throw AppError.notFound('Contract not found');
-      if (contract.status === ContractStatus.ACTIVE) {
-        const existing = await tx.stayContract.findFirst({ where: { id: contractId, organizationId }, select: CONTRACT_SELECT });
-        return toStayContractDto(existing!);
-      }
-      if (contract.status !== ContractStatus.DRAFT) {
-        throw AppError.conflict('Only DRAFT contracts can be activated', ErrorCode.BUSINESS_RULE_VIOLATION);
-      }
 
-      // Lock in canonical order so a concurrently-archived hostel/resident is
-      // observed authoritatively and checkout/terminate serialize correctly.
+      // Lock in canonical order. Hostel/resident are immutable once created, so
+      // the ids read above are stable; the contract is locked last so the
+      // authoritative re-read below observes any concurrent update/terminate.
       await this.locks.lockHostel(tx, contract.hostelId);
       await this.locks.lockResident(tx, contract.residentId);
       await this.locks.lockContract(tx, contractId);
 
-      const hostel = await tx.hostel.findFirst({ where: { id: contract.hostelId, organizationId }, select: { status: true } });
+      // Authoritative re-read AFTER acquiring the locks: never base the
+      // activation decision (status, range, parents) on the pre-lock snapshot.
+      const current = await tx.stayContract.findFirst({
+        where: { id: contractId, organizationId },
+        select: { status: true, hostelId: true, residentId: true, startDate: true, endDate: true, version: true },
+      });
+      if (!current) throw AppError.notFound('Contract not found');
+      if (current.status === ContractStatus.ACTIVE) {
+        const existing = await tx.stayContract.findFirst({ where: { id: contractId, organizationId }, select: CONTRACT_SELECT });
+        return toStayContractDto(existing!);
+      }
+      if (current.status !== ContractStatus.DRAFT) {
+        throw AppError.conflict('Only DRAFT contracts can be activated', ErrorCode.BUSINESS_RULE_VIOLATION);
+      }
+
+      const hostel = await tx.hostel.findFirst({ where: { id: current.hostelId, organizationId }, select: { status: true } });
       if (!hostel) throw AppError.notFound('Hostel not found');
       if (hostel.status === ArchiveStatus.ARCHIVED) {
         throw AppError.conflict('Hostel is archived; the contract cannot be activated', ErrorCode.BUSINESS_RULE_VIOLATION);
       }
-      const resident = await tx.resident.findFirst({ where: { id: contract.residentId, organizationId }, select: { status: true } });
+      const resident = await tx.resident.findFirst({ where: { id: current.residentId, organizationId }, select: { status: true } });
       if (!resident) throw AppError.notFound('Resident not found');
       if (resident.status !== ResidentStatus.ACTIVE) {
         throw AppError.conflict('Resident is not active', ErrorCode.BUSINESS_RULE_VIOLATION);
       }
 
-      await this.assertNoActiveOverlap(tx, organizationId, contract.residentId, contract.startDate, contract.endDate, contractId);
+      await this.assertNoActiveOverlap(tx, organizationId, current.residentId, current.startDate, current.endDate, contractId);
 
       try {
+        // CAS on status AND version so a concurrent update cannot be silently
+        // activated mid-flight.
         const result = await tx.stayContract.updateMany({
-          where: { id: contractId, organizationId, status: ContractStatus.DRAFT },
+          where: { id: contractId, organizationId, status: ContractStatus.DRAFT, version: current.version },
           data: { status: ContractStatus.ACTIVE, version: { increment: 1 } },
         });
         if (result.count === 0) {
@@ -352,18 +379,63 @@ async update(organizationId: string, contractId: string, expectedVersion: number
    */
   async checkout(organizationId: string, contractId: string) {
     return this.prisma.$transaction(async (tx) => {
+      // Discover the parent ids so we can lock the canonical chain, then
+      // re-read authoritatively before validating and closing.
+      const initial = await tx.stayContract.findFirst({
+        where: { id: contractId, organizationId },
+        select: { hostelId: true, residentId: true },
+      });
+      if (!initial) throw AppError.notFound('Contract not found');
+
+      await this.locks.lockHostel(tx, initial.hostelId);
+      await this.locks.lockResident(tx, initial.residentId);
+      await this.locks.lockContract(tx, contractId);
+
+      const contract = await tx.stayContract.findFirst({
+        where: { id: contractId, organizationId },
+        select: { id: true, status: true, startDate: true, version: true },
+      });
+      if (!contract) throw AppError.notFound('Contract not found');
+      if (contract.status === ContractStatus.CLOSED) {
+        const existing = await tx.stayContract.findFirst({ where: { id: contractId, organizationId }, select: CONTRACT_SELECT });
+        return toStayContractDto(existing!);
+      }
+      if (contract.status !== ContractStatus.ACTIVE) {
+        throw AppError.conflict('Only ACTIVE contracts can be checked out', ErrorCode.BUSINESS_RULE_VIOLATION);
+      }
+
       const today = await businessTodayForOrg(tx, organizationId);
       const endDate = toBusinessDateOnly(today);
-      // CAS: only close if still ACTIVE (idempotent for an already-CLOSED contract).
+
+      // A checkout that would persist endDate <= startDate, or that would end an
+      // assignment on/before its own start date, must be rejected as a domain
+      // error rather than surfacing a raw DB constraint failure.
+      if (dateMs(endDate) <= dateMs(contract.startDate)) {
+        throw AppError.conflict(
+          'Contract cannot be checked out on or before its start date',
+          ErrorCode.BUSINESS_RULE_VIOLATION,
+        );
+      }
+      const pendingAssignments = await tx.bedAssignment.findMany({
+        where: { contractId, organizationId, status: AssignmentStatus.ACTIVE },
+        select: { id: true, startDate: true },
+      });
+      const invalid = pendingAssignments.find((a) => dateMs(endDate) <= dateMs(a.startDate));
+      if (invalid) {
+        throw AppError.conflict(
+          'Contract has an active assignment starting on or after today; end it first',
+          ErrorCode.BUSINESS_RULE_VIOLATION,
+        );
+      }
+
+      // CAS: only close if still ACTIVE and unmodified (idempotent for an
+      // already-CLOSED contract; version-guarded against a concurrent edit).
       const closed = await tx.stayContract.updateMany({
-        where: { id: contractId, organizationId, status: ContractStatus.ACTIVE },
+        where: { id: contractId, organizationId, status: ContractStatus.ACTIVE, version: contract.version },
         data: { status: ContractStatus.CLOSED, endDate, version: { increment: 1 } },
       });
       if (closed.count === 0) {
-        const existing = await tx.stayContract.findFirst({ where: { id: contractId, organizationId }, select: CONTRACT_SELECT });
-        if (!existing) throw AppError.notFound('Contract not found');
-        if (existing.status === ContractStatus.CLOSED) return toStayContractDto(existing);
-        throw AppError.conflict('Only ACTIVE contracts can be checked out', ErrorCode.BUSINESS_RULE_VIOLATION);
+        throw AppError.conflict('Contract was modified by another request; refresh and retry', ErrorCode.RESOURCE_VERSION_CONFLICT);
       }
       await tx.bedAssignment.updateMany({
         where: { contractId, organizationId, status: AssignmentStatus.ACTIVE },

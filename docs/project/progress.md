@@ -488,5 +488,35 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
   - `smoke-phase82` ✅ **۲۴/۲۴**
   - `smoke-phase83` ✅ **۱۳/۱۳** (فعال‌سازی هم‌روند دو قرارداد هم‌پوشان → یک 409 RESIDENT_CONTRACT_OVERLAP، تاریخ کسب‌وکار در end/checkout، race تخصیص vs terminate، انقضای lazy idempotency، parent-lock revalidation)
 
+## فاز 8.2.1 — بستن نهایی یکپارچگی چرخه‌حیات (انجام شد)
+
+### هدف
+پس از ممیزی مستقل، چند race و نقص مرزی باقی‌مانده در archiving، deactivate، activate/update قرارداد، انتقال، checkout و زمان‌سنجی اعتبارسنجی بسته شد تا Charge/Payment فاز مالی روی دادهٔ معتبر ساخته شوند.
+
+### تصمیم
+- `hostelId`/`residentId` قرارداد پس از ساخت **تغییرناپذیر** شد؛ انتقال ساکن/لیلیه با ساخت قرارداد جدید انجام می‌شود (یکپارچگی مالی فاز ۹ هم مستحکم‌تر است).
+- بازهٔ قرارداد نیمه‌باز `[startDate, endDate)` در `assertAssignable` و `transfer` با تابع مشترک `assertRangeWithinContract` اعمال شد (رد startDate == endDate).
+
+### تغییرات کد
+- `hostels/rooms/beds.service.ts`: archive/deactivate به تراکنش + قفل ردیف والد تبدیل شدند (`lockHostel`/`lockRoom`/`lockBed`) و شمارش فرزند/تخصیص **پس از قفل** بازبینی می‌شود؛ Hostel archive اکنون قرارداد ACTIVE و تخصیص ACTIVE را هم بررسی می‌کند.
+- `contracts.service.ts`: update ابتدا تغییر hostel/resident را رد می‌کند و قفل قرارداد می‌گیرد؛ activate پس از قفل، قرارداد را **دوباره** می‌خواند و با CAS روی `status + version` فعال می‌کند؛ checkout با قفل ردیف، بازبینی پایان‌پذیری در برابر `startDate` قرارداد و `startDate` تخصیص‌های فعال، و CAS نسخه‌ای بسته شد.
+- `assignments.service.ts`: transfer مقصد را پس از قفل دوباره می‌خواند، `transitionStart <= startDate` را رد می‌کند، و بازهٔ انتقال/انتهای جدید را در برابر بازهٔ قرارداد بررسی می‌کند.
+- `business-date.ts` + `is-timezone.decorator.ts`: اعتبارسنجی IANA timezone در آپدیت organization (رد `INVALID_ZONE` با 422).
+- `auth.service.ts`: ساخت payload پاسخ پیش از چرخش refresh انجام می‌شود تا شکست پس از commit، token خام جدید را گم نکند.
+- مهاجرت `20261105100000_stay_contract_date_range_check`: `CHECK (end_date IS NULL OR end_date > start_date)` برای `stay_contracts` (fail-fast، بدون mutate).
+- `docs/api/idempotency.md`: scope واقعی unique (`organizationId + idempotencyKey + endpoint`) و تفاوت lazy-expiry با پاک‌سازی فیزیکی مستند شد.
+
+### اعتبارسنجی واقعی
+- `npm run build` ✅ exit=0.
+- `npx prisma migrate deploy` ✅ (مهاجرت date-range اعمال شد).
+- Smoke واقعی، همگی PASS:
+  - `smoke-phase7` ✅ **۴۲/۴۲**
+  - `smoke-phase8-packages` ✅ **۱۶/۱۶**
+  - `smoke-phase8` ✅ **۴۸/۴۸**
+  - `smoke-phase81` ✅ **۱۴/۱۴**
+  - `smoke-phase82` ✅ **۲۴/۲۴**
+  - `smoke-phase83` ✅ **۱۳/۱۳**
+  - `smoke-phase84` ✅ **۲۲/۲۲** (race واقعی room↔bed و hostel↔room و bed↔assignment با بررسی وضعیت نهایی DB، update↔activate، immutability قرارداد، مرزهای تاریخ transfer/checkout، timezone نامعتبر)
+
 ### Next actions
 - فاز ۹ مالی.

@@ -21,6 +21,20 @@ export function businessToday(timezone: string = DEFAULT_TIMEZONE): string {
 }
 
 /**
+ * True when `timezone` is a real IANA timezone name accepted by `Intl`.
+ * Used to reject bogus timezone strings before they are persisted, so a later
+ * `businessToday()` call cannot blow up with a `RangeError` on a bad value.
+ */
+export function isValidTimezone(timezone: string): boolean {
+  try {
+    new Intl.DateTimeFormat('en-CA', { timeZone: timezone });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * The organisation's business today, falling back to the default timezone when
  * the organisation row is missing (or has no explicit timezone). Requires a
  * client with an `organization` delegate, i.e. the main client or an

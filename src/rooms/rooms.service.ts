@@ -209,28 +209,34 @@ export class RoomsService {
   }
 
   async archive(organizationId: string, roomId: string) {
-    const room = await this.prisma.room.findFirst({
-      where: { id: roomId, organizationId },
-      select: ROOM_SELECT,
-    });
-    if (!room) throw AppError.notFound('Room not found');
-    if (room.status === ArchiveStatus.ARCHIVED) return toRoomDto(room);
+    return this.prisma.$transaction(async (tx) => {
+      // Lock the room row so a concurrent bed create (which locks the room in
+      // the canonical order) serializes before the archive check-and-set below.
+      await this.locks.lockRoom(tx, roomId);
 
-    const activeBeds = await this.prisma.bed.count({
-      where: { roomId, status: BedStatus.ACTIVE },
-    });
-    if (activeBeds > 0) {
-      throw AppError.conflict(
-        'Room still has active beds; deactivate them first',
-        ErrorCode.RESOURCE_HAS_ACTIVE_ASSIGNMENT,
-      );
-    }
+      const room = await tx.room.findFirst({
+        where: { id: roomId, organizationId },
+        select: ROOM_SELECT,
+      });
+      if (!room) throw AppError.notFound('Room not found');
+      if (room.status === ArchiveStatus.ARCHIVED) return toRoomDto(room);
 
-    const updated = await this.prisma.room.update({
-      where: { id: roomId },
-      data: { status: ArchiveStatus.ARCHIVED, version: { increment: 1 } },
-      select: ROOM_SELECT,
+      const activeBeds = await tx.bed.count({
+        where: { roomId, status: BedStatus.ACTIVE },
+      });
+      if (activeBeds > 0) {
+        throw AppError.conflict(
+          'Room still has active beds; deactivate them first',
+          ErrorCode.RESOURCE_HAS_ACTIVE_ASSIGNMENT,
+        );
+      }
+
+      const updated = await tx.room.update({
+        where: { id: roomId },
+        data: { status: ArchiveStatus.ARCHIVED, version: { increment: 1 } },
+        select: ROOM_SELECT,
+      });
+      return toRoomDto(updated);
     });
-    return toRoomDto(updated);
   }
 }
