@@ -1194,7 +1194,9 @@ paths:
       tags: [bed-assignments]
       summary: transfer resident to another bed (end current + start new)
       operationId: assignmentTransfer
-      parameters: [{ name: assignmentId, in: path, required: true, schema: { type: string, format: uuid } }]
+      parameters:
+        - { name: assignmentId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       requestBody:
         required: true
         content:

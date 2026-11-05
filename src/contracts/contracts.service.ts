@@ -6,7 +6,7 @@ import { AppError } from '../common/errors/app-error';
 import { ErrorCode } from '../common/errors/error-codes';
 import { IdempotencyService } from '../common/idempotency/idempotency.service';
 import { isUniqueViolation } from '../common/prisma/unique-violation';
-import { ArchiveStatus, AssignmentStatus, BillingCycle, ContractStatus, PackageComponentKind } from '../generated/prisma/enums';
+import { ArchiveStatus, AssignmentStatus, BillingCycle, ContractStatus, PackageComponentKind, ResidentStatus } from '../generated/prisma/enums';
 import { ContractDto } from './dto/contract.dto';
 
 const CONTRACT_SELECT = {
@@ -90,13 +90,21 @@ export class ContractsService {
     return toStayContractDto(contract);
   }
 private async resolve(organizationId: string, dto: ContractDto): Promise<{ rentAmount: number; snapshot: ComponentSnapshot[] }> {
+    if (dto.endDate && dto.endDate <= dto.startDate) {
+      throw AppError.validation('endDate must be after startDate', [
+        { field: 'endDate', code: 'invalid', message: 'must be after startDate' },
+      ]);
+    }
     const hostel = await this.prisma.hostel.findFirst({ where: { id: dto.hostelId, organizationId }, select: { id: true, status: true } });
     if (!hostel) throw AppError.notFound('Hostel not found');
     if (hostel.status === ArchiveStatus.ARCHIVED) {
       throw AppError.conflict('Hostel is archived; no new contracts can be created', ErrorCode.BUSINESS_RULE_VIOLATION);
     }
-    const resident = await this.prisma.resident.findFirst({ where: { id: dto.residentId, organizationId }, select: { id: true } });
+    const resident = await this.prisma.resident.findFirst({ where: { id: dto.residentId, organizationId }, select: { id: true, status: true } });
     if (!resident) throw AppError.notFound('Resident not found');
+    if (resident.status !== ResidentStatus.ACTIVE) {
+      throw AppError.conflict('Resident is not active', ErrorCode.BUSINESS_RULE_VIOLATION);
+    }
 
     let snapshot: ComponentSnapshot[] = [];
     if (dto.packageId) {
@@ -120,9 +128,14 @@ private async resolve(organizationId: string, dto: ContractDto): Promise<{ rentA
   }
 
   async create(organizationId: string, userId: string, dto: ContractDto, idempotencyKey: string) {
+    const requestHash = this.idempotency.hash(dto);
+    // Replay before any domain reads: a retry must recover the stored result
+    // even if the selected package was archived after the original commit.
+    const replay = await this.idempotency.getReplay<ReturnType<typeof toStayContractDto>>(organizationId, idempotencyKey, CREATE_ENDPOINT, requestHash);
+    if (replay) return replay;
+
     const { rentAmount, snapshot } = await this.resolve(organizationId, dto);
 
-    const requestHash = this.idempotency.hash(dto);
     return this.idempotency.runAtomic<ReturnType<typeof toStayContractDto>>(
       { organizationId, key: idempotencyKey, endpoint: CREATE_ENDPOINT, userId, requestHash, statusCode: 201 },
       async (tx) => {
@@ -150,6 +163,21 @@ private async resolve(organizationId: string, dto: ContractDto): Promise<{ rentA
     );
   }
 async update(organizationId: string, contractId: string, expectedVersion: number, dto: ContractDto) {
+    // Status/version guard runs before the (expensive/validating) package
+    // reconcile so a non-DRAFT contract is always rejected with the correct
+    // conflict code instead of an unrelated validation error.
+    const existing = await this.prisma.stayContract.findFirst({
+      where: { id: contractId, organizationId },
+      select: { id: true, status: true, version: true },
+    });
+    if (!existing) throw AppError.notFound('Contract not found');
+    if (existing.status !== ContractStatus.DRAFT) {
+      throw AppError.conflict('Only DRAFT contracts can be edited', ErrorCode.BUSINESS_RULE_VIOLATION);
+    }
+    if (existing.version !== expectedVersion) {
+      throw AppError.conflict('Contract was modified by another request; refresh and retry', ErrorCode.RESOURCE_VERSION_CONFLICT);
+    }
+
     const { rentAmount, snapshot } = await this.resolve(organizationId, dto);
 
     // Compare-and-swap update guarded by both status (DRAFT) and version.
@@ -165,14 +193,6 @@ async update(organizationId: string, contractId: string, expectedVersion: number
       },
     });
     if (result.count === 0) {
-      const existing = await this.prisma.stayContract.findFirst({
-        where: { id: contractId, organizationId },
-        select: { id: true, status: true },
-      });
-      if (!existing) throw AppError.notFound('Contract not found');
-      if (existing.status !== ContractStatus.DRAFT) {
-        throw AppError.conflict('Only DRAFT contracts can be edited', ErrorCode.BUSINESS_RULE_VIOLATION);
-      }
       throw AppError.conflict('Contract was modified by another request; refresh and retry', ErrorCode.RESOURCE_VERSION_CONFLICT);
     }
 
@@ -184,41 +204,49 @@ async update(organizationId: string, contractId: string, expectedVersion: number
   }
 
   async activate(organizationId: string, contractId: string) {
-    const contract = await this.prisma.stayContract.findFirst({ where: { id: contractId, organizationId }, select: CONTRACT_SELECT });
-    if (!contract) throw AppError.notFound('Contract not found');
-    if (contract.status === ContractStatus.ACTIVE) return toStayContractDto(contract);
-    if (contract.status !== ContractStatus.DRAFT) {
+    const result = await this.prisma.stayContract.updateMany({
+      where: { id: contractId, organizationId, status: ContractStatus.DRAFT },
+      data: { status: ContractStatus.ACTIVE, version: { increment: 1 } },
+    });
+    if (result.count === 0) {
+      const existing = await this.prisma.stayContract.findFirst({ where: { id: contractId, organizationId }, select: CONTRACT_SELECT });
+      if (!existing) throw AppError.notFound('Contract not found');
+      if (existing.status === ContractStatus.ACTIVE) return toStayContractDto(existing);
       throw AppError.conflict('Only DRAFT contracts can be activated', ErrorCode.BUSINESS_RULE_VIOLATION);
     }
-    const updated = await this.prisma.stayContract.update({
-      where: { id: contractId },
-      data: { status: ContractStatus.ACTIVE, version: { increment: 1 } },
-      select: CONTRACT_SELECT,
-    });
-    return toStayContractDto(updated);
+    const updated = await this.prisma.stayContract.findFirst({ where: { id: contractId, organizationId }, select: CONTRACT_SELECT });
+    return toStayContractDto(updated!);
   }
 
   async terminate(organizationId: string, contractId: string) {
-    const contract = await this.prisma.stayContract.findFirst({ where: { id: contractId, organizationId }, select: CONTRACT_SELECT });
-    if (!contract) throw AppError.notFound('Contract not found');
-    if (contract.status === ContractStatus.TERMINATED) return toStayContractDto(contract);
-    if (contract.status === ContractStatus.CLOSED) {
-      throw AppError.conflict('Closed contract cannot be terminated', ErrorCode.BUSINESS_RULE_VIOLATION);
-    }
-    if (contract.status === ContractStatus.ACTIVE) {
-      const activeAssignments = await this.prisma.bedAssignment.count({
-        where: { contractId, organizationId, status: 'ACTIVE' as const },
+    return this.prisma.$transaction(async (tx) => {
+      const contract = await tx.stayContract.findFirst({ where: { id: contractId, organizationId }, select: { status: true } });
+      if (!contract) throw AppError.notFound('Contract not found');
+      if (contract.status === ContractStatus.TERMINATED) {
+        const existing = await tx.stayContract.findFirst({ where: { id: contractId, organizationId }, select: CONTRACT_SELECT });
+        return toStayContractDto(existing!);
+      }
+      if (contract.status === ContractStatus.CLOSED) {
+        throw AppError.conflict('Closed contract cannot be terminated', ErrorCode.BUSINESS_RULE_VIOLATION);
+      }
+
+      const activeAssignments = await tx.bedAssignment.count({
+        where: { contractId, organizationId, status: AssignmentStatus.ACTIVE },
       });
       if (activeAssignments > 0) {
         throw AppError.conflict('Contract still has an active bed assignment; end it first', ErrorCode.RESOURCE_HAS_ACTIVE_ASSIGNMENT);
       }
-    }
-    const updated = await this.prisma.stayContract.update({
-      where: { id: contractId },
-      data: { status: ContractStatus.TERMINATED, version: { increment: 1 } },
-      select: CONTRACT_SELECT,
+
+      const result = await tx.stayContract.updateMany({
+        where: { id: contractId, organizationId, status: contract.status },
+        data: { status: ContractStatus.TERMINATED, version: { increment: 1 } },
+      });
+      if (result.count === 0) {
+        throw AppError.conflict('Contract was modified by another request; refresh and retry', ErrorCode.RESOURCE_VERSION_CONFLICT);
+      }
+      const updated = await tx.stayContract.findFirst({ where: { id: contractId, organizationId }, select: CONTRACT_SELECT });
+      return toStayContractDto(updated!);
     });
-    return toStayContractDto(updated);
   }
 
   /**
@@ -226,30 +254,25 @@ async update(organizationId: string, contractId: string, expectedVersion: number
    * close the contract. History is preserved — rows are updated, never deleted.
    */
   async checkout(organizationId: string, contractId: string) {
-    const contract = await this.prisma.stayContract.findFirst({
-      where: { id: contractId, organizationId },
-      select: { id: true, status: true },
-    });
-    if (!contract) throw AppError.notFound('Contract not found');
-    if (contract.status === ContractStatus.CLOSED) {
-      return this.get(organizationId, contractId);
-    }
-    if (contract.status !== ContractStatus.ACTIVE) {
-      throw AppError.conflict('Only ACTIVE contracts can be checked out', ErrorCode.BUSINESS_RULE_VIOLATION);
-    }
-
     return this.prisma.$transaction(async (tx) => {
       const now = new Date();
+      // CAS: only close if still ACTIVE (idempotent for an already-CLOSED contract).
+      const closed = await tx.stayContract.updateMany({
+        where: { id: contractId, organizationId, status: ContractStatus.ACTIVE },
+        data: { status: ContractStatus.CLOSED, endDate: now, version: { increment: 1 } },
+      });
+      if (closed.count === 0) {
+        const existing = await tx.stayContract.findFirst({ where: { id: contractId, organizationId }, select: CONTRACT_SELECT });
+        if (!existing) throw AppError.notFound('Contract not found');
+        if (existing.status === ContractStatus.CLOSED) return toStayContractDto(existing);
+        throw AppError.conflict('Only ACTIVE contracts can be checked out', ErrorCode.BUSINESS_RULE_VIOLATION);
+      }
       await tx.bedAssignment.updateMany({
         where: { contractId, organizationId, status: AssignmentStatus.ACTIVE },
         data: { status: AssignmentStatus.ENDED, endDate: now, version: { increment: 1 } },
       });
-      const updated = await tx.stayContract.update({
-        where: { id: contractId },
-        data: { status: ContractStatus.CLOSED, endDate: now, version: { increment: 1 } },
-        select: CONTRACT_SELECT,
-      });
-      return toStayContractDto(updated);
+      const updated = await tx.stayContract.findFirst({ where: { id: contractId, organizationId }, select: CONTRACT_SELECT });
+      return toStayContractDto(updated!);
     });
   }
 }

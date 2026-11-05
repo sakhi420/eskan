@@ -151,14 +151,25 @@ export class AuthService {
       throw AppError.unauthorized('Refresh token has expired');
     }
 
-    const { hash } = this.tokens.generateRefreshToken();
-    // Rotate atomically: two concurrent refresh calls with the same token can
-    // only one wins the compare-and-swap on the old session. The loser is
-    // treated as a reuse and the whole family is revoked.
+    const { raw, hash } = this.tokens.generateRefreshToken();
+    const now = new Date();
+
+    // Rotate atomically: generate one token, persist it in the SAME family as
+    // the rotated session, and link old -> new. The compare-and-swap ensures
+    // only one of two concurrent refresh calls wins. The winner returns `raw`;
+    // the loser is a legitimate concurrent request (not proven reuse), so we
+    // reject it WITHOUT revoking the family — revoking would log out the very
+    // client that just won. Genuine later reuse of the already-rotated token is
+    // still caught by the pre-check above (which revokes the family).
     const rotated = await this.prisma.$transaction(async (tx) => {
       const claimed = await tx.refreshSession.updateMany({
-        where: { id: session.id, replacedById: null, revokedAt: null },
-        data: { revokedAt: new Date() },
+        where: {
+          id: session.id,
+          replacedById: null,
+          revokedAt: null,
+          expiresAt: { gt: now },
+        },
+        data: { revokedAt: now },
       });
       if (claimed.count === 0) return false;
 
@@ -178,11 +189,11 @@ export class AuthService {
     });
 
     if (!rotated) {
-      await this.revokeFamily(session.userId, session.family);
-      throw AppError.unauthorized('Refresh token has been reused and was revoked');
+      throw AppError.unauthorized('Refresh token rotation conflict; retry with the new token');
     }
 
-    return this.buildSession(session.user);
+    const payload = await this.buildSessionPayload(session.user);
+    return { ...payload, refreshToken: raw };
   }
 
   async logout(userId: string, dto: RefreshDto): Promise<void> {
@@ -230,7 +241,7 @@ export class AuthService {
     });
   }
 
-  private async buildSession(user: UserRecord): Promise<AuthSession> {
+  private async buildSessionPayload(user: UserRecord): Promise<Omit<AuthSession, 'refreshToken'>> {
     const memberships = await this.tenants.listActiveMemberships(user.id);
     const { token: accessToken, expiresIn } = await this.tokens.signAccessToken({
       sub: user.id,
@@ -239,6 +250,16 @@ export class AuthService {
       isPlatformAdmin: user.isPlatformAdmin,
     });
 
+    return {
+      accessToken,
+      expiresIn,
+      user: { id: user.id, email: user.email, fullName: user.fullName, createdAt: user.createdAt },
+      memberships,
+    };
+  }
+
+  private async buildSession(user: UserRecord): Promise<AuthSession> {
+    const payload = await this.buildSessionPayload(user);
     const { raw, hash } = this.tokens.generateRefreshToken();
     await this.prisma.refreshSession.create({
       data: {
@@ -248,14 +269,7 @@ export class AuthService {
         expiresAt: this.tokens.refreshExpiresAt(),
       },
     });
-
-    return {
-      accessToken,
-      refreshToken: raw,
-      expiresIn,
-      user: { id: user.id, email: user.email, fullName: user.fullName, createdAt: user.createdAt },
-      memberships,
-    };
+    return { ...payload, refreshToken: raw };
   }
 
   private async revokeFamily(userId: string, family: string): Promise<void> {

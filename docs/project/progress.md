@@ -16,7 +16,7 @@
 | 6   | احراز هویت و tenancy | ✅ انجام شد (build/seed/smoke واقعی) | auth, refresh, BOLA |
 | 7   | سازمان/لیلیه/اتاق/بستر | ✅ انجام شد (کد + smoke واقعی ۴۲/۴۲) | CRUD, archive |
 | 8   | ساکن/قرارداد/تخصیص | ✅ انجام شد (کد + smoke واقعی ۴۸/۴۸) | overlap, concurrency |
-| 8.1 | سخت‌سازی صحت/سازگاری (بازبینی) | ✅ انجام شد (smoke جدید ۱۴/۱۴ + build/migrate/generate) | atomic idempotency, CAS locking, resident overlap, transfer/checkout |
+| 8.1 | سخت‌سازی صحت/سازگاری (بازبینی) | ✅ انجام شد (P0 fixes + smoke ۱۴۴/۱۴۴ = 42+16+48+14+24) | atomic idempotency, CAS locking, resident overlap, transfer/checkout, fail-fast migration |
 | 9   | مالی (charge/payment/deposit) | ⏳ در انتظار | decimal, reversal |
 | 10  | مصارف و گزارش | ⏳ در انتظار | reports |
 | 11  | idempotency/audit/sync | ⏳ در انتظار | cursor, tombstone |
@@ -428,16 +428,32 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 - `hostels.service`/`rooms.service`: فیلدهای v0.4 (`contactPhone`, `defaultRentAmount`, `rentDueDayOfMonth`, `absenceMinDays`, `maintenanceStatus`) ذخیره/بازگشت.
 - قفل خوش‌بینانه اتمی (compare-and-swap) با `updateMany({ where: { version } })` در org/hostel/room/bed/package/resident/contract؛ `count === 0 → 409 RESOURCE_VERSION_CONFLICT`.
 - idempotency اتمی: `IdempotencyService.runAtomic` (claim → mutate → complete در یک transaction)؛ duplicate key → replay ذخیره‌شده بدون اثر جانبی؛ retention ۳۰ روزه برای صف آفلاین (غیر مالی).
-- هم‌پوشانی ساکن: چک app-level + exclusion constraint مهاجرت `20261104190000_bed_assignment_resident_no_overlap` (با backfill deconflict داده‌های پیشین).
+- هم‌پوشانی ساکن: چک app-level + exclusion constraint مهاجرت `20261104190000_bed_assignment_resident_no_overlap` (بدون backfill؛ fail-fast برای ناسازگاری‌های پیشین).
 - parent archive/maintenance: ساخت فرزند زیر hostel/room آرشیوشده و تخصیص روی room/hostel آرشیو/خارج‌سرویس ممنوع شد.
 - transfer (پایان + شروع در یک transaction) و checkout (پایان تخصیص + close قرارداد اتمی، حفظ سابقه) + قرارداد OpenAPI به‌روز شد.
 - refresh rotation هم‌روند امن شد (compare-and-swap روی session قدیمی).
 - `X-Organization-Id` هنگام چند عضویت فعال اجباری شد (`ORGANIZATION_CONTEXT_REQUIRED`).
 
+### رفع P0های بازبینی 8.1
+- **رفرش‌چرخش توکن:** توکن جدید پیش از تراکنش ساخته و در همان family ذخیره می‌شود؛ old→new لینک می‌شود؛ session قدیمی با compare-and-swap claim می‌شود؛ raw token جدید برمی‌گردد. بازندهٔ هم‌روندی به‌عنوان 401 برگشت داده می‌شود **بدون** ابطال family؛ reuse واقعی (ارائهٔ توکنِ ازقبل‌چرخیده) همچنان در pre-check کل family را ابطال می‌کند.
+- **تخصیص `create`:** replay های idempotency پیش از هر خوانش دامنه بررسی می‌شود؛ check وضعیت خطیر (`assertAssignable`) داخل transaction اجرا می‌شود؛ بازهٔ تاریخ قرارداد اعتبارسنجی می‌شود؛ double-assignment هم‌روند مهار می‌شود.
+- **انتقال (transfer):** `Idempotency-Key` الزامی شد؛ با `IdempotencyService.runAtomic` اتمی اجرا می‌شود؛ تاریخ انتقال نسبت به تخصیص فعلی و تاریخ‌های قرارداد اعتبارسنجی می‌شود؛ تخصیص قدیمی با CAS پایان می‌یابد؛ وضعیت/هم‌پوشانی بستر/اتاق/لیلیهٔ مقصد بررسی می‌شود؛ تخصیص جدید ساخته می‌شود.
+- **`end` تخصیص و `activate`/`terminate`/`checkout` قرارداد:** به CAS و many-update تراکنشی تبدیل شدند (با idempotency در موارد لازم).
+- **قرارداد `resolve`/`create`:** اعتبارسنجی `endDate > startDate`، الزام فعال‌بودن ساکن، و replay پیش از خوانش دامنه اضافه شد. `update` ابتدا وضعیت/نسخه را چک می‌کند تا قرارداد غیر-DRAFT همیشه 409 صحیح بگیرد (نه خطای نامربوط).
+- **مهاجرت `20261104190000`:** backfill خاموش حذف شد؛ CHECK سلامت بازه (`end_date > start_date`) و exclusion در سطح resident اضافه شد؛ سطرهای موجود mutate نمی‌شوند و conflict/بازهٔ نامعتبر پیشین **fail-fast** می‌کند تا اپراتور صریحاً رفع‌و‌رجوع کند.
+- **OpenAPI:** `Idempotency-Key` روی `assignmentTransfer` الزامی شد.
+
 ### اعتبارسنجی واقعی
-- `npx prisma migrate dev` ✅ (پس از backfill deconflict) و `npx prisma generate` ✅.
+- `npx prisma validate` ✅ (schema معتبر) و `npx prisma generate` ✅ (Prisma 7.10.1).
+- `npx prisma migrate dev` ✅ — پس از پاک‌سازی دادهٔ تست نامعتبرِ dev (رکوردهای `end_date <= start_date`) خارج از مهاجرت؛ مهاجرت خود fail-fast باقی می‌ماند.
 - `npm run build` ✅ exit=0.
-- `scripts/smoke-phase81.cjs` ✅ **۱۴/۱۴ PASS** (idempotency هم‌روند، قفل خوش‌بینانه هم‌روند، ساکن دو-تخت، parent archive، تاریخ نامعتبر، transfer/checkout).
+- `npm run openapi:validate` ✅ (معتبر؛ ۶ warning از پیش‌موجود).
+- Smoke واقعی، همگی PASS:
+  - `smoke-phase7` ✅ **۴۲/۴۲**
+  - `smoke-phase8-packages` ✅ **۱۶/۱۶**
+  - `smoke-phase8` ✅ **۴۸/۴۸**
+  - `smoke-phase81` ✅ **۱۴/۱۴**
+  - `smoke-phase82` ✅ **۲۴/۲۴** (رفرش هم‌روند + reuse/ابطال family، idempotency/اتمی بودن transfer، تاریخ‌های خارج از بازهٔ قرارداد، replay پس از checkout، idempotency/CAS فعال‌سازی/خاتمه/checkout)
 
 ### Next actions
 - فاز ۹ مالی.

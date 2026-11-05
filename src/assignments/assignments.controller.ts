@@ -41,11 +41,14 @@ export class AssignmentsController {
   @HttpCode(HttpStatus.OK)
   async transfer(
     @CurrentMembership() m: MembershipContext,
+    @CurrentUser() user: AuthUser,
     @Param('assignmentId') assignmentId: string,
+    @Headers('Idempotency-Key') idempotencyKey: string | undefined,
     @Body() dto: TransferDto,
     @Req() req: RequestWithAuth,
   ) {
-    return envelope(req, await this.assignments.transfer(m.organizationId, assignmentId, dto));
+    const key = requireIdempotencyKey(idempotencyKey);
+    return envelope(req, await this.assignments.transfer(m.organizationId, assignmentId, user.id, dto, key));
   }
 
   @Get('residents/:residentId/assignments')

@@ -108,8 +108,8 @@ async function main() {
   // 8. Transfer + checkout (atomic transitions).
   const assignmentRes = await api('GET', `/residents/${resident1}/assignments`, { token, orgId: org });
   const activeAssign = (Array.isArray(assignmentRes.body.data) ? assignmentRes.body.data : []).find((a) => a.status === 'ACTIVE');
-  const tr = await api('POST', `/bed-assignments/${activeAssign.id}/transfer`, { token, orgId: org, body: { bedId: bed2, startDate: '2026-03-01' } });
-  check('transfer: ends previous and starts new', tr.status === 200 && tr.body.data.previous.status === 'ENDED' && tr.body.data.assignment.status === 'ACTIVE' && !!tr.body.data.previous.endDate, 's=' + tr.status);
+  const tr = await api('POST', `/bed-assignments/${activeAssign.id}/transfer`, { token, orgId: org, idem: uuid(), body: { bedId: bed2, startDate: '2026-03-01' } });
+  check('transfer: ends previous and starts new', tr.status === 200 && tr.body.data.previous.status === 'ENDED' && tr.body.data.assignment.status === 'ACTIVE' && !!tr.body.data.previous.endDate && tr.body.data.previous.endDate === tr.body.data.assignment.startDate, 's=' + tr.status);
 
   const co = await api('POST', `/contracts/${contract1}/checkout`, { token, orgId: org });
   check('checkout closes contract atomically', co.status === 200 && co.body.data.status === 'CLOSED', 's=' + co.status);

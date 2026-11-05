@@ -166,7 +166,7 @@ async function main() {
     data: { organizationId: orgA, hostelId: H1, residentId: resident.id, contractNumber: 'C-' + s, startDate: new Date(), rentAmount: 1000 },
   });
   const assignment = await prisma.bedAssignment.create({
-    data: { organizationId: orgA, bedId: B1, residentId: resident.id, contractId: contract.id, startDate: new Date() },
+    data: { organizationId: orgA, bedId: B1, residentId: resident.id, contractId: contract.id, startDate: new Date(Date.now() - 24 * 60 * 60 * 1000) },
   });
 
   const deactBusy = await api('POST', `/beds/${B1}/deactivate`, { token: tokenA, orgId: orgA });
