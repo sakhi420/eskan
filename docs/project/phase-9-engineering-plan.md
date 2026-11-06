@@ -236,7 +236,7 @@ model AbsenceCredit {
   ذخیره نمی‌شود**؛ purge policy نباید رکورد مالی را دوباره قابل اجرا کند (یا soft-archive).
 
 ### Receipt numbering
-- شمارنده به ازای `(organizationId, period)` (مثلاً سال) باشد؛ درج اتمی با قفل ردیف روی
+- شمارنده فقط در سطح `organizationId` باشد (بدون reset سالانه)؛ درج اتمی با قفل ردیف روی
   `ReceiptCounter`.
 - **gap policy (تصمیم D-03):** شمارهٔ رسید unique و پایدار است؛ gapless بودن تضمین نمی‌شود
   مگر الزام حقوقی/عملیاتی صریح باشد.

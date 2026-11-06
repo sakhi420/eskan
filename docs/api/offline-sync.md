@@ -57,3 +57,19 @@
 
 `APPLIED`, `DUPLICATE`, `CONFLICT`, `VALIDATION_FAILED`, `FORBIDDEN`,
 `RETRYABLE_FAILURE` (قرارداد sync).
+
+## وضعیت محلی و تأیید سرور
+
+- `PENDING_SYNC` یک **وضعیت محلی کلاینت** است (نوشتهٔ هنوز تأییدنشده) و نباید با وضعیت
+  سند قطعی سرور (`POSTED`/`ISSUED`) یکی گرفته شود.
+- کلاینت آفلاین `provisionalReceiptId` محلی می‌سازد؛ `receiptNumber`/رسید رسمی فقط پس از
+  commit سرور صادر و در sync بازگردانده می‌شود (D-03/D-17). دو شناسه جدا نگه داشته می‌شوند.
+- تعارض با `X-Expected-Version` یا `Idempotency-Key` → 409 با وضعیت/نسخهٔ فعلی؛ کلاینت پیش از
+  retry re-sync می‌کند (بدون Last-write-wins).
+
+## Backup / Restore (الزام مستقل از Sync)
+
+- **Backup محلی (کلاینت):** SQLite/Drift به‌صورت دوره‌ای/دستی export می‌شود؛ قابل Restore
+  مستقل از سرور (کاربر اینترنت محدود دارد). رمزنگاری/محافظت دستگاه گم‌شده طبق OWASP.
+- **Backup مرکزی (سرور):** PostgreSQL backup دوره‌ای + **تمرین Restore واقعی** قبل از pilot؛
+  این الزام جدا از Sync است و در مسترپرامپت نیز آمده است.

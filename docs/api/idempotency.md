@@ -18,7 +18,15 @@
   می‌شود. این به‌معنای پاک‌سازی فیزیکی دوره‌ای (batch) نیست؛ پاک‌سازی فیزیکی
   انبوه رکوردهای منقضی‌شده به سیاست retention فاز مالی واگذار می‌شود.
 
-## رفتار replay برای payment
+## رفتار replay (financial mutation)
 
-بدنهٔ پاسخ replay همان Payment اصلی (با allocationها) است؛ پاسخ مبهم که
-client را مجبور به retry کور کند داده نمی‌شود.
+- **payment create** replay → همان `Payment` اصلی (ایجادشده به‌صورت **وجه تخصیص‌نیافته**) را
+  برمی‌گرداند؛ Allocation بعداً با endpoint مستقل انجام می‌شود و در پاسخ create نیست.
+- **replay (same key + same payload)** → 200/201 با همان نتیجهٔ قبلی.
+- **same key + different payload** → 409 `IDEMPOTENCY_KEY_REUSED`.
+- **concurrent request (same key هم‌زمان)** → یکی commit و بقیه همان نتیجه را می‌گیرند
+  (store-then-execute داخل همان transaction).
+- **retry پس از timeout+commit** → بازیابی همان نتیجه، نه اجرای مجدد.
+- **retention دائمی مالی:** رکورد IdempotencyRecord برای mutationهای مالی
+  `retentionClass = PERMANENT` و `expiresAt = NULL` دارد؛ هرگز lazy-delete نمی‌شود تا retry
+  چندماهه هم به همان سند اشاره کند. رکوردهای غیرمالی `TRANSIENT` با expiry lazy می‌مانند.

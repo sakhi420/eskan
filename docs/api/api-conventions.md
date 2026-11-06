@@ -32,3 +32,12 @@ timestamp RFC 3339 UTC؛ تاریخ کاری `YYYY-MM-DD` جدا از timestamp.
 - افزودن فیلد optional: non-breaking.
 - حذف/تغییر نوع فیلد یا تغییر enum: breaking → نسخهٔ API جدید.
 - قرارداد در `contracts/openapi.yaml` قبل از endpointها تغییر می‌کند.
+
+## نسخهٔ رکورد و قفل خوش‌بینانه (X-Expected-Version)
+
+- موجودیت‌های mutable (contract, hostel, absence, resident, …) هنگام update هدر
+  `X-Expected-Version` (integer) با `version` فعلی رکورد می‌فرستند.
+- عملیات مالی append-only روی سند منبع (reversal/refund/release/apply/forfeit) هدر را
+  **اختیاری** برای `version` سند منبع می‌پذیرند.
+- mismatch → `409 RESOURCE_VERSION_CONFLICT` + `version` فعلی در پاسخ خطا؛ client باید
+  re-read و retry کند (بدون Last-write-wins).

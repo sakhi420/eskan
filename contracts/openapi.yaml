@@ -1300,6 +1300,7 @@ paths:
     patch:
       tags: [absences]
       summary: update / approve / close temporary absence
+      description: "Setting `actualReturnDate` finalizes the absence; monthly `AbsenceCredit` lines are then generated (see POST /absences/{absenceId}/credits) in the same transaction. Credits are issued only after the actual return is approved (D-12) and never rewritten afterward."
       operationId: absenceUpdate
       parameters:
         - { name: absenceId, in: path, required: true, schema: { type: string, format: uuid } }
@@ -1324,6 +1325,31 @@ paths:
         '404': { $ref: '#/components/responses/Error' }
         '409': { $ref: '#/components/responses/Error' }
         '422': { $ref: '#/components/responses/Error' }
+  /api/v1/absences/{absenceId}/credits:
+    post:
+      tags: [absences]
+      summary: generate monthly absence credits after actual return
+      description: "Idempotent generation of monthly AbsenceCredit lines after the actual return is recorded (D-12). The absence is finalized by setting `actualReturnDate`; credit generation is atomic (all month lines in one transaction) and the (absenceId, periodStart) unique key prevents duplicate credits on retry."
+      operationId: absenceCreditGenerate
+      parameters:
+        - { name: absenceId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '200':
+          description: credits generated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/AbsenceCreditResult' }
+                  meta: { $ref: '#/components/schemas/Meta' }
   /api/v1/charges:
     get:
       tags: [charges]
@@ -1397,6 +1423,7 @@ paths:
       parameters:
         - { name: chargeId, in: path, required: true, schema: { type: string, format: uuid } }
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: false, schema: { type: integer } }
       requestBody:
         required: true
         content:
@@ -1493,6 +1520,7 @@ paths:
       parameters:
         - { name: paymentId, in: path, required: true, schema: { type: string, format: uuid } }
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: false, schema: { type: integer } }
       requestBody:
         required: true
         content:
@@ -1593,6 +1621,7 @@ paths:
       parameters:
         - { name: depositTransactionId, in: path, required: true, schema: { type: string, format: uuid } }
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: false, schema: { type: integer } }
       requestBody:
         required: true
         content:
@@ -1623,6 +1652,7 @@ paths:
       parameters:
         - { name: depositTransactionId, in: path, required: true, schema: { type: string, format: uuid } }
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: false, schema: { type: integer } }
       requestBody:
         required: true
         content:
@@ -1653,6 +1683,7 @@ paths:
       parameters:
         - { name: depositTransactionId, in: path, required: true, schema: { type: string, format: uuid } }
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: false, schema: { type: integer } }
       requestBody:
         required: true
         content:
@@ -1746,6 +1777,7 @@ paths:
       parameters:
         - { name: expenseId, in: path, required: true, schema: { type: string, format: uuid } }
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: false, schema: { type: integer } }
       requestBody:
         required: true
         content:
@@ -1824,6 +1856,7 @@ paths:
       parameters:
         - { name: allocationId, in: path, required: true, schema: { type: string, format: uuid } }
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: false, schema: { type: integer } }
       requestBody:
         required: true
         content:
@@ -1854,6 +1887,7 @@ paths:
       parameters:
         - { name: paymentId, in: path, required: true, schema: { type: string, format: uuid } }
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: false, schema: { type: integer } }
       requestBody:
         required: true
         content:
@@ -1902,6 +1936,7 @@ paths:
       parameters:
         - { name: residentId, in: path, required: true, schema: { type: string, format: uuid } }
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: false, schema: { type: integer } }
       requestBody:
         required: true
         content:
@@ -1921,7 +1956,7 @@ paths:
                 type: object
                 required: [data, meta]
                 properties:
-                  data: { $ref: '#/components/schemas/DepositApplication' }
+                  data: { $ref: '#/components/schemas/DepositApplicationResult' }
                   meta: { $ref: '#/components/schemas/Meta' }
   /api/v1/billing-runs/preview:
     post:
@@ -3446,6 +3481,15 @@ components:
         periodEnd: { type: string, format: date }
         money: { $ref: '#/components/schemas/Money' }
         createdAt: { type: string, format: date-time }
+    AbsenceCreditResult:
+      type: object
+      description: "Result of generating absence credits: all monthly AbsenceCredit lines produced for an absence, plus the total credit amount."
+      required: [credits, totalCredit]
+      properties:
+        credits:
+          type: array
+          items: { $ref: '#/components/schemas/AbsenceCredit' }
+        totalCredit: { $ref: '#/components/schemas/Amount' }
     PaymentAllocation:
       type: object
       required: [id, paymentId, chargeId, money, createdAt]
@@ -3628,6 +3672,16 @@ components:
         reason: { type: string }
         actorUserId: { type: string, format: uuid }
         createdAt: { type: string, format: date-time }
+    DepositApplicationResult:
+      type: object
+      description: "Atomic result of applying one deposit to multiple charges (D-10). The whole operation is all-or-nothing: if any single application fails, none is persisted."
+      required: [applications, totalApplied, remainingDepositBalance]
+      properties:
+        applications:
+          type: array
+          items: { $ref: '#/components/schemas/DepositApplication' }
+        totalApplied: { $ref: '#/components/schemas/Amount' }
+        remainingDepositBalance: { $ref: '#/components/schemas/Amount' }
     DepositRefundRequest:
       type: object
       description: "Refund of a received deposit (full or partial). Refunded + applied + forfeited must never exceed the held amount (D-08)."
