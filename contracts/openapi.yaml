@@ -1699,6 +1699,229 @@ paths:
                 properties:
                   data: { $ref: '#/components/schemas/Expense' }
                   meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/payments/{paymentId}/allocations:
+    get:
+      tags: [payments]
+      summary: list allocations for a payment
+      operationId: allocationList
+      parameters: [{ name: paymentId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: allocations
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/PaymentAllocation' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+    post:
+      tags: [payments]
+      summary: allocate payment amount to a charge
+      operationId: allocationCreate
+      parameters:
+        - { name: paymentId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PaymentAllocationRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '201':
+          description: allocated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/PaymentAllocation' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/allocations/{allocationId}/release:
+    post:
+      tags: [payments]
+      summary: release part of an allocation
+      operationId: allocationRelease
+      parameters:
+        - { name: allocationId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AllocationReleaseRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: released
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/AllocationRelease' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/payments/{paymentId}/refund:
+    post:
+      tags: [payments]
+      summary: refund unallocated amount of a payment
+      operationId: paymentRefund
+      parameters:
+        - { name: paymentId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PaymentRefundRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '201':
+          description: refunded
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/PaymentRefund' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/residents/{residentId}/unallocated-balance:
+    get:
+      tags: [residents]
+      summary: unallocated payment/credit balance for a resident
+      operationId: residentUnallocatedBalance
+      parameters: [{ name: residentId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: unallocated balance
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/UnallocatedBalance' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/residents/{residentId}/deposits/apply:
+    post:
+      tags: [deposits]
+      summary: apply deposit to selected charges at final checkout
+      operationId: depositApply
+      parameters:
+        - { name: residentId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DepositApplicationRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '200':
+          description: applied
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/DepositTransaction' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/billing-runs/preview:
+    post:
+      tags: [charges]
+      summary: preview a monthly billing run
+      operationId: billingRunPreview
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BillingRunRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '200':
+          description: preview
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/BillingPreview' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/billing-runs:
+    post:
+      tags: [charges]
+      summary: post a monthly billing run
+      operationId: billingRunPost
+      parameters:
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BillingRunRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '201':
+          description: posted
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/BillingRun' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/ledger/reversals:
+    get:
+      tags: [charges]
+      summary: list ledger reversal events
+      operationId: ledgerReversalList
+      parameters:
+        - { name: page, in: query, required: false, schema: { type: integer, default: 1 } }
+        - { name: size, in: query, required: false, schema: { type: integer, default: 20 } }
+        - { name: residentId, in: query, required: false, schema: { type: string, format: uuid } }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '200':
+          description: reversals
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/LedgerReversal' }
+                  meta: { $ref: '#/components/schemas/Meta' }
   /api/v1/reports/dashboard:
     get:
       tags: [reports]
@@ -2412,6 +2635,16 @@ components:
         - REFRESH_TOKEN_REUSED
         - REFRESH_TOKEN_ROTATION_CONFLICT
         - ORGANIZATION_CONTEXT_REQUIRED
+        - AMOUNT_OUT_OF_RANGE
+        - ALLOCATION_EXCEEDS_CHARGE
+        - ALLOCATION_ALREADY_RELEASED
+        - RELEASE_EXCEEDS_ALLOCATION
+        - DEPOSIT_ALREADY_REVERSED
+        - PAYMENT_REFUND_EXCEEDS_UNALLOCATED
+        - REFUND_EXCEEDS_DEPOSIT_BALANCE
+        - BILLING_RUN_DUPLICATE
+        - RESIDENT_MISMATCH
+        - ABSENCE_ALREADY_CREDITED
         - INTERNAL_ERROR
     PlanCode:
       type: string
@@ -2697,10 +2930,15 @@ components:
         totalPages: { type: integer }
     Money:
       type: object
+      description: "Single AFN amount. Individual financial documents MUST be positive (1..2147483647); minimum: 0 is retained only for orderable/optional values (e.g. a contract without a deposit), which services clamp to the document rule."
       required: [amount, currency]
       properties:
-        amount: { type: integer, minimum: 0 }
+        amount: { type: integer, minimum: 0, maximum: 2147483647 }
         currency: { type: string, enum: [AFN] }
+    Amount:
+      type: string
+      pattern: '^[0-9]{1,19}$'
+      description: "Decimal integer string for aggregates (balances, report totals, unapplied credit, deposit held) that may exceed Number.MAX_SAFE_INTEGER. Always AFN; never a float."
     UserSummary:
       type: object
       properties:
@@ -2877,6 +3115,7 @@ components:
         payerName: { type: string, maxLength: 200 }
         payerPhone: { type: string, maxLength: 50 }
         payerRelation: { type: string, maxLength: 100 }
+        provisionalReceiptId: { type: string, maxLength: 200 }
         allocations:
           type: array
           items: { $ref: '#/components/schemas/PaymentAllocationRequest' }
@@ -2933,7 +3172,7 @@ components:
       enum: [CASH, BANK_TRANSFER, MOBILE_MONEY, OTHER]
     DepositType:
       type: string
-      enum: [RECEIVED, REFUNDED, FORFEITED]
+      enum: [RECEIVED, REFUNDED, FORFEITED, APPLIED_TO_CHARGES]
     AssignmentStatus:
       type: string
       enum: [ACTIVE, ENDED]
@@ -3138,6 +3377,7 @@ components:
         payerPhone: { type: string }
         payerRelation: { type: string }
         reversedBy: { type: string, format: uuid }
+        provisionalReceipt: { $ref: '#/components/schemas/ProvisionalReceipt' }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
         allocations:
@@ -3180,6 +3420,142 @@ components:
         reversedBy: { type: string, format: uuid }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
+    EntrySide:
+      type: string
+      enum: [DEBIT, CREDIT]
+    LedgerReversal:
+      type: object
+      required: [id, organizationId, residentId, sourceType, sourceId, side, money, reason, actorUserId, idempotencyKey, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        organizationId: { type: string, format: uuid }
+        residentId: { type: string, format: uuid }
+        sourceType: { type: string, enum: [CHARGE, CREDIT, PAYMENT, DEPOSIT, EXPENSE] }
+        sourceId: { type: string, format: uuid }
+        side: { $ref: '#/components/schemas/EntrySide' }
+        money: { $ref: '#/components/schemas/Money' }
+        reason: { type: string }
+        actorUserId: { type: string, format: uuid }
+        idempotencyKey: { type: string, format: uuid }
+        createdAt: { type: string, format: date-time }
+    AllocationRelease:
+      type: object
+      required: [id, organizationId, residentId, allocationId, money, reason, actorUserId, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        organizationId: { type: string, format: uuid }
+        residentId: { type: string, format: uuid }
+        allocationId: { type: string, format: uuid }
+        money: { $ref: '#/components/schemas/Money' }
+        reason: { type: string }
+        actorUserId: { type: string, format: uuid }
+        createdAt: { type: string, format: date-time }
+    AllocationReleaseRequest:
+      type: object
+      required: [money, reason]
+      properties:
+        money: { $ref: '#/components/schemas/Money' }
+        reason: { type: string, minLength: 1, maxLength: 500 }
+    PaymentRefund:
+      type: object
+      required: [id, organizationId, residentId, paymentId, money, reason, actorUserId, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        organizationId: { type: string, format: uuid }
+        residentId: { type: string, format: uuid }
+        paymentId: { type: string, format: uuid }
+        money: { $ref: '#/components/schemas/Money' }
+        reason: { type: string }
+        actorUserId: { type: string, format: uuid }
+        createdAt: { type: string, format: date-time }
+    PaymentRefundRequest:
+      type: object
+      required: [money, reason]
+      properties:
+        money: { $ref: '#/components/schemas/Money' }
+        reason: { type: string, minLength: 1, maxLength: 500 }
+    ProvisionalReceipt:
+      type: object
+      required: [provisionalReceiptId, status]
+      properties:
+        provisionalReceiptId: { type: string }
+        officialReceiptNumber: { type: string }
+        status: { type: string, enum: [PENDING_SYNC, ISSUED] }
+    UnallocatedBalance:
+      type: object
+      required: [residentId, amount]
+      properties:
+        residentId: { type: string, format: uuid }
+        amount: { $ref: '#/components/schemas/Amount' }
+    DepositApplicationRequest:
+      type: object
+      required: [charges]
+      properties:
+        charges:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [chargeId, money]
+            properties:
+              chargeId: { type: string, format: uuid }
+              money: { $ref: '#/components/schemas/Money' }
+    BillingComponent:
+      type: object
+      required: [kind, name, amount]
+      properties:
+        kind: { $ref: '#/components/schemas/PackageComponentKind' }
+        name: { type: string }
+        amount: { type: integer, minimum: 0, maximum: 2147483647 }
+    BillingLine:
+      type: object
+      required: [residentId, contractId, money, periodStart, periodEnd, components]
+      properties:
+        residentId: { type: string, format: uuid }
+        contractId: { type: string, format: uuid }
+        money: { $ref: '#/components/schemas/Money' }
+        periodStart: { type: string, format: date }
+        periodEnd: { type: string, format: date }
+        components:
+          type: array
+          items: { $ref: '#/components/schemas/BillingComponent' }
+    BillingPreview:
+      type: object
+      required: [periodStart, periodEnd, lines, totalAmount]
+      properties:
+        periodStart: { type: string, format: date }
+        periodEnd: { type: string, format: date }
+        lines:
+          type: array
+          items: { $ref: '#/components/schemas/BillingLine' }
+        totalAmount: { $ref: '#/components/schemas/Amount' }
+    BillingRunRequest:
+      type: object
+      required: [periodStart, periodEnd]
+      properties:
+        periodStart: { type: string, format: date }
+        periodEnd: { type: string, format: date }
+        residentId: { type: string, format: uuid }
+        dryRun: { type: boolean, default: true }
+    BillingRun:
+      type: object
+      required: [id, organizationId, periodStart, periodEnd, status, totalAmount, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        organizationId: { type: string, format: uuid }
+        periodStart: { type: string, format: date }
+        periodEnd: { type: string, format: date }
+        status: { type: string, enum: [PREVIEW, POSTED] }
+        totalAmount: { $ref: '#/components/schemas/Amount' }
+        createdByUserId: { type: string, format: uuid }
+        createdAt: { type: string, format: date-time }
+    AccountBuckets:
+      type: object
+      required: [outstandingReceivable, unappliedCredit, depositHeld]
+      properties:
+        outstandingReceivable: { $ref: '#/components/schemas/Amount' }
+        unappliedCredit: { $ref: '#/components/schemas/Amount' }
+        depositHeld: { $ref: '#/components/schemas/Amount' }
     ResidentAccount:
       type: object
       required: [residentId, totalCharged, totalPaid, allocatedBalance, unallocatedCredit, outstandingBalance, depositBalance]
@@ -3191,6 +3567,7 @@ components:
         unallocatedCredit: { type: integer }
         outstandingBalance: { type: integer }
         depositBalance: { type: integer }
+        buckets: { $ref: '#/components/schemas/AccountBuckets' }
         charges:
           type: array
           items: { $ref: '#/components/schemas/Charge' }
