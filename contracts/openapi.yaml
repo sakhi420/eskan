@@ -1440,7 +1440,7 @@ paths:
                   meta: { $ref: '#/components/schemas/Meta' }
     post:
       tags: [payments]
-      summary: record payment + allocations
+      summary: record unallocated payment (receipt issued by server; allocation is a separate operation)
       operationId: paymentCreate
       parameters:
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
@@ -1451,6 +1451,7 @@ paths:
             schema: { $ref: '#/components/schemas/PaymentRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '201':
           description: created
@@ -1554,7 +1555,8 @@ paths:
                   meta: { $ref: '#/components/schemas/Meta' }
     post:
       tags: [deposits]
-      summary: record deposit event
+      summary: receive deposit (RECEIVED event)
+      description: "Records a RECEIVED deposit. Refund, forfeit and apply-to-charges are separate operations."
       operationId: depositCreate
       parameters:
         - { name: residentId, in: path, required: true, schema: { type: string, format: uuid } }
@@ -1566,6 +1568,7 @@ paths:
             schema: { $ref: '#/components/schemas/DepositRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
         '201':
@@ -1599,6 +1602,66 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '200':
           description: reversed
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/DepositTransaction' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/deposit-transactions/{depositTransactionId}/refund:
+    post:
+      tags: [deposits]
+      summary: refund a received deposit (full or partial)
+      description: "Separate, permissioned operation from receipt. Refunded + applied + forfeited must never exceed the held amount (D-08)."
+      operationId: depositRefund
+      parameters:
+        - { name: depositTransactionId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DepositRefundRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '201':
+          description: refunded
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/DepositTransaction' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/deposit-transactions/{depositTransactionId}/forfeit:
+    post:
+      tags: [deposits]
+      summary: forfeit a deposit (full or partial)
+      description: "Separate, permissioned operation from receipt. Forfeit is deposit income, not a resident payment or expense (D-09)."
+      operationId: depositForfeit
+      parameters:
+        - { name: depositTransactionId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DepositForfeitRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '201':
+          description: forfeited
           content:
             application/json:
               schema:
@@ -1837,6 +1900,7 @@ paths:
             schema: { $ref: '#/components/schemas/DepositApplicationRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -1848,7 +1912,7 @@ paths:
                 type: object
                 required: [data, meta]
                 properties:
-                  data: { $ref: '#/components/schemas/DepositTransaction' }
+                  data: { $ref: '#/components/schemas/DepositApplication' }
                   meta: { $ref: '#/components/schemas/Meta' }
   /api/v1/billing-runs/preview:
     post:
@@ -1859,7 +1923,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/BillingRunRequest' }
+            schema: { $ref: '#/components/schemas/BillingPreviewRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '422': { $ref: '#/components/responses/ValidationError' }
@@ -1877,6 +1941,7 @@ paths:
     post:
       tags: [charges]
       summary: post a monthly billing run
+      description: "Final, idempotent issuance. The (organization, periodStart, periodEnd) business key forbids re-issuing the same rent period."
       operationId: billingRunPost
       parameters:
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
@@ -1884,9 +1949,10 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/BillingRunRequest' }
+            schema: { $ref: '#/components/schemas/BillingPostRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '201':
@@ -2930,15 +2996,22 @@ components:
         totalPages: { type: integer }
     Money:
       type: object
-      description: "Single AFN amount. Individual financial documents MUST be positive (1..2147483647); minimum: 0 is retained only for orderable/optional values (e.g. a contract without a deposit), which services clamp to the document rule."
+      description: "Positive AFN amount (integer Afghani) for a single financial document. MUST be 1..2147483647. Never negative; direction (debit/credit) is expressed by an explicit side field, not by sign."
+      required: [amount, currency]
+      properties:
+        amount: { type: integer, minimum: 1, maximum: 2147483647 }
+        currency: { type: string, enum: [AFN] }
+    NonNegativeMoney:
+      type: object
+      description: "AFN amount that may be zero. Reserved for optional/orderable values (e.g. a contract deposit of zero). Financial documents MUST NOT use this; they use Money."
       required: [amount, currency]
       properties:
         amount: { type: integer, minimum: 0, maximum: 2147483647 }
         currency: { type: string, enum: [AFN] }
     Amount:
       type: string
+      description: "Aggregate/running-balance AFN amount serialized as a decimal-string integer (max 19 digits) so account/report totals cannot overflow. Always AFN; never a float."
       pattern: '^[0-9]{1,19}$'
-      description: "Decimal integer string for aggregates (balances, report totals, unapplied credit, deposit held) that may exceed Number.MAX_SAFE_INTEGER. Always AFN; never a float."
     UserSummary:
       type: object
       properties:
@@ -3069,7 +3142,7 @@ components:
         endDate: { type: string, format: date }
         rent: { $ref: '#/components/schemas/Money' }
         billingCycle: { type: string, enum: [MONTHLY] }
-        deposit: { $ref: '#/components/schemas/Money' }
+        deposit: { $ref: '#/components/schemas/NonNegativeMoney' }
         packageId: { type: string, format: uuid }
         packageComponents:
           type: array
@@ -3086,11 +3159,13 @@ components:
         endDate: { type: string, format: date }
     ChargeRequest:
       type: object
+      description: "Creates an obligation posting. `entrySide` defaults to DEBIT; use CREDIT only for positive-amount discounts/absence credits (D-02/D-07). `periodEnd` is exclusive (half-open [periodStart, periodEnd))."
       required: [residentId, type, money, periodStart, periodEnd, dueDate]
       properties:
         residentId: { type: string, format: uuid }
         contractId: { type: string, format: uuid }
         type: { $ref: '#/components/schemas/ChargeType' }
+        entrySide: { $ref: '#/components/schemas/EntrySide' }
         money: { $ref: '#/components/schemas/Money' }
         periodStart: { type: string, format: date }
         periodEnd: { type: string, format: date }
@@ -3104,21 +3179,18 @@ components:
         money: { $ref: '#/components/schemas/Money' }
     PaymentRequest:
       type: object
-      required: [residentId, money, method, receivedAt, receiptNumber]
+      description: "Records an unallocated payment. `receiptNumber` is issued by the server only after commit (D-03); clients MUST NOT send it. Offline clients send a local `provisionalReceiptId`; the server maps it to the official number in the response. Allocation is a separate operation and is not accepted here (section 4.2 of the execution directive)."
+      required: [residentId, money, method, receivedAt]
       properties:
         residentId: { type: string, format: uuid }
         money: { $ref: '#/components/schemas/Money' }
         method: { $ref: '#/components/schemas/PaymentMethod' }
         receivedAt: { type: string, format: date }
-        receiptNumber: { type: string, minLength: 1, maxLength: 100 }
         notes: { type: string, maxLength: 1000 }
         payerName: { type: string, maxLength: 200 }
         payerPhone: { type: string, maxLength: 50 }
         payerRelation: { type: string, maxLength: 100 }
         provisionalReceiptId: { type: string, maxLength: 200 }
-        allocations:
-          type: array
-          items: { $ref: '#/components/schemas/PaymentAllocationRequest' }
     ReversalRequest:
       type: object
       required: [reason]
@@ -3126,9 +3198,9 @@ components:
         reason: { type: string, minLength: 1, maxLength: 500 }
     DepositRequest:
       type: object
-      required: [type, money]
+      description: "Receive a deposit (RECEIVED event). Refund/forfeit are separate operations with their own endpoints; application to charges is the separate DepositApplication operation."
+      required: [money, receivedAt]
       properties:
-        type: { $ref: '#/components/schemas/DepositType' }
         money: { $ref: '#/components/schemas/Money' }
         receivedAt: { type: string, format: date }
         reason: { type: string, maxLength: 500 }
@@ -3330,7 +3402,8 @@ components:
         updatedAt: { type: string, format: date-time }
     Charge:
       type: object
-      required: [id, version, organizationId, residentId, type, status, money, periodStart, periodEnd, dueDate, postedAt, createdAt, updatedAt]
+      description: "Obligation posting. `entrySide` is DEBIT for normal charges (RENT/UTILITY/DAMAGE/OTHER) and CREDIT for positive-amount discounts/absence credits. `periodEnd` is exclusive (half-open)."
+      required: [id, version, organizationId, residentId, type, entrySide, status, money, periodStart, periodEnd, dueDate, postedAt, createdAt, updatedAt]
       properties:
         id: { type: string, format: uuid }
         version: { type: integer }
@@ -3338,6 +3411,7 @@ components:
         residentId: { type: string, format: uuid }
         contractId: { type: string, format: uuid }
         type: { $ref: '#/components/schemas/ChargeType' }
+        entrySide: { $ref: '#/components/schemas/EntrySide' }
         status: { $ref: '#/components/schemas/LedgerEntryStatus' }
         money: { $ref: '#/components/schemas/Money' }
         periodStart: { type: string, format: date }
@@ -3348,6 +3422,37 @@ components:
         postedAt: { type: string, format: date-time }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
+    Credit:
+      type: object
+      description: "Manual discount/adjustment posting with positive amount and explicit CREDIT side (D-02/D-07). Never a negative Charge."
+      required: [id, version, organizationId, residentId, money, reason, actorUserId, postedAt, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        version: { type: integer }
+        organizationId: { type: string, format: uuid }
+        residentId: { type: string, format: uuid }
+        contractId: { type: string, format: uuid }
+        money: { $ref: '#/components/schemas/Money' }
+        reason: { type: string }
+        actorUserId: { type: string, format: uuid }
+        reversedBy: { type: string, format: uuid }
+        postedAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    AbsenceCredit:
+      type: object
+      description: "Monthly absence credit line (one per calendar month). Uniquely keyed by (absenceId, periodStart) so a multi-month absence yields several month rows (F-21). Links the absence to the emitted CREDIT posting."
+      required: [id, organizationId, residentId, absenceId, chargeId, periodStart, periodEnd, money, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        organizationId: { type: string, format: uuid }
+        residentId: { type: string, format: uuid }
+        absenceId: { type: string, format: uuid }
+        chargeId: { type: string, format: uuid }
+        periodStart: { type: string, format: date }
+        periodEnd: { type: string, format: date }
+        money: { $ref: '#/components/schemas/Money' }
+        createdAt: { type: string, format: date-time }
     PaymentAllocation:
       type: object
       required: [id, paymentId, chargeId, money, createdAt]
@@ -3359,25 +3464,25 @@ components:
         createdAt: { type: string, format: date-time }
     Payment:
       type: object
+      description: "Received funds (unallocated on creation). `receiptNumber` is the official, organization-unique, server-issued number; it is never supplied by the client (D-03/D-17). `provisionalReceiptId` echoes the offline client's local id when present."
       required: [id, version, organizationId, residentId, status, money, method, receivedAt, receiptNumber, createdAt, updatedAt]
       properties:
         id: { type: string, format: uuid }
         version: { type: integer }
-        memberships:
-          type: array
-          items: { $ref: '#/components/schemas/MembershipSummary' }
+        organizationId: { type: string, format: uuid }
         residentId: { type: string, format: uuid }
         status: { $ref: '#/components/schemas/LedgerEntryStatus' }
         money: { $ref: '#/components/schemas/Money' }
         method: { $ref: '#/components/schemas/PaymentMethod' }
         receivedAt: { type: string, format: date }
         receiptNumber: { type: string }
+        provisionalReceiptId: { type: string }
+        provisionalReceipt: { $ref: '#/components/schemas/ProvisionalReceipt' }
         notes: { type: string }
         payerName: { type: string }
         payerPhone: { type: string }
         payerRelation: { type: string }
         reversedBy: { type: string, format: uuid }
-        provisionalReceipt: { $ref: '#/components/schemas/ProvisionalReceipt' }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
         allocations:
@@ -3385,31 +3490,30 @@ components:
           items: { $ref: '#/components/schemas/PaymentAllocation' }
     DepositTransaction:
       type: object
+      description: "Append-only deposit ledger event: RECEIVED, REFUNDED, FORFEITED, or a correction void. Deposit-to-charge application is a separate DepositApplication entity (never a DepositTransaction)."
       required: [id, version, organizationId, residentId, type, status, money, createdAt, updatedAt]
       properties:
         id: { type: string, format: uuid }
         version: { type: integer }
-        memberships:
-          type: array
-          items: { $ref: '#/components/schemas/MembershipSummary' }
+        organizationId: { type: string, format: uuid }
         residentId: { type: string, format: uuid }
         type: { $ref: '#/components/schemas/DepositType' }
         status: { $ref: '#/components/schemas/LedgerEntryStatus' }
         money: { $ref: '#/components/schemas/Money' }
         receivedAt: { type: string, format: date }
         reason: { type: string }
+        actorUserId: { type: string, format: uuid }
         reversedBy: { type: string, format: uuid }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
     Expense:
       type: object
+      description: "Paid expense only (D-14); no accounts payable. Void via an immutable reversal event, not by rewrite."
       required: [id, version, organizationId, category, status, money, spentAt, createdAt, updatedAt]
       properties:
         id: { type: string, format: uuid }
         version: { type: integer }
-        memberships:
-          type: array
-          items: { $ref: '#/components/schemas/MembershipSummary' }
+        organizationId: { type: string, format: uuid }
         hostelId: { type: string, format: uuid }
         category: { type: string }
         status: { $ref: '#/components/schemas/LedgerEntryStatus' }
@@ -3417,6 +3521,7 @@ components:
         spentAt: { type: string, format: date }
         paymentMethod: { $ref: '#/components/schemas/PaymentMethod' }
         description: { type: string }
+        actorUserId: { type: string, format: uuid }
         reversedBy: { type: string, format: uuid }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
@@ -3425,6 +3530,7 @@ components:
       enum: [DEBIT, CREDIT]
     LedgerReversal:
       type: object
+      description: "Reversal event. `side` MUST be the opposite of the source posting's side (a DEBIT charge reverses with CREDIT, and vice versa). Append-only."
       required: [id, organizationId, residentId, sourceType, sourceId, side, money, reason, actorUserId, idempotencyKey, createdAt]
       properties:
         id: { type: string, format: uuid }
@@ -3489,8 +3595,10 @@ components:
         amount: { $ref: '#/components/schemas/Amount' }
     DepositApplicationRequest:
       type: object
-      required: [charges]
+      description: "Applies deposit funds to selected charges at final checkout (D-10). Explicit manager action only; never automatic. Each line references a resident charge; the total must not exceed the available deposit or each charge's outstanding amount."
+      required: [charges, reason]
       properties:
+        reason: { type: string, minLength: 1, maxLength: 500 }
         charges:
           type: array
           minItems: 1
@@ -3500,6 +3608,34 @@ components:
             properties:
               chargeId: { type: string, format: uuid }
               money: { $ref: '#/components/schemas/Money' }
+    DepositApplication:
+      type: object
+      description: "Independent, append-only record of deposit-to-charge application (D-10). Not a PaymentAllocation and not a DepositTransaction. Links the organization, resident, the deposit ledger event, and the charge line."
+      required: [id, organizationId, residentId, depositTransactionId, chargeId, money, reason, actorUserId, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        organizationId: { type: string, format: uuid }
+        residentId: { type: string, format: uuid }
+        depositTransactionId: { type: string, format: uuid }
+        chargeId: { type: string, format: uuid }
+        money: { $ref: '#/components/schemas/Money' }
+        reason: { type: string }
+        actorUserId: { type: string, format: uuid }
+        createdAt: { type: string, format: date-time }
+    DepositRefundRequest:
+      type: object
+      description: "Refund of a received deposit (full or partial). Refunded + applied + forfeited must never exceed the held amount (D-08)."
+      required: [money, reason]
+      properties:
+        money: { $ref: '#/components/schemas/Money' }
+        reason: { type: string, minLength: 1, maxLength: 500 }
+    DepositForfeitRequest:
+      type: object
+      description: "Forfeit of a deposit (full or partial). Shown separately as deposit income — not a resident payment and not an expense (D-09)."
+      required: [money, reason]
+      properties:
+        money: { $ref: '#/components/schemas/Money' }
+        reason: { type: string, minLength: 1, maxLength: 500 }
     BillingComponent:
       type: object
       required: [kind, name, amount]
@@ -3529,22 +3665,35 @@ components:
           type: array
           items: { $ref: '#/components/schemas/BillingLine' }
         totalAmount: { $ref: '#/components/schemas/Amount' }
-    BillingRunRequest:
+    BillingPreviewRequest:
       type: object
+      description: "Preview-only request (no side effects, no Idempotency-Key). `periodEnd` is exclusive; `dueDayOfMonth` (1..28, clamped to month end) overrides the organization rent due-day default."
       required: [periodStart, periodEnd]
       properties:
         periodStart: { type: string, format: date }
         periodEnd: { type: string, format: date }
         residentId: { type: string, format: uuid }
-        dryRun: { type: boolean, default: true }
+        dueDayOfMonth: { type: integer, minimum: 1, maximum: 28 }
+    BillingPostRequest:
+      type: object
+      description: "Final, idempotent billing issuance. Requires Idempotency-Key; the (organization, periodStart, periodEnd) business key forbids issuing the same rent period twice (F-23)."
+      required: [periodStart, periodEnd]
+      properties:
+        periodStart: { type: string, format: date }
+        periodEnd: { type: string, format: date }
+        residentId: { type: string, format: uuid }
+        dueDayOfMonth: { type: integer, minimum: 1, maximum: 28 }
     BillingRun:
       type: object
+      description: "Result of a billing operation. POSTED runs carry a stable `businessKey` (organization+period) and can never re-issue the same period."
       required: [id, organizationId, periodStart, periodEnd, status, totalAmount, createdAt]
       properties:
         id: { type: string, format: uuid }
         organizationId: { type: string, format: uuid }
         periodStart: { type: string, format: date }
         periodEnd: { type: string, format: date }
+        businessKey: { type: string }
+        dueDayOfMonth: { type: integer, minimum: 1, maximum: 28 }
         status: { type: string, enum: [PREVIEW, POSTED] }
         totalAmount: { $ref: '#/components/schemas/Amount' }
         createdByUserId: { type: string, format: uuid }
@@ -3561,12 +3710,12 @@ components:
       required: [residentId, totalCharged, totalPaid, allocatedBalance, unallocatedCredit, outstandingBalance, depositBalance]
       properties:
         residentId: { type: string, format: uuid }
-        totalCharged: { type: integer }
-        totalPaid: { type: integer }
-        allocatedBalance: { type: integer }
-        unallocatedCredit: { type: integer }
-        outstandingBalance: { type: integer }
-        depositBalance: { type: integer }
+        totalCharged: { $ref: '#/components/schemas/Amount' }
+        totalPaid: { $ref: '#/components/schemas/Amount' }
+        allocatedBalance: { $ref: '#/components/schemas/Amount' }
+        unallocatedCredit: { $ref: '#/components/schemas/Amount' }
+        outstandingBalance: { $ref: '#/components/schemas/Amount' }
+        depositBalance: { $ref: '#/components/schemas/Amount' }
         buckets: { $ref: '#/components/schemas/AccountBuckets' }
         charges:
           type: array
@@ -3574,6 +3723,9 @@ components:
         payments:
           type: array
           items: { $ref: '#/components/schemas/Payment' }
+        credits:
+          type: array
+          items: { $ref: '#/components/schemas/Credit' }
         depositTransactions:
           type: array
           items: { $ref: '#/components/schemas/DepositTransaction' }
@@ -3596,7 +3748,7 @@ components:
         activeBeds: { type: integer }
         occupiedBeds: { type: integer }
         activeResidents: { type: integer }
-        totalOutstanding: { type: integer }
+        totalOutstanding: { $ref: '#/components/schemas/Amount' }
         overdueCount: { type: integer }
     OccupancyReport:
       type: object
@@ -3619,27 +3771,27 @@ components:
               residentName: { type: string }
               chargeId: { type: string, format: uuid }
               dueDate: { type: string, format: date }
-              outstanding: { type: integer }
-        totalOutstanding: { type: integer }
+              outstanding: { $ref: '#/components/schemas/Amount' }
+        totalOutstanding: { $ref: '#/components/schemas/Amount' }
     FinancialSummaryReport:
       type: object
       required: [from, to, totalCharged, totalCollected, totalReversedPayments, totalDepositReceived, totalDepositRefunded, totalExpenses]
       properties:
         from: { type: string, format: date }
         to: { type: string, format: date }
-        totalCharged: { type: integer }
-        totalCollected: { type: integer }
-        totalReversedPayments: { type: string }
-        totalDepositReceived: { type: integer }
-        totalDepositRefunded: { type: integer }
-        totalExpenses: { type: integer }
+        totalCharged: { $ref: '#/components/schemas/Amount' }
+        totalCollected: { $ref: '#/components/schemas/Amount' }
+        totalReversedPayments: { $ref: '#/components/schemas/Amount' }
+        totalDepositReceived: { $ref: '#/components/schemas/Amount' }
+        totalDepositRefunded: { $ref: '#/components/schemas/Amount' }
+        totalExpenses: { $ref: '#/components/schemas/Amount' }
     ExpenseReport:
       type: object
       required: [from, to, total, items]
       properties:
         from: { type: string, format: date }
         to: { type: string, format: date }
-        total: { type: string }
+        total: { $ref: '#/components/schemas/Amount' }
         items:
           type: array
           items: { $ref: '#/components/schemas/Expense' }
@@ -3650,8 +3802,9 @@ components:
         residentId: { type: string, format: uuid }
         from: { type: string, format: date }
         to: { type: string, format: date }
-        openingBalance: { type: integer }
-        closingBalance: { type: integer }
+        openingBalance: { $ref: '#/components/schemas/Amount' }
+        closingBalance: { $ref: '#/components/schemas/Amount' }
+        buckets: { $ref: '#/components/schemas/AccountBuckets' }
         entries:
           type: array
           items:
@@ -3659,9 +3812,10 @@ components:
             properties:
               date: { type: string, format: date }
               type: { type: string }
+              side: { $ref: '#/components/schemas/EntrySide' }
               description: { type: string }
-              amount: { type: integer }
-              balance: { type: integer }
+              amount: { $ref: '#/components/schemas/Amount' }
+              balance: { $ref: '#/components/schemas/Amount' }
     PackageComponent:
       type: object
       required: [kind, name, amount, deductibleOnAbsence]
@@ -3714,9 +3868,7 @@ components:
       properties:
         id: { type: string, format: uuid }
         version: { type: integer }
-        memberships:
-          type: array
-          items: { $ref: '#/components/schemas/MembershipSummary' }
+        organizationId: { type: string, format: uuid }
         residentId: { type: string, format: uuid }
         contractId: { type: string, format: uuid }
         status: { $ref: '#/components/schemas/AbsenceStatus' }
@@ -3729,7 +3881,9 @@ components:
         requestedBy: { type: string, format: uuid }
         approvedBy: { type: string, format: uuid }
         approvedAt: { type: string, format: date-time }
-        creditChargeId: { type: string, format: uuid }
+        credits:
+          type: array
+          items: { $ref: '#/components/schemas/AbsenceCredit' }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
     TemporaryAbsenceRequest:

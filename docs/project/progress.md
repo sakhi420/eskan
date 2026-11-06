@@ -523,4 +523,12 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
   - پوشش unit-test بازسازی شد (mock تعاملی `$transaction` + assertion ناهم‌گام refresh).
   - **CI واقعی** `.github/workflows/ci.yml`: install + generate + build + OpenAPI + Prisma validate + unit + `migrate deploy` + e2e smoke روی PostgreSQL 17.
   - اعتبارسنجی: build ✅، `openapi:validate` ✅ (۶ warning)، `prisma validate` ✅، `migrate status` ✅ (۸ migration)، unit **۲۶/۲۶** ✅، e2e smoke **۲/۲** ✅.
-- **بعدی:** Gate 1 — تکمیل واقعی قرارداد مالی `contracts/openapi.yaml` و قفل آن (پیش از ساخت Controller مالی)؛ سپس M-1/M-2.
+- **Gate 1 — Contract (در حال تکمیل؛ هنوز قفل‌نشده):**
+  - `contracts/openapi.yaml` برای رفع تناقض‌های گزارش ممیزی اصلاح شد؛ `openapi:validate` ✅ (valid، ۶ warning از پیش‌موجود).
+  - **Receipt/Payment/Allocation:** `PaymentRequest` دیگر `receiptNumber` و آرایهٔ `allocations` نمی‌پذیرد؛ پرداخت به‌صورت وجه تخصیص‌نیافته ثبت و `receiptNumber` رسمی فقط سمت سرور صادر می‌شود (`provisionalReceiptId` جدا). Allocation عملیات مستقل است.
+  - **Debit/Credit:** `Charge.entrySide` (DEBIT پیش‌فرض)، مدل مستقل `Credit` و `AbsenceCredit` (یک سطر به‌ازای هر ماه، کلید یکتای absence+دوره) اضافه شد؛ `TemporaryAbsence.creditChargeId` در قرارداد با `credits[]` جایگزین شد.
+  - **Deposit:** مدل مستقل `DepositApplication` + درخواست و endpointهای جداگانهٔ `refund`/`forfeit`؛ `depositCreate` فقط دریافت؛ پاسخ `/deposits/apply` به `DepositApplication` تغییر کرد.
+  - **Billing:** `BillingRunRequest` به `BillingPreviewRequest`/`BillingPostRequest` تفکیک شد؛ `dryRun` حذف؛ `businessKey` و `dueDayOfMonth` اضافه شد؛ `periodEnd` نیمه‌باز صریح شد.
+  - **مبلغ:** `Money` مثبت (`minimum: 1`) و `NonNegativeMoney` (صفرپذیر) جدا شد؛ مبالغ حساب/گزارش به `Amount` (رشته، تا ۱۹ رقم) یکسان شد.
+  - **باقی‌مانده پیش از قفل واقعی Gate 1:** Permission Matrix endpoint‌به‌endpoint، یکسان‌سازی `X-Expected-Version` و Idempotency Replay، تکمیل قرارداد Offline/Pending/Server-confirmed + الزام Backup، و تطبیق اسناد قدیمی با تصمیم‌های قطعی.
+- **بعدی:** تکمیل موارد باقی‌ماندهٔ Gate 1 و قفل آن؛ سپس M-1/M-2 (بدون migration مالی تا قفل Gate 1).
