@@ -24,7 +24,7 @@
 | Reversal/Void (هر سند مالی) | ✅ | ✅ | ❌ | ❌ |
 | Billing preview | ✅ | ✅ | ✅ | ✅ |
 | Billing post (صدور قطعی) | ✅ | ✅ | ❌ | ❌ |
-| AbsenceCredit (تولید) | ✅ | ✅ | ✅ | ❌ |
+| AbsenceCredit (تولید) | ✅ | ✅ | ❌ | ❌ |
 | گزارش‌ها | ✅ | ✅ | ✅ | ✅ |
 | sync/read | ✅ | ✅ | ✅ | ✅ |
 | change-password (خود) | ✅ | ✅ | ✅ | ✅ |

@@ -445,6 +445,7 @@ paths:
       operationId: hostelUpdate
       parameters:
         - { name: hostelId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
         - { name: X-Expected-Version, in: header, required: true, schema: { type: integer } }
       requestBody:
         required: true
@@ -562,6 +563,7 @@ paths:
       operationId: roomUpdate
       parameters:
         - { name: roomId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
         - { name: X-Expected-Version, in: header, required: true, schema: { type: integer } }
       requestBody:
         required: true
@@ -679,6 +681,7 @@ paths:
       operationId: bedUpdate
       parameters:
         - { name: bedId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
         - { name: X-Expected-Version, in: header, required: true, schema: { type: integer } }
       requestBody:
         required: true
@@ -911,6 +914,7 @@ paths:
       operationId: residentUpdate
       parameters:
         - { name: residentId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
         - { name: X-Expected-Version, in: header, required: true, schema: { type: integer } }
       requestBody:
         required: true
@@ -1085,6 +1089,7 @@ paths:
       operationId: contractUpdate
       parameters:
         - { name: contractId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
         - { name: X-Expected-Version, in: header, required: true, schema: { type: integer } }
       requestBody:
         required: true
@@ -1234,6 +1239,7 @@ paths:
           application/json:
             schema:
               type: object
+              description: "Transfer boundary: `startDate` is the shared transition point — the previous assignment ends AT `startDate` (exclusive) and the new one starts at the same value, with no +1 applied (D-01/F-20). `endDate` is exclusive (half-open)."
               required: [bedId, startDate]
               properties:
                 bedId: { type: string, format: uuid }
@@ -1291,7 +1297,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/TemporaryAbsenceRequest' }
+            schema: { $ref: '#/components/schemas/TemporaryAbsenceCreateRequest' }
       responses:
         '201':
           description: absence created
@@ -1335,12 +1341,12 @@ paths:
       parameters:
         - { name: absenceId, in: path, required: true, schema: { type: string, format: uuid } }
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
-        - { name: X-Expected-Version, in: header, required: false, schema: { type: integer } }
+        - { name: X-Expected-Version, in: header, required: true, schema: { type: integer } }
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/TemporaryAbsenceRequest' }
+            schema: { $ref: '#/components/schemas/TemporaryAbsenceUpdateRequest' }
       responses:
         '200':
           description: absence updated
@@ -1405,6 +1411,7 @@ paths:
     post:
       tags: [charges]
       summary: create charge
+      description: "Creates an obligation posting. `entrySide=DEBIT` (normal charge) is allowed for OWNER/ADMIN/OPERATOR; `entrySide=CREDIT` (discount/absence credit) is allowed only for OWNER/ADMIN (403 otherwise)."
       operationId: chargeCreate
       parameters:
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
@@ -1415,6 +1422,7 @@ paths:
             schema: { $ref: '#/components/schemas/ChargeRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '201':
@@ -3209,7 +3217,7 @@ components:
         notes: { type: string, maxLength: 2000 }
     ContractRequest:
       type: object
-      description: "`endDate` is exclusive (half-open [startDate, endDate)); the last inclusive stay day is endDate - 1 day. Checkout sets endDate = lastDay + 1; Transfer sets endDate to the shared boundary (no +1)."
+      description: "`endDate` is exclusive (half-open [startDate, endDate)); the last inclusive stay day is endDate - 1 day. Checkout (closing) sets endDate = lastDay + 1."
       required: [hostelId, residentId, startDate, rent]
       properties:
         hostelId: { type: string, format: uuid }
@@ -3982,15 +3990,24 @@ components:
           items: { $ref: '#/components/schemas/AbsenceCredit' }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
-    TemporaryAbsenceRequest:
+    TemporaryAbsenceCreateRequest:
       type: object
+      description: "Creates an absence (starts as REQUESTED). `actualReturnDate`/RETURNED/CLOSED cannot be set at creation; record the return via PATCH then generate credits via POST /absences/{id}/credits."
       required: [contractId, plannedDepartureDate, expectedReturnDate]
       properties:
         contractId: { type: string, format: uuid }
         plannedDepartureDate: { type: string, format: date }
+        expectedReturnDate: { type: string, format: date }
+        reason: { type: string, maxLength: 500 }
+        notes: { type: string, maxLength: 2000 }
+    TemporaryAbsenceUpdateRequest:
+      type: object
+      description: "Updates an absence. `actualReturnDate` moves it to RETURNED (credit generation is a separate POST). CLOSED cannot be set directly."
+      properties:
+        plannedDepartureDate: { type: string, format: date }
         actualDepartureDate: { type: string, format: date }
         expectedReturnDate: { type: string, format: date }
-        actualReturnDate: { type: string, format: date, description: "Records the actual return; adding it moves the absence to RETURNED (credit generation is a separate POST)." }
+        actualReturnDate: { type: string, format: date, description: "Records the actual return; moves the absence to RETURNED." }
         reason: { type: string, maxLength: 500 }
         notes: { type: string, maxLength: 2000 }
     TemporaryAbsencePage:

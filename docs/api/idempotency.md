@@ -27,6 +27,12 @@
 - **concurrent request (same key هم‌زمان)** → یکی commit و بقیه همان نتیجه را می‌گیرند
   (store-then-execute داخل همان transaction).
 - **retry پس از timeout+commit** → بازیابی همان نتیجه، نه اجرای مجدد.
-- **retention دائمی مالی:** رکورد IdempotencyRecord برای mutationهای مالی
-  `retentionClass = PERMANENT` و `expiresAt = NULL` دارد؛ هرگز lazy-delete نمی‌شود تا retry
-  چندماهه هم به همان سند اشاره کند. رکوردهای غیرمالی `TRANSIENT` با expiry lazy می‌مانند.
+- **retention دائمی مالی (طرح هدف آینده):** برای mutationهای مالی، `IdempotencyRecord`
+  باید `retentionClass = PERMANENT` و `expiresAt = NULL` داشته باشد و هرگز lazy-delete نشود
+  تا retry چندماهه هم به همان سند اشاره کند. **این هنوز در Prisma/سرویس فعلی پیاده نشده**
+  (فعلاً `expiresAt` غیر nullable و بدون `retentionClass` است)؛ به‌عنوان نیازمندی Migration
+  آینده ثبت می‌شود، نه وضعیت فعلی سیستم.
+- **authorization قبل از replay:** نتیجهٔ replay فقط پس از بررسی دوبارهٔ عضویت/مجوز کاربرِ
+  فعلی برمی‌گردد. کلید در سطح Organization + Endpoint یکتاست (نه User)، پس replay نباید راه
+  دورزدن RBAC باشد. canonical request hash (fingerprint) برای تشخیص same-key-different-payload
+  ذخیره می‌شود.
