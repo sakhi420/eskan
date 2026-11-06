@@ -96,13 +96,13 @@ T2 :: body کلیدهای با ترتیب متفاوت، canonical/hash یکسا
 T3 :: null ≠ فیلد حذف‌شده (hash متفاوت)
   a) {} -> {"body":{},"method":"PATCH","pathParams":{"chargeId":"22222222-2222-2222-2222-222222222222"},"query":{},"route":"/api/v1/charges/{chargeId}","semanticHeaders":{}}
      -> 11ba0dd560b2773ec5d0cb3836a0fb6bc9336941a54c4bc35a239ca868557d6f
-  b) {"note":null} -> {"body":{"note":null},...}
+  b) {"note":null} -> {"body":{"note":null},"method":"PATCH","pathParams":{"chargeId":"22222222-2222-2222-2222-222222222222"},"query":{},"route":"/api/v1/charges/{chargeId}","semanticHeaders":{}}
      -> 0ac803f497e38ff941cde664493381dc63ac0be69a7899cc8e99302ebfbb7e0a
 
 T4 :: query چندمقداری مرتب + بدون‌مقدار/خالی معادل
   a) ?tag=b&tag=a&tag=b -> {"body":{},"method":"GET","pathParams":{},"query":{"tag":["a","b","b"]},"route":"/api/v1/charges","semanticHeaders":{}}
      -> f4afe42487ebbcf9507afea5309bae0168aa2b0e0365fa9d7b8a60223ecf93ca
-  b) ?tag  یا  ?tag= -> {"tag":[""]}
+  b) ?tag  یا  ?tag= -> {"body":{},"method":"GET","pathParams":{},"query":{"tag":[""]},"route":"/api/v1/charges","semanticHeaders":{}}
      -> 3a1720385e7e769e931ffc5c89a8a4a162d1e659189b3d85fe758be9d9ce1a7f
 
 T5 :: Unicode + عدد افغانی
@@ -113,8 +113,17 @@ T5 :: Unicode + عدد افغانی
 T6 :: X-Expected-Version در fingerprint (body/key یکسان، version متفاوت → hash متفاوت)
   a) v=4 -> {"body":{"note":"x"},"method":"PATCH","pathParams":{"residentId":"33333333-3333-3333-3333-333333333333"},"query":{},"route":"/api/v1/residents/{residentId}","semanticHeaders":{"x-expected-version":4}}
      -> 26ce9c64b385790e11b30d6b2122ab7fc25cf303d4257ed1e3da332c8cc67aef
-  b) v=5 -> {"body":{"note":"x"},...,"semanticHeaders":{"x-expected-version":5}}
+  b) v=5 -> {"body":{"note":"x"},"method":"PATCH","pathParams":{"residentId":"33333333-3333-3333-3333-333333333333"},"query":{},"route":"/api/v1/residents/{residentId}","semanticHeaders":{"x-expected-version":5}}
      -> eccb2a34e5a35406676da4579e018f0756d6c05daa996addb8fa6aeab41b03d7
 ```
 
 same key + same hash = replay همان نتیجه؛ same key + different hash = 409 `IDEMPOTENCY_KEY_REUSED`.
+
+## وضعیت پیاده‌سازی نسبت به قرارداد (هدف vs فعلی)
+
+> این بخش برای جلوگیری از گزارش «هدف آینده» به‌عنوان «قابلیت پیاده‌سازی‌شده» است.
+
+1. fingerprint شش‌فیلدی مبتنی بر RFC 8785/JCS در بالا، **مشخصات هدفِ قرارداد** است؛ نه چیزی که runtime فعلی اجرا می‌کند.
+2. `IdempotencyService` فعلی (`src/common/idempotency/idempotency.service.ts`) هنوز `stableStringify(payload)` را هش می‌کند و `method`/`route`/`pathParams`/`query`/`semanticHeaders` را نمی‌پوشاند.
+3. `authRegister` در Controller، وجود و UUID بودن `Idempotency-Key` را اعتبارسنجی می‌کند اما مقدار را به `AuthService.register` منتقل نمی‌کند؛ بازیابی/تکرار ثبت‌نام فعلی بر پایهٔ email + تأیید رمز است، نه تطبیق key + fingerprint.
+4. idempotency ثبت‌نام باید **جداگانه** طراحی و تست شود: ثبت‌نام پیش از ایجاد organization اتفاق می‌افتد ولی scope فعلی رکورد Idempotency بر `organizationId` بنا شده است.
