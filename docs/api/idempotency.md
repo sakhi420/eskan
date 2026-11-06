@@ -59,6 +59,7 @@ fingerprint = SHA-256 روی ساختار کانونیکالِ صریح (JSON ب
   "route": "/api/v1/residents/{residentId}/payments",
   "pathParams": { "residentId": "<uuid>" },
   "query": { "key": ["v1", "v2"] },
+  "semanticHeaders": { "x-expected-version": 4 },
   "body": { }
 }
 ```
@@ -68,7 +69,7 @@ fingerprint = SHA-256 روی ساختار کانونیکالِ صریح (JSON ب
 - **الگوریتم:** JCS — کلیدهای هر object الفبایی (UTF-16 code unit)، خروجی compact بدون whitespace، بدون فاصلهٔ تزئینی، escape حداقلی JSON.
 - **whitespace:** در خروجی canonical هیچ فاصله/خط جدیدی نیست.
 - **string escaping:** فقط `"`، `\` و کاراکترهای کنترلی (< U+0020) escape می‌شوند؛ نویسه‌های غیر-ASCII (فارسی/دری) escape نمی‌شوند و مستقیماً UTF-8 می‌شوند.
-- **numbers:** فرم I-JSON (RFC 7493) — عدد صحیح/اعشاری، بدون نمایش علمی، بدون `NaN`/`Infinity`، بدون صفرهای پیشرو (پول افغانی همیشه عدد صحیح = افغانی).
+- **numbers:** serialization دقیقاً مطابق RFC 8785 (الگوریتم ECMAScript `Number::toString`)؛ بدون گردکردن سفارشی. ورودی عددی canonical فقط **safe integer** مجاز است؛ اعداد اعشاری، `NaN`، `Infinity` و خارج از range دقیق binary64 رد می‌شوند؛ عدد صحیح بزرگ‌تر از `Number.MAX_SAFE_INTEGER` باید به‌صورت **JSON string** منتقل شود (مبلغ AFN همیشه integer و داخل safe range است).
 - **encoding:** خروجی canonical UTF-8 است؛ SHA-256 روی بایت‌ها؛ خروجی hex lowercase.
 
 ### قواعد فیلدها
@@ -76,38 +77,44 @@ fingerprint = SHA-256 روی ساختار کانونیکالِ صریح (JSON ب
 - **method:** uppercase.
 - **route:** route template (نه URL واقعی)؛ با جایگاه پارامترها.
 - **pathParams:** فقط پارامترهای موجود در route؛ object با کلید = نام پارامتر (کلیدها توسط JCS الفبایی می‌شوند)؛ مقادیر رشته.
-- **query:** object با کلید = نام پارامتر، مقدار = آرایهٔ رشته‌ها. ترتیب آرایهٔ چندمقداری از نظر معنایی بی‌اهمیت است؛ اجزای هر آرایه الفبایی (UTF-16 code unit) مرتب می‌شوند. `?k` (بدون `=`) و `?k=` **معادل** هستند: هر دو `[""]` (رشتهٔ خالی).
+- **query:** object با کلید = نام پارامتر، مقدار = آرایهٔ رشته‌ها (پس از **percent-decode دقیقاً یک‌بار**، UTF-8؛ `+` کاراکتر تحت‌اللفظی است و به space تبدیل نمی‌شود؛ `%20` = space). `?k` (بدون `=`) و `?k=` **معادل** هستند: هر دو `[""]`. مقادیر چندتایی فقط وقتی الفبایی مرتب می‌شوند که آن پارامتر طبق قرارداد ترتیب‌ناپذیر تعریف شده باشد؛ پارامتر scalar که چندبار تکرار شود **رد** می‌شود (422)، نه مرتب‌سازی پنهانی.
+- **semanticHeaders:** فقط headerهای معنایی که روی نتیجه اثر دارند؛ فعلاً `x-expected-version` (عدد integer، تبدیل‌شده از مقدار header و سپس canonicalize). در ساختار **همیشه حاضر** است؛ خالی = `{}`. `Idempotency-Key`/`Authorization`/`User-Agent`/timestamp و `X-Organization-Id` وارد نمی‌شوند (scope سازمانی Idempotency از قبل سازمان را دربر دارد).
 - **body:** همان بدنهٔ ارسالی با JCS — کلیدهای object بازگشتی الفبایی؛ ترتیب آرایه‌ها **حفظ** می‌شود؛ `null` صریح ≠ فیلد حذف‌شده ≠ مقدار پیش‌فرض.
-- **Unicode/normalization:** هیچ‌گونه NFC/NFKC/case-fold اعمال نمی‌شود؛ code pointها عیناً هش می‌شوند. کلاینت‌ها موظف‌اند ورودی را پیش از ارسال به شکل یکسان (NFC) بفرستند.
-- **حذف از hash:** `Idempotency-Key` و headerهای ناپایدار (`Authorization`, `User-Agent`, timestamp و…) وارد ساختار نمی‌شوند.
+- **Unicode/normalization:** هیچ‌گونه NFC/NFKC/case-fold اعمال نمی‌شود؛ code pointها عیناً هش می‌شوند؛ **lone surrogate** (UTF-16 ناقص) رد می‌شود. کلاینت‌ها موظف‌اند ورودی را پیش از ارسال به شکل یکسان (NFC) بفرستند.
 
 ### test vectors (canonical → SHA-256)
 
 ```
-T1 :: {"body":{"amount":1500,"currency":"AFN","note":null},"method":"POST","pathParams":{},"query":{},"route":"/api/v1/payments"}
-  -> 78448fda558b23d5da49d48f128e7dfaf4ff1221a0da6b7c1b3be4fdc3d6d630
+T1 :: {"body":{"amount":1500,"currency":"AFN","note":null},"method":"POST","pathParams":{},"query":{},"route":"/api/v1/payments","semanticHeaders":{}}
+  -> 8aba91621d58acba92472ecfc84ad0b2d082b5396053749eba894caf8d943107
 
 T2 :: body کلیدهای با ترتیب متفاوت، canonical/hash یکسان
   A {"note":"x","phone":"0700123456"}  و  B {"phone":"0700123456","note":"x"}
-  -> {"body":{"note":"x","phone":"0700123456"},"method":"PATCH","pathParams":{"residentId":"11111111-1111-1111-1111-111111111111"},"query":{},"route":"/api/v1/residents/{residentId}"}
-  -> d7e09a35b59d76a05d1a5b3ae8e729a50d4dd850646ad7eb6c6a696a1dad8065
+  -> {"body":{"note":"x","phone":"0700123456"},"method":"PATCH","pathParams":{"residentId":"11111111-1111-1111-1111-111111111111"},"query":{},"route":"/api/v1/residents/{residentId}","semanticHeaders":{}}
+  -> a1a196b94fccee24d41c2d0ec29bd7a84351da396562fd1365c32f2fda38ca86
 
 T3 :: null ≠ فیلد حذف‌شده (hash متفاوت)
-  a) {} -> {"body":{},"method":"PATCH","pathParams":{"chargeId":"22222222-2222-2222-2222-222222222222"},"query":{},"route":"/api/v1/charges/{chargeId}"}
-     -> 876fd0589481392b9b883f4df949d7e0717620f323d2afba39175361dc65f526
-  b) {"note":null} -> {"body":{"note":null},...same...}
-     -> 945dd944490f28ce4898eb2695e20448d5699d223bd177c3d1449bc2cf7b2eee
+  a) {} -> {"body":{},"method":"PATCH","pathParams":{"chargeId":"22222222-2222-2222-2222-222222222222"},"query":{},"route":"/api/v1/charges/{chargeId}","semanticHeaders":{}}
+     -> 11ba0dd560b2773ec5d0cb3836a0fb6bc9336941a54c4bc35a239ca868557d6f
+  b) {"note":null} -> {"body":{"note":null},...}
+     -> 0ac803f497e38ff941cde664493381dc63ac0be69a7899cc8e99302ebfbb7e0a
 
 T4 :: query چندمقداری مرتب + بدون‌مقدار/خالی معادل
-  a) ?tag=b&tag=a&tag=b -> {"body":{},"method":"GET","pathParams":{},"query":{"tag":["a","b","b"]},"route":"/api/v1/charges"}
-     -> 4a126fe77c6d43aaab097360cff9ca87cea2102359b6a64709514bc95a4cec95
+  a) ?tag=b&tag=a&tag=b -> {"body":{},"method":"GET","pathParams":{},"query":{"tag":["a","b","b"]},"route":"/api/v1/charges","semanticHeaders":{}}
+     -> f4afe42487ebbcf9507afea5309bae0168aa2b0e0365fa9d7b8a60223ecf93ca
   b) ?tag  یا  ?tag= -> {"tag":[""]}
-     -> d245c1c1dc88a6d54fb48993600a4ab5d075f3a490e944591d83c4279d342872
+     -> 3a1720385e7e769e931ffc5c89a8a4a162d1e659189b3d85fe758be9d9ce1a7f
 
 T5 :: Unicode + عدد افغانی
   {"title":"کرایه موتر","amount":750}
-  -> {"body":{"amount":750,"title":"کرایه موتر"},"method":"POST","pathParams":{},"query":{},"route":"/api/v1/expenses"}
-  -> 64b2b4af343b734bbcf0cc5da2e5bf314e9c750ab47435c5cdad3e88d04a6362
+  -> {"body":{"amount":750,"title":"کرایه موتر"},"method":"POST","pathParams":{},"query":{},"route":"/api/v1/expenses","semanticHeaders":{}}
+  -> 28f9fd4521f61d640eac3fc200f28abc0adc9937fbb66bc2443f5662d930f1d9
+
+T6 :: X-Expected-Version در fingerprint (body/key یکسان، version متفاوت → hash متفاوت)
+  a) v=4 -> {"body":{"note":"x"},"method":"PATCH","pathParams":{"residentId":"33333333-3333-3333-3333-333333333333"},"query":{},"route":"/api/v1/residents/{residentId}","semanticHeaders":{"x-expected-version":4}}
+     -> 26ce9c64b385790e11b30d6b2122ab7fc25cf303d4257ed1e3da332c8cc67aef
+  b) v=5 -> {"body":{"note":"x"},...,"semanticHeaders":{"x-expected-version":5}}
+     -> eccb2a34e5a35406676da4579e018f0756d6c05daa996addb8fa6aeab41b03d7
 ```
 
 same key + same hash = replay همان نتیجه؛ same key + different hash = 409 `IDEMPOTENCY_KEY_REUSED`.

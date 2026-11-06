@@ -22,6 +22,9 @@
 2. این ۵ عملیات هویتی → `security: [{ bearerAuth: [] }]` (احراز هویت الزامی ولی بدون `X-Organization-Id`؛ از endpointهای anonymous جدا شدند):
    - `GET /api/v1/system/me` · `GET /api/v1/auth/me` · `POST /api/v1/auth/logout` · `POST /api/v1/auth/logout-all` · `POST /api/v1/auth/change-password`
 3. ماتریس مجوزها به ۵ کلاس صریح بازنویسی شد: Anonymous / احراز بدون نقش سازمانی / عضو سازمانی (هر نقش) / محدود نقش / Platform Admin — نگاه کنید به `permissions-matrix.md`.
+4. `GET /api/v1/organizations` → `security: [{ bearerAuth: [] }]` (فهرست عضویت‌ها/سازمان‌ها برای انتخاب سازمان فعال، بدون `X-Organization-Id`).
+5. هر ۱۰ عملیات `/api/v1/admin/**` → `security: [{ bearerAuth: [] }]` (بدون `X-Organization-Id`؛ مجوز سیستمی از `User.isPlatformAdmin` سمت سرور؛ `organizationId` مسیر = سازمان هدف).
+6. canonical hash به ساختار ۶فیلدی گسترش یافت (`semanticHeaders` شامل `X-Expected-Version`) و test vectorها بازمحاسبه شدند (T1–T6 با SHA-256 واقعی) — نگاه کنید به `idempotency.md`.
 # بازبینی v0.3.0 — تطبیق با مسترپرامپت v3.0 (اشتراک/کنترل + مدل پول)
 
 ## تغییرات

@@ -74,6 +74,8 @@
 
 هر ۱۱۳ عملیات OpenAPI (۱۱۱ عملیات محصول + ۲ health probe) دقیقاً در یکی از این ۵ کلاس می‌گنجد. ستون «security» وضعیت واقعی قرارداد است: `empty` = `security: []`، `bearer` = `security: [{ bearerAuth: [] }]`، `inherit` = bearer + `X-Organization-Id` (امنیت پیش‌فرض سراسری).
 
+توزیع محصولی (۱۱۱): Anonymous ۶ · احراز-بدون-نقش ۶ · عضو-هر-نقش ۴۴ · محدود-نقش ۴۵ · Platform Admin ۱۰.
+
 #### کلاس ۱ — Anonymous / عمومی (`security: []`)
 
 | Method + Path | operationId |
@@ -98,14 +100,14 @@
 | POST /auth/logout | authLogout |
 | POST /auth/logout-all | authLogoutAll |
 | POST /auth/change-password | authChangePassword |
+| GET /organizations | organizationListMine |
 
-> این‌ها فقط bearerAuth لازم دارند و `X-Organization-Id` لازم ندارند؛ از endpointهای anonymous جدا هستند و «بدون نقش سازمانی» با «بدون احراز هویت» یکی نیست.
+> این‌ها فقط bearerAuth لازم دارند و `X-Organization-Id` لازم ندارند؛ از endpointهای anonymous جدا هستند و «بدون نقش سازمانی» با «بدون احراز هویت» یکی نیست. `GET /organizations` همین‌جا قرار دارد چون وظیفه‌اش فهرست‌کردن عضویت‌ها/سازمان‌های کاربر برای انتخاب سازمان فعال است؛ اگر `X-Organization-Id` می‌خواست، انتخاب سازمان ناممکن می‌شد.
 
 #### کلاس ۳ — عضو سازمانی با هر نقش (OWNER/ADMIN/OPERATOR/VIEWER)
 
 - همهٔ GET‌های منابع سازمانی (hostels/rooms/beds/packages/residents/contracts/bed-assignments/charges/payments/allocations/deposits/expenses/absences/billing-runs/ledger/reports/subscription/sync) که در کلاس ۱/۲/۵ نیستند → هر نقش.
 - به‌صورت صریح (زیرا روی «منبع» واضحی قرار ندارند):
-  - `GET /organizations` → `organizationListMine`
   - `GET /organizations/current` → `organizationGetCurrent`
   - `GET /organizations/current/members` → `organizationListMembers`
   - `GET /organizations/current/members/invitations` → `invitationList`
@@ -121,7 +123,7 @@
 
 #### کلاس ۵ — Platform Admin (`/api/v1/admin/**`)
 
-جدول Platform Admin بالا؛ فقط `PLATFORM_ADMIN` (`User.isPlatformAdmin`)؛ عدم دسترسی → **404**/نقش ناکافی → **403**.
+جدول Platform Admin بالا؛ فقط `PLATFORM_ADMIN` (`User.isPlatformAdmin`)؛ عدم دسترسی → **404**/نقش ناکافی → **403**. security فقط `[{ bearerAuth: [] }]` است؛ `X-Organization-Id` برای این مسیرها **الزامی نیست** (مدیر پلتفرم الزاماً عضو سازمانِ هدف نیست و `organizationId` در مسیر، سازمانِ هدفِ عملیات است نه انتخاب سازمان).
 
 ## Platform Admin (`/api/v1/admin/**`)
 
