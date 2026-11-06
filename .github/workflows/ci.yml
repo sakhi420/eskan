@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: eskan
+          POSTGRES_PASSWORD: eskan_dev_password
+          POSTGRES_DB: eskan_dev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U eskan -d eskan_dev"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://eskan:eskan_dev_password@localhost:5432/eskan_dev
+      NODE_ENV: test
+      # Test-only, non-secret placeholder required by the config validator.
+      JWT_SECRET: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Build
+        run: npm run build
+
+      - name: Validate OpenAPI contract
+        run: npm run openapi:validate
+
+      - name: Validate Prisma schema
+        run: npx prisma validate
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Apply migrations
+        run: npx prisma migrate deploy
+
+      - name: E2E smoke tests
+        run: npm run test:e2e

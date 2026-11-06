@@ -41,6 +41,10 @@ export class AppError extends HttpException {
     );
     this.code = code;
     this.errors = options.errors;
+    // Keep `Error.message` aligned with the human-readable `detail` so callers
+    // and test assertions see the real reason, not the class-name-derived
+    // "App Error" that NestJS's HttpException.initMessage() would produce.
+    this.message = detail;
   }
 
   static unauthorized(detail = 'Authentication required', code: ErrorCode = ErrorCode.UNAUTHENTICATED): AppError {

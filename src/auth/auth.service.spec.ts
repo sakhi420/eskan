@@ -19,21 +19,26 @@ function configStub(values: Record<string, unknown>): ConfigService {
 }
 
 function prismaMock() {
-  return {
+  const prisma: any = {
     user: { findUnique: jest.fn(), create: jest.fn(), update: jest.fn() },
     refreshSession: {
       findUnique: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
-      updateMany: jest.fn(),
+      updateMany: jest.fn().mockResolvedValue({ count: 1 }),
     },
     subscriptionPlan: { findUnique: jest.fn() },
     organization: { create: jest.fn() },
     organizationSubscription: { create: jest.fn() },
     subscriptionEvent: { create: jest.fn() },
     organizationMembership: { findFirst: jest.fn() },
-    $transaction: jest.fn(),
   };
+  // Default interactive-transaction behaviour: invoke the callback with the
+  // same mock object as the client, so `$transaction(async (tx) => ...)` code
+  // paths (refresh rotation, etc.) run in unit tests instead of returning
+  // `undefined` and short-circuiting.
+  prisma.$transaction = jest.fn(async (fn: (tx: any) => Promise<unknown>) => fn(prisma));
+  return prisma;
 }
 
 const USER = {
@@ -227,9 +232,20 @@ describe('AuthService', () => {
           data: expect.objectContaining({ userId: 'u-1', family: 'fam-1' }),
         }),
       );
+      // The old session is first revoked atomically (CAS guard), then linked to
+      // its in-family successor.
+      expect(prisma.refreshSession.updateMany).toHaveBeenCalledWith({
+        where: {
+          id: 's-1',
+          replacedById: null,
+          revokedAt: null,
+          expiresAt: { gt: expect.any(Date) },
+        },
+        data: { revokedAt: expect.any(Date) },
+      });
       expect(prisma.refreshSession.update).toHaveBeenCalledWith({
         where: { id: 's-1' },
-        data: { replacedById: 's-2', revokedAt: expect.any(Date) },
+        data: { replacedById: 's-2' },
       });
       expect(session.refreshToken).toBe('refresh-raw');
     });

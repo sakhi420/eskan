@@ -511,12 +511,16 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 - Smoke واقعی، همگی PASS:
   - `smoke-phase82` ✅ **۲۴/۲۴**، `smoke-phase83` ✅ **۱۳/۱۳**، `smoke-phase84` ✅ **۲۲/۲۲**
   - `smoke-phase85` ✅ **۹/۹** (register replay، maintenance guard بستر/اتاق، کد refresh، race آخرین owner + بررسی DB)
-- NOTE: unit-test `jest` در Node حاضر به‌دلیل ESM اجرا نمی‌شود (ناسازگاری از پیش‌موجود؛ رفع در CI).
+- NOTE: unit-test `jest` در Node 24 به‌دلیل ESM-only بودن پکیج‌های NestJS v12 به `--experimental-vm-modules` نیاز دارد؛ در Gate 0 با `scripts/run-jest.cjs` رفع و پایدار شد.
 
-## پلان مهندسی فاز ۹
-- سند کامل تصمیم‌ها: `docs/project/phase-9-engineering-plan.md` (نسخهٔ **0.3 — Design Lock** پس از بازبینی 0.3).
-- رفع P0های ممیزی 0.2 + بازبینی 0.3: جهت مخالف Reversal، FK مرکب tenant+resident، `AbsenceCredit` با `residentId` و relation صحیح، قفل tenant اجباری + `lockGlobal`، خاتمهٔ اتمیک قرارداد (terminate = checkout اتمیک)، فهرست کامل Gate 1، و جدول کامل D-01..D-18.
-- **وضعیت:** Gate 0 (Design Lock) کامل؛ Gate 1 (OpenAPI مالی) «مجوز شروع طراحی» است، نه قفل‌شده؛ **M-1 و M-2 و هر Migration/Kode مالی فعلاً NO-GO** تا تصویب D-01..D-18 توسط مالک محصول.
-
-### Next actions
-- فاز ۹ مالی.
+## پلان مهندسی فاز ۹ — اجرا
+- مرجع اجرایی: `ESKAN_PHASE9_EXECUTION_DIRECTIVE_v1_FA.md` (تصمیم‌های D-01..D-18 **تصویب‌شده و قطعی**).
+- سند طراحی: `docs/project/phase-9-engineering-plan.md` (نسخهٔ **0.3 — Design Lock**).
+- **Gate 0 — Baseline (اجرا شد):**
+  - شاخهٔ اجرایی `feat/phase-9-financial` از `a1374eb`.
+  - **Jest/ESM رفع شد:** پکیج‌های NestJS v12 فقط ESM هستند؛ Jest 30 مسیر native `require(esm)` دارد که فقط با `--experimental-vm-modules` فعال می‌شود. `scripts/run-jest.cjs` این flag را در `NODE_OPTIONS` ست می‌کند و اسکریپت‌های `test`/`test:e2e` از آن عبور می‌کنند.
+  - **bug واقعی رفع شد:** `AppError.message` پیش‌تر `"App Error"` (برگرفته از نام کلاس توسط NestJS) بود؛ حالا برابر `detail` است.
+  - پوشش unit-test بازسازی شد (mock تعاملی `$transaction` + assertion ناهم‌گام refresh).
+  - **CI واقعی** `.github/workflows/ci.yml`: install + generate + build + OpenAPI + Prisma validate + unit + `migrate deploy` + e2e smoke روی PostgreSQL 17.
+  - اعتبارسنجی: build ✅، `openapi:validate` ✅ (۶ warning)، `prisma validate` ✅، `migrate status` ✅ (۸ migration)، unit **۲۶/۲۶** ✅، e2e smoke **۲/۲** ✅.
+- **بعدی:** Gate 1 — تکمیل واقعی قرارداد مالی `contracts/openapi.yaml` و قفل آن (پیش از ساخت Controller مالی)؛ سپس M-1/M-2.
