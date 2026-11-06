@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: ESKAN Backend API
-  version: 0.4.0
+  version: 0.5.0
   description: |
     قرارداد رسمی API سامانهٔ اسکان (ESKAN) — مدیریت لیلیه‌های خصوصی.
     منبع حقیقت قرارداد: این فایل. مسیر محصول زیر `/api/v1`.
@@ -1404,6 +1404,7 @@ paths:
             schema: { $ref: '#/components/schemas/ReversalRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -1487,7 +1488,7 @@ paths:
     post:
       tags: [payments]
       summary: reverse payment (void with allocation release)
-      description: "Atomic void (D-02): active allocations are released first with append-only AllocationRelease entries (sum of releases ≤ allocated amount), then a reversal with the opposite side is recorded. A real cash return is a separate PaymentRefund, never part of this call. The payment is not voided while valid allocations remain unreleased."
+      description: "Atomic void (D-02): active allocations are released first with append-only AllocationRelease entries (sum of releases ≤ allocated amount), then a reversal with the opposite side is recorded. A real cash return is a separate PaymentRefund, never part of this call. A payment that has any recorded refund may NOT be fully voided until that refund is resolved (no amount is ever returned twice). The payment is not voided while valid allocations remain unreleased."
       operationId: paymentReverse
       parameters:
         - { name: paymentId, in: path, required: true, schema: { type: string, format: uuid } }
@@ -1511,7 +1512,7 @@ paths:
                 type: object
                 required: [data, meta]
                 properties:
-                  data: { $ref: '#/components/schemas/Payment' }
+                  data: { $ref: '#/components/schemas/PaymentVoidResult' }
                   meta: { $ref: '#/components/schemas/Meta' }
   /api/v1/residents/{residentId}/payments:
     get:
@@ -1599,6 +1600,7 @@ paths:
             schema: { $ref: '#/components/schemas/ReversalRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -1751,6 +1753,7 @@ paths:
             schema: { $ref: '#/components/schemas/ReversalRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -1828,6 +1831,7 @@ paths:
             schema: { $ref: '#/components/schemas/AllocationReleaseRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -3249,7 +3253,8 @@ components:
       enum: [CASH, BANK_TRANSFER, MOBILE_MONEY, OTHER]
     DepositType:
       type: string
-      enum: [RECEIVED, REFUNDED, FORFEITED, APPLIED_TO_CHARGES]
+      description: "Deposit ledger event kind. Application to charges is NOT a DepositTransaction type; it is the independent DepositApplication entity."
+      enum: [RECEIVED, REFUNDED, FORFEITED]
     AssignmentStatus:
       type: string
       enum: [ACTIVE, ENDED]
@@ -3427,23 +3432,6 @@ components:
         postedAt: { type: string, format: date-time }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
-    Credit:
-      type: object
-      description: "Manual discount/adjustment posting with positive amount and explicit CREDIT side (D-02/D-07). Never a negative Charge."
-      required: [id, version, organizationId, residentId, money, reason, actorUserId, postedAt, createdAt]
-      properties:
-        id: { type: string, format: uuid }
-        version: { type: integer }
-        organizationId: { type: string, format: uuid }
-        residentId: { type: string, format: uuid }
-        contractId: { type: string, format: uuid }
-        money: { $ref: '#/components/schemas/Money' }
-        reason: { type: string }
-        actorUserId: { type: string, format: uuid }
-        reversedBy: { type: string, format: uuid }
-        postedAt: { type: string, format: date-time }
-        createdAt: { type: string, format: date-time }
-        updatedAt: { type: string, format: date-time }
     AbsenceCredit:
       type: object
       description: "Monthly absence credit line (one per calendar month). Uniquely keyed by (absenceId, periodStart) so a multi-month absence yields several month rows (F-21). Links the absence to the emitted CREDIT posting."
@@ -3535,13 +3523,13 @@ components:
       enum: [DEBIT, CREDIT]
     LedgerReversal:
       type: object
-      description: "Reversal event. `side` MUST be the opposite of the source posting's side (a DEBIT charge reverses with CREDIT, and vice versa). Append-only."
+      description: "Reversal event. `side` MUST be the opposite of the source posting's side (a DEBIT charge reverses with CREDIT, and vice versa). A credit is a Charge with entrySide=CREDIT, so it reverses under sourceType=CHARGE. Append-only."
       required: [id, organizationId, residentId, sourceType, sourceId, side, money, reason, actorUserId, idempotencyKey, createdAt]
       properties:
         id: { type: string, format: uuid }
         organizationId: { type: string, format: uuid }
         residentId: { type: string, format: uuid }
-        sourceType: { type: string, enum: [CHARGE, CREDIT, PAYMENT, DEPOSIT, EXPENSE] }
+        sourceType: { type: string, enum: [CHARGE, PAYMENT, DEPOSIT, EXPENSE] }
         sourceId: { type: string, format: uuid }
         side: { $ref: '#/components/schemas/EntrySide' }
         money: { $ref: '#/components/schemas/Money' }
@@ -3587,6 +3575,16 @@ components:
       properties:
         money: { $ref: '#/components/schemas/Money' }
         reason: { type: string, minLength: 1, maxLength: 500 }
+    PaymentVoidResult:
+      type: object
+      description: "Result of an atomic payment void: the reversed payment plus the append-only AllocationRelease events and the LedgerReversal created in the same transaction."
+      required: [payment, releases, reversal]
+      properties:
+        payment: { $ref: '#/components/schemas/Payment' }
+        releases:
+          type: array
+          items: { $ref: '#/components/schemas/AllocationRelease' }
+        reversal: { $ref: '#/components/schemas/LedgerReversal' }
     ProvisionalReceipt:
       type: object
       required: [provisionalReceiptId, status]
@@ -3602,9 +3600,10 @@ components:
         amount: { $ref: '#/components/schemas/Amount' }
     DepositApplicationRequest:
       type: object
-      description: "Applies deposit funds to selected charges at final checkout (D-10). Explicit manager action only; never automatic. Each line references a resident charge; the total must not exceed the available deposit or each charge's outstanding amount."
-      required: [charges, reason]
+      description: "Applies a specific deposit to selected charges at final checkout (D-10). Explicit manager action only; never automatic. `depositTransactionId` selects WHICH received deposit is consumed; each line references a resident charge. Total must not exceed the selected deposit's available balance or each charge's outstanding amount."
+      required: [depositTransactionId, charges, reason]
       properties:
+        depositTransactionId: { type: string, format: uuid }
         reason: { type: string, minLength: 1, maxLength: 500 }
         charges:
           type: array
@@ -3730,9 +3729,6 @@ components:
         payments:
           type: array
           items: { $ref: '#/components/schemas/Payment' }
-        credits:
-          type: array
-          items: { $ref: '#/components/schemas/Credit' }
         depositTransactions:
           type: array
           items: { $ref: '#/components/schemas/DepositTransaction' }
