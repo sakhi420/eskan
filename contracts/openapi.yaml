@@ -1486,7 +1486,8 @@ paths:
   /api/v1/payments/{paymentId}/reverse:
     post:
       tags: [payments]
-      summary: reverse payment
+      summary: reverse payment (void with allocation release)
+      description: "Atomic void (D-02): active allocations are released first with append-only AllocationRelease entries (sum of releases ≤ allocated amount), then a reversal with the opposite side is recorded. A real cash return is a separate PaymentRefund, never part of this call. The payment is not voided while valid allocations remain unreleased."
       operationId: paymentReverse
       parameters:
         - { name: paymentId, in: path, required: true, schema: { type: string, format: uuid } }
@@ -1498,6 +1499,7 @@ paths:
             schema: { $ref: '#/components/schemas/ReversalRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -1814,6 +1816,7 @@ paths:
     post:
       tags: [payments]
       summary: release part of an allocation
+      description: "Append-only release; the sum of releases for one allocation must not exceed its amount (enforced atomically)."
       operationId: allocationRelease
       parameters:
         - { name: allocationId, in: path, required: true, schema: { type: string, format: uuid } }
@@ -1842,6 +1845,7 @@ paths:
     post:
       tags: [payments]
       summary: refund unallocated amount of a payment
+      description: "Actual cash return to the payer. Separate from reversal/void. Refundable amount is limited to the payment's unallocated balance."
       operationId: paymentRefund
       parameters:
         - { name: paymentId, in: path, required: true, schema: { type: string, format: uuid } }
@@ -1853,6 +1857,7 @@ paths:
             schema: { $ref: '#/components/schemas/PaymentRefundRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -3546,6 +3551,7 @@ components:
         createdAt: { type: string, format: date-time }
     AllocationRelease:
       type: object
+      description: "Append-only release of (part of) a payment allocation. The sum of releases for one allocation MUST NOT exceed the allocation amount; releases precede payment void/reversal so no voided payment keeps live allocations in the balance."
       required: [id, organizationId, residentId, allocationId, money, reason, actorUserId, createdAt]
       properties:
         id: { type: string, format: uuid }
@@ -3564,6 +3570,7 @@ components:
         reason: { type: string, minLength: 1, maxLength: 500 }
     PaymentRefund:
       type: object
+      description: "Actual cash return to the payer (outflow), separate from a payment reversal/void. Only the unallocated amount of a payment can be refunded."
       required: [id, organizationId, residentId, paymentId, money, reason, actorUserId, createdAt]
       properties:
         id: { type: string, format: uuid }

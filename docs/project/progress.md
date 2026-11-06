@@ -530,5 +530,6 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
   - **Deposit:** مدل مستقل `DepositApplication` + درخواست و endpointهای جداگانهٔ `refund`/`forfeit`؛ `depositCreate` فقط دریافت؛ پاسخ `/deposits/apply` به `DepositApplication` تغییر کرد.
   - **Billing:** `BillingRunRequest` به `BillingPreviewRequest`/`BillingPostRequest` تفکیک شد؛ `dryRun` حذف؛ `businessKey` و `dueDayOfMonth` اضافه شد؛ `periodEnd` نیمه‌باز صریح شد.
   - **مبلغ:** `Money` مثبت (`minimum: 1`) و `NonNegativeMoney` (صفرپذیر) جدا شد؛ مبالغ حساب/گزارش به `Amount` (رشته، تا ۱۹ رقم) یکسان شد.
+  - **چرخهٔ Void/Refund پرداخت:** `paymentReverse` اکنون Void اتمیک را صریح می‌کند (آزادسازی `AllocationRelease`های append-only با سقف «مجموع Release ≤ مبلغ تخصیص»، سپس Reversal با جهت مخالف؛ Refund نقدی جدا). سقف مجموع Release و محدودیت Refund به ماندهٔ تخصیص‌نیافته در `AllocationRelease`/`PaymentRefund` مستند شد.
   - **باقی‌مانده پیش از قفل واقعی Gate 1:** Permission Matrix endpoint‌به‌endpoint، یکسان‌سازی `X-Expected-Version` و Idempotency Replay، تکمیل قرارداد Offline/Pending/Server-confirmed + الزام Backup، و تطبیق اسناد قدیمی با تصمیم‌های قطعی.
 - **بعدی:** تکمیل موارد باقی‌ماندهٔ Gate 1 و قفل آن؛ سپس M-1/M-2 (بدون migration مالی تا قفل Gate 1).
