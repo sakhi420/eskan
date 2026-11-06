@@ -45,12 +45,12 @@
 
 ## canonical request hash
 
-fingerprint از موارد زیر ساخته می‌شود (به ترتیب تعریف‌شده):
+fingerprint = SHA-256(hex) از رشتهٔ کانونیکال زیر ساخته می‌شود (به ترتیب تعریف‌شده):
 
 1. `method` (uppercase) + route template (مثل `/api/v1/residents/{residentId}/payments`).
 2. path parameters مؤثر (مقادیر، به ترتیب جایگاه route).
-3. query parameters مؤثر (مرتب‌شده؛ فقط موارد دارای اثر معنایی).
-4. body کانونیکال‌شده (کلیدهای JSON مرتب‌شده + serialization پایدار).
+3. query parameters مؤثر (مرتب‌شدهٔ الفبایی؛ فقط موارد دارای اثر معنایی).
+4. body کانونیکال‌شده: JSON با کلیدهای مرتب‌شدهٔ بازگشتی؛ آرایه‌ها ترتیب‌دار حفظ می‌شوند؛ `null` صریح با فیلد حذف‌شده متفاوت است (هم defaultValue هم حذف‌شده هم `null` جدا canonicalize می‌شوند).
 5. `Idempotency-Key` و headerهای ناپایدار (`Authorization`, `User-Agent`, timestamp, …)
    از hash **حذف** می‌شوند.
 

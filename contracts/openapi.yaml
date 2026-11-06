@@ -301,6 +301,7 @@ paths:
             schema: { $ref: '#/components/schemas/OrganizationUpdateRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '200':
           description: updated
@@ -358,6 +359,7 @@ paths:
             schema: { $ref: '#/components/schemas/MembershipUpdateRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '200':
           description: updated
@@ -408,6 +410,7 @@ paths:
             schema: { $ref: '#/components/schemas/HostelRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '201':
@@ -454,6 +457,7 @@ paths:
             schema: { $ref: '#/components/schemas/HostelRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -477,6 +481,7 @@ paths:
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '404': { $ref: '#/components/responses/NotFound' }
         '200':
@@ -525,6 +530,7 @@ paths:
             schema: { $ref: '#/components/schemas/RoomRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -572,6 +578,7 @@ paths:
             schema: { $ref: '#/components/schemas/RoomRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -595,6 +602,7 @@ paths:
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '404': { $ref: '#/components/responses/NotFound' }
         '200':
@@ -643,6 +651,7 @@ paths:
             schema: { $ref: '#/components/schemas/BedRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -690,6 +699,7 @@ paths:
             schema: { $ref: '#/components/schemas/BedRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -771,6 +781,7 @@ paths:
                   data: { $ref: '#/components/schemas/AccommodationPackage' }
                   meta: { $ref: '#/components/schemas/Meta' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/Error' }
         '409': { $ref: '#/components/responses/Error' }
         '422': { $ref: '#/components/responses/Error' }
@@ -819,6 +830,7 @@ paths:
                   data: { $ref: '#/components/schemas/AccommodationPackage' }
                   meta: { $ref: '#/components/schemas/Meta' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/Error' }
         '409': { $ref: '#/components/responses/Error' }
         '422': { $ref: '#/components/responses/Error' }
@@ -832,6 +844,7 @@ paths:
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '404': { $ref: '#/components/responses/NotFound' }
         '200':
@@ -880,6 +893,7 @@ paths:
             schema: { $ref: '#/components/schemas/ResidentRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '201':
@@ -926,6 +940,7 @@ paths:
             schema: { $ref: '#/components/schemas/ResidentRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -949,6 +964,7 @@ paths:
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '404': { $ref: '#/components/responses/NotFound' }
         '200':
@@ -1054,6 +1070,7 @@ paths:
             schema: { $ref: '#/components/schemas/ContractRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '201':
@@ -1101,6 +1118,7 @@ paths:
             schema: { $ref: '#/components/schemas/ContractRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -1124,6 +1142,7 @@ paths:
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '404': { $ref: '#/components/responses/NotFound' }
         '200':
@@ -1146,6 +1165,7 @@ paths:
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '404': { $ref: '#/components/responses/NotFound' }
         '200':
@@ -1168,6 +1188,7 @@ paths:
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '404': { $ref: '#/components/responses/NotFound' }
         '200':
@@ -1194,6 +1215,7 @@ paths:
             schema: { $ref: '#/components/schemas/BedAssignmentRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '201':
           description: created
@@ -1216,6 +1238,7 @@ paths:
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '404': { $ref: '#/components/responses/NotFound' }
         '200':
@@ -1250,6 +1273,7 @@ paths:
                 endDate: { type: string, format: date }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '409': { $ref: '#/components/responses/Conflict' }
         '404': { $ref: '#/components/responses/NotFound' }
