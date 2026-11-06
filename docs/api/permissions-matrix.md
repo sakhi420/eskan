@@ -7,7 +7,7 @@
 
 | عملیات (endpoint) | OWNER | ADMIN | OPERATOR | VIEWER |
 |--------|-------|-------|----------|--------|
-| خواندن همهٔ منابع (GET) | ✅ | ✅ | ✅ | ✅ |
+| خواندن منابع سازمانی (GET، به‌جز `/admin/**`) | ✅ | ✅ | ✅ | ✅ |
 | پروفایل سازمان (ویرایش) | ✅ | ❌ | ❌ | ❌ |
 | مدیریت اعضا/نقش‌ها | ✅ | ❌ | ❌ | ❌ |
 | لیلیه/اتاق/بستر (ایجاد/ویرایش/archive) | ✅ | ✅ | ❌ | ❌ |
@@ -32,7 +32,8 @@
 ## Platform Admin (`/api/v1/admin/**`)
 
 - فقط `PLATFORM_ADMIN`؛ هیچ‌یک از نقش‌های سازمانی (حتی OWNER) به این مسیرها دسترسی ندارند.
-- عملیات: activate/extend/change-plan/suspend/resume/grant-grace/payments برای اشتراک سازمان.
+- عملیات: list/get/history + activate/extend/change-plan/suspend/resume/grant-grace/payments.
+- **منبع authority:** claim/principal سراسری مستقل از membership سازمانی (مثلاً claim `platform_admin` یا principal ستونی جدا). `OWNER` سازمانی به‌طور خودکار `PLATFORM_ADMIN` نیست.
 - عدم عضویت/منبع → **404**؛ نقش ناکافی → **403**.
 
 ## سیاست cross-tenant و خطاها

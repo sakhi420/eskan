@@ -7,7 +7,7 @@
 1. همهٔ مسیرهای محصول زیر `/api/v1`؛ health زیر `/health`.
 2. JSON UTF-8؛ نام propertyها `camelCase`؛ enumها uppercase.
 3. شناسهٔ داخلی UUID؛ شمارهٔ سند/رسید string یکتا در محدودهٔ سازمان.
-4. عملیات نوشتنی با هدر `Idempotency-Key` (UUID)؛ موجودیت mutable با `version`.
+4. عملیات نوشتنی با هدر `Idempotency-Key` (UUID)؛ موجودیت mutable با `version`. استثناهای مستند: عملیات Auth و Billing Preview (read-only) — جزئیات و الگوریتم canonical hash در `idempotency.md`.
 5. `GET` هیچ اثر مالی/جانبی ندارد.
 6. pagination صریح: `page` (default 1)، `size` (default 20، max از قرارداد). پاسخ `Page`:
    `items, page, size, totalElements, totalPages`.

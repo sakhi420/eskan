@@ -34,5 +34,24 @@
   آینده ثبت می‌شود، نه وضعیت فعلی سیستم.
 - **authorization قبل از replay:** نتیجهٔ replay فقط پس از بررسی دوبارهٔ عضویت/مجوز کاربرِ
   فعلی برمی‌گردد. کلید در سطح Organization + Endpoint یکتاست (نه User)، پس replay نباید راه
-  دورزدن RBAC باشد. canonical request hash (fingerprint) برای تشخیص same-key-different-payload
-  ذخیره می‌شود.
+  دورزدن RBAC باشد.
+
+## استثناهای مستند (reasoned exceptions)
+
+- **Auth** (`register`, `login`, `refresh`, `logout`, `logout-all`, `change-password`):
+  Idempotency-Key ندارند؛ هم‌ارزی/تکرار با توکن/پاسورد و وضعیت session کنترل می‌شود. در
+  OpenAPI این endpointها هدر ندارند.
+- **Billing Preview** (اثر جانبی/سند مالی ندارد، read-only منطقی): Idempotency-Key لازم نیست.
+
+## canonical request hash
+
+fingerprint از موارد زیر ساخته می‌شود (به ترتیب تعریف‌شده):
+
+1. `method` (uppercase) + route template (مثل `/api/v1/residents/{residentId}/payments`).
+2. path parameters مؤثر (مقادیر، به ترتیب جایگاه route).
+3. query parameters مؤثر (مرتب‌شده؛ فقط موارد دارای اثر معنایی).
+4. body کانونیکال‌شده (کلیدهای JSON مرتب‌شده + serialization پایدار).
+5. `Idempotency-Key` و headerهای ناپایدار (`Authorization`, `User-Agent`, timestamp, …)
+   از hash **حذف** می‌شوند.
+
+same key + same hash = replay همان نتیجه؛ same key + different hash = 409 `IDEMPOTENCY_KEY_REUSED`.

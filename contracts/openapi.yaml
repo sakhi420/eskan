@@ -708,9 +708,12 @@ paths:
       tags: [beds]
       summary: deactivate bed
       operationId: bedDeactivate
-      parameters: [{ name: bedId, in: path, required: true, schema: { type: string, format: uuid } }]
+      parameters:
+        - { name: bedId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '404': { $ref: '#/components/responses/NotFound' }
         '200':
@@ -2189,6 +2192,8 @@ paths:
       tags: [sync]
       summary: register a device for sync
       operationId: syncRegisterDevice
+      parameters:
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       requestBody:
         required: true
         content:
@@ -2251,6 +2256,8 @@ paths:
       tags: [sync]
       summary: request full resync for a device
       operationId: syncResyncRequest
+      parameters:
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '409': { $ref: '#/components/responses/Conflict' }
@@ -2279,6 +2286,8 @@ paths:
       tags: [organizations]
       summary: create member invitation (owner only)
       operationId: invitationCreate
+      parameters:
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       requestBody:
         required: true
         content:
@@ -2306,8 +2315,10 @@ paths:
       operationId: invitationRevoke
       parameters:
         - { name: invitationId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '200':
           description: revoked
@@ -2325,6 +2336,8 @@ paths:
       tags: [organizations]
       summary: accept an invitation with a one-time token
       operationId: invitationAccept
+      parameters:
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       requestBody:
         required: true
         content:
@@ -2430,6 +2443,7 @@ paths:
         - { name: q, in: query, required: false, schema: { type: string } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '200':
           description: organizations
           content:
@@ -2450,6 +2464,7 @@ paths:
         - { name: organizationId, in: path, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
         '200':
           description: subscription
@@ -2473,6 +2488,7 @@ paths:
         - { name: size, in: query, required: false, schema: { type: integer, default: 20 } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
         '200':
           description: history
@@ -2500,6 +2516,7 @@ paths:
             schema: { $ref: '#/components/schemas/AdminActivateRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -2521,6 +2538,7 @@ paths:
       description: requires PLATFORM_ADMIN system-level role
       parameters:
         - { name: organizationId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       requestBody:
         required: true
         content:
@@ -2528,6 +2546,7 @@ paths:
             schema: { $ref: '#/components/schemas/AdminExtendRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -2549,6 +2568,7 @@ paths:
       description: requires PLATFORM_ADMIN system-level role
       parameters:
         - { name: organizationId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       requestBody:
         required: true
         content:
@@ -2556,6 +2576,7 @@ paths:
             schema: { $ref: '#/components/schemas/AdminChangePlanRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -2577,6 +2598,7 @@ paths:
       description: requires PLATFORM_ADMIN system-level role
       parameters:
         - { name: organizationId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       requestBody:
         required: true
         content:
@@ -2584,6 +2606,7 @@ paths:
             schema: { $ref: '#/components/schemas/AdminSuspendRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -2605,6 +2628,7 @@ paths:
       description: requires PLATFORM_ADMIN system-level role
       parameters:
         - { name: organizationId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       requestBody:
         required: true
         content:
@@ -2612,6 +2636,7 @@ paths:
             schema: { $ref: '#/components/schemas/AdminResumeRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -2633,6 +2658,7 @@ paths:
       description: requires PLATFORM_ADMIN system-level role
       parameters:
         - { name: organizationId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       requestBody:
         required: true
         content:
@@ -2640,6 +2666,7 @@ paths:
             schema: { $ref: '#/components/schemas/AdminGrantGraceRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -2669,6 +2696,7 @@ paths:
             schema: { $ref: '#/components/schemas/AdminManualPaymentRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -3462,8 +3490,8 @@ components:
         contractNumber: { type: string }
         status: { $ref: '#/components/schemas/ContractStatus' }
         startDate: { type: string, format: date }
-        endDate: { type: string, format: date, description: "Exclusive end of the half-open interval." }
-        lastOccupiedDateInclusive: { type: string, format: date, readOnly: true, description: "Computed: endDate - 1 day." }
+        endDate: { type: string, format: date, nullable: true, description: "Exclusive end of the half-open interval; null = open-ended." }
+        lastOccupiedDateInclusive: { type: string, format: date, nullable: true, readOnly: true, description: "Computed: endDate - 1 day; null when endDate is null." }
         rent: { $ref: '#/components/schemas/Money' }
         billingCycle: { type: string }
         deposit: { $ref: '#/components/schemas/Money' }
@@ -3487,8 +3515,8 @@ components:
         contractId: { type: string, format: uuid }
         status: { $ref: '#/components/schemas/AssignmentStatus' }
         startDate: { type: string, format: date }
-        endDate: { type: string, format: date, description: "Exclusive end of the half-open interval." }
-        lastOccupiedDateInclusive: { type: string, format: date, readOnly: true, description: "Computed: endDate - 1 day." }
+        endDate: { type: string, format: date, nullable: true, description: "Exclusive end of the half-open interval; null = open-ended." }
+        lastOccupiedDateInclusive: { type: string, format: date, nullable: true, readOnly: true, description: "Computed: endDate - 1 day; null when endDate is null." }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
     Charge:
