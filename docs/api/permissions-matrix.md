@@ -54,8 +54,6 @@
 | POST /residents/{residentId}/absences | absenceCreate | OWNER, ADMIN, OPERATOR |
 | PATCH /absences/{absenceId} | absenceUpdate | OWNER, ADMIN, OPERATOR |
 | POST /absences/{absenceId}/credits | absenceCreditGenerate | OWNER, ADMIN |
-| POST /sync/devices/register | syncRegisterDevice | عضو authenticated |
-| POST /sync/resync-request | syncResyncRequest | عضو authenticated |
 
 ### Platform Admin (`/api/v1/admin/**`) — فقط PLATFORM_ADMIN
 
@@ -72,12 +70,58 @@
 | POST /admin/organizations/{organizationId}/subscription/grant-grace | adminSubscriptionGrantGrace |
 | POST /admin/organizations/{organizationId}/subscription/payments | adminSubscriptionPayment |
 
-### خواندنی و عمومی
+### طبقه‌بندی کامل دسترسی — هماهنگ با security واقعی OpenAPI
 
-- همهٔ GETهای سازمانی (hostels/rooms/beds/packages/residents/contracts/assignments/charges/payments/deposits/expenses/reports/sync/plans/subscription/me) → عضو authenticated با هر نقش (OWNER/ADMIN/OPERATOR/VIEWER).
-- Billing preview (POST /billing-runs/preview) → عضو authenticated (read-only).
-- Auth (register/login/refresh/logout/logout-all/me/change-password) و POST /invitations/accept → عمومی/توکنی، بدون نقش سازمانی.
-- GETهای `/admin/**` → PLATFORM_ADMIN (جدول بالا).
+هر ۱۱۳ عملیات OpenAPI (۱۱۱ عملیات محصول + ۲ health probe) دقیقاً در یکی از این ۵ کلاس می‌گنجد. ستون «security» وضعیت واقعی قرارداد است: `empty` = `security: []`، `bearer` = `security: [{ bearerAuth: [] }]`، `inherit` = bearer + `X-Organization-Id` (امنیت پیش‌فرض سراسری).
+
+#### کلاس ۱ — Anonymous / عمومی (`security: []`)
+
+| Method + Path | operationId |
+|---|---|
+| GET /health/live | healthLive |
+| GET /health/ready | healthReady |
+| GET /system/version | systemVersion |
+| POST /auth/register | authRegister |
+| POST /auth/login | authLogin |
+| POST /auth/refresh | authRefresh |
+| POST /invitations/accept | invitationAccept |
+| GET /plans | planList |
+
+> `POST /invitations/accept` توکن یک‌بارمصرف دارد؛ دعوت‌شونده هنوز وارد نشده، پس `security: []` است (بدون bearer/X-Org). توکن معتبر همچنان شرط دسترسی است.
+
+#### کلاس ۲ — احراز هویت‌شده، بدون نقش سازمانی (`security: [{ bearerAuth: [] }]`)
+
+| Method + Path | operationId |
+|---|---|
+| GET /system/me | systemMe |
+| GET /auth/me | authMe |
+| POST /auth/logout | authLogout |
+| POST /auth/logout-all | authLogoutAll |
+| POST /auth/change-password | authChangePassword |
+
+> این‌ها فقط bearerAuth لازم دارند و `X-Organization-Id` لازم ندارند؛ از endpointهای anonymous جدا هستند و «بدون نقش سازمانی» با «بدون احراز هویت» یکی نیست.
+
+#### کلاس ۳ — عضو سازمانی با هر نقش (OWNER/ADMIN/OPERATOR/VIEWER)
+
+- همهٔ GET‌های منابع سازمانی (hostels/rooms/beds/packages/residents/contracts/bed-assignments/charges/payments/allocations/deposits/expenses/absences/billing-runs/ledger/reports/subscription/sync) که در کلاس ۱/۲/۵ نیستند → هر نقش.
+- به‌صورت صریح (زیرا روی «منبع» واضحی قرار ندارند):
+  - `GET /organizations` → `organizationListMine`
+  - `GET /organizations/current` → `organizationGetCurrent`
+  - `GET /organizations/current/members` → `organizationListMembers`
+  - `GET /organizations/current/members/invitations` → `invitationList`
+- نوشتنی بدون محدودیت نقش:
+  - `POST /billing-runs/preview` → `billingRunPreview` (read-only منطقی)
+  - `POST /sync/devices/register` → `syncRegisterDevice`
+  - `POST /sync/resync-request` → `syncResyncRequest`
+- عدم عضویت در سازمانِ درخواستی → **404** نه **403**.
+
+#### کلاس ۴ — عملیات محدود به نقش (جدول «عملیات محدودشده» بالا)
+
+۴۵ ردیف جدول بالا؛ enforcement سمت سرور؛ عضویت بدون نقش کافی → **403**.
+
+#### کلاس ۵ — Platform Admin (`/api/v1/admin/**`)
+
+جدول Platform Admin بالا؛ فقط `PLATFORM_ADMIN` (`User.isPlatformAdmin`)؛ عدم دسترسی → **404**/نقش ناکافی → **403**.
 
 ## Platform Admin (`/api/v1/admin/**`)
 

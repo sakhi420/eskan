@@ -118,6 +118,7 @@ paths:
       tags: [system]
       summary: authenticated user summary
       operationId: systemMe
+      security: [{ bearerAuth: [] }]
       responses:
         '200':
           description: current user
@@ -212,6 +213,7 @@ paths:
       tags: [auth]
       summary: revoke current session
       operationId: authLogout
+      security: [{ bearerAuth: [] }]
       requestBody:
         required: true
         content:
@@ -227,6 +229,7 @@ paths:
       tags: [auth]
       summary: revoke all sessions of the user
       operationId: authLogoutAll
+      security: [{ bearerAuth: [] }]
       responses:
         '409': { $ref: '#/components/responses/Conflict' }
         '204': { description: revoked }
@@ -236,6 +239,7 @@ paths:
       tags: [auth]
       summary: current user
       operationId: authMe
+      security: [{ bearerAuth: [] }]
       responses:
         '200':
           description: current user
@@ -253,6 +257,7 @@ paths:
       tags: [auth]
       summary: change own password
       operationId: authChangePassword
+      security: [{ bearerAuth: [] }]
       requestBody:
         required: true
         content:
@@ -2364,6 +2369,7 @@ paths:
       tags: [organizations]
       summary: accept an invitation with a one-time token
       operationId: invitationAccept
+      security: []
       parameters:
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       requestBody:

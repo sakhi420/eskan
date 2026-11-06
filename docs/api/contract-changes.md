@@ -14,6 +14,14 @@
 
 ---
 
+# بازبینی Gate 1 (phase-9 financial) — هم‌ترازی امنیت قرارداد با ماتریس
+
+## تغییرات امنیتی (بدون تغییر migration/Prisma)
+
+1. `POST /api/v1/invitations/accept` → `security: []` (پذیرش با توکن یک‌بارمصرف؛ دعوت‌شونده لزومی به ورود قبلی ندارد).
+2. این ۵ عملیات هویتی → `security: [{ bearerAuth: [] }]` (احراز هویت الزامی ولی بدون `X-Organization-Id`؛ از endpointهای anonymous جدا شدند):
+   - `GET /api/v1/system/me` · `GET /api/v1/auth/me` · `POST /api/v1/auth/logout` · `POST /api/v1/auth/logout-all` · `POST /api/v1/auth/change-password`
+3. ماتریس مجوزها به ۵ کلاس صریح بازنویسی شد: Anonymous / احراز بدون نقش سازمانی / عضو سازمانی (هر نقش) / محدود نقش / Platform Admin — نگاه کنید به `permissions-matrix.md`.
 # بازبینی v0.3.0 — تطبیق با مسترپرامپت v3.0 (اشتراک/کنترل + مدل پول)
 
 ## تغییرات

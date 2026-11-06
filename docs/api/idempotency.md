@@ -51,7 +51,7 @@
 
 ## canonical request hash
 
-fingerprint = SHA-256 (خروجی hex lowercase) روی ساختار کانونیکالِ صریح با فیلدهای جداگانه (نه الحاق سادهٔ رشته‌ها):
+fingerprint = SHA-256 روی ساختار کانونیکالِ صریح (JSON با فیلدهای جداگانه) که با **RFC 8785 / JCS (JSON Canonicalization Scheme)** سریالایز می‌شود:
 
 ```json
 {
@@ -63,19 +63,51 @@ fingerprint = SHA-256 (خروجی hex lowercase) روی ساختار کانون�
 }
 ```
 
-قواعد قطعی serialization:
+### سریال‌سازی قطعی (RFC 8785 / JCS)
 
-- **encoding:** ساختار کانونیکال JSON است؛ با UTF-8 به بایت تبدیل و SHA-256 گرفته می‌شود؛ خروجی hex (lowercase).
+- **الگوریتم:** JCS — کلیدهای هر object الفبایی (UTF-16 code unit)، خروجی compact بدون whitespace، بدون فاصلهٔ تزئینی، escape حداقلی JSON.
+- **whitespace:** در خروجی canonical هیچ فاصله/خط جدیدی نیست.
+- **string escaping:** فقط `"`، `\` و کاراکترهای کنترلی (< U+0020) escape می‌شوند؛ نویسه‌های غیر-ASCII (فارسی/دری) escape نمی‌شوند و مستقیماً UTF-8 می‌شوند.
+- **numbers:** فرم I-JSON (RFC 7493) — عدد صحیح/اعشاری، بدون نمایش علمی، بدون `NaN`/`Infinity`، بدون صفرهای پیشرو (پول افغانی همیشه عدد صحیح = افغانی).
+- **encoding:** خروجی canonical UTF-8 است؛ SHA-256 روی بایت‌ها؛ خروجی hex lowercase.
+
+### قواعد فیلدها
+
 - **method:** uppercase.
 - **route:** route template (نه URL واقعی)؛ با جایگاه پارامترها.
-- **pathParams:** فقط پارامترهایی که در route حضور دارند؛ کلیدها به ترتیب ظاهر در route، مقادیر رشته.
-- **query:** کلیدها الفبایی؛ query تکراری/چندمقداری به آرایه تبدیل و اجزای هر آرایه الفبایی مرتب می‌شوند؛ کلید بدون مقدار (`k`) با `k=` و `k=v` متمایز است.
-- **body:** canonical JSON — کلیدهای اشیا به‌صورت بازگشتی الفبایی؛ ترتیب آرایه‌ها حفظ می‌شود؛ `null` صریح ≠ فیلد حذف‌شده؛ هر دو ≠ مقدار پیش‌فرض.
+- **pathParams:** فقط پارامترهای موجود در route؛ object با کلید = نام پارامتر (کلیدها توسط JCS الفبایی می‌شوند)؛ مقادیر رشته.
+- **query:** object با کلید = نام پارامتر، مقدار = آرایهٔ رشته‌ها. ترتیب آرایهٔ چندمقداری از نظر معنایی بی‌اهمیت است؛ اجزای هر آرایه الفبایی (UTF-16 code unit) مرتب می‌شوند. `?k` (بدون `=`) و `?k=` **معادل** هستند: هر دو `[""]` (رشتهٔ خالی).
+- **body:** همان بدنهٔ ارسالی با JCS — کلیدهای object بازگشتی الفبایی؛ ترتیب آرایه‌ها **حفظ** می‌شود؛ `null` صریح ≠ فیلد حذف‌شده ≠ مقدار پیش‌فرض.
+- **Unicode/normalization:** هیچ‌گونه NFC/NFKC/case-fold اعمال نمی‌شود؛ code pointها عیناً هش می‌شوند. کلاینت‌ها موظف‌اند ورودی را پیش از ارسال به شکل یکسان (NFC) بفرستند.
 - **حذف از hash:** `Idempotency-Key` و headerهای ناپایدار (`Authorization`, `User-Agent`, timestamp و…) وارد ساختار نمی‌شوند.
 
-مثال‌های تستی:
+### test vectors (canonical → SHA-256)
 
-- معادل (hash یکسان): `{"a":1,"b":2}` و `{"b":2,"a":1}` (کلید مرتب می‌شود).
-- غیرمعادل (hash متفاوت): `{"a":1}` و `{"a":null}` (null صریح ≠ عدد)؛ `{}` و `{"a":null}` (فیلد حذف‌شده ≠ null صریح).
+```
+T1 :: {"body":{"amount":1500,"currency":"AFN","note":null},"method":"POST","pathParams":{},"query":{},"route":"/api/v1/payments"}
+  -> 78448fda558b23d5da49d48f128e7dfaf4ff1221a0da6b7c1b3be4fdc3d6d630
+
+T2 :: body کلیدهای با ترتیب متفاوت، canonical/hash یکسان
+  A {"note":"x","phone":"0700123456"}  و  B {"phone":"0700123456","note":"x"}
+  -> {"body":{"note":"x","phone":"0700123456"},"method":"PATCH","pathParams":{"residentId":"11111111-1111-1111-1111-111111111111"},"query":{},"route":"/api/v1/residents/{residentId}"}
+  -> d7e09a35b59d76a05d1a5b3ae8e729a50d4dd850646ad7eb6c6a696a1dad8065
+
+T3 :: null ≠ فیلد حذف‌شده (hash متفاوت)
+  a) {} -> {"body":{},"method":"PATCH","pathParams":{"chargeId":"22222222-2222-2222-2222-222222222222"},"query":{},"route":"/api/v1/charges/{chargeId}"}
+     -> 876fd0589481392b9b883f4df949d7e0717620f323d2afba39175361dc65f526
+  b) {"note":null} -> {"body":{"note":null},...same...}
+     -> 945dd944490f28ce4898eb2695e20448d5699d223bd177c3d1449bc2cf7b2eee
+
+T4 :: query چندمقداری مرتب + بدون‌مقدار/خالی معادل
+  a) ?tag=b&tag=a&tag=b -> {"body":{},"method":"GET","pathParams":{},"query":{"tag":["a","b","b"]},"route":"/api/v1/charges"}
+     -> 4a126fe77c6d43aaab097360cff9ca87cea2102359b6a64709514bc95a4cec95
+  b) ?tag  یا  ?tag= -> {"tag":[""]}
+     -> d245c1c1dc88a6d54fb48993600a4ab5d075f3a490e944591d83c4279d342872
+
+T5 :: Unicode + عدد افغانی
+  {"title":"کرایه موتر","amount":750}
+  -> {"body":{"amount":750,"title":"کرایه موتر"},"method":"POST","pathParams":{},"query":{},"route":"/api/v1/expenses"}
+  -> 64b2b4af343b734bbcf0cc5da2e5bf314e9c750ab47435c5cdad3e88d04a6362
+```
 
 same key + same hash = replay همان نتیجه؛ same key + different hash = 409 `IDEMPOTENCY_KEY_REUSED`.
