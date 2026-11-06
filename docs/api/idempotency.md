@@ -38,20 +38,44 @@
 
 ## استثناهای مستند (reasoned exceptions)
 
-- **Auth** (`register`, `login`, `refresh`, `logout`, `logout-all`, `change-password`):
-  Idempotency-Key ندارند؛ هم‌ارزی/تکرار با توکن/پاسورد و وضعیت session کنترل می‌شود. در
-  OpenAPI این endpointها هدر ندارند.
-- **Billing Preview** (اثر جانبی/سند مالی ندارد، read-only منطقی): Idempotency-Key لازم نیست.
+فقط این ۶ عملیات Idempotency-Key ندارند (۵ Auth + ۱ read-only):
+
+1. `authLogin`
+2. `authRefresh`
+3. `authLogout`
+4. `authLogoutAll`
+5. `authChangePassword`
+6. `billingRunPreview`
+
+> `authRegister` هدر اجباری دارد و جزو استثناها نیست.
 
 ## canonical request hash
 
-fingerprint = SHA-256(hex) از رشتهٔ کانونیکال زیر ساخته می‌شود (به ترتیب تعریف‌شده):
+fingerprint = SHA-256 (خروجی hex lowercase) روی ساختار کانونیکالِ صریح با فیلدهای جداگانه (نه الحاق سادهٔ رشته‌ها):
 
-1. `method` (uppercase) + route template (مثل `/api/v1/residents/{residentId}/payments`).
-2. path parameters مؤثر (مقادیر، به ترتیب جایگاه route).
-3. query parameters مؤثر (مرتب‌شدهٔ الفبایی؛ فقط موارد دارای اثر معنایی).
-4. body کانونیکال‌شده: JSON با کلیدهای مرتب‌شدهٔ بازگشتی؛ آرایه‌ها ترتیب‌دار حفظ می‌شوند؛ `null` صریح با فیلد حذف‌شده متفاوت است (هم defaultValue هم حذف‌شده هم `null` جدا canonicalize می‌شوند).
-5. `Idempotency-Key` و headerهای ناپایدار (`Authorization`, `User-Agent`, timestamp, …)
-   از hash **حذف** می‌شوند.
+```json
+{
+  "method": "POST",
+  "route": "/api/v1/residents/{residentId}/payments",
+  "pathParams": { "residentId": "<uuid>" },
+  "query": { "key": ["v1", "v2"] },
+  "body": { }
+}
+```
+
+قواعد قطعی serialization:
+
+- **encoding:** ساختار کانونیکال JSON است؛ با UTF-8 به بایت تبدیل و SHA-256 گرفته می‌شود؛ خروجی hex (lowercase).
+- **method:** uppercase.
+- **route:** route template (نه URL واقعی)؛ با جایگاه پارامترها.
+- **pathParams:** فقط پارامترهایی که در route حضور دارند؛ کلیدها به ترتیب ظاهر در route، مقادیر رشته.
+- **query:** کلیدها الفبایی؛ query تکراری/چندمقداری به آرایه تبدیل و اجزای هر آرایه الفبایی مرتب می‌شوند؛ کلید بدون مقدار (`k`) با `k=` و `k=v` متمایز است.
+- **body:** canonical JSON — کلیدهای اشیا به‌صورت بازگشتی الفبایی؛ ترتیب آرایه‌ها حفظ می‌شود؛ `null` صریح ≠ فیلد حذف‌شده؛ هر دو ≠ مقدار پیش‌فرض.
+- **حذف از hash:** `Idempotency-Key` و headerهای ناپایدار (`Authorization`, `User-Agent`, timestamp و…) وارد ساختار نمی‌شوند.
+
+مثال‌های تستی:
+
+- معادل (hash یکسان): `{"a":1,"b":2}` و `{"b":2,"a":1}` (کلید مرتب می‌شود).
+- غیرمعادل (hash متفاوت): `{"a":1}` و `{"a":null}` (null صریح ≠ عدد)؛ `{}` و `{"a":null}` (فیلد حذف‌شده ≠ null صریح).
 
 same key + same hash = replay همان نتیجه؛ same key + different hash = 409 `IDEMPOTENCY_KEY_REUSED`.

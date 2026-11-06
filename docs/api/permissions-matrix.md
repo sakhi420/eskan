@@ -26,27 +26,27 @@
 | POST /residents | residentCreate | OWNER, ADMIN, OPERATOR |
 | PATCH /residents/{residentId} | residentUpdate | OWNER, ADMIN |
 | POST /residents/{residentId}/archive | residentArchive | OWNER, ADMIN |
-| POST /residents/{residentId}/contracts | contractCreate | OWNER, ADMIN, OPERATOR |
+| POST /contracts | contractCreate | OWNER, ADMIN, OPERATOR |
 | PATCH /contracts/{contractId} | contractUpdate | OWNER, ADMIN, OPERATOR |
 | POST /contracts/{contractId}/activate | contractActivate | OWNER, ADMIN, OPERATOR |
 | POST /contracts/{contractId}/terminate | contractTerminate | OWNER, ADMIN, OPERATOR |
 | POST /contracts/{contractId}/checkout | contractCheckout | OWNER, ADMIN, OPERATOR |
-| POST /beds/{bedId}/assignments | assignmentCreate | OWNER, ADMIN, OPERATOR |
+| POST /bed-assignments | assignmentCreate | OWNER, ADMIN, OPERATOR |
 | POST /bed-assignments/{assignmentId}/end | assignmentEnd | OWNER, ADMIN, OPERATOR |
 | POST /bed-assignments/{assignmentId}/transfer | assignmentTransfer | OWNER, ADMIN, OPERATOR |
 | POST /organizations/current/members/invitations | invitationCreate | OWNER |
 | POST /organizations/current/members/invitations/{invitationId}/revoke | invitationRevoke | OWNER |
 | POST /charges | chargeCreate | DEBIT: OWNER/ADMIN/OPERATOR · CREDIT: OWNER/ADMIN |
 | POST /charges/{chargeId}/reverse | chargeReverse | OWNER, ADMIN |
-| POST /residents/{residentId}/payments | paymentCreate | OWNER, ADMIN, OPERATOR |
+| POST /payments | paymentCreate | OWNER, ADMIN, OPERATOR |
 | POST /payments/{paymentId}/allocations | allocationCreate | OWNER, ADMIN, OPERATOR |
 | POST /allocations/{allocationId}/release | allocationRelease | OWNER, ADMIN |
 | POST /payments/{paymentId}/reverse | paymentReverse | OWNER, ADMIN |
 | POST /payments/{paymentId}/refund | paymentRefund | OWNER, ADMIN |
 | POST /residents/{residentId}/deposit-transactions | depositCreate | OWNER, ADMIN, OPERATOR |
-| POST /deposit-transactions/{id}/reverse | depositReverse | OWNER, ADMIN |
-| POST /deposit-transactions/{id}/refund | depositRefund | OWNER, ADMIN |
-| POST /deposit-transactions/{id}/forfeit | depositForfeit | OWNER, ADMIN |
+| POST /deposit-transactions/{depositTransactionId}/reverse | depositReverse | OWNER, ADMIN |
+| POST /deposit-transactions/{depositTransactionId}/refund | depositRefund | OWNER, ADMIN |
+| POST /deposit-transactions/{depositTransactionId}/forfeit | depositForfeit | OWNER, ADMIN |
 | POST /residents/{residentId}/deposits/apply | depositApply | OWNER, ADMIN |
 | POST /expenses | expenseCreate | OWNER, ADMIN, OPERATOR |
 | POST /expenses/{expenseId}/reverse | expenseReverse | OWNER, ADMIN |
@@ -62,15 +62,15 @@
 | Method + Path | operationId |
 |---|---|
 | GET /admin/organizations | adminOrganizationList |
-| GET /admin/organizations/{id}/subscription | adminSubscriptionGet |
-| GET /admin/organizations/{id}/subscription/history | adminSubscriptionHistory |
-| POST .../activate | adminSubscriptionActivate |
-| POST .../extend | adminSubscriptionExtend |
-| POST .../change-plan | adminSubscriptionChangePlan |
-| POST .../suspend | adminSubscriptionSuspend |
-| POST .../resume | adminSubscriptionResume |
-| POST .../grant-grace | adminSubscriptionGrantGrace |
-| POST .../payments | adminSubscriptionPayment |
+| GET /admin/organizations/{organizationId}/subscription | adminSubscriptionGet |
+| GET /admin/organizations/{organizationId}/subscription/history | adminSubscriptionHistory |
+| POST /admin/organizations/{organizationId}/subscription/activate | adminSubscriptionActivate |
+| POST /admin/organizations/{organizationId}/subscription/extend | adminSubscriptionExtend |
+| POST /admin/organizations/{organizationId}/subscription/change-plan | adminSubscriptionChangePlan |
+| POST /admin/organizations/{organizationId}/subscription/suspend | adminSubscriptionSuspend |
+| POST /admin/organizations/{organizationId}/subscription/resume | adminSubscriptionResume |
+| POST /admin/organizations/{organizationId}/subscription/grant-grace | adminSubscriptionGrantGrace |
+| POST /admin/organizations/{organizationId}/subscription/payments | adminSubscriptionPayment |
 
 ### خواندنی و عمومی
 
