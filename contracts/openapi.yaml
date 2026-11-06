@@ -286,6 +286,10 @@ paths:
       operationId: organizationPatchCurrent
       parameters:
         - in: header
+          name: Idempotency-Key
+          required: true
+          schema: { type: string, format: uuid }
+        - in: header
           name: X-Expected-Version
           required: true
           schema: { type: integer }
@@ -338,6 +342,15 @@ paths:
           name: membershipId
           required: true
           schema: { type: string, format: uuid }
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: { type: string, format: uuid }
+        - in: header
+          name: X-Expected-Version
+          required: true
+          schema: { type: integer }
+          description: expected version
       requestBody:
         required: true
         content:
@@ -458,7 +471,9 @@ paths:
       tags: [hostels]
       summary: archive hostel
       operationId: hostelArchive
-      parameters: [{ name: hostelId, in: path, required: true, schema: { type: string, format: uuid } }]
+      parameters:
+        - { name: hostelId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '409': { $ref: '#/components/responses/Conflict' }
@@ -573,7 +588,9 @@ paths:
       tags: [rooms]
       summary: archive room
       operationId: roomArchive
-      parameters: [{ name: roomId, in: path, required: true, schema: { type: string, format: uuid } }]
+      parameters:
+        - { name: roomId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '409': { $ref: '#/components/responses/Conflict' }
@@ -777,7 +794,8 @@ paths:
       operationId: packageUpdate
       parameters:
         - { name: packageId, in: path, required: true, schema: { type: string, format: uuid } }
-        - { name: X-Expected-Version, in: header, required: false, schema: { type: integer } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: true, schema: { type: integer } }
       requestBody:
         required: true
         content:
@@ -803,7 +821,9 @@ paths:
       tags: [packages]
       summary: archive accommodation package
       operationId: packageArchive
-      parameters: [{ name: packageId, in: path, required: true, schema: { type: string, format: uuid } }]
+      parameters:
+        - { name: packageId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '409': { $ref: '#/components/responses/Conflict' }
@@ -917,7 +937,9 @@ paths:
       tags: [residents]
       summary: archive resident (only if no active contract/debt)
       operationId: residentArchive
-      parameters: [{ name: residentId, in: path, required: true, schema: { type: string, format: uuid } }]
+      parameters:
+        - { name: residentId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '409': { $ref: '#/components/responses/Conflict' }
@@ -1089,7 +1111,9 @@ paths:
       tags: [contracts]
       summary: activate contract
       operationId: contractActivate
-      parameters: [{ name: contractId, in: path, required: true, schema: { type: string, format: uuid } }]
+      parameters:
+        - { name: contractId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '409': { $ref: '#/components/responses/Conflict' }
@@ -1109,7 +1133,9 @@ paths:
       tags: [contracts]
       summary: terminate contract
       operationId: contractTerminate
-      parameters: [{ name: contractId, in: path, required: true, schema: { type: string, format: uuid } }]
+      parameters:
+        - { name: contractId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '409': { $ref: '#/components/responses/Conflict' }
@@ -1129,7 +1155,9 @@ paths:
       tags: [contracts]
       summary: checkout contract (end assignments and close)
       operationId: contractCheckout
-      parameters: [{ name: contractId, in: path, required: true, schema: { type: string, format: uuid } }]
+      parameters:
+        - { name: contractId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '409': { $ref: '#/components/responses/Conflict' }
@@ -1175,7 +1203,9 @@ paths:
       tags: [bed-assignments]
       summary: end bed assignment
       operationId: assignmentEnd
-      parameters: [{ name: assignmentId, in: path, required: true, schema: { type: string, format: uuid } }]
+      parameters:
+        - { name: assignmentId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '409': { $ref: '#/components/responses/Conflict' }
@@ -1300,10 +1330,11 @@ paths:
     patch:
       tags: [absences]
       summary: update / approve / close temporary absence
-      description: "Setting `actualReturnDate` finalizes the absence; monthly `AbsenceCredit` lines are then generated (see POST /absences/{absenceId}/credits) in the same transaction. Credits are issued only after the actual return is approved (D-12) and never rewritten afterward."
+      description: "Records `actualReturnDate` and moves the absence to RETURNED. Credit generation is a separate idempotent operation (POST /absences/{absenceId}/credits), NOT done in this call; credits are issued only after the actual return is approved (D-12) and never rewritten afterward."
       operationId: absenceUpdate
       parameters:
         - { name: absenceId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
         - { name: X-Expected-Version, in: header, required: false, schema: { type: integer } }
       requestBody:
         required: true
@@ -1329,7 +1360,7 @@ paths:
     post:
       tags: [absences]
       summary: generate monthly absence credits after actual return
-      description: "Idempotent generation of monthly AbsenceCredit lines after the actual return is recorded (D-12). The absence is finalized by setting `actualReturnDate`; credit generation is atomic (all month lines in one transaction) and the (absenceId, periodStart) unique key prevents duplicate credits on retry."
+      description: "Idempotent generation of monthly AbsenceCredit lines, run AFTER `actualReturnDate` is recorded (absence status=RETURNED). All month lines are created atomically in one transaction; each links to a Charge with entrySide=CREDIT. The (absenceId, periodStart) unique key prevents duplicate credits on retry, and success moves the absence to CLOSED."
       operationId: absenceCreditGenerate
       parameters:
         - { name: absenceId, in: path, required: true, schema: { type: string, format: uuid } }
@@ -3178,6 +3209,7 @@ components:
         notes: { type: string, maxLength: 2000 }
     ContractRequest:
       type: object
+      description: "`endDate` is exclusive (half-open [startDate, endDate)); the last inclusive stay day is endDate - 1 day. Checkout sets endDate = lastDay + 1; Transfer sets endDate to the shared boundary (no +1)."
       required: [hostelId, residentId, startDate, rent]
       properties:
         hostelId: { type: string, format: uuid }
@@ -3194,6 +3226,7 @@ components:
         notes: { type: string, maxLength: 2000 }
     BedAssignmentRequest:
       type: object
+      description: "`endDate` is exclusive (half-open [startDate, endDate)); leave unset for an open-ended assignment (COALESCE to infinity)."
       required: [bedId, residentId, contractId, startDate]
       properties:
         bedId: { type: string, format: uuid }
@@ -3304,7 +3337,8 @@ components:
       enum: [OPERATIONAL, NEEDS_CLEANING, NEEDS_REPAIR, OUT_OF_SERVICE]
     AbsenceStatus:
       type: string
-      enum: [REQUESTED, APPROVED, ADJUSTED, CLOSED]
+      description: "REQUESTED/APPROVED/ADJUSTED = before actual return; RETURNED = actualReturnDate recorded but AbsenceCredit not yet generated; CLOSED = credits generated and absence finalized."
+      enum: [REQUESTED, APPROVED, ADJUSTED, RETURNED, CLOSED]
     Organization:
       type: object
       required: [id, version, name, timezone, defaultCurrency, createdAt, updatedAt]
@@ -3409,6 +3443,7 @@ components:
         updatedAt: { type: string, format: date-time }
     StayContract:
       type: object
+      description: "`endDate` is exclusive (half-open [startDate, endDate)); `lastOccupiedDateInclusive` (= endDate - 1 day) is the last billable/shown stay day."
       required: [id, version, organizationId, hostelId, residentId, contractNumber, status, startDate, rent, billingCycle, createdAt, updatedAt]
       properties:
         id: { type: string, format: uuid }
@@ -3419,7 +3454,8 @@ components:
         contractNumber: { type: string }
         status: { $ref: '#/components/schemas/ContractStatus' }
         startDate: { type: string, format: date }
-        endDate: { type: string, format: date }
+        endDate: { type: string, format: date, description: "Exclusive end of the half-open interval." }
+        lastOccupiedDateInclusive: { type: string, format: date, readOnly: true, description: "Computed: endDate - 1 day." }
         rent: { $ref: '#/components/schemas/Money' }
         billingCycle: { type: string }
         deposit: { $ref: '#/components/schemas/Money' }
@@ -3432,6 +3468,7 @@ components:
         updatedAt: { type: string, format: date-time }
     BedAssignment:
       type: object
+      description: "`endDate` is exclusive (half-open [startDate, endDate)); `lastOccupiedDateInclusive` (= endDate - 1 day) is the last occupied day shown to the user."
       required: [id, version, organizationId, bedId, residentId, contractId, status, startDate, createdAt, updatedAt]
       properties:
         id: { type: string, format: uuid }
@@ -3442,7 +3479,8 @@ components:
         contractId: { type: string, format: uuid }
         status: { $ref: '#/components/schemas/AssignmentStatus' }
         startDate: { type: string, format: date }
-        endDate: { type: string, format: date }
+        endDate: { type: string, format: date, description: "Exclusive end of the half-open interval." }
+        lastOccupiedDateInclusive: { type: string, format: date, readOnly: true, description: "Computed: endDate - 1 day." }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
     Charge:
@@ -3631,11 +3669,12 @@ components:
         reversal: { $ref: '#/components/schemas/LedgerReversal' }
     ProvisionalReceipt:
       type: object
+      description: "Server-side receipt mapping: a client-local `provisionalReceiptId` mapped to the organization-official `receiptNumber` after server accept/commit. Server responses are always `ISSUED`; `PENDING_SYNC` exists only as a local Flutter/Drift client state and never appears in a server document."
       required: [provisionalReceiptId, status]
       properties:
         provisionalReceiptId: { type: string }
         officialReceiptNumber: { type: string }
-        status: { type: string, enum: [PENDING_SYNC, ISSUED] }
+        status: { type: string, enum: [ISSUED] }
     UnallocatedBalance:
       type: object
       required: [residentId, amount]
@@ -3951,6 +3990,7 @@ components:
         plannedDepartureDate: { type: string, format: date }
         actualDepartureDate: { type: string, format: date }
         expectedReturnDate: { type: string, format: date }
+        actualReturnDate: { type: string, format: date, description: "Records the actual return; adding it moves the absence to RETURNED (credit generation is a separate POST)." }
         reason: { type: string, maxLength: 500 }
         notes: { type: string, maxLength: 2000 }
     TemporaryAbsencePage:

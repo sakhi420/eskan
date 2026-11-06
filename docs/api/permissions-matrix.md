@@ -1,6 +1,7 @@
 # ماتریس مجوزها — ESKAN
 
-نقش‌ها: `OWNER`, `ADMIN`, `OPERATOR`, `VIEWER`.
+نقش‌های سازمانی: `OWNER`, `ADMIN`, `OPERATOR`, `VIEWER`.
+نقش جداگانهٔ پلتفرم: `PLATFORM_ADMIN` — فقط مسیرهای `/api/v1/admin/**`؛ مستقل از نقش‌های سازمانی است و در جدول زیر نمی‌آید.
 
 ## ماتریس نقش‌ها
 
@@ -27,6 +28,12 @@
 | گزارش‌ها | ✅ | ✅ | ✅ | ✅ |
 | sync/read | ✅ | ✅ | ✅ | ✅ |
 | change-password (خود) | ✅ | ✅ | ✅ | ✅ |
+
+## Platform Admin (`/api/v1/admin/**`)
+
+- فقط `PLATFORM_ADMIN`؛ هیچ‌یک از نقش‌های سازمانی (حتی OWNER) به این مسیرها دسترسی ندارند.
+- عملیات: activate/extend/change-plan/suspend/resume/grant-grace/payments برای اشتراک سازمان.
+- عدم عضویت/منبع → **404**؛ نقش ناکافی → **403**.
 
 ## سیاست cross-tenant و خطاها
 
