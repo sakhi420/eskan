@@ -1,3 +1,9 @@
+# M-1 (2026-11-07) — additive change to BedAssignment (documented, post Gate-1 lock)
+
+1. Added `AssignmentEndReason` (`CHECKOUT | TRANSFER | TERMINATE | MANUAL_END`) and a nullable `endReason` field on the `BedAssignment` response schema. This is an explicit additive change, not a hidden edit: legacy rows keep `endReason: null` (treated as LEGACY_UNKNOWN per D-04); new service code always sets it.
+2. `assignmentEnd`, `contractTerminate` and `contractCheckout` already declared `Idempotency-Key` as required; the controllers now receive + validate the header and the services record it (replay/serialization) instead of only being "naturally idempotent".
+
+---
 ---
 
 # تصمیمات نهایی مالک — 2026-10-25 (حاکم بر قرارداد)

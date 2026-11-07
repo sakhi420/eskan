@@ -8,11 +8,13 @@ import {
   IsOptional,
   IsString,
   Length,
+  Max,
   MaxLength,
   Min,
   ValidateNested,
 } from 'class-validator';
 import { PackageComponentKind } from '../../generated/prisma/enums';
+import { MONEY_MAX } from '../../common/money/money.dto';
 
 export class PackageComponentDto {
   @IsEnum(PackageComponentKind)
@@ -24,6 +26,7 @@ export class PackageComponentDto {
 
   @IsInt()
   @Min(0)
+  @Max(MONEY_MAX)
   amount!: number;
 
   @IsBoolean()

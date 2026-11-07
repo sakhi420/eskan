@@ -3407,6 +3407,10 @@ components:
     AssignmentStatus:
       type: string
       enum: [ACTIVE, ENDED]
+    AssignmentEndReason:
+      type: string
+      description: "Why a bed assignment ended. Null on legacy rows (LEGACY_UNKNOWN per D-04)."
+      enum: [CHECKOUT, TRANSFER, TERMINATE, MANUAL_END]
     SyncAction:
       type: string
       enum: [UPSERT, TOMBSTONE]
@@ -3562,6 +3566,7 @@ components:
         startDate: { type: string, format: date }
         endDate: { type: string, format: date, nullable: true, description: "Exclusive end of the half-open interval; null = open-ended." }
         lastOccupiedDateInclusive: { type: string, format: date, nullable: true, readOnly: true, description: "Computed: endDate - 1 day; null when endDate is null." }
+        endReason: { $ref: '#/components/schemas/AssignmentEndReason', nullable: true, description: "Why the assignment ended; null for legacy rows (LEGACY_UNKNOWN per D-04)." }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
     Charge:

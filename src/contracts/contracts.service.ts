@@ -338,112 +338,122 @@ async update(organizationId: string, contractId: string, expectedVersion: number
     });
   }
 
-  async terminate(organizationId: string, contractId: string) {
-    return this.prisma.$transaction(async (tx) => {
-      const contract = await tx.stayContract.findFirst({ where: { id: contractId, organizationId }, select: { status: true, version: true } });
-      if (!contract) throw AppError.notFound('Contract not found');
-      if (contract.status === ContractStatus.TERMINATED) {
-        const existing = await tx.stayContract.findFirst({ where: { id: contractId, organizationId }, select: CONTRACT_SELECT });
-        return toStayContractDto(existing!);
-      }
-      if (contract.status === ContractStatus.CLOSED) {
-        throw AppError.conflict('Closed contract cannot be terminated', ErrorCode.BUSINESS_RULE_VIOLATION);
-      }
-      // D-01: an ACTIVE contract is only ever closed through the atomic checkout()
-      // path (contract + all active assignments in one transaction). terminate()
-      // is reserved for cancelling a DRAFT that was never activated.
-      if (contract.status === ContractStatus.ACTIVE) {
-        throw AppError.conflict('ACTIVE contract must be closed via checkout, not terminate', ErrorCode.BUSINESS_RULE_VIOLATION);
-      }
+  async terminate(organizationId: string, contractId: string, userId: string, idempotencyKey: string) {
+    const endpoint = `/api/v1/contracts/${contractId}/terminate`;
+    const requestHash = this.idempotency.hash({ contractId });
+    return this.idempotency.runAtomic<ReturnType<typeof toStayContractDto>>(
+      { organizationId, key: idempotencyKey, endpoint, userId, requestHash, statusCode: 200 },
+      async (tx) => {
+        const contract = await tx.stayContract.findFirst({ where: { id: contractId, organizationId }, select: { status: true, version: true } });
+        if (!contract) throw AppError.notFound('Contract not found');
+        if (contract.status === ContractStatus.TERMINATED) {
+          const existing = await tx.stayContract.findFirst({ where: { id: contractId, organizationId }, select: CONTRACT_SELECT });
+          return toStayContractDto(existing!);
+        }
+        if (contract.status === ContractStatus.CLOSED) {
+          throw AppError.conflict('Closed contract cannot be terminated', ErrorCode.BUSINESS_RULE_VIOLATION);
+        }
+        // D-01: an ACTIVE contract is only ever closed through the atomic checkout()
+        // path (contract + all active assignments in one transaction). terminate()
+        // is reserved for cancelling a DRAFT that was never activated.
+        if (contract.status === ContractStatus.ACTIVE) {
+          throw AppError.conflict('ACTIVE contract must be closed via checkout, not terminate', ErrorCode.BUSINESS_RULE_VIOLATION);
+        }
 
-      // Serialize against a concurrent activate (which also locks the contract).
-      await this.locks.lockContract(tx, contractId);
+        // Serialize against a concurrent activate (which also locks the contract).
+        await this.locks.lockContract(tx, contractId);
 
-      // CAS on DRAFT + version so a concurrent activate cannot be silently
-      // terminated mid-flight.
-      const result = await tx.stayContract.updateMany({
-        where: { id: contractId, organizationId, status: ContractStatus.DRAFT, version: contract.version },
-        data: { status: ContractStatus.TERMINATED, version: { increment: 1 } },
-      });
-      if (result.count === 0) {
-        throw AppError.conflict('Contract was modified by another request; refresh and retry', ErrorCode.RESOURCE_VERSION_CONFLICT);
-      }
-      const updated = await tx.stayContract.findFirst({ where: { id: contractId, organizationId }, select: CONTRACT_SELECT });
-      return toStayContractDto(updated!);
-    });
+        // CAS on DRAFT + version so a concurrent activate cannot be silently
+        // terminated mid-flight.
+        const result = await tx.stayContract.updateMany({
+          where: { id: contractId, organizationId, status: ContractStatus.DRAFT, version: contract.version },
+          data: { status: ContractStatus.TERMINATED, version: { increment: 1 } },
+        });
+        if (result.count === 0) {
+          throw AppError.conflict('Contract was modified by another request; refresh and retry', ErrorCode.RESOURCE_VERSION_CONFLICT);
+        }
+        const updated = await tx.stayContract.findFirst({ where: { id: contractId, organizationId }, select: CONTRACT_SELECT });
+        return toStayContractDto(updated!);
+      },
+    );
   }
 
   /**
    * Checkout: atomically end all active bed assignments for the contract and
    * close the contract. History is preserved — rows are updated, never deleted.
    */
-  async checkout(organizationId: string, contractId: string) {
-    return this.prisma.$transaction(async (tx) => {
-      // Discover the parent ids so we can lock the canonical chain, then
-      // re-read authoritatively before validating and closing.
-      const initial = await tx.stayContract.findFirst({
-        where: { id: contractId, organizationId },
-        select: { hostelId: true, residentId: true },
-      });
-      if (!initial) throw AppError.notFound('Contract not found');
+  async checkout(organizationId: string, contractId: string, userId: string, idempotencyKey: string) {
+    const endpoint = `/api/v1/contracts/${contractId}/checkout`;
+    const requestHash = this.idempotency.hash({ contractId });
+    return this.idempotency.runAtomic<ReturnType<typeof toStayContractDto>>(
+      { organizationId, key: idempotencyKey, endpoint, userId, requestHash, statusCode: 200 },
+      async (tx) => {
+        // Discover the parent ids so we can lock the canonical chain, then
+        // re-read authoritatively before validating and closing.
+        const initial = await tx.stayContract.findFirst({
+          where: { id: contractId, organizationId },
+          select: { hostelId: true, residentId: true },
+        });
+        if (!initial) throw AppError.notFound('Contract not found');
 
-      await this.locks.lockHostel(tx, initial.hostelId);
-      await this.locks.lockResident(tx, initial.residentId);
-      await this.locks.lockContract(tx, contractId);
+        await this.locks.lockHostel(tx, initial.hostelId);
+        await this.locks.lockResident(tx, initial.residentId);
+        await this.locks.lockContract(tx, contractId);
 
-      const contract = await tx.stayContract.findFirst({
-        where: { id: contractId, organizationId },
-        select: { id: true, status: true, startDate: true, version: true },
-      });
-      if (!contract) throw AppError.notFound('Contract not found');
-      if (contract.status === ContractStatus.CLOSED) {
-        const existing = await tx.stayContract.findFirst({ where: { id: contractId, organizationId }, select: CONTRACT_SELECT });
-        return toStayContractDto(existing!);
-      }
-      if (contract.status !== ContractStatus.ACTIVE) {
-        throw AppError.conflict('Only ACTIVE contracts can be checked out', ErrorCode.BUSINESS_RULE_VIOLATION);
-      }
+        const contract = await tx.stayContract.findFirst({
+          where: { id: contractId, organizationId },
+          select: { id: true, status: true, startDate: true, version: true },
+        });
+        if (!contract) throw AppError.notFound('Contract not found');
+        if (contract.status === ContractStatus.CLOSED) {
+          const existing = await tx.stayContract.findFirst({ where: { id: contractId, organizationId }, select: CONTRACT_SELECT });
+          return toStayContractDto(existing!);
+        }
+        if (contract.status !== ContractStatus.ACTIVE) {
+          throw AppError.conflict('Only ACTIVE contracts can be checked out', ErrorCode.BUSINESS_RULE_VIOLATION);
+        }
 
-      const today = await businessTodayForOrg(tx, organizationId);
-      const endDate = toBusinessDateOnly(exclusiveEndForInclusiveLastDay(today));
+        const today = await businessTodayForOrg(tx, organizationId);
+        const endDate = toBusinessDateOnly(exclusiveEndForInclusiveLastDay(today));
 
-      // endDate = lastInclusiveDay + 1, so rejecting when endDate <= startDate
-      // means the business day is strictly before the contract start. Same-day
-      // checkout stays valid (endDate > startDate); only an inverted range is
-      // rejected here.
-      if (dateMs(endDate) <= dateMs(contract.startDate)) {
-        throw AppError.conflict(
-          'Contract cannot be checked out before its start date',
-          ErrorCode.BUSINESS_RULE_VIOLATION,
-        );
-      }
-      const pendingAssignments = await tx.bedAssignment.findMany({
-        where: { contractId, organizationId, status: AssignmentStatus.ACTIVE },
-        select: { id: true, startDate: true },
-      });
-      const invalid = pendingAssignments.find((a) => dateMs(endDate) <= dateMs(a.startDate));
-      if (invalid) {
-        throw AppError.conflict(
-          'Contract has an active assignment starting after today; end it first',
-          ErrorCode.BUSINESS_RULE_VIOLATION,
-        );
-      }
+        // endDate = lastInclusiveDay + 1, so rejecting when endDate <= startDate
+        // means the business day is strictly before the contract start. Same-day
+        // checkout stays valid (endDate > startDate); only an inverted range is
+        // rejected here.
+        if (dateMs(endDate) <= dateMs(contract.startDate)) {
+          throw AppError.conflict(
+            'Contract cannot be checked out before its start date',
+            ErrorCode.BUSINESS_RULE_VIOLATION,
+          );
+        }
+        const pendingAssignments = await tx.bedAssignment.findMany({
+          where: { contractId, organizationId, status: AssignmentStatus.ACTIVE },
+          select: { id: true, startDate: true },
+        });
+        const invalid = pendingAssignments.find((a) => dateMs(endDate) <= dateMs(a.startDate));
+        if (invalid) {
+          throw AppError.conflict(
+            'Contract has an active assignment starting after today; end it first',
+            ErrorCode.BUSINESS_RULE_VIOLATION,
+          );
+        }
 
-      // CAS: only close if still ACTIVE and unmodified (idempotent for an
-      // already-CLOSED contract; version-guarded against a concurrent edit).
-      const closed = await tx.stayContract.updateMany({
-        where: { id: contractId, organizationId, status: ContractStatus.ACTIVE, version: contract.version },
-        data: { status: ContractStatus.CLOSED, endDate, version: { increment: 1 } },
-      });
-      if (closed.count === 0) {
-        throw AppError.conflict('Contract was modified by another request; refresh and retry', ErrorCode.RESOURCE_VERSION_CONFLICT);
-      }
-      await tx.bedAssignment.updateMany({
-        where: { contractId, organizationId, status: AssignmentStatus.ACTIVE },
-        data: { status: AssignmentStatus.ENDED, endDate, endReason: AssignmentEndReason.CHECKOUT, version: { increment: 1 } },
-      });
-      const updated = await tx.stayContract.findFirst({ where: { id: contractId, organizationId }, select: CONTRACT_SELECT });
-      return toStayContractDto(updated!);
-    });
+        // CAS: only close if still ACTIVE and unmodified (idempotent for an
+        // already-CLOSED contract; version-guarded against a concurrent edit).
+        const closed = await tx.stayContract.updateMany({
+          where: { id: contractId, organizationId, status: ContractStatus.ACTIVE, version: contract.version },
+          data: { status: ContractStatus.CLOSED, endDate, version: { increment: 1 } },
+        });
+        if (closed.count === 0) {
+          throw AppError.conflict('Contract was modified by another request; refresh and retry', ErrorCode.RESOURCE_VERSION_CONFLICT);
+        }
+        await tx.bedAssignment.updateMany({
+          where: { contractId, organizationId, status: AssignmentStatus.ACTIVE },
+          data: { status: AssignmentStatus.ENDED, endDate, endReason: AssignmentEndReason.CHECKOUT, version: { increment: 1 } },
+        });
+        const updated = await tx.stayContract.findFirst({ where: { id: contractId, organizationId }, select: CONTRACT_SELECT });
+        return toStayContractDto(updated!);
+      },
+    );
   }
 }

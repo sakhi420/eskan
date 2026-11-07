@@ -6,20 +6,18 @@
 --
 -- (2) Amount domain rules enforce the OpenAPI "Money positive / deposit may be
 --     zero" contract at the database level. Postgres `integer` columns are
---     already 32-bit, so the int32 upper bound (2,147,483,647) is inherent; the
---     CHECKs below add the lower-bound domain rules. Any pre-existing violating
---     row aborts the migration (SQLSTATE 23514) — data is never rewritten.
+--     already 32-bit, so the int32 upper bound (2,147,483,647) is inherent.
+--
+-- Transactionality: the whole migration runs in an explicit BEGIN/COMMIT and the
+-- preflight executes BEFORE any DDL. PostgreSQL supports transactional DDL, so
+-- any statement that fails rolls back everything (no partial enum/column is left
+-- behind on a preflight failure).
 
--- CreateEnum
-CREATE TYPE "AssignmentEndReason" AS ENUM ('CHECKOUT', 'TRANSFER', 'TERMINATE', 'MANUAL_END');
+BEGIN;
 
--- AlterTable
-ALTER TABLE "bed_assignments"
-  ADD COLUMN "end_reason" "AssignmentEndReason";
-
--- Preflight: surface actionable per-table counts before the constraints would
--- fail, so an operator sees which table has invalid rows (query IDs individually
--- when a count is non-zero). No amount is auto-corrected.
+-- Preflight FIRST (before any DDL). Surface actionable per-table counts so an
+-- operator sees which table has invalid rows (query IDs individually when a
+-- count is non-zero). No amount is auto-corrected.
 DO $$
 DECLARE
   bad_contracts  integer;
@@ -48,6 +46,13 @@ BEGIN
       bad_dep_tx, bad_expenses, bad_manual;
   END IF;
 END $$;
+
+-- CreateEnum
+CREATE TYPE "AssignmentEndReason" AS ENUM ('CHECKOUT', 'TRANSFER', 'TERMINATE', 'MANUAL_END');
+
+-- AlterTable
+ALTER TABLE "bed_assignments"
+  ADD COLUMN "end_reason" "AssignmentEndReason";
 
 -- Money lower-bound domain rules. rent must be positive; deposit may be zero.
 ALTER TABLE "stay_contracts"
@@ -81,3 +86,5 @@ ALTER TABLE "expenses"
 ALTER TABLE "manual_subscription_payments"
   ADD CONSTRAINT "manual_subscription_payments_amount_positive"
   CHECK ("amount" > 0);
+
+COMMIT;

@@ -37,6 +37,14 @@ function prismaMock() {
   return prisma;
 }
 
+function idempotencyMock(prisma: any) {
+  return {
+    hash: jest.fn().mockReturnValue('req-hash'),
+    getReplay: jest.fn().mockResolvedValue(null),
+    runAtomic: jest.fn(async (_args: any, mutate: (tx: any) => Promise<unknown>) => mutate(prisma)),
+  };
+}
+
 function locksMock() {
   return {
     lockHostel: jest.fn().mockResolvedValue(undefined),
@@ -50,7 +58,7 @@ function locksMock() {
 }
 
 function makeService(prisma = prismaMock(), locks = locksMock()) {
-  const svc = new ContractsService(prisma as unknown as PrismaService, {} as any, locks as any);
+  const svc = new ContractsService(prisma as unknown as PrismaService, idempotencyMock(prisma) as any, locks as any);
   return { svc, prisma, locks };
 }
 
@@ -65,7 +73,7 @@ describe('ContractsService.checkout', () => {
       .mockResolvedValueOnce({ id: 'c1', status: 'ACTIVE', startDate: new Date('2026-11-07T00:00:00.000Z'), version: 1 })
       .mockResolvedValueOnce(contractRow());
 
-    await svc.checkout('o1', 'c1');
+    await svc.checkout('o1', 'c1', 'u-1', 'idem-1');
 
     const updateArg = prisma.stayContract.updateMany.mock.calls[0][0];
     expect(updateArg.data.endDate.toISOString()).toBe('2026-11-08T00:00:00.000Z');
@@ -83,7 +91,7 @@ describe('ContractsService.checkout', () => {
       .mockResolvedValueOnce({ hostelId: 'h1', residentId: 'r1' })
       .mockResolvedValueOnce({ id: 'c1', status: 'ACTIVE', startDate: new Date('2026-11-07T00:00:00.000Z'), version: 1 });
 
-    await expect(svc.checkout('o1', 'c1')).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
+    await expect(svc.checkout('o1', 'c1', 'u-1', 'idem-1')).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
     expect(prisma.stayContract.updateMany).not.toHaveBeenCalled();
   });
 });
@@ -95,7 +103,7 @@ describe('ContractsService.terminate', () => {
       .mockResolvedValueOnce({ status: 'DRAFT', version: 2 })
       .mockResolvedValueOnce(contractRow({ status: 'TERMINATED' }));
 
-    await svc.terminate('o1', 'c1');
+    await svc.terminate('o1', 'c1', 'u-1', 'idem-1');
 
     expect(prisma.stayContract.updateMany).toHaveBeenCalledWith({
       where: { id: 'c1', organizationId: 'o1', status: 'DRAFT', version: 2 },
@@ -107,7 +115,7 @@ describe('ContractsService.terminate', () => {
     const { svc, prisma } = makeService();
     prisma.stayContract.findFirst.mockResolvedValueOnce({ status: 'ACTIVE', version: 2 });
 
-    await expect(svc.terminate('o1', 'c1')).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
+    await expect(svc.terminate('o1', 'c1', 'u-1', 'idem-1')).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
     expect(prisma.stayContract.updateMany).not.toHaveBeenCalled();
   });
 
@@ -115,7 +123,7 @@ describe('ContractsService.terminate', () => {
     const { svc, prisma } = makeService();
     prisma.stayContract.findFirst.mockResolvedValueOnce({ status: 'CLOSED', version: 2 });
 
-    await expect(svc.terminate('o1', 'c1')).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
+    await expect(svc.terminate('o1', 'c1', 'u-1', 'idem-1')).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
     expect(prisma.stayContract.updateMany).not.toHaveBeenCalled();
   });
 });

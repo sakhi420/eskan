@@ -276,48 +276,66 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
     }
   }
 
-  async end(organizationId: string, assignmentId: string) {
-    return this.prisma.$transaction(async (tx) => {
-      const assignment = await tx.bedAssignment.findFirst({
-        where: { id: assignmentId, organizationId },
-        select: ASSIGNMENT_SELECT,
-      });
-      if (!assignment) throw AppError.notFound('Assignment not found');
-      if (assignment.status === AssignmentStatus.ENDED) return toAssignmentDto(assignment); // idempotent
+  async end(organizationId: string, assignmentId: string, userId: string, idempotencyKey: string) {
+    const endpoint = `/api/v1/bed-assignments/${assignmentId}/end`;
+    const requestHash = this.idempotency.hash({ assignmentId });
+    return this.idempotency.runAtomic<ReturnType<typeof toAssignmentDto>>(
+      { organizationId, key: idempotencyKey, endpoint, userId, requestHash, statusCode: 200 },
+      async (tx) => {
+        const assignment = await tx.bedAssignment.findFirst({
+          where: { id: assignmentId, organizationId },
+          select: ASSIGNMENT_SELECT,
+        });
+        if (!assignment) throw AppError.notFound('Assignment not found');
+        if (assignment.status === AssignmentStatus.ENDED) return toAssignmentDto(assignment); // idempotent
 
-      // The end date is a business date in the org's timezone, never `new Date()`
-      // (which would truncate inconsistently and could even land on the start date).
-      const today = await businessTodayForOrg(tx, organizationId);
-      const startDate = toISODate(assignment.startDate);
-      if (!startDate) {
-        throw AppError.conflict('Assignment is missing its start date', ErrorCode.BUSINESS_RULE_VIOLATION);
-      }
-      // Same-day end is valid: endDate is exclusive, so ending on the start day
-      // yields endDate = startDay + 1. Only ending strictly before the start is
-      // rejected.
-      if (today < startDate) {
-        throw AppError.conflict(
-          'Assignment cannot be ended before its start date',
-          ErrorCode.BUSINESS_RULE_VIOLATION,
-        );
-      }
-      const exclusiveEnd = exclusiveEndForInclusiveLastDay(today);
+        // Serialize against a concurrent checkout/transfer by taking the same
+        // parent chain (Hostel -> Room -> Bed -> Resident -> Contract): both lock
+        // the contract, so a manual end and a checkout cannot interleave.
+        await this.lockCreateContext(tx, organizationId, assignment.bedId, assignment.residentId, assignment.contractId);
 
-      const result = await tx.bedAssignment.updateMany({
-        where: { id: assignmentId, organizationId, status: AssignmentStatus.ACTIVE },
-        data: {
-          status: AssignmentStatus.ENDED,
-          endDate: toBusinessDateOnly(exclusiveEnd),
-          endReason: AssignmentEndReason.MANUAL_END,
-          version: { increment: 1 },
-        },
-      });
-      if (result.count === 0) {
-        throw AppError.conflict('Assignment was modified concurrently; refresh and retry', ErrorCode.RESOURCE_VERSION_CONFLICT);
-      }
-      const updated = await tx.bedAssignment.findFirst({ where: { id: assignmentId, organizationId }, select: ASSIGNMENT_SELECT });
-      return toAssignmentDto(updated!);
-    });
+        // Authoritative re-read AFTER acquiring the locks.
+        const current = await tx.bedAssignment.findFirst({
+          where: { id: assignmentId, organizationId },
+          select: ASSIGNMENT_SELECT,
+        });
+        if (!current) throw AppError.notFound('Assignment not found');
+        if (current.status === AssignmentStatus.ENDED) return toAssignmentDto(current);
+
+        // The end date is a business date in the org's timezone, never `new Date()`
+        // (which would truncate inconsistently and could even land on the start date).
+        const today = await businessTodayForOrg(tx, organizationId);
+        const startDate = toISODate(current.startDate);
+        if (!startDate) {
+          throw AppError.conflict('Assignment is missing its start date', ErrorCode.BUSINESS_RULE_VIOLATION);
+        }
+        // Same-day end is valid: endDate is exclusive, so ending on the start day
+        // yields endDate = startDay + 1. Only ending strictly before the start is
+        // rejected.
+        if (today < startDate) {
+          throw AppError.conflict(
+            'Assignment cannot be ended before its start date',
+            ErrorCode.BUSINESS_RULE_VIOLATION,
+          );
+        }
+        const exclusiveEnd = exclusiveEndForInclusiveLastDay(today);
+
+        const result = await tx.bedAssignment.updateMany({
+          where: { id: assignmentId, organizationId, status: AssignmentStatus.ACTIVE, version: current.version },
+          data: {
+            status: AssignmentStatus.ENDED,
+            endDate: toBusinessDateOnly(exclusiveEnd),
+            endReason: AssignmentEndReason.MANUAL_END,
+            version: { increment: 1 },
+          },
+        });
+        if (result.count === 0) {
+          throw AppError.conflict('Assignment was modified concurrently; refresh and retry', ErrorCode.RESOURCE_VERSION_CONFLICT);
+        }
+        const updated = await tx.bedAssignment.findFirst({ where: { id: assignmentId, organizationId }, select: ASSIGNMENT_SELECT });
+        return toAssignmentDto(updated!);
+      },
+    );
   }
 
   /**
