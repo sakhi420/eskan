@@ -562,3 +562,17 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
   - race میان checkout و transfer روی PostgreSQL واقعی با Prisma/Service واقعی (بدون mock): هر ترتیبی که برنده شود، قرارداد CLOSED و هیچ assignment فعال/legacy-NULL باقی نمی‌ماند؛ تاریخ‌ها/`endReason` درست.
 - **سیاست Idempotency:** فعلی `IDEMPOTENCY_RETENTION_DAYS = 30` (انقضای ۳۰روزه، نه دائمی). سازگاری آن با Offline Outbox قابل صف باید جداگانه تصمیم شود.
 - npm scripts جدید: `test:integration` و `test:migration`؛ هر دو به CI اضافه شدند.
+## M-1 — ACCEPTED + نکات harness — 2026-11-07
+- **M-1 رسماً پذیرفته شد** (حکم مالک). Integration Harness (migration/constraint ۳۴→۴۰ چک + concurrency ۳ تست) روی PostgreSQL واقعی در CI سبز است.
+- سه نکتهٔ harness در فهرست بهبود ثبت شد:
+  1. **race فقط یک‌بار و بدون تحمیل قطعی هر دو ترتیب قفل** — بهبود آینده: هر دو ترتیب با کنترل زمان‌بندی/barrier.
+  2. **rollback باید نبودن همهٔ ۸ constraint را صریح بررسی کند** — اکنون اصلاح شد (`test-m1-migration.cjs` در سناریوی preflight همهٔ ۸ constraint را جداگانه بررسی می‌کند؛ مجموع **۴۰/۴۰**).
+  3. **guard ایمنی fail-closed برای اسکریپت‌های ایجاد/حذف DB** — اضافه شد: `assertLocalTestHost()` در `test-m1-migration.cjs` و `m1-concurrency.integration-spec.ts` (فقط host محلی؛ override: `ESKAN_TEST_DB_ALLOW=1`).
+- سیاست `IDEMPOTENCY_RETENTION_DAYS=30` همچنان تصمیم باز است (نه دائمی)؛ پیش از Outbox آفلاین باید تکلیف retention بلندمدت مشخص شود.
+
+## M-2 — Read-only Preflight (تشخیصی) — 2026-11-07
+- وضعیت: **M-2 در فاز پیش‌بررسی خواندنی**؛ فقط SELECT، فقط روی clone/دیتابیس آزمایشی throwaway.
+- ابزار: `scripts/preflight-m2.cjs` (guard fail-closed + `BEGIN TRANSACTION READ ONLY`).
+- گزارش کامل: `docs/project/m2-preflight-report.md`.
+- نتیجهٔ کلیدی: cross-org=۵، cross-resident=۲، orphan=۰ (FK-enforced)، و هر ۵ جدول والد بدون `UNIQUE(organization_id, id)` (پیش‌نیاز composite-FK).
+- هیچ DDL/DML/migration/backfill، FK/index، تغییر PaymentAllocation/LockService، کد production یا OpenAPI انجام نشد. M-3 و سرویس‌های مالی مجاز نیستند. قبل از هر migration/schema تغییر، مجوز جداگانه لازم است.

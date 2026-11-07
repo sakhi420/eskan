@@ -17,6 +17,18 @@ function withDatabase(dbName: string): string {
   return u.toString();
 }
 
+// Fail-closed guard: this harness creates/drops a throwaway database, so it
+// must never be pointed at a non-local (production/shared) PostgreSQL server.
+function assertLocalTestHost(): void {
+  const host = new URL(BASE_URL).hostname;
+  if (!['localhost', '127.0.0.1', '::1'].includes(host) && process.env.ESKAN_TEST_DB_ALLOW !== '1') {
+    throw new Error(
+      `REFUSED: integration harness creates/drops a throwaway DB; host "${host}" is not local. ` +
+        `Set ESKAN_TEST_DB_ALLOW=1 only for an explicitly sanctioned test server.`,
+    );
+  }
+}
+
 function ymd(v: unknown): string {
   if (v == null) return '';
   if (v instanceof Date) return v.toISOString().slice(0, 10);
@@ -58,6 +70,7 @@ describe('M-1 concurrency (real PostgreSQL + real Prisma/services)', () => {
 
   beforeAll(async () => {
     jest.setTimeout(30000);
+    assertLocalTestHost();
     dbName = `eskan_m1_conc_${process.pid}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
     admin = new Client({ connectionString: withDatabase('postgres') });
     await admin.connect();

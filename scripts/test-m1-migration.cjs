@@ -33,6 +33,20 @@ function adminUrl() {
   return u.toString();
 }
 
+// Fail-closed guard: this script creates/drops throwaway test databases, so it
+// must never be pointed at a non-local (production/shared) PostgreSQL server.
+function assertLocalTestHost() {
+  const host = new URL(BASE_URL).hostname;
+  if (!['localhost', '127.0.0.1', '::1'].includes(host) && process.env.ESKAN_TEST_DB_ALLOW !== '1') {
+    console.error(
+      `REFUSED: this script creates/drops throwaway (eskan_m1_*) databases. Host "${host}" is not local; ` +
+        `only run against a local/dev test PostgreSQL server. Set ESKAN_TEST_DB_ALLOW=1 to override ` +
+        `for an explicitly sanctioned test server.`,
+    );
+    process.exit(2);
+  }
+}
+
 function readMigrations() {
   return fs
     .readdirSync(MIGRATIONS_DIR, { withFileTypes: true })
@@ -173,8 +187,10 @@ async function scenarioPreflightFailure(admin) {
 
     check('[preflight] AssignmentEndReason enum NOT created', (await c.query(`SELECT 1 FROM pg_type WHERE typname='AssignmentEndReason'`)).rowCount === 0);
     check('[preflight] bed_assignments.end_reason NOT added', (await c.query(`SELECT 1 FROM information_schema.columns WHERE table_name='bed_assignments' AND column_name='end_reason'`)).rowCount === 0);
-    check('[preflight] stay_contracts_rent_positive NOT added', (await c.query(`SELECT 1 FROM pg_constraint WHERE conname='stay_contracts_rent_positive'`)).rowCount === 0);
-    check('[preflight] charges_amount_positive NOT added', (await c.query(`SELECT 1 FROM pg_constraint WHERE conname='charges_amount_positive'`)).rowCount === 0);
+    const absentConstraints = ['stay_contracts_rent_positive', 'stay_contracts_deposit_nonnegative', 'charges_amount_positive', 'payments_amount_positive', 'payment_allocations_amount_positive', 'deposit_transactions_amount_positive', 'expenses_amount_positive', 'manual_subscription_payments_amount_positive'];
+    for (const cn of absentConstraints) {
+      check(`[preflight] constraint ${cn} NOT added`, (await c.query(`SELECT 1 FROM pg_constraint WHERE conname=$1`, [cn])).rowCount === 0);
+    }
 
     const rentAfter = await c.query(`SELECT rent_amount FROM stay_contracts WHERE id=$1`, [contract]);
     const chargeAfter = await c.query(`SELECT amount FROM charges WHERE id=$1`, [charge]);
@@ -186,6 +202,7 @@ async function scenarioPreflightFailure(admin) {
 }
 
 (async () => {
+  assertLocalTestHost();
   const admin = new Client({ connectionString: adminUrl() });
   await admin.connect();
   try {
