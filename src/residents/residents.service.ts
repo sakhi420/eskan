@@ -104,7 +104,7 @@ export class ResidentsService {
       // Lock the resident first so a concurrent contract/assignment create
       // (which also locks the resident) cannot interleave with the
       // "active contract/assignment" guard below.
-      await this.locks.lockResident(tx, residentId);
+      await this.locks.lockResident(tx, residentId, organizationId);
       const resident = await tx.resident.findFirst({ where: { id: residentId, organizationId }, select: RESIDENT_SELECT });
       if (!resident) throw AppError.notFound('Resident not found');
       if (resident.status === ResidentStatus.ARCHIVED) return toResidentDto(resident);

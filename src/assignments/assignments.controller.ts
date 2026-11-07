@@ -32,8 +32,15 @@ export class AssignmentsController {
   @Post('bed-assignments/:assignmentId/end')
   @Roles(Role.OWNER, Role.ADMIN, Role.OPERATOR)
   @HttpCode(HttpStatus.OK)
-  async end(@CurrentMembership() m: MembershipContext, @Param('assignmentId') assignmentId: string, @Req() req: RequestWithAuth) {
-    return envelope(req, await this.assignments.end(m.organizationId, assignmentId));
+  async end(
+    @CurrentMembership() m: MembershipContext,
+    @CurrentUser() user: AuthUser,
+    @Param('assignmentId') assignmentId: string,
+    @Headers('Idempotency-Key') idempotencyKey: string | undefined,
+    @Req() req: RequestWithAuth,
+  ) {
+    const key = requireIdempotencyKey(idempotencyKey);
+    return envelope(req, await this.assignments.end(m.organizationId, assignmentId, user.id, key));
   }
 
   @Post('bed-assignments/:assignmentId/transfer')

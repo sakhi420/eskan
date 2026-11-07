@@ -118,7 +118,7 @@ export class PackagesService {
     organizationId: string,
     hostelId: string,
   ): Promise<void> {
-    await this.locks.lockHostel(tx, hostelId);
+    await this.locks.lockHostel(tx, hostelId, organizationId);
     const hostel = await tx.hostel.findFirst({
       where: { id: hostelId, organizationId },
       select: { id: true, status: true },

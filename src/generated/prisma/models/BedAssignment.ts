@@ -44,6 +44,7 @@ export type BedAssignmentMinAggregateOutputType = {
   status: $Enums.AssignmentStatus | null
   startDate: Date | null
   endDate: Date | null
+  endReason: $Enums.AssignmentEndReason | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -58,6 +59,7 @@ export type BedAssignmentMaxAggregateOutputType = {
   status: $Enums.AssignmentStatus | null
   startDate: Date | null
   endDate: Date | null
+  endReason: $Enums.AssignmentEndReason | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -72,6 +74,7 @@ export type BedAssignmentCountAggregateOutputType = {
   status: number
   startDate: number
   endDate: number
+  endReason: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -96,6 +99,7 @@ export type BedAssignmentMinAggregateInputType = {
   status?: true
   startDate?: true
   endDate?: true
+  endReason?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -110,6 +114,7 @@ export type BedAssignmentMaxAggregateInputType = {
   status?: true
   startDate?: true
   endDate?: true
+  endReason?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -124,6 +129,7 @@ export type BedAssignmentCountAggregateInputType = {
   status?: true
   startDate?: true
   endDate?: true
+  endReason?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -225,6 +231,7 @@ export type BedAssignmentGroupByOutputType = {
   status: $Enums.AssignmentStatus
   startDate: Date
   endDate: Date | null
+  endReason: $Enums.AssignmentEndReason | null
   createdAt: Date
   updatedAt: Date
   _count: BedAssignmentCountAggregateOutputType | null
@@ -262,6 +269,7 @@ export type BedAssignmentWhereInput = {
   status?: Prisma.EnumAssignmentStatusFilter<"BedAssignment"> | $Enums.AssignmentStatus
   startDate?: Prisma.DateTimeFilter<"BedAssignment"> | Date | string
   endDate?: Prisma.DateTimeNullableFilter<"BedAssignment"> | Date | string | null
+  endReason?: Prisma.EnumAssignmentEndReasonNullableFilter<"BedAssignment"> | $Enums.AssignmentEndReason | null
   createdAt?: Prisma.DateTimeFilter<"BedAssignment"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"BedAssignment"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -280,6 +288,7 @@ export type BedAssignmentOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   startDate?: Prisma.SortOrder
   endDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  endReason?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
@@ -301,6 +310,7 @@ export type BedAssignmentWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumAssignmentStatusFilter<"BedAssignment"> | $Enums.AssignmentStatus
   startDate?: Prisma.DateTimeFilter<"BedAssignment"> | Date | string
   endDate?: Prisma.DateTimeNullableFilter<"BedAssignment"> | Date | string | null
+  endReason?: Prisma.EnumAssignmentEndReasonNullableFilter<"BedAssignment"> | $Enums.AssignmentEndReason | null
   createdAt?: Prisma.DateTimeFilter<"BedAssignment"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"BedAssignment"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -319,6 +329,7 @@ export type BedAssignmentOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   startDate?: Prisma.SortOrder
   endDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  endReason?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.BedAssignmentCountOrderByAggregateInput
@@ -341,6 +352,7 @@ export type BedAssignmentScalarWhereWithAggregatesInput = {
   status?: Prisma.EnumAssignmentStatusWithAggregatesFilter<"BedAssignment"> | $Enums.AssignmentStatus
   startDate?: Prisma.DateTimeWithAggregatesFilter<"BedAssignment"> | Date | string
   endDate?: Prisma.DateTimeNullableWithAggregatesFilter<"BedAssignment"> | Date | string | null
+  endReason?: Prisma.EnumAssignmentEndReasonNullableWithAggregatesFilter<"BedAssignment"> | $Enums.AssignmentEndReason | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"BedAssignment"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"BedAssignment"> | Date | string
 }
@@ -351,6 +363,7 @@ export type BedAssignmentCreateInput = {
   status?: $Enums.AssignmentStatus
   startDate: Date | string
   endDate?: Date | string | null
+  endReason?: $Enums.AssignmentEndReason | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutBedAssignmentsInput
@@ -369,6 +382,7 @@ export type BedAssignmentUncheckedCreateInput = {
   status?: $Enums.AssignmentStatus
   startDate: Date | string
   endDate?: Date | string | null
+  endReason?: $Enums.AssignmentEndReason | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -379,6 +393,7 @@ export type BedAssignmentUpdateInput = {
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endReason?: Prisma.NullableEnumAssignmentEndReasonFieldUpdateOperationsInput | $Enums.AssignmentEndReason | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutBedAssignmentsNestedInput
@@ -397,6 +412,7 @@ export type BedAssignmentUncheckedUpdateInput = {
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endReason?: Prisma.NullableEnumAssignmentEndReasonFieldUpdateOperationsInput | $Enums.AssignmentEndReason | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -411,6 +427,7 @@ export type BedAssignmentCreateManyInput = {
   status?: $Enums.AssignmentStatus
   startDate: Date | string
   endDate?: Date | string | null
+  endReason?: $Enums.AssignmentEndReason | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -421,6 +438,7 @@ export type BedAssignmentUpdateManyMutationInput = {
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endReason?: Prisma.NullableEnumAssignmentEndReasonFieldUpdateOperationsInput | $Enums.AssignmentEndReason | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -435,6 +453,7 @@ export type BedAssignmentUncheckedUpdateManyInput = {
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endReason?: Prisma.NullableEnumAssignmentEndReasonFieldUpdateOperationsInput | $Enums.AssignmentEndReason | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -459,6 +478,7 @@ export type BedAssignmentCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   startDate?: Prisma.SortOrder
   endDate?: Prisma.SortOrder
+  endReason?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -477,6 +497,7 @@ export type BedAssignmentMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   startDate?: Prisma.SortOrder
   endDate?: Prisma.SortOrder
+  endReason?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -491,6 +512,7 @@ export type BedAssignmentMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   startDate?: Prisma.SortOrder
   endDate?: Prisma.SortOrder
+  endReason?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -671,12 +693,17 @@ export type EnumAssignmentStatusFieldUpdateOperationsInput = {
   set?: $Enums.AssignmentStatus
 }
 
+export type NullableEnumAssignmentEndReasonFieldUpdateOperationsInput = {
+  set?: $Enums.AssignmentEndReason | null
+}
+
 export type BedAssignmentCreateWithoutOrganizationInput = {
   id?: string
   version?: number
   status?: $Enums.AssignmentStatus
   startDate: Date | string
   endDate?: Date | string | null
+  endReason?: $Enums.AssignmentEndReason | null
   createdAt?: Date | string
   updatedAt?: Date | string
   bed: Prisma.BedCreateNestedOneWithoutAssignmentsInput
@@ -693,6 +720,7 @@ export type BedAssignmentUncheckedCreateWithoutOrganizationInput = {
   status?: $Enums.AssignmentStatus
   startDate: Date | string
   endDate?: Date | string | null
+  endReason?: $Enums.AssignmentEndReason | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -736,6 +764,7 @@ export type BedAssignmentScalarWhereInput = {
   status?: Prisma.EnumAssignmentStatusFilter<"BedAssignment"> | $Enums.AssignmentStatus
   startDate?: Prisma.DateTimeFilter<"BedAssignment"> | Date | string
   endDate?: Prisma.DateTimeNullableFilter<"BedAssignment"> | Date | string | null
+  endReason?: Prisma.EnumAssignmentEndReasonNullableFilter<"BedAssignment"> | $Enums.AssignmentEndReason | null
   createdAt?: Prisma.DateTimeFilter<"BedAssignment"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"BedAssignment"> | Date | string
 }
@@ -746,6 +775,7 @@ export type BedAssignmentCreateWithoutBedInput = {
   status?: $Enums.AssignmentStatus
   startDate: Date | string
   endDate?: Date | string | null
+  endReason?: $Enums.AssignmentEndReason | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutBedAssignmentsInput
@@ -762,6 +792,7 @@ export type BedAssignmentUncheckedCreateWithoutBedInput = {
   status?: $Enums.AssignmentStatus
   startDate: Date | string
   endDate?: Date | string | null
+  endReason?: $Enums.AssignmentEndReason | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -798,6 +829,7 @@ export type BedAssignmentCreateWithoutResidentInput = {
   status?: $Enums.AssignmentStatus
   startDate: Date | string
   endDate?: Date | string | null
+  endReason?: $Enums.AssignmentEndReason | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutBedAssignmentsInput
@@ -814,6 +846,7 @@ export type BedAssignmentUncheckedCreateWithoutResidentInput = {
   status?: $Enums.AssignmentStatus
   startDate: Date | string
   endDate?: Date | string | null
+  endReason?: $Enums.AssignmentEndReason | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -850,6 +883,7 @@ export type BedAssignmentCreateWithoutContractInput = {
   status?: $Enums.AssignmentStatus
   startDate: Date | string
   endDate?: Date | string | null
+  endReason?: $Enums.AssignmentEndReason | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutBedAssignmentsInput
@@ -866,6 +900,7 @@ export type BedAssignmentUncheckedCreateWithoutContractInput = {
   status?: $Enums.AssignmentStatus
   startDate: Date | string
   endDate?: Date | string | null
+  endReason?: $Enums.AssignmentEndReason | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -905,6 +940,7 @@ export type BedAssignmentCreateManyOrganizationInput = {
   status?: $Enums.AssignmentStatus
   startDate: Date | string
   endDate?: Date | string | null
+  endReason?: $Enums.AssignmentEndReason | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -915,6 +951,7 @@ export type BedAssignmentUpdateWithoutOrganizationInput = {
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endReason?: Prisma.NullableEnumAssignmentEndReasonFieldUpdateOperationsInput | $Enums.AssignmentEndReason | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   bed?: Prisma.BedUpdateOneRequiredWithoutAssignmentsNestedInput
@@ -931,6 +968,7 @@ export type BedAssignmentUncheckedUpdateWithoutOrganizationInput = {
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endReason?: Prisma.NullableEnumAssignmentEndReasonFieldUpdateOperationsInput | $Enums.AssignmentEndReason | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -944,6 +982,7 @@ export type BedAssignmentUncheckedUpdateManyWithoutOrganizationInput = {
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endReason?: Prisma.NullableEnumAssignmentEndReasonFieldUpdateOperationsInput | $Enums.AssignmentEndReason | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -957,6 +996,7 @@ export type BedAssignmentCreateManyBedInput = {
   status?: $Enums.AssignmentStatus
   startDate: Date | string
   endDate?: Date | string | null
+  endReason?: $Enums.AssignmentEndReason | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -967,6 +1007,7 @@ export type BedAssignmentUpdateWithoutBedInput = {
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endReason?: Prisma.NullableEnumAssignmentEndReasonFieldUpdateOperationsInput | $Enums.AssignmentEndReason | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutBedAssignmentsNestedInput
@@ -983,6 +1024,7 @@ export type BedAssignmentUncheckedUpdateWithoutBedInput = {
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endReason?: Prisma.NullableEnumAssignmentEndReasonFieldUpdateOperationsInput | $Enums.AssignmentEndReason | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -996,6 +1038,7 @@ export type BedAssignmentUncheckedUpdateManyWithoutBedInput = {
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endReason?: Prisma.NullableEnumAssignmentEndReasonFieldUpdateOperationsInput | $Enums.AssignmentEndReason | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1009,6 +1052,7 @@ export type BedAssignmentCreateManyResidentInput = {
   status?: $Enums.AssignmentStatus
   startDate: Date | string
   endDate?: Date | string | null
+  endReason?: $Enums.AssignmentEndReason | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1019,6 +1063,7 @@ export type BedAssignmentUpdateWithoutResidentInput = {
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endReason?: Prisma.NullableEnumAssignmentEndReasonFieldUpdateOperationsInput | $Enums.AssignmentEndReason | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutBedAssignmentsNestedInput
@@ -1035,6 +1080,7 @@ export type BedAssignmentUncheckedUpdateWithoutResidentInput = {
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endReason?: Prisma.NullableEnumAssignmentEndReasonFieldUpdateOperationsInput | $Enums.AssignmentEndReason | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1048,6 +1094,7 @@ export type BedAssignmentUncheckedUpdateManyWithoutResidentInput = {
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endReason?: Prisma.NullableEnumAssignmentEndReasonFieldUpdateOperationsInput | $Enums.AssignmentEndReason | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1061,6 +1108,7 @@ export type BedAssignmentCreateManyContractInput = {
   status?: $Enums.AssignmentStatus
   startDate: Date | string
   endDate?: Date | string | null
+  endReason?: $Enums.AssignmentEndReason | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1071,6 +1119,7 @@ export type BedAssignmentUpdateWithoutContractInput = {
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endReason?: Prisma.NullableEnumAssignmentEndReasonFieldUpdateOperationsInput | $Enums.AssignmentEndReason | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutBedAssignmentsNestedInput
@@ -1087,6 +1136,7 @@ export type BedAssignmentUncheckedUpdateWithoutContractInput = {
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endReason?: Prisma.NullableEnumAssignmentEndReasonFieldUpdateOperationsInput | $Enums.AssignmentEndReason | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1100,6 +1150,7 @@ export type BedAssignmentUncheckedUpdateManyWithoutContractInput = {
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endReason?: Prisma.NullableEnumAssignmentEndReasonFieldUpdateOperationsInput | $Enums.AssignmentEndReason | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1116,6 +1167,7 @@ export type BedAssignmentSelect<ExtArgs extends runtime.Types.Extensions.Interna
   status?: boolean
   startDate?: boolean
   endDate?: boolean
+  endReason?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -1134,6 +1186,7 @@ export type BedAssignmentSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   status?: boolean
   startDate?: boolean
   endDate?: boolean
+  endReason?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -1152,6 +1205,7 @@ export type BedAssignmentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   status?: boolean
   startDate?: boolean
   endDate?: boolean
+  endReason?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -1170,11 +1224,12 @@ export type BedAssignmentSelectScalar = {
   status?: boolean
   startDate?: boolean
   endDate?: boolean
+  endReason?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type BedAssignmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "version" | "organizationId" | "bedId" | "residentId" | "contractId" | "status" | "startDate" | "endDate" | "createdAt" | "updatedAt", ExtArgs["result"]["bedAssignment"]>
+export type BedAssignmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "version" | "organizationId" | "bedId" | "residentId" | "contractId" | "status" | "startDate" | "endDate" | "endReason" | "createdAt" | "updatedAt", ExtArgs["result"]["bedAssignment"]>
 export type BedAssignmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   bed?: boolean | Prisma.BedDefaultArgs<ExtArgs>
@@ -1212,6 +1267,7 @@ export type $BedAssignmentPayload<ExtArgs extends runtime.Types.Extensions.Inter
     status: $Enums.AssignmentStatus
     startDate: Date
     endDate: Date | null
+    endReason: $Enums.AssignmentEndReason | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["bedAssignment"]>
@@ -1650,6 +1706,7 @@ export interface BedAssignmentFieldRefs {
   readonly status: Prisma.FieldRef<"BedAssignment", 'AssignmentStatus'>
   readonly startDate: Prisma.FieldRef<"BedAssignment", 'DateTime'>
   readonly endDate: Prisma.FieldRef<"BedAssignment", 'DateTime'>
+  readonly endReason: Prisma.FieldRef<"BedAssignment", 'AssignmentEndReason'>
   readonly createdAt: Prisma.FieldRef<"BedAssignment", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"BedAssignment", 'DateTime'>
 }

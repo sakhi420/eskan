@@ -314,6 +314,7 @@ export type ResidentOrderByWithRelationInput = {
 
 export type ResidentWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  organizationId_id?: Prisma.ResidentOrganizationIdIdCompoundUniqueInput
   AND?: Prisma.ResidentWhereInput | Prisma.ResidentWhereInput[]
   OR?: Prisma.ResidentWhereInput[]
   NOT?: Prisma.ResidentWhereInput | Prisma.ResidentWhereInput[]
@@ -336,7 +337,7 @@ export type ResidentWhereUniqueInput = Prisma.AtLeast<{
   payments?: Prisma.PaymentListRelationFilter
   deposits?: Prisma.DepositTransactionListRelationFilter
   absences?: Prisma.TemporaryAbsenceListRelationFilter
-}, "id">
+}, "id" | "organizationId_id">
 
 export type ResidentOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -526,6 +527,11 @@ export type ResidentOrderByRelationAggregateInput = {
 export type ResidentScalarRelationFilter = {
   is?: Prisma.ResidentWhereInput
   isNot?: Prisma.ResidentWhereInput
+}
+
+export type ResidentOrganizationIdIdCompoundUniqueInput = {
+  organizationId: string
+  id: string
 }
 
 export type ResidentCountOrderByAggregateInput = {

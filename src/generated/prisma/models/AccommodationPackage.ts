@@ -272,6 +272,7 @@ export type AccommodationPackageOrderByWithRelationInput = {
 
 export type AccommodationPackageWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  organizationId_id?: Prisma.AccommodationPackageOrganizationIdIdCompoundUniqueInput
   AND?: Prisma.AccommodationPackageWhereInput | Prisma.AccommodationPackageWhereInput[]
   OR?: Prisma.AccommodationPackageWhereInput[]
   NOT?: Prisma.AccommodationPackageWhereInput | Prisma.AccommodationPackageWhereInput[]
@@ -287,7 +288,7 @@ export type AccommodationPackageWhereUniqueInput = Prisma.AtLeast<{
   hostel?: Prisma.XOR<Prisma.HostelNullableScalarRelationFilter, Prisma.HostelWhereInput> | null
   components?: Prisma.AccommodationPackageComponentListRelationFilter
   contracts?: Prisma.StayContractListRelationFilter
-}, "id">
+}, "id" | "organizationId_id">
 
 export type AccommodationPackageOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -419,6 +420,11 @@ export type AccommodationPackageListRelationFilter = {
 
 export type AccommodationPackageOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type AccommodationPackageOrganizationIdIdCompoundUniqueInput = {
+  organizationId: string
+  id: string
 }
 
 export type AccommodationPackageCountOrderByAggregateInput = {

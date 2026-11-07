@@ -55,6 +55,13 @@ enum AssignmentStatus {
   ENDED
 }
 
+enum AssignmentEndReason {
+  CHECKOUT
+  TRANSFER
+  TERMINATE
+  MANUAL_END
+}
+
 enum ChargeType {
   RENT
   UTILITY
@@ -270,70 +277,73 @@ model RefreshSession {
 }
 
 model Hostel {
-  id             String        @id @default(uuid()) @db.Uuid
-  version        Int           @default(1)
-  organizationId String        @map("organization_id") @db.Uuid
+  id                String        @id @default(uuid()) @db.Uuid
+  version           Int           @default(1)
+  organizationId    String        @map("organization_id") @db.Uuid
   name              String
   address           String?
-  contactPhone      String? @map("contact_phone")
-  defaultRentAmount Int?    @map("default_rent_amount")
-  rentDueDayOfMonth Int?    @map("rent_due_day_of_month")
-  absenceMinDays    Int     @default(3) @map("absence_min_days")
+  contactPhone      String?       @map("contact_phone")
+  defaultRentAmount Int?          @map("default_rent_amount")
+  rentDueDayOfMonth Int?          @map("rent_due_day_of_month")
+  absenceMinDays    Int           @default(3) @map("absence_min_days")
   notes             String?
   status            ArchiveStatus @default(ACTIVE)
-  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt      DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+  createdAt         DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  organization  Organization   @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  organization  Organization           @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   rooms         Room[]
   stayContracts StayContract[]
   expenses      Expense[]
   packages      AccommodationPackage[]
 
+  @@unique([organizationId, id])
   @@index([organizationId])
   @@index([organizationId, status])
   @@map("hostels")
 }
 
 model Room {
-  id             String        @id @default(uuid()) @db.Uuid
-  version        Int           @default(1)
-  organizationId String        @map("organization_id") @db.Uuid
-  hostelId       String        @map("hostel_id") @db.Uuid
-  code             String
-  floor            Int
-  notes            String?
+  id                String            @id @default(uuid()) @db.Uuid
+  version           Int               @default(1)
+  organizationId    String            @map("organization_id") @db.Uuid
+  hostelId          String            @map("hostel_id") @db.Uuid
+  code              String
+  floor             Int
+  notes             String?
   maintenanceStatus MaintenanceStatus @default(OPERATIONAL) @map("maintenance_status")
-  status           ArchiveStatus @default(ACTIVE)
-  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt      DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+  status            ArchiveStatus     @default(ACTIVE)
+  createdAt         DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   hostel       Hostel       @relation(fields: [hostelId], references: [id], onDelete: Restrict)
   beds         Bed[]
 
   @@unique([hostelId, code])
+  @@unique([organizationId, id])
   @@index([organizationId])
   @@map("rooms")
 }
 
 model Bed {
-  id             String    @id @default(uuid()) @db.Uuid
-  version        Int       @default(1)
-  organizationId String    @map("organization_id") @db.Uuid
-  roomId         String    @map("room_id") @db.Uuid
-  code             String
-  notes            String?
+  id                String            @id @default(uuid()) @db.Uuid
+  version           Int               @default(1)
+  organizationId    String            @map("organization_id") @db.Uuid
+  roomId            String            @map("room_id") @db.Uuid
+  code              String
+  notes             String?
   maintenanceStatus MaintenanceStatus @default(OPERATIONAL) @map("maintenance_status")
-  status           BedStatus @default(ACTIVE)
-  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  status            BedStatus         @default(ACTIVE)
+  createdAt         DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   room         Room            @relation(fields: [roomId], references: [id], onDelete: Restrict)
   assignments  BedAssignment[]
 
   @@unique([roomId, code])
+  @@unique([organizationId, id])
   @@index([organizationId])
   @@map("beds")
 }
@@ -349,11 +359,12 @@ model AccommodationPackage {
   createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt      DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  organization Organization                  @relation(fields: [organizationId], references: [id], onDelete: Restrict)
-  hostel       Hostel?                      @relation(fields: [hostelId], references: [id], onDelete: SetNull)
+  organization Organization                    @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  hostel       Hostel?                         @relation(fields: [hostelId], references: [id], onDelete: SetNull)
   components   AccommodationPackageComponent[]
   contracts    StayContract[]
 
+  @@unique([organizationId, id])
   @@index([organizationId])
   @@index([organizationId, hostelId])
   @@map("accommodation_packages")
@@ -401,6 +412,7 @@ model TemporaryAbsence {
   approvedBy   User?        @relation("AbsenceApprovedBy", fields: [approvedByUserId], references: [id], onDelete: SetNull)
   creditCharge Charge?      @relation("AbsenceCreditCharge", fields: [creditChargeId], references: [id], onDelete: SetNull)
 
+  @@unique([organizationId, residentId, id])
   @@index([organizationId, residentId])
   @@index([organizationId, contractId])
   @@index([organizationId, status])
@@ -408,19 +420,19 @@ model TemporaryAbsence {
 }
 
 model Resident {
-  id             String         @id @default(uuid()) @db.Uuid
-  version        Int            @default(1)
-  organizationId String         @map("organization_id") @db.Uuid
-  fullName       String         @map("full_name")
-  type           ResidentType   @default(OTHER)
+  id                       String         @id @default(uuid()) @db.Uuid
+  version                  Int            @default(1)
+  organizationId           String         @map("organization_id") @db.Uuid
+  fullName                 String         @map("full_name")
+  type                     ResidentType   @default(OTHER)
   phone                    String?
-  emergencyContactName     String? @map("emergency_contact_name")
-  emergencyContactPhone    String? @map("emergency_contact_phone")
-  emergencyContactRelation String? @map("emergency_contact_relation")
+  emergencyContactName     String?        @map("emergency_contact_name")
+  emergencyContactPhone    String?        @map("emergency_contact_phone")
+  emergencyContactRelation String?        @map("emergency_contact_relation")
   notes                    String?
   status                   ResidentStatus @default(ACTIVE)
-  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt      DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+  createdAt                DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   organization  Organization         @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   stayContracts StayContract[]
@@ -430,6 +442,7 @@ model Resident {
   deposits      DepositTransaction[]
   absences      TemporaryAbsence[]
 
+  @@unique([organizationId, id])
   @@index([organizationId])
   @@index([organizationId, fullName])
   @@index([organizationId, status])
@@ -437,50 +450,53 @@ model Resident {
 }
 
 model StayContract {
-  id             String         @id @default(uuid()) @db.Uuid
-  version        Int            @default(1)
-  organizationId String         @map("organization_id") @db.Uuid
-  hostelId       String         @map("hostel_id") @db.Uuid
-  residentId     String         @map("resident_id") @db.Uuid
-  contractNumber String         @map("contract_number")
-  status         ContractStatus @default(DRAFT)
-  startDate      DateTime       @map("start_date") @db.Date
-  endDate        DateTime?      @map("end_date") @db.Date
-  rentAmount     Int            @map("rent_amount")
-  billingCycle   BillingCycle   @default(MONTHLY) @map("billing_cycle")
-  depositAmount  Int?           @map("deposit_amount")
-  packageId      String?        @map("package_id") @db.Uuid
-  packageSnapshot Json?         @map("package_snapshot")
-  notes          String?
-  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt      DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+  id              String         @id @default(uuid()) @db.Uuid
+  version         Int            @default(1)
+  organizationId  String         @map("organization_id") @db.Uuid
+  hostelId        String         @map("hostel_id") @db.Uuid
+  residentId      String         @map("resident_id") @db.Uuid
+  contractNumber  String         @map("contract_number")
+  status          ContractStatus @default(DRAFT)
+  startDate       DateTime       @map("start_date") @db.Date
+  endDate         DateTime?      @map("end_date") @db.Date
+  rentAmount      Int            @map("rent_amount")
+  billingCycle    BillingCycle   @default(MONTHLY) @map("billing_cycle")
+  depositAmount   Int?           @map("deposit_amount")
+  packageId       String?        @map("package_id") @db.Uuid
+  packageSnapshot Json?          @map("package_snapshot")
+  notes           String?
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Restrict)
-  hostel       Hostel          @relation(fields: [hostelId], references: [id], onDelete: Restrict)
-  resident     Resident        @relation(fields: [residentId], references: [id], onDelete: Restrict)
+  organization Organization          @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  hostel       Hostel                @relation(fields: [hostelId], references: [id], onDelete: Restrict)
+  resident     Resident              @relation(fields: [residentId], references: [id], onDelete: Restrict)
   package      AccommodationPackage? @relation(fields: [packageId], references: [id], onDelete: SetNull)
   assignments  BedAssignment[]
   charges      Charge[]
   absences     TemporaryAbsence[]
 
   @@unique([organizationId, contractNumber])
+  @@unique([organizationId, id])
+  @@unique([organizationId, residentId, id])
   @@index([organizationId, residentId])
   @@index([organizationId, hostelId])
   @@map("stay_contracts")
 }
 
 model BedAssignment {
-  id             String           @id @default(uuid()) @db.Uuid
-  version        Int              @default(1)
-  organizationId String           @map("organization_id") @db.Uuid
-  bedId          String           @map("bed_id") @db.Uuid
-  residentId     String           @map("resident_id") @db.Uuid
-  contractId     String           @map("contract_id") @db.Uuid
-  status         AssignmentStatus @default(ACTIVE)
-  startDate      DateTime         @map("start_date") @db.Date
-  endDate        DateTime?        @map("end_date") @db.Date
-  createdAt      DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt      DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+  id             String               @id @default(uuid()) @db.Uuid
+  version        Int                  @default(1)
+  organizationId String               @map("organization_id") @db.Uuid
+  bedId          String               @map("bed_id") @db.Uuid
+  residentId     String               @map("resident_id") @db.Uuid
+  contractId     String               @map("contract_id") @db.Uuid
+  status         AssignmentStatus     @default(ACTIVE)
+  startDate      DateTime             @map("start_date") @db.Date
+  endDate        DateTime?            @map("end_date") @db.Date
+  endReason      AssignmentEndReason? @map("end_reason")
+  createdAt      DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   bed          Bed          @relation(fields: [bedId], references: [id], onDelete: Restrict)
@@ -518,8 +534,10 @@ model Charge {
   contract     StayContract?       @relation(fields: [contractId], references: [id], onDelete: SetNull)
   reversedBy   User?               @relation("ChargeReversedBy", fields: [reversedById], references: [id], onDelete: SetNull)
   allocations  PaymentAllocation[]
-  absence      TemporaryAbsence?  @relation("AbsenceCreditCharge")
+  absence      TemporaryAbsence?   @relation("AbsenceCreditCharge")
 
+  @@unique([organizationId, id])
+  @@unique([organizationId, residentId, id])
   @@index([organizationId, residentId, status])
   @@index([organizationId, dueDate])
   @@index([organizationId, contractId])
@@ -552,20 +570,24 @@ model Payment {
   allocations  PaymentAllocation[]
 
   @@unique([organizationId, receiptNumber])
+  @@unique([organizationId, id])
+  @@unique([organizationId, residentId, id])
   @@index([organizationId, residentId, status])
   @@index([organizationId, receivedAt])
   @@map("payments")
 }
 
 model PaymentAllocation {
-  id        String   @id @default(uuid()) @db.Uuid
-  paymentId String   @map("payment_id") @db.Uuid
-  chargeId  String   @map("charge_id") @db.Uuid
-  amount    Int
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  residentId     String   @map("resident_id") @db.Uuid
+  paymentId      String   @map("payment_id") @db.Uuid
+  chargeId       String   @map("charge_id") @db.Uuid
+  amount         Int
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
-  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
-  charge  Charge  @relation(fields: [chargeId], references: [id], onDelete: Restrict)
+  payment Payment @relation(fields: [organizationId, residentId, paymentId], references: [organizationId, residentId, id], onDelete: Cascade)
+  charge  Charge  @relation(fields: [organizationId, residentId, chargeId], references: [organizationId, residentId, id], onDelete: Restrict)
 
   @@unique([paymentId, chargeId])
   @@index([chargeId])

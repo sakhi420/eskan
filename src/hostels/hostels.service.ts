@@ -174,7 +174,7 @@ export class HostelsService {
       // Lock the hostel row so a concurrent room/contract/assignment create
       // (which also locks the hostel in the canonical order) serializes before
       // the archive check-and-set below.
-      await this.locks.lockHostel(tx, hostelId);
+      await this.locks.lockHostel(tx, hostelId, organizationId);
 
       const hostel = await tx.hostel.findFirst({
         where: { id: hostelId, organizationId },

@@ -358,6 +358,7 @@ export type TemporaryAbsenceOrderByWithRelationInput = {
 export type TemporaryAbsenceWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   creditChargeId?: string
+  organizationId_residentId_id?: Prisma.TemporaryAbsenceOrganizationIdResidentIdIdCompoundUniqueInput
   AND?: Prisma.TemporaryAbsenceWhereInput | Prisma.TemporaryAbsenceWhereInput[]
   OR?: Prisma.TemporaryAbsenceWhereInput[]
   NOT?: Prisma.TemporaryAbsenceWhereInput | Prisma.TemporaryAbsenceWhereInput[]
@@ -383,7 +384,7 @@ export type TemporaryAbsenceWhereUniqueInput = Prisma.AtLeast<{
   requestedBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   approvedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   creditCharge?: Prisma.XOR<Prisma.ChargeNullableScalarRelationFilter, Prisma.ChargeWhereInput> | null
-}, "id" | "creditChargeId">
+}, "id" | "creditChargeId" | "organizationId_residentId_id">
 
 export type TemporaryAbsenceOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -584,6 +585,12 @@ export type TemporaryAbsenceListRelationFilter = {
 
 export type TemporaryAbsenceOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type TemporaryAbsenceOrganizationIdResidentIdIdCompoundUniqueInput = {
+  organizationId: string
+  residentId: string
+  id: string
 }
 
 export type TemporaryAbsenceCountOrderByAggregateInput = {

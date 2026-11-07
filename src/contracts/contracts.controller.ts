@@ -67,14 +67,28 @@ export class ContractsController {
   @Post('contracts/:contractId/terminate')
   @Roles(Role.OWNER, Role.ADMIN, Role.OPERATOR)
   @HttpCode(HttpStatus.OK)
-  async terminate(@CurrentMembership() m: MembershipContext, @Param('contractId') contractId: string, @Req() req: RequestWithAuth) {
-    return envelope(req, await this.contracts.terminate(m.organizationId, contractId));
+  async terminate(
+    @CurrentMembership() m: MembershipContext,
+    @CurrentUser() user: AuthUser,
+    @Param('contractId') contractId: string,
+    @Headers('Idempotency-Key') idempotencyKey: string | undefined,
+    @Req() req: RequestWithAuth,
+  ) {
+    const key = requireIdempotencyKey(idempotencyKey);
+    return envelope(req, await this.contracts.terminate(m.organizationId, contractId, user.id, key));
   }
 
   @Post('contracts/:contractId/checkout')
   @Roles(Role.OWNER, Role.ADMIN, Role.OPERATOR)
   @HttpCode(HttpStatus.OK)
-  async checkout(@CurrentMembership() m: MembershipContext, @Param('contractId') contractId: string, @Req() req: RequestWithAuth) {
-    return envelope(req, await this.contracts.checkout(m.organizationId, contractId));
+  async checkout(
+    @CurrentMembership() m: MembershipContext,
+    @CurrentUser() user: AuthUser,
+    @Param('contractId') contractId: string,
+    @Headers('Idempotency-Key') idempotencyKey: string | undefined,
+    @Req() req: RequestWithAuth,
+  ) {
+    const key = requireIdempotencyKey(idempotencyKey);
+    return envelope(req, await this.contracts.checkout(m.organizationId, contractId, user.id, key));
   }
 }

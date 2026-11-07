@@ -358,6 +358,8 @@ export type PaymentOrderByWithRelationInput = {
 export type PaymentWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   organizationId_receiptNumber?: Prisma.PaymentOrganizationIdReceiptNumberCompoundUniqueInput
+  organizationId_id?: Prisma.PaymentOrganizationIdIdCompoundUniqueInput
+  organizationId_residentId_id?: Prisma.PaymentOrganizationIdResidentIdIdCompoundUniqueInput
   AND?: Prisma.PaymentWhereInput | Prisma.PaymentWhereInput[]
   OR?: Prisma.PaymentWhereInput[]
   NOT?: Prisma.PaymentWhereInput | Prisma.PaymentWhereInput[]
@@ -382,7 +384,7 @@ export type PaymentWhereUniqueInput = Prisma.AtLeast<{
   resident?: Prisma.XOR<Prisma.ResidentScalarRelationFilter, Prisma.ResidentWhereInput>
   reversedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   allocations?: Prisma.PaymentAllocationListRelationFilter
-}, "id" | "organizationId_receiptNumber">
+}, "id" | "organizationId_receiptNumber" | "organizationId_id" | "organizationId_residentId_id">
 
 export type PaymentOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -595,6 +597,17 @@ export type PaymentOrderByRelationAggregateInput = {
 export type PaymentOrganizationIdReceiptNumberCompoundUniqueInput = {
   organizationId: string
   receiptNumber: string
+}
+
+export type PaymentOrganizationIdIdCompoundUniqueInput = {
+  organizationId: string
+  id: string
+}
+
+export type PaymentOrganizationIdResidentIdIdCompoundUniqueInput = {
+  organizationId: string
+  residentId: string
+  id: string
 }
 
 export type PaymentCountOrderByAggregateInput = {

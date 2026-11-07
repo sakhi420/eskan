@@ -92,5 +92,5 @@ sequenceDiagram
 
 - tenant scope از security context؛ نه از body.
 - تراکنش‌ها در serviceها (Prisma `$transaction`).
-- پول از decimal.js و NUMERIC؛ هرگز Number.
+- پول عدد صحیح AFN (A-016)؛ گردکردن proration با decimal.js؛ هرگز Number/Float/Double.
 - خطاها Problem Details با `code` پایدار و `traceId`.

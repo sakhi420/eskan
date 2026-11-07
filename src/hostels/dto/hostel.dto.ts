@@ -1,4 +1,5 @@
 import { IsInt, IsOptional, IsString, Length, Max, MaxLength, Min } from 'class-validator';
+import { MONEY_MAX } from '../../common/money/money.dto';
 
 export class HostelDto {
   @IsString()
@@ -18,6 +19,7 @@ export class HostelDto {
   @IsOptional()
   @IsInt()
   @Min(0)
+  @Max(MONEY_MAX)
   defaultRentAmount?: number;
 
   @IsOptional()

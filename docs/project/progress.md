@@ -523,12 +523,78 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
   - پوشش unit-test بازسازی شد (mock تعاملی `$transaction` + assertion ناهم‌گام refresh).
   - **CI واقعی** `.github/workflows/ci.yml`: install + generate + build + OpenAPI + Prisma validate + unit + `migrate deploy` + e2e smoke روی PostgreSQL 17.
   - اعتبارسنجی: build ✅، `openapi:validate` ✅ (۶ warning)، `prisma validate` ✅، `migrate status` ✅ (۸ migration)، unit **۲۶/۲۶** ✅، e2e smoke **۲/۲** ✅.
-- **Gate 1 — Contract (در حال تکمیل؛ هنوز قفل‌نشده):**
+- **Gate 1 — Contract (✅ قفل رسمی — 2026-11-07):**
   - `contracts/openapi.yaml` برای رفع تناقض‌های گزارش ممیزی اصلاح شد؛ `openapi:validate` ✅ (valid، ۶ warning از پیش‌موجود).
   - **Receipt/Payment/Allocation:** `PaymentRequest` دیگر `receiptNumber` و آرایهٔ `allocations` نمی‌پذیرد؛ پرداخت به‌صورت وجه تخصیص‌نیافته ثبت و `receiptNumber` رسمی فقط سمت سرور صادر می‌شود (`provisionalReceiptId` جدا). Allocation عملیات مستقل است.
   - **Debit/Credit:** `Charge.entrySide` (DEBIT پیش‌فرض)، مدل مستقل `Credit` و `AbsenceCredit` (یک سطر به‌ازای هر ماه، کلید یکتای absence+دوره) اضافه شد؛ `TemporaryAbsence.creditChargeId` در قرارداد با `credits[]` جایگزین شد.
   - **Deposit:** مدل مستقل `DepositApplication` + درخواست و endpointهای جداگانهٔ `refund`/`forfeit`؛ `depositCreate` فقط دریافت؛ پاسخ `/deposits/apply` به `DepositApplication` تغییر کرد.
   - **Billing:** `BillingRunRequest` به `BillingPreviewRequest`/`BillingPostRequest` تفکیک شد؛ `dryRun` حذف؛ `businessKey` و `dueDayOfMonth` اضافه شد؛ `periodEnd` نیمه‌باز صریح شد.
   - **مبلغ:** `Money` مثبت (`minimum: 1`) و `NonNegativeMoney` (صفرپذیر) جدا شد؛ مبالغ حساب/گزارش به `Amount` (رشته، تا ۱۹ رقم) یکسان شد.
-  - **باقی‌مانده پیش از قفل واقعی Gate 1:** Permission Matrix endpoint‌به‌endpoint، یکسان‌سازی `X-Expected-Version` و Idempotency Replay، تکمیل قرارداد Offline/Pending/Server-confirmed + الزام Backup، و تطبیق اسناد قدیمی با تصمیم‌های قطعی.
-- **بعدی:** تکمیل موارد باقی‌ماندهٔ Gate 1 و قفل آن؛ سپس M-1/M-2 (بدون migration مالی تا قفل Gate 1).
+  - **چرخهٔ Void/Refund پرداخت:** `paymentReverse` اکنون Void اتمیک را صریح می‌کند (آزادسازی `AllocationRelease`های append-only با سقف «مجموع Release ≤ مبلغ تخصیص»، سپس Reversal با جهت مخالف؛ Refund نقدی جدا). سقف مجموع Release و محدودیت Refund به ماندهٔ تخصیص‌نیافته در `AllocationRelease`/`PaymentRefund` مستند شد.
+  - **DepositApplication/DepositType/Credit:** `DepositApplicationRequest` اکنون `depositTransactionId` اجباری دارد (ودیعهٔ مشخص مصرف‌شونده)؛ `DepositType` فاقد `APPLIED_TO_CHARGES` شد؛ مدل مستقل `Credit` حذف و `Charge.entrySide=CREDIT` تنها مدل canonical اعتبار شد؛ `info.version` → `0.5.0`.
+  - **مجوزها (403):** endpointهای اصلاحیِ `chargeReverse`، `depositReverse`، `expenseReverse`، `allocationRelease` 403 گرفتند (علاوه بر پرداخت/ودیعه/apply/billing قبلی).
+  - **پاسخ Void:** `PaymentVoidResult` (`payment` + `releases[]` + `reversal`) ساخته و پاسخ `paymentReverse` به آن تغییر کرد؛ تعامل Refund↔Void (ممنوعیت Void کامل تا تعیین‌تکلیف Refund) صریح شد.
+  - **اسناد مدل پول:** `api-conventions.md`، `assumptions-register` (A-006)، `glossary-fa-AF`، `requirements` (REQ-NF-001)، `contract-changes.md` و `architecture-overview.md` با A-016 (عدد صحیح افغانی) تطبیق شدند؛ وضعیت D-01..D-18 در پلان «قطعی» و `offline-sync.md` «قرارداد هدف نه اجراشده» شد.
+  - **این دوره (ممیزی سوم):** `DepositApplicationResult` (پاسخ گروهی: `applications[]` + `totalApplied` + `remainingDepositBalance`) و endpoint `POST /absences/{id}/credits` (`AbsenceCreditResult`) افزوده شد؛ تناقض ReceiptCounter در پلان رفع شد (سطح Organization، بدون reset سالانه)؛ A-001 و Q-001/Q-004/Q-012 با A-015/Refund-Void/عدم Backdate حل شدند؛ gap-analysis «گزارش تاریخی» شد؛ Permission Matrix (cross-tenant/403-404)، Idempotency Replay و Offline/Backup و `X-Expected-Version` مستند/یکپارچه شدند.
+  - **ممیزی چهارم (P0):** `actualReturnDate` به `TemporaryAbsenceRequest` افزوده و trigger یکتای AbsenceCredit (PATCH=ثبت بازگشت→RETURNED، POST=تولید Credit→CLOSED) شد؛ `AbsenceStatus` شامل RETURNED/CLOSED؛ date semantics (endDate exclusive + `lastOccupiedDateInclusive`) صریح شد؛ `PENDING_SYNC` از مدل سرور حذف (فقط ISSUED)؛ Idempotency-Key به contract lifecycle/checkout/end/archive/absence/package/org-patch افزوده و `X-Expected-Version` یکدست شد؛ `PLATFORM_ADMIN` جدا تعریف شد؛ Q-009 و absence-policy و پلان (D-01/Credit) هماهنگ شدند.
+  - **ممیزی پنجم (P0):** جداسازی `TemporaryAbsenceCreateRequest`/`TemporaryAbsenceUpdateRequest`؛ `absenceUpdate` → `X-Expected-Version` اجباری؛ قانون Transfer از `ContractRequest` خارج و به endpoint `assignmentTransfer` منتقل شد؛ ردیف AbsenceCredit در ماتریس → OWNER/ADMIN؛ `chargeCreate` → description + 403 بر پایهٔ `entrySide`؛ Idempotency-Key به ۵ Update (hostel/room/bed/resident/contract)؛ `idempotency.md` → retention دائمی «طرح هدف آینده» + authorization قبل از replay؛ absence-policy 3.4/3.5 قطعی شد.
+  - **ممیزی ششم (P0):** Idempotency کامل شد (۵۶/۶۲ mutation + ۶ استثنای مستند Auth/Preview)؛ 403 به ۲۴ عملیات master-data و ۱۰ عملیات `/admin/**` افزوده شد؛ ماتریس به path+method و منبع authority `PLATFORM_ADMIN = User.isPlatformAdmin` قطعی شد؛ canonical hash → SHA-256 با قواعد serialization.
+  - **ممیزی هفتم (P0/P1):** استثناهای Idempotency به ۶ مورد دقیق (`authLogin`/`authRefresh`/`authLogout`/`authLogoutAll`/`authChangePassword` + `billingRunPreview`) اصلاح شد؛ `authRegister` از استثناها خارج و هدر آن اجباری ماند؛ ۶ مسیر ماتریس اصلاح و ۱۰ مسیر `/admin/**` کامل شد؛ 403 به `allocationCreate`/`expenseCreate`/`absenceCreate`/`absenceUpdate` افزوده شد؛ canonical hash با ساختار JSON قطعی (SHA-256 hex) و مثال تستی ثبت شد.
+  - **ممیزی هشتم (P0/P1):** هم‌ترازی security ماتریس با OpenAPI — طبقه‌بندی ۵کلاسه (Anonymous/احراز بدون نقش/عضو سازمانی/محدود نقش/Platform Admin)؛ ۶ اصلاح security قرارداد (`invitationAccept`→`security: []`؛ `systemMe`/`authMe`/`logout`/`logout-all`/`change-password`→`[{ bearerAuth: [] }]`)؛ canonical hash دقیق با RFC 8785/JCS + I-JSON + ۵ test vector با SHA-256 واقعی.
+  - **ممیزی نهم (P0/P1):** `GET /organizations` → `[{ bearerAuth: [] }]` (فهرست عضویت‌ها برای انتخاب سازمان، بدون `X-Organization-Id`)؛ ۱۰ مسیر `/admin/**` → `[{ bearerAuth: [] }]` بدون `X-Organization-Id` (نقش قطعی از `User.isPlatformAdmin`)؛ ادعای عددی RFC 8785 تصحیح (ECMAScript `Number::toString` + safe-integer؛ عدد بزرگ با JSON string)؛ `semanticHeaders`/`X-Expected-Version` به fingerprint اضافه و ۶ test vector جدید (T6 = نسخهٔ متفاوت → hash متفاوت) با SHA-256 واقعی؛ قواعد query قطعی (`?k`≡`?k=`≡`[""]`، percent-decode یک‌بار، `+` literal، scalar تکراری رد 422).
+  - **ممیزی دهم (مستندات وضعیت، بدون تغییر کد):** سه test vector ناقص (T3b/T4b/T6b) با JSON کامل جایگزین شد؛ «قرارداد هدف vs رفتار فعلی کد» در `idempotency.md` و `permissions-matrix.md` صریح ثبت شد.
+  - **وضعیت Gate 1 — ✅ قفل رسمی (2026-11-07):** مجوز صریح مالک پروژه صادر شد؛ از این لحظه قرارداد OpenAPI مالی (Gate 1 — Contract Lock) قفل است. CI سبز روی PR #1 با سه run (`42273554895`، `42339956241`، `42341231268`؛ همهٔ مراحل Build/OpenAPI/Prisma/Unit/Migrate/E2E موفق). PR #1 باز و `main` دست‌نخورده؛ Merge تا دستور جداگانه ممنوع. شروع M-1 و M-2 با مجوز رسمی (ترتیب: M-1 ابتدا؛ preflight فقط‌خواندنی M-2 هم‌زمان؛ Migration M-2 پس از تثبیت M-1).
+  - **پردهنشده (فقط بعد از قفل) — گپ پیاده‌سازی شناخته‌شده:**
+    - `GET /api/v1/organizations` در OpenAPI هست ولی هنوز در `OrganizationsController` پیاده نشده؛ Controller فعلی class-level `TenantGuard` دارد، پس route آینده نباید به guard وابستهٔ tenant متکی باشد؛ فقط Bearer لازم دارد و باید پیش از انتخاب organization اجرا شود.
+    - Idempotency: `IdempotencyService` فعلی هنوز `stableStringify(payload)` دارد و method/route/path/query/semanticHeaders را نمی‌پوشاند؛ `authRegister` هدر را اعتبارسنجی می‌کند ولی به `AuthService.register` منتقل نمی‌کند (بازیابی فعلی email/password)؛ idempotency ثبت‌نام باید جداگانه طراحی/تست شود (ثبت‌نام پیش از organization و scope فعلی organization-based است).
+    - امنیت 404/403: سیاست هدف = عدم عضویت → 404 و نقش ناکافی → 403؛ رفتار فعلی کد = `TenantGuard` → 403 و `PlatformAdminGuard` → 403 (هم‌ترازی، کار مرحلهٔ پیاده‌سازی).
+- **بعدی (فعال):** M-1 (Date + Amount + Contract Checkout/Terminate) ابتدا پیاده‌سازی و اعتبارسنجی می‌شود؛ هم‌زمان inventory و preflight فقط‌خواندنی M-2 آماده می‌شود. Migration/اجرای M-2 پس از تثبیت M-1. M-3 و Charge/Payment/Allocation services و Controllerهای مالی در این مرحله مجاز نیستند.
+## M-1 — Integration Harness (PostgreSQL واقعی) — 2026-11-07
+- **`scripts/test-m1-migration.cjs` (۳۴ چک، همه PASS محلی):**
+  - اعمال migrationهای 1..8 سپس M-1 روی دیتابیس موقتی `eskan_m1_*` (هر سناریو DB جدا می‌سازد و حذف می‌کند؛ هیچ DB پایدار/واقعی دست نمی‌خورد).
+  - حفظ `end_reason = NULL` برای ردیف‌های legacy (بدون بازنویسی تاریخچه).
+  - موفقیت migration روی baseline معتبرِ غیرخالی (org/hostel/room/bed/resident/contract + charges/payments/expenses/deposit/manual_payment مثبت).
+  - شکست preflight و اثبات rollback کامل DDL: پس از خطا، enum `AssignmentEndReason`، ستون `end_reason` و هیچ‌یک از ۸ constraint جدید ساخته نمی‌شوند و داده‌های نامعتبر دست‌نخورده می‌مانند (خطای actionable با `contracts=N charges=N`).
+  - طرد مقادیر صفر/منفی و سرریز int32 مستقیماً توسط CHECKهای PostgreSQL (۲۳۵۱۴ / ۲۲۰۰۳)؛ `deposit=0` مجاز.
+- **`test/integration/m1-concurrency.integration-spec.ts` (۳ تست، همه PASS) + `test/jest-integration.json`:**
+  - checkout هم‌زمان دوگانه با کلید متفاوت → فقط یک transition واقعی (`version=2`) و هر دو خروجی CLOSED.
+  - checkout هم‌زمان با کلید مشترک → replay ایدمپوتنت (یک `idempotency_records`) و تک‌transition.
+  - race میان checkout و transfer روی PostgreSQL واقعی با Prisma/Service واقعی (بدون mock): هر ترتیبی که برنده شود، قرارداد CLOSED و هیچ assignment فعال/legacy-NULL باقی نمی‌ماند؛ تاریخ‌ها/`endReason` درست.
+- **سیاست Idempotency:** فعلی `IDEMPOTENCY_RETENTION_DAYS = 30` (انقضای ۳۰روزه، نه دائمی). سازگاری آن با Offline Outbox قابل صف باید جداگانه تصمیم شود.
+- npm scripts جدید: `test:integration` و `test:migration`؛ هر دو به CI اضافه شدند.
+## M-1 — ACCEPTED + نکات harness — 2026-11-07
+- **M-1 رسماً پذیرفته شد** (حکم مالک). Integration Harness (migration/constraint ۳۴→۴۰ چک + concurrency ۳ تست) روی PostgreSQL واقعی در CI سبز است.
+- سه نکتهٔ harness در فهرست بهبود ثبت شد:
+  1. **race فقط یک‌بار و بدون تحمیل قطعی هر دو ترتیب قفل** — بهبود آینده: هر دو ترتیب با کنترل زمان‌بندی/barrier.
+  2. **rollback باید نبودن همهٔ ۸ constraint را صریح بررسی کند** — اکنون اصلاح شد (`test-m1-migration.cjs` در سناریوی preflight همهٔ ۸ constraint را جداگانه بررسی می‌کند؛ مجموع **۴۰/۴۰**).
+  3. **guard ایمنی fail-closed برای اسکریپت‌های ایجاد/حذف DB** — اضافه شد: `assertLocalTestHost()` در `test-m1-migration.cjs` و `m1-concurrency.integration-spec.ts` (فقط host محلی؛ override: `ESKAN_TEST_DB_ALLOW=1`).
+- سیاست `IDEMPOTENCY_RETENTION_DAYS=30` همچنان تصمیم باز است (نه دائمی)؛ پیش از Outbox آفلاین باید تکلیف retention بلندمدت مشخص شود.
+
+## M-2 — Read-only Preflight (تشخیصی) — 2026-11-07
+- وضعیت: **M-2 در فاز پیش‌بررسی خواندنی**؛ فقط SELECT، فقط روی clone/دیتابیس آزمایشی throwaway.
+- ابزار: `scripts/preflight-m2.cjs` (guard fail-closed + `BEGIN TRANSACTION READ ONLY`).
+- گزارش کامل: `docs/project/m2-preflight-report.md`.
+- نتیجهٔ کلیدی (demo مصنوعی — نه دیتابیس واقعی): cross-org=۸، cross-resident=۳ (شامل TemporaryAbsence)، orphan=۰ (FK-enforced)، و **۱۱/۱۱ کلید UNIQUE موردنیاز** (۲ و ۳ ستونه) غایب‌اند.
+- تکمیل پوشش پس از بازبینی مالک: رابطهٔ **Absence→Charge (creditChargeId)** در هر سه جهت (org / resident / orphan)؛ کلیدهای سه‌ستونی `(organization_id, resident_id, id)` روی stay_contracts/charges/payments/temporary_absences (و حذف کلید دوستونی غیرلازمِ temporary_absences)؛ تشخیص دقیق UNIQUE با تطبیق مجموعه/ترتیب ستون‌ها + حذف index ناvalid/ناready (`indisvalid`/`indisready`).
+- CI سه مرحلهٔ M-2: (۱) `preflight-m2.cjs --strict` baseline پاک، (۲) `test-m2-preflight-detection.cjs` (کارش cross-tenant incl. creditCharge و اثبات تشخیص با exit 1)، (۳) `preflight guard fail-closed` روی نام دیتابیس غیرآزمایشی (exit 2).
+- guard = دفاع در عمق (host محلی + نام دیتابیس dev/test allowlist)؛ **مانع قطعی Port-Forwarding نیست** — مقاومت واقعی با نقش کم‌امتیاز بدون CREATEDB یا سرور آزمایشی مستقل است.
+- **قبل از هر migration باید همین ابزار روی clone واقعی دیتابیس مبنای توسعه اجرا شود** (اعداد demo، وضعیت واقعی نیستند).
+- هیچ DDL/DML/migration/backfill، FK/index، تغییر PaymentAllocation/LockService، کد production یا OpenAPI انجام نشد. M-3 و سرویس‌های مالی مجاز نیستند. قبل از هر migration/schema تغییر، مجوز جداگانه لازم است.
+## M-2 — Preflight روی Clone واقعی — 2026-11-07
+- Clone: `eskan_preflight_clone_20261107` از `eskan_dev` (محلی، `CREATE DATABASE ... TEMPLATE eskan_dev`)، ساخته‌شده در `2026-11-07T16:34:38Z`.
+- نتیجه (فقط `node scripts/preflight-m2.cjs --strict`): **cross_org=0، cross_resident=0، cross_hostel=0، orphan=0**؛ کلیدهای composite همچنان ۱۲/۱۲ MISSING (وضعیت schema، نه خطای داده).
+- دادهٔ منبع: org=72, residents=84, stay_contracts=90, bed_assignments=72، accommodation_packages=19 (57 components)، contracts_with_package=7؛ جدول‌های مالی و temporary_absences خالی (۰).
+- تفسیر: دادهٔ موجودِ لایهٔ اقامت پاک است → migration بدون backfill ممکن؛ مسیر مالی/absence چون خالی است باید بعد از ورود دادهٔ واقعی دوباره preflight شود.
+- جزئیات: `docs/project/m2-preflight-clone-report.md`.
+- آزمون destructive روی clone اجرا نشد (طبق دستور).
+- پوشش Package اضافه شد: package→hostel (org)، contract→package (org)، contract.hostel vs package.hostel و orphanها؛ روی clone همه ۰ (۱۹ package و ۷ contract←package پاک).
+## M-2 — پیاده‌سازی مرحلهٔ اول + Rehearsal — 2026-11-07
+- **مجوز:** پیاده‌سازی و Rehearsal روی دیتابیس‌های ایزوله؛ بدون تغییر `eskan_dev`/Staging/Production و بدون Merge.
+- **Schema:** ۱۲ کلید UNIQUE tenant/resident-scoped + `PaymentAllocation.organization_id/resident_id` + رابطه‌های composite.
+- **Migration:** `20261107120000_m2_tenant_resident_composite_integrity` — preflight قبل از DDL، ۱۲ کلید UNIQUE، backfill + swap PaymentAllocation، ۱۷ composite FK، ۲ تریگر Package/Hostel. BEGIN/COMMIT تراکنشی.
+- **LockService:** `lockForUpdate(tx, entity, id, organizationId)` اجباری + `lockGlobal` برای global؛ همهٔ Call Siteها اصلاح شدند.
+- **تست‌ها:** `test-m2-migration.cjs` (۴۱/۴۱)، `lock.service.spec.ts` (۶ unit)، `lock-tenant-isolation.integration-spec.ts` (۳ integration)، به‌روزرسانی `test-m1-migration.cjs`/`test-m2-preflight-detection.cjs` و اصلاح `preflight-m2.cjs`.
+- **Rehearsal روی Clone:** از `eskan_preflight_clone_20261107` (دست‌نخورده) یک Clone جدید ساخته و M-2 اعمال شد؛ preflight بعدی `cross_org=0 / cross_resident=0 / cross_hostel=0 / orphan=0` و **۱۲/۱۲ PRESENT**. Clone اصلی دست‌نخورده ماند.
+- **تست منفی واقعی:** cross-org/cross-resident → `23503`؛ Package/Hostel → `23514` (تریگر). Rollback با preflight-fail بدون leftover schema.
+- جزئیات: `docs/project/m2-rehearsal-report.md`.
+- **ممنوع مانده:** اعمال روی `eskan_dev`/Staging/Production، Merge PR، شروع M-3 و سرویس‌های مالی.

@@ -361,6 +361,8 @@ export type ChargeOrderByWithRelationInput = {
 
 export type ChargeWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  organizationId_id?: Prisma.ChargeOrganizationIdIdCompoundUniqueInput
+  organizationId_residentId_id?: Prisma.ChargeOrganizationIdResidentIdIdCompoundUniqueInput
   AND?: Prisma.ChargeWhereInput | Prisma.ChargeWhereInput[]
   OR?: Prisma.ChargeWhereInput[]
   NOT?: Prisma.ChargeWhereInput | Prisma.ChargeWhereInput[]
@@ -387,7 +389,7 @@ export type ChargeWhereUniqueInput = Prisma.AtLeast<{
   reversedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   allocations?: Prisma.PaymentAllocationListRelationFilter
   absence?: Prisma.XOR<Prisma.TemporaryAbsenceNullableScalarRelationFilter, Prisma.TemporaryAbsenceWhereInput> | null
-}, "id">
+}, "id" | "organizationId_id" | "organizationId_residentId_id">
 
 export type ChargeOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -603,6 +605,17 @@ export type ChargeOrderByRelationAggregateInput = {
 export type ChargeNullableScalarRelationFilter = {
   is?: Prisma.ChargeWhereInput | null
   isNot?: Prisma.ChargeWhereInput | null
+}
+
+export type ChargeOrganizationIdIdCompoundUniqueInput = {
+  organizationId: string
+  id: string
+}
+
+export type ChargeOrganizationIdResidentIdIdCompoundUniqueInput = {
+  organizationId: string
+  residentId: string
+  id: string
 }
 
 export type ChargeCountOrderByAggregateInput = {
