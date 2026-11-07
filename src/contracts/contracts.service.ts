@@ -149,9 +149,9 @@ private async resolve(
   }
 
   /** Locks the contract's parents in canonical order before create/update. */
-  private async lockContractParents(tx: Prisma.TransactionClient, hostelId: string, residentId: string): Promise<void> {
-    await this.locks.lockHostel(tx, hostelId);
-    await this.locks.lockResident(tx, residentId);
+  private async lockContractParents(tx: Prisma.TransactionClient, organizationId: string, hostelId: string, residentId: string): Promise<void> {
+    await this.locks.lockHostel(tx, hostelId, organizationId);
+    await this.locks.lockResident(tx, residentId, organizationId);
   }
 
   /** Rejects activation when the resident already has an overlapping ACTIVE contract. */
@@ -192,7 +192,7 @@ private async resolve(
     return this.idempotency.runAtomic<ReturnType<typeof toStayContractDto>>(
       { organizationId, key: idempotencyKey, endpoint: CREATE_ENDPOINT, userId, requestHash, statusCode: 201 },
       async (tx) => {
-        await this.lockContractParents(tx, dto.hostelId, dto.residentId);
+        await this.lockContractParents(tx, organizationId, dto.hostelId, dto.residentId);
         const { rentAmount, snapshot } = await this.resolve(tx, organizationId, dto);
         try {
           const contract = await tx.stayContract.create({
@@ -245,8 +245,8 @@ async update(organizationId: string, contractId: string, expectedVersion: number
         );
       }
 
-      await this.lockContractParents(tx, existing.hostelId, existing.residentId);
-      await this.locks.lockContract(tx, contractId);
+      await this.lockContractParents(tx, organizationId, existing.hostelId, existing.residentId);
+      await this.locks.lockContract(tx, contractId, organizationId);
       const { rentAmount, snapshot } = await this.resolve(tx, organizationId, dto);
 
       // Compare-and-swap update guarded by both status (DRAFT) and version.
@@ -284,9 +284,9 @@ async update(organizationId: string, contractId: string, expectedVersion: number
       // Lock in canonical order. Hostel/resident are immutable once created, so
       // the ids read above are stable; the contract is locked last so the
       // authoritative re-read below observes any concurrent update/terminate.
-      await this.locks.lockHostel(tx, contract.hostelId);
-      await this.locks.lockResident(tx, contract.residentId);
-      await this.locks.lockContract(tx, contractId);
+      await this.locks.lockHostel(tx, contract.hostelId, organizationId);
+      await this.locks.lockResident(tx, contract.residentId, organizationId);
+      await this.locks.lockContract(tx, contractId, organizationId);
 
       // Authoritative re-read AFTER acquiring the locks: never base the
       // activation decision (status, range, parents) on the pre-lock snapshot.
@@ -361,7 +361,7 @@ async update(organizationId: string, contractId: string, expectedVersion: number
         }
 
         // Serialize against a concurrent activate (which also locks the contract).
-        await this.locks.lockContract(tx, contractId);
+        await this.locks.lockContract(tx, contractId, organizationId);
 
         // CAS on DRAFT + version so a concurrent activate cannot be silently
         // terminated mid-flight.
@@ -396,9 +396,9 @@ async update(organizationId: string, contractId: string, expectedVersion: number
         });
         if (!initial) throw AppError.notFound('Contract not found');
 
-        await this.locks.lockHostel(tx, initial.hostelId);
-        await this.locks.lockResident(tx, initial.residentId);
-        await this.locks.lockContract(tx, contractId);
+        await this.locks.lockHostel(tx, initial.hostelId, organizationId);
+        await this.locks.lockResident(tx, initial.residentId, organizationId);
+        await this.locks.lockContract(tx, contractId, organizationId);
 
         const contract = await tx.stayContract.findFirst({
           where: { id: contractId, organizationId },

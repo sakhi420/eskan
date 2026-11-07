@@ -588,3 +588,13 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 - جزئیات: `docs/project/m2-preflight-clone-report.md`.
 - آزمون destructive روی clone اجرا نشد (طبق دستور).
 - پوشش Package اضافه شد: package→hostel (org)، contract→package (org)، contract.hostel vs package.hostel و orphanها؛ روی clone همه ۰ (۱۹ package و ۷ contract←package پاک).
+## M-2 — پیاده‌سازی مرحلهٔ اول + Rehearsal — 2026-11-07
+- **مجوز:** پیاده‌سازی و Rehearsal روی دیتابیس‌های ایزوله؛ بدون تغییر `eskan_dev`/Staging/Production و بدون Merge.
+- **Schema:** ۱۲ کلید UNIQUE tenant/resident-scoped + `PaymentAllocation.organization_id/resident_id` + رابطه‌های composite.
+- **Migration:** `20261107120000_m2_tenant_resident_composite_integrity` — preflight قبل از DDL، ۱۲ کلید UNIQUE، backfill + swap PaymentAllocation، ۱۷ composite FK، ۲ تریگر Package/Hostel. BEGIN/COMMIT تراکنشی.
+- **LockService:** `lockForUpdate(tx, entity, id, organizationId)` اجباری + `lockGlobal` برای global؛ همهٔ Call Siteها اصلاح شدند.
+- **تست‌ها:** `test-m2-migration.cjs` (۴۱/۴۱)، `lock.service.spec.ts` (۶ unit)، `lock-tenant-isolation.integration-spec.ts` (۳ integration)، به‌روزرسانی `test-m1-migration.cjs`/`test-m2-preflight-detection.cjs` و اصلاح `preflight-m2.cjs`.
+- **Rehearsal روی Clone:** از `eskan_preflight_clone_20261107` (دست‌نخورده) یک Clone جدید ساخته و M-2 اعمال شد؛ preflight بعدی `cross_org=0 / cross_resident=0 / cross_hostel=0 / orphan=0` و **۱۲/۱۲ PRESENT**. Clone اصلی دست‌نخورده ماند.
+- **تست منفی واقعی:** cross-org/cross-resident → `23503`؛ Package/Hostel → `23514` (تریگر). Rollback با preflight-fail بدون leftover schema.
+- جزئیات: `docs/project/m2-rehearsal-report.md`.
+- **ممنوع مانده:** اعمال روی `eskan_dev`/Staging/Production، Merge PR، شروع M-3 و سرویس‌های مالی.

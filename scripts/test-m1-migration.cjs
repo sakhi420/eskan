@@ -106,7 +106,7 @@ async function scenarioValidBaselineAndChecks(admin) {
   const { client: c, name } = await freshDb(admin, 'valid');
   try {
     const migrations = readMigrations();
-    const beforeM1 = migrations.filter((m) => m.name !== M1_NAME);
+    const beforeM1 = migrations.filter((m) => m.name < M1_NAME);
     const m1 = migrations.find((m) => m.name === M1_NAME);
 
     for (const m of beforeM1) await c.query(m.sql);
@@ -172,7 +172,7 @@ async function scenarioPreflightFailure(admin) {
   const { client: c, name } = await freshDb(admin, 'preflight');
   try {
     const migrations = readMigrations();
-    for (const m of migrations.filter((m) => m.name !== M1_NAME)) await c.query(m.sql);
+    for (const m of migrations.filter((m) => m.name < M1_NAME)) await c.query(m.sql);
     const m1 = migrations.find((m) => m.name === M1_NAME);
 
     const ids = await seedBase(c);

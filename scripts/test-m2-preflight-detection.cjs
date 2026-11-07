@@ -17,6 +17,10 @@ const { spawnSync } = require('child_process');
 const uuid = () => crypto.randomUUID();
 const MIGDIR = path.join(__dirname, '..', 'prisma', 'migrations');
 const PREFLIGHT = path.join(__dirname, 'preflight-m2.cjs');
+// M-2 enforces the composite FKs the preflight diagnoses, so the detection test
+// must seed anomalies against the schema JUST BEFORE M-2 (post-M-2 the DB would
+// reject the anomalies itself).
+const M2_NAME = '20261107120000_m2_tenant_resident_composite_integrity';
 
 const BASE_URL = process.env.DATABASE_URL || 'postgresql://postgres@127.0.0.1:5432/eskan_dev';
 
@@ -55,7 +59,7 @@ function check(label, cond, detail) {
     const c = new Client({ connectionString: dbUrl });
     try {
       await c.connect();
-      const dirs = fs.readdirSync(MIGDIR, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort();
+      const dirs = fs.readdirSync(MIGDIR, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort().filter((n) => n < M2_NAME);
       for (const n of dirs) await c.query(fs.readFileSync(path.join(MIGDIR, n, 'migration.sql'), 'utf8'));
 
       const orgA = uuid(), orgB = uuid();

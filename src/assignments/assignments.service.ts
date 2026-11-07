@@ -112,11 +112,11 @@ export class AssignmentsService {
       select: { roomId: true, room: { select: { hostelId: true } } },
     });
     if (!bed) throw AppError.notFound('Bed not found');
-    await this.locks.lockHostel(tx, bed.room.hostelId);
-    await this.locks.lockRoom(tx, bed.roomId);
-    await this.locks.lockBed(tx, bedId);
-    await this.locks.lockResident(tx, residentId);
-    await this.locks.lockContract(tx, contractId);
+    await this.locks.lockHostel(tx, bed.room.hostelId, organizationId);
+    await this.locks.lockRoom(tx, bed.roomId, organizationId);
+    await this.locks.lockBed(tx, bedId, organizationId);
+    await this.locks.lockResident(tx, residentId, organizationId);
+    await this.locks.lockContract(tx, contractId, organizationId);
   }
 
   async listByResident(organizationId: string, residentId: string) {
@@ -385,11 +385,11 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
 
         // Serialize against concurrent archive/checkout/terminate before any
         // status re-check. Lock order: Hostel -> Room -> Bed -> Resident -> Contract.
-        await this.locks.lockHostel(tx, dest.room.hostelId);
-        await this.locks.lockRoom(tx, dest.roomId);
-        await this.locks.lockBed(tx, dto.bedId);
-        await this.locks.lockResident(tx, current.residentId);
-        await this.locks.lockContract(tx, current.contractId);
+        await this.locks.lockHostel(tx, dest.room.hostelId, organizationId);
+        await this.locks.lockRoom(tx, dest.roomId, organizationId);
+        await this.locks.lockBed(tx, dto.bedId, organizationId);
+        await this.locks.lockResident(tx, current.residentId, organizationId);
+        await this.locks.lockContract(tx, current.contractId, organizationId);
 
         // Authoritative destination re-read after acquiring the locks.
         const bed = await tx.bed.findFirst({

@@ -81,5 +81,8 @@ jobs:
       - name: M-1 migration & DB constraint tests
         run: node scripts/test-m1-migration.cjs
 
+      - name: M-2 migration & DB constraint tests
+        run: node scripts/test-m2-migration.cjs
+
       - name: M-1 concurrency integration tests
         run: npm run test:integration

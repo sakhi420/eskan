@@ -141,7 +141,7 @@ async function compositeReadiness(client) {
   // table, then check for an EXACT match against each required key (same
   // columns, same order) — a 3-column UNIQUE does not satisfy a 2-column key.
   const res = await client.query(
-    `SELECT t.relname AS tbl, i.relname AS idx, array_agg(a.attname ORDER BY k.ord) AS cols
+    `SELECT t.relname AS tbl, i.relname AS idx, string_agg(a.attname, ',' ORDER BY k.ord) AS cols
      FROM pg_index x
      JOIN pg_class t ON t.oid = x.indrelid
      JOIN pg_class i ON i.oid = x.indexrelid
@@ -152,7 +152,7 @@ async function compositeReadiness(client) {
      ORDER BY t.relname, i.relname`,
   );
   const idxByTable = {};
-  for (const row of res.rows) (idxByTable[row.tbl] ||= []).push({ idx: row.idx, cols: row.cols });
+  for (const row of res.rows) (idxByTable[row.tbl] ||= []).push({ idx: row.idx, cols: row.cols.split(',') });
   return REQUIRED_KEYS.map((req) => {
     const exact = (idxByTable[req.table] || []).filter(
       (ix) => ix.cols.length === req.cols.length && ix.cols.every((c, j) => c === req.cols[j]),

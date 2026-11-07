@@ -355,6 +355,8 @@ export type StayContractOrderByWithRelationInput = {
 export type StayContractWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   organizationId_contractNumber?: Prisma.StayContractOrganizationIdContractNumberCompoundUniqueInput
+  organizationId_id?: Prisma.StayContractOrganizationIdIdCompoundUniqueInput
+  organizationId_residentId_id?: Prisma.StayContractOrganizationIdResidentIdIdCompoundUniqueInput
   AND?: Prisma.StayContractWhereInput | Prisma.StayContractWhereInput[]
   OR?: Prisma.StayContractWhereInput[]
   NOT?: Prisma.StayContractWhereInput | Prisma.StayContractWhereInput[]
@@ -381,7 +383,7 @@ export type StayContractWhereUniqueInput = Prisma.AtLeast<{
   assignments?: Prisma.BedAssignmentListRelationFilter
   charges?: Prisma.ChargeListRelationFilter
   absences?: Prisma.TemporaryAbsenceListRelationFilter
-}, "id" | "organizationId_contractNumber">
+}, "id" | "organizationId_contractNumber" | "organizationId_id" | "organizationId_residentId_id">
 
 export type StayContractOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -597,6 +599,17 @@ export type StayContractScalarRelationFilter = {
 export type StayContractOrganizationIdContractNumberCompoundUniqueInput = {
   organizationId: string
   contractNumber: string
+}
+
+export type StayContractOrganizationIdIdCompoundUniqueInput = {
+  organizationId: string
+  id: string
+}
+
+export type StayContractOrganizationIdResidentIdIdCompoundUniqueInput = {
+  organizationId: string
+  residentId: string
+  id: string
 }
 
 export type StayContractCountOrderByAggregateInput = {

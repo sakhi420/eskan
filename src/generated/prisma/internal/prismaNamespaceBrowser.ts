@@ -381,6 +381,8 @@ export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeo
 
 export const PaymentAllocationScalarFieldEnum = {
   id: 'id',
+  organizationId: 'organizationId',
+  residentId: 'residentId',
   paymentId: 'paymentId',
   chargeId: 'chargeId',
   amount: 'amount',
