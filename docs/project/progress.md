@@ -549,3 +549,16 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
     - Idempotency: `IdempotencyService` فعلی هنوز `stableStringify(payload)` دارد و method/route/path/query/semanticHeaders را نمی‌پوشاند؛ `authRegister` هدر را اعتبارسنجی می‌کند ولی به `AuthService.register` منتقل نمی‌کند (بازیابی فعلی email/password)؛ idempotency ثبت‌نام باید جداگانه طراحی/تست شود (ثبت‌نام پیش از organization و scope فعلی organization-based است).
     - امنیت 404/403: سیاست هدف = عدم عضویت → 404 و نقش ناکافی → 403؛ رفتار فعلی کد = `TenantGuard` → 403 و `PlatformAdminGuard` → 403 (هم‌ترازی، کار مرحلهٔ پیاده‌سازی).
 - **بعدی (فعال):** M-1 (Date + Amount + Contract Checkout/Terminate) ابتدا پیاده‌سازی و اعتبارسنجی می‌شود؛ هم‌زمان inventory و preflight فقط‌خواندنی M-2 آماده می‌شود. Migration/اجرای M-2 پس از تثبیت M-1. M-3 و Charge/Payment/Allocation services و Controllerهای مالی در این مرحله مجاز نیستند.
+## M-1 — Integration Harness (PostgreSQL واقعی) — 2026-11-07
+- **`scripts/test-m1-migration.cjs` (۳۴ چک، همه PASS محلی):**
+  - اعمال migrationهای 1..8 سپس M-1 روی دیتابیس موقتی `eskan_m1_*` (هر سناریو DB جدا می‌سازد و حذف می‌کند؛ هیچ DB پایدار/واقعی دست نمی‌خورد).
+  - حفظ `end_reason = NULL` برای ردیف‌های legacy (بدون بازنویسی تاریخچه).
+  - موفقیت migration روی baseline معتبرِ غیرخالی (org/hostel/room/bed/resident/contract + charges/payments/expenses/deposit/manual_payment مثبت).
+  - شکست preflight و اثبات rollback کامل DDL: پس از خطا، enum `AssignmentEndReason`، ستون `end_reason` و هیچ‌یک از ۸ constraint جدید ساخته نمی‌شوند و داده‌های نامعتبر دست‌نخورده می‌مانند (خطای actionable با `contracts=N charges=N`).
+  - طرد مقادیر صفر/منفی و سرریز int32 مستقیماً توسط CHECKهای PostgreSQL (۲۳۵۱۴ / ۲۲۰۰۳)؛ `deposit=0` مجاز.
+- **`test/integration/m1-concurrency.integration-spec.ts` (۳ تست، همه PASS) + `test/jest-integration.json`:**
+  - checkout هم‌زمان دوگانه با کلید متفاوت → فقط یک transition واقعی (`version=2`) و هر دو خروجی CLOSED.
+  - checkout هم‌زمان با کلید مشترک → replay ایدمپوتنت (یک `idempotency_records`) و تک‌transition.
+  - race میان checkout و transfer روی PostgreSQL واقعی با Prisma/Service واقعی (بدون mock): هر ترتیبی که برنده شود، قرارداد CLOSED و هیچ assignment فعال/legacy-NULL باقی نمی‌ماند؛ تاریخ‌ها/`endReason` درست.
+- **سیاست Idempotency:** فعلی `IDEMPOTENCY_RETENTION_DAYS = 30` (انقضای ۳۰روزه، نه دائمی). سازگاری آن با Offline Outbox قابل صف باید جداگانه تصمیم شود.
+- npm scripts جدید: `test:integration` و `test:migration`؛ هر دو به CI اضافه شدند.
