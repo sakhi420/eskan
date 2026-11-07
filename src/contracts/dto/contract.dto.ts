@@ -1,7 +1,7 @@
 import { IsEnum, IsOptional, IsString, IsUUID, MaxLength, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { BillingCycle } from '../../generated/prisma/enums';
-import { MoneyDto } from '../../common/money/money.dto';
+import { MoneyDto, NonNegativeMoneyDto } from '../../common/money/money.dto';
 import { PackageComponentDto } from '../../packages/dto/package.dto';
 import { IsDateOnly } from '../../common/validation/is-date-only.decorator';
 
@@ -29,8 +29,8 @@ export class ContractDto {
 
   @IsOptional()
   @ValidateNested()
-  @Type(() => MoneyDto)
-  deposit?: MoneyDto;
+  @Type(() => NonNegativeMoneyDto)
+  deposit?: NonNegativeMoneyDto;
 
   @IsOptional()
   @IsUUID()

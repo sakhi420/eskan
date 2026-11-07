@@ -55,6 +55,13 @@ enum AssignmentStatus {
   ENDED
 }
 
+enum AssignmentEndReason {
+  CHECKOUT
+  TRANSFER
+  TERMINATE
+  MANUAL_END
+}
+
 enum ChargeType {
   RENT
   UTILITY
@@ -479,6 +486,7 @@ model BedAssignment {
   status         AssignmentStatus @default(ACTIVE)
   startDate      DateTime         @map("start_date") @db.Date
   endDate        DateTime?        @map("end_date") @db.Date
+  endReason      AssignmentEndReason? @map("end_reason")
   createdAt      DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt      DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
 

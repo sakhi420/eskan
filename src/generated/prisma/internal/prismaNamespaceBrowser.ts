@@ -323,6 +323,7 @@ export const BedAssignmentScalarFieldEnum = {
   status: 'status',
   startDate: 'startDate',
   endDate: 'endDate',
+  endReason: 'endReason',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

@@ -2781,6 +2781,7 @@ export const BedAssignmentScalarFieldEnum = {
   status: 'status',
   startDate: 'startDate',
   endDate: 'endDate',
+  endReason: 'endReason',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -3312,6 +3313,20 @@ export type EnumAssignmentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<
  * Reference to a field of type 'AssignmentStatus[]'
  */
 export type ListEnumAssignmentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AssignmentStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'AssignmentEndReason'
+ */
+export type EnumAssignmentEndReasonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AssignmentEndReason'>
+    
+
+
+/**
+ * Reference to a field of type 'AssignmentEndReason[]'
+ */
+export type ListEnumAssignmentEndReasonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AssignmentEndReason[]'>
     
 
 

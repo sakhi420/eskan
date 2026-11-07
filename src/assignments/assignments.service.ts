@@ -5,19 +5,19 @@ import { AppError } from '../common/errors/app-error';
 import { ErrorCode } from '../common/errors/error-codes';
 import { IdempotencyService } from '../common/idempotency/idempotency.service';
 import { LockService } from '../common/concurrency/lock.service';
-import { businessTodayForOrg, toDateOnly as toBusinessDateOnly } from '../common/date/business-date';
-import { ArchiveStatus, AssignmentStatus, BedStatus, ContractStatus, MaintenanceStatus, ResidentStatus } from '../generated/prisma/enums';
+import { businessTodayForOrg, exclusiveEndForInclusiveLastDay, toDateOnly as toBusinessDateOnly } from '../common/date/business-date';
+import { ArchiveStatus, AssignmentEndReason, AssignmentStatus, BedStatus, ContractStatus, MaintenanceStatus, ResidentStatus } from '../generated/prisma/enums';
 import { BedAssignmentDto } from './dto/assignment.dto';
 import { TransferDto } from './dto/transfer.dto';
 
 const ASSIGNMENT_SELECT = {
   id: true, version: true, organizationId: true, bedId: true, residentId: true, contractId: true,
-  status: true, startDate: true, endDate: true, createdAt: true, updatedAt: true,
+  status: true, startDate: true, endDate: true, endReason: true, createdAt: true, updatedAt: true,
 } as const;
 
 interface AssignmentRow {
   id: string; version: number; organizationId: string; bedId: string; residentId: string; contractId: string;
-  status: AssignmentStatus; startDate: Date; endDate: Date | null; createdAt: Date; updatedAt: Date;
+  status: AssignmentStatus; startDate: Date; endDate: Date | null; endReason: AssignmentEndReason | null; createdAt: Date; updatedAt: Date;
 }
 
 function toISODate(value: Date | string | null): string | null {
@@ -32,7 +32,7 @@ function toAssignmentDto(row: AssignmentRow) {
   return {
     id: row.id, version: row.version, organizationId: row.organizationId,
     bedId: row.bedId, residentId: row.residentId, contractId: row.contractId,
-    status: row.status, startDate: toISODate(row.startDate), endDate: toISODate(row.endDate),
+    status: row.status, startDate: toISODate(row.startDate), endDate: toISODate(row.endDate), endReason: row.endReason,
     createdAt: row.createdAt.toISOString(), updatedAt: row.updatedAt.toISOString(),
   };
 }
@@ -292,16 +292,25 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
       if (!startDate) {
         throw AppError.conflict('Assignment is missing its start date', ErrorCode.BUSINESS_RULE_VIOLATION);
       }
-      if (today <= startDate) {
+      // Same-day end is valid: endDate is exclusive, so ending on the start day
+      // yields endDate = startDay + 1. Only ending strictly before the start is
+      // rejected.
+      if (today < startDate) {
         throw AppError.conflict(
-          'Assignment cannot be ended on or before its start date',
+          'Assignment cannot be ended before its start date',
           ErrorCode.BUSINESS_RULE_VIOLATION,
         );
       }
+      const exclusiveEnd = exclusiveEndForInclusiveLastDay(today);
 
       const result = await tx.bedAssignment.updateMany({
         where: { id: assignmentId, organizationId, status: AssignmentStatus.ACTIVE },
-        data: { status: AssignmentStatus.ENDED, endDate: toBusinessDateOnly(today), version: { increment: 1 } },
+        data: {
+          status: AssignmentStatus.ENDED,
+          endDate: toBusinessDateOnly(exclusiveEnd),
+          endReason: AssignmentEndReason.MANUAL_END,
+          version: { increment: 1 },
+        },
       });
       if (result.count === 0) {
         throw AppError.conflict('Assignment was modified concurrently; refresh and retry', ErrorCode.RESOURCE_VERSION_CONFLICT);
@@ -415,7 +424,7 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
       // CAS: end the current assignment only if still ACTIVE and unmodified.
         const endedResult = await tx.bedAssignment.updateMany({
           where: { id: assignmentId, organizationId, status: AssignmentStatus.ACTIVE, version: current.version },
-          data: { status: AssignmentStatus.ENDED, endDate: transitionStart, version: { increment: 1 } },
+          data: { status: AssignmentStatus.ENDED, endDate: transitionStart, endReason: AssignmentEndReason.TRANSFER, version: { increment: 1 } },
         });
         if (endedResult.count === 0) {
           throw AppError.conflict('Assignment was modified concurrently; refresh and retry', ErrorCode.RESOURCE_VERSION_CONFLICT);

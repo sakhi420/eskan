@@ -81,6 +81,16 @@ export const AssignmentStatus = {
 export type AssignmentStatus = (typeof AssignmentStatus)[keyof typeof AssignmentStatus]
 
 
+export const AssignmentEndReason = {
+  CHECKOUT: 'CHECKOUT',
+  TRANSFER: 'TRANSFER',
+  TERMINATE: 'TERMINATE',
+  MANUAL_END: 'MANUAL_END'
+} as const
+
+export type AssignmentEndReason = (typeof AssignmentEndReason)[keyof typeof AssignmentEndReason]
+
+
 export const ChargeType = {
   RENT: 'RENT',
   UTILITY: 'UTILITY',
