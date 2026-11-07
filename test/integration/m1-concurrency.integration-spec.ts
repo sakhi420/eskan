@@ -20,11 +20,21 @@ function withDatabase(dbName: string): string {
 // Fail-closed guard: this harness creates/drops a throwaway database, so it
 // must never be pointed at a non-local (production/shared) PostgreSQL server.
 function assertLocalTestHost(): void {
-  const host = new URL(BASE_URL).hostname;
-  if (!['localhost', '127.0.0.1', '::1'].includes(host) && process.env.ESKAN_TEST_DB_ALLOW !== '1') {
+  let host = '';
+  let db = '';
+  try {
+    const u = new URL(BASE_URL);
+    host = u.hostname;
+    db = decodeURIComponent(u.pathname.replace(/^\//, ''));
+  } catch {
+    /* keep empty */
+  }
+  const okHost = ['localhost', '127.0.0.1', '::1'].includes(host);
+  const okDb = ['eskan_dev', 'eskan_test', 'eskan_testing'].includes(db);
+  if ((!okHost || !okDb) && process.env.ESKAN_TEST_DB_ALLOW !== '1') {
     throw new Error(
-      `REFUSED: integration harness creates/drops a throwaway DB; host "${host}" is not local. ` +
-        `Set ESKAN_TEST_DB_ALLOW=1 only for an explicitly sanctioned test server.`,
+      `REFUSED: integration harness creates/drops a throwaway DB; host="${host}" db="${db}" is not a local ` +
+        `dev/test database. Set ESKAN_TEST_DB_ALLOW=1 only for an explicitly sanctioned test server.`,
     );
   }
 }

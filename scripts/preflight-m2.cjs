@@ -61,12 +61,15 @@ const CROSS_ORG_CHECKS = [
   { id: 'deposit.resident', label: 'Deposit -> Resident       (org must match)', sql: `SELECT dt.id FROM deposit_transactions dt JOIN residents r ON r.id = dt.resident_id WHERE dt.organization_id <> r.organization_id` },
   { id: 'expense.hostel', label: 'Expense -> Hostel          (org must match)', sql: `SELECT e.id FROM expenses e JOIN hostels h ON h.id = e.hostel_id WHERE e.organization_id <> h.organization_id` },
   { id: 'allocation.org', label: 'Allocation: payment.org vs charge.org', sql: `SELECT pa.payment_id AS id_a, pa.charge_id AS id_b FROM payment_allocations pa JOIN payments p ON p.id = pa.payment_id JOIN charges c ON c.id = pa.charge_id WHERE p.organization_id <> c.organization_id` },
+  { id: 'absence.contract', label: 'Absence -> Contract       (org must match)', sql: `SELECT ta.id FROM temporary_absences ta JOIN stay_contracts sc ON sc.id = ta.contract_id WHERE ta.organization_id <> sc.organization_id` },
+  { id: 'absence.resident', label: 'Absence -> Resident      (org must match)', sql: `SELECT ta.id FROM temporary_absences ta JOIN residents r ON r.id = ta.resident_id WHERE ta.organization_id <> r.organization_id` },
 ];
 
 const CROSS_RESIDENT_CHECKS = [
   { id: 'assignment.contract', label: 'Assignment: resident vs its contract resident', sql: `SELECT ba.id FROM bed_assignments ba JOIN stay_contracts sc ON sc.id = ba.contract_id WHERE ba.resident_id <> sc.resident_id` },
   { id: 'charge.contract', label: 'Charge: resident vs its contract resident', sql: `SELECT c.id FROM charges c JOIN stay_contracts sc ON sc.id = c.contract_id WHERE c.resident_id <> sc.resident_id` },
   { id: 'allocation.resident', label: 'Allocation: payment.resident vs charge.resident', sql: `SELECT pa.payment_id AS id_a, pa.charge_id AS id_b FROM payment_allocations pa JOIN payments p ON p.id = pa.payment_id JOIN charges c ON c.id = pa.charge_id WHERE p.resident_id <> c.resident_id` },
+  { id: 'absence.contract', label: 'Absence: resident vs its contract resident', sql: `SELECT ta.id FROM temporary_absences ta JOIN stay_contracts sc ON sc.id = ta.contract_id WHERE ta.resident_id <> sc.resident_id` },
 ];
 
 const ORPHAN_CHECKS = [
@@ -83,9 +86,27 @@ const ORPHAN_CHECKS = [
   { id: 'deposit.resident', label: 'Deposit without Resident', sql: `SELECT dt.id FROM deposit_transactions dt LEFT JOIN residents r ON r.id = dt.resident_id WHERE r.id IS NULL` },
   { id: 'allocation.payment', label: 'Allocation without Payment', sql: `SELECT pa.charge_id AS id FROM payment_allocations pa LEFT JOIN payments p ON p.id = pa.payment_id WHERE p.id IS NULL` },
   { id: 'allocation.charge', label: 'Allocation without Charge', sql: `SELECT pa.payment_id AS id FROM payment_allocations pa LEFT JOIN charges c ON c.id = pa.charge_id WHERE c.id IS NULL` },
+  { id: 'absence.resident', label: 'Absence without Resident', sql: `SELECT ta.id FROM temporary_absences ta LEFT JOIN residents r ON r.id = ta.resident_id WHERE r.id IS NULL` },
+  { id: 'absence.contract', label: 'Absence without Contract', sql: `SELECT ta.id FROM temporary_absences ta LEFT JOIN stay_contracts sc ON sc.id = ta.contract_id WHERE sc.id IS NULL` },
 ];
 
-const COMPOSITE_PARENTS = ['hostels', 'rooms', 'beds', 'residents', 'stay_contracts'];
+// Required tenant-scoped unique keys (prerequisites for composite FKs). Each key
+// must exist on the parent table EXACTLY (same columns, same order) before a
+// composite FK can reference it. Sourced from docs/project/phase-9-engineering-plan.md.
+const REQUIRED_KEYS = [
+  { table: 'hostels', cols: ['organization_id', 'id'] },
+  { table: 'rooms', cols: ['organization_id', 'id'] },
+  { table: 'beds', cols: ['organization_id', 'id'] },
+  { table: 'residents', cols: ['organization_id', 'id'] },
+  { table: 'stay_contracts', cols: ['organization_id', 'id'] },
+  { table: 'stay_contracts', cols: ['organization_id', 'resident_id', 'id'] },
+  { table: 'charges', cols: ['organization_id', 'id'] },
+  { table: 'charges', cols: ['organization_id', 'resident_id', 'id'] },
+  { table: 'payments', cols: ['organization_id', 'id'] },
+  { table: 'payments', cols: ['organization_id', 'resident_id', 'id'] },
+  { table: 'temporary_absences', cols: ['organization_id', 'id'] },
+  { table: 'temporary_absences', cols: ['organization_id', 'resident_id', 'id'] },
+];
 
 function sample(r) {
   if (r.id_a && r.id_b) return `${r.id_a} / ${r.id_b}`;
@@ -102,16 +123,28 @@ async function runChecks(client, checks) {
 }
 
 async function compositeReadiness(client) {
-  const out = [];
-  for (const tbl of COMPOSITE_PARENTS) {
-    const res = await client.query(
-      `SELECT conname, contype, pg_get_constraintdef(oid) AS def FROM pg_constraint WHERE conrelid = $1::regclass AND contype IN ('p','u') ORDER BY conname`,
-      [tbl],
+  // Enumerate the ordered column list of every unique (non-partial) index per
+  // table, then check for an EXACT match against each required key (same
+  // columns, same order) — a 3-column UNIQUE does not satisfy a 2-column key.
+  const res = await client.query(
+    `SELECT t.relname AS tbl, i.relname AS idx, array_agg(a.attname ORDER BY k.ord) AS cols
+     FROM pg_index x
+     JOIN pg_class t ON t.oid = x.indrelid
+     JOIN pg_class i ON i.oid = x.indexrelid
+     CROSS JOIN LATERAL unnest(x.indkey) WITH ORDINALITY AS k(attnum, ord)
+     JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = k.attnum
+     WHERE x.indisunique AND x.indpred IS NULL AND k.ord <= (x.indnkeyatts)::bigint
+     GROUP BY t.relname, i.relname
+     ORDER BY t.relname, i.relname`,
+  );
+  const idxByTable = {};
+  for (const row of res.rows) (idxByTable[row.tbl] ||= []).push({ idx: row.idx, cols: row.cols });
+  return REQUIRED_KEYS.map((req) => {
+    const exact = (idxByTable[req.table] || []).filter(
+      (ix) => ix.cols.length === req.cols.length && ix.cols.every((c, j) => c === req.cols[j]),
     );
-    const hasOrgId = res.rows.some((r) => r.def.includes('organization_id') && /\bid\b/.test(r.def));
-    out.push({ table: tbl, ok: hasOrgId, constraints: res.rows.map((r) => `${r.conname}: ${r.def}`) });
-  }
-  return out;
+    return { table: req.table, key: req.cols.join(', '), ok: exact.length > 0, matchedBy: exact.map((ix) => ix.idx) };
+  });
 }
 
 function printGroup(title, rows) {
@@ -146,10 +179,9 @@ function printGroup(title, rows) {
     const totalCrossRes = printGroup('Cross-resident mismatches', crossRes);
     const totalOrphan = printGroup('Orphans / missing parents (FK-enforced, expect 0)', orphan);
 
-    console.log('## Composite-key readiness (parent needs UNIQUE(organization_id, id) for composite FKs)');
+    console.log('## Composite-key readiness (required UNIQUE keys for tenant-scoped composite FKs)');
     for (const c of composite) {
-      console.log(`- ${c.table.padEnd(16)} UNIQUE(org,id)? ${c.ok ? 'YES' : 'NO'}`);
-      for (const con of c.constraints) console.log(`    ${con}`);
+      console.log(`- ${c.table.padEnd(18)} (${c.key}) ${c.ok ? 'PRESENT' : 'MISSING'}${c.ok ? '  via ' + c.matchedBy.join(', ') : ''}`);
     }
     console.log('');
 
@@ -157,7 +189,12 @@ function printGroup(title, rows) {
     console.log(`cross_org_mismatches:        ${totalCrossOrg}`);
     console.log(`cross_resident_mismatches:   ${totalCrossRes}`);
     console.log(`orphan_rows:                 ${totalOrphan}`);
-    console.log(`parents missing UNIQUE(org,id): ${composite.filter((c) => !c.ok).length}/${composite.length}`);
+    console.log(`missing required UNIQUE keys: ${composite.filter((c) => !c.ok).length}/${composite.length}`);
+
+    if (process.argv.includes('--strict') && (totalCrossOrg > 0 || totalCrossRes > 0 || totalOrphan > 0)) {
+      console.error(`STRICT: anomalies detected (cross_org=${totalCrossOrg}, cross_resident=${totalCrossRes}, orphan=${totalOrphan}); failing.`);
+      process.exitCode = 1;
+    }
   } finally {
     await client.end().catch(() => {});
   }

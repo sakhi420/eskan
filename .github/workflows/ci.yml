@@ -59,6 +59,11 @@ jobs:
       - name: Apply migrations
         run: npx prisma migrate deploy
 
+      - name: M-2 preflight (read-only, strict = clean baseline)
+        run: node scripts/preflight-m2.cjs --strict
+        env:
+          PREFLIGHT_ALLOW: "1"
+
       - name: E2E smoke tests
         run: npm run test:e2e
 

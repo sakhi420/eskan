@@ -574,5 +574,8 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 - وضعیت: **M-2 در فاز پیش‌بررسی خواندنی**؛ فقط SELECT، فقط روی clone/دیتابیس آزمایشی throwaway.
 - ابزار: `scripts/preflight-m2.cjs` (guard fail-closed + `BEGIN TRANSACTION READ ONLY`).
 - گزارش کامل: `docs/project/m2-preflight-report.md`.
-- نتیجهٔ کلیدی: cross-org=۵، cross-resident=۲، orphan=۰ (FK-enforced)، و هر ۵ جدول والد بدون `UNIQUE(organization_id, id)` (پیش‌نیاز composite-FK).
+- نتیجهٔ کلیدی (demo مصنوعی — نه دیتابیس واقعی): cross-org=۸، cross-resident=۳ (شامل TemporaryAbsence)، orphan=۰ (FK-enforced)، و **۱۲/۱۲ کلید UNIQUE موردنیاز** (۲ و ۳ ستونه) غایب‌اند.
+- تکمیل پوشش پس از بازبینی مالک: TemporaryAbsence (cross-org/resident + orphan)؛ کلیدهای سه‌ستونی `(organization_id, resident_id, id)` روی stay_contracts/charges/payments/temporary_absences؛ تشخیص دقیق UNIQUE (تطبیق مجموعه و ترتیب ستون‌ها، نه صرف وجود `organization_id`/`id`).
+- CI اکنون مرحلهٔ `preflight-m2.cjs --strict` (baseline پاک روی `eskan_dev` خالی) دارد؛ guard در برابر Port-Forwarding با بررسی نام دیتابیس مبنا (allowlist) تقویت شد.
+- **قبل از هر migration باید همین ابزار روی clone واقعی دیتابیس مبنای توسعه اجرا شود** (اعداد demo، وضعیت واقعی نیستند).
 - هیچ DDL/DML/migration/backfill، FK/index، تغییر PaymentAllocation/LockService، کد production یا OpenAPI انجام نشد. M-3 و سرویس‌های مالی مجاز نیستند. قبل از هر migration/schema تغییر، مجوز جداگانه لازم است.

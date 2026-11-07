@@ -36,12 +36,18 @@ function adminUrl() {
 // Fail-closed guard: this script creates/drops throwaway test databases, so it
 // must never be pointed at a non-local (production/shared) PostgreSQL server.
 function assertLocalTestHost() {
-  const host = new URL(BASE_URL).hostname;
-  if (!['localhost', '127.0.0.1', '::1'].includes(host) && process.env.ESKAN_TEST_DB_ALLOW !== '1') {
+  let host = '', db = '';
+  try {
+    const u = new URL(BASE_URL);
+    host = u.hostname;
+    db = decodeURIComponent(u.pathname.replace(/^\//, ''));
+  } catch {}
+  const okHost = ['localhost', '127.0.0.1', '::1'].includes(host);
+  const okDb = ['eskan_dev', 'eskan_test', 'eskan_testing'].includes(db);
+  if ((!okHost || !okDb) && process.env.ESKAN_TEST_DB_ALLOW !== '1') {
     console.error(
-      `REFUSED: this script creates/drops throwaway (eskan_m1_*) databases. Host "${host}" is not local; ` +
-        `only run against a local/dev test PostgreSQL server. Set ESKAN_TEST_DB_ALLOW=1 to override ` +
-        `for an explicitly sanctioned test server.`,
+      `REFUSED: this script creates/drops throwaway (eskan_m1_*) databases. host="${host}" db="${db}" is not ` +
+        `a local dev/test database. Set ESKAN_TEST_DB_ALLOW=1 to override for an explicitly sanctioned test server.`,
     );
     process.exit(2);
   }
