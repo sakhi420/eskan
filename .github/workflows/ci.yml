@@ -64,6 +64,17 @@ jobs:
         env:
           PREFLIGHT_ALLOW: "1"
 
+      - name: M-2 preflight detection (seeded cross-tenant anomalies)
+        run: node scripts/test-m2-preflight-detection.cjs
+
+      - name: M-2 preflight guard (fail-closed on non-test DB)
+        run: |
+          set +e
+          DATABASE_URL="postgresql://eskan:eskan_dev_password@localhost:5432/eskan_prod" node scripts/preflight-m2.cjs --strict
+          code=$?
+          set -e
+          if [ "$code" -ne 2 ]; then echo "expected guard exit 2, got $code"; exit 1; fi
+
       - name: E2E smoke tests
         run: npm run test:e2e
 

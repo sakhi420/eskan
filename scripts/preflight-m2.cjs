@@ -63,6 +63,7 @@ const CROSS_ORG_CHECKS = [
   { id: 'allocation.org', label: 'Allocation: payment.org vs charge.org', sql: `SELECT pa.payment_id AS id_a, pa.charge_id AS id_b FROM payment_allocations pa JOIN payments p ON p.id = pa.payment_id JOIN charges c ON c.id = pa.charge_id WHERE p.organization_id <> c.organization_id` },
   { id: 'absence.contract', label: 'Absence -> Contract       (org must match)', sql: `SELECT ta.id FROM temporary_absences ta JOIN stay_contracts sc ON sc.id = ta.contract_id WHERE ta.organization_id <> sc.organization_id` },
   { id: 'absence.resident', label: 'Absence -> Resident      (org must match)', sql: `SELECT ta.id FROM temporary_absences ta JOIN residents r ON r.id = ta.resident_id WHERE ta.organization_id <> r.organization_id` },
+  { id: 'absence.creditCharge', label: 'Absence -> Credit Charge (org must match)', sql: `SELECT ta.id FROM temporary_absences ta JOIN charges c ON c.id = ta.credit_charge_id WHERE ta.organization_id <> c.organization_id` },
 ];
 
 const CROSS_RESIDENT_CHECKS = [
@@ -70,6 +71,7 @@ const CROSS_RESIDENT_CHECKS = [
   { id: 'charge.contract', label: 'Charge: resident vs its contract resident', sql: `SELECT c.id FROM charges c JOIN stay_contracts sc ON sc.id = c.contract_id WHERE c.resident_id <> sc.resident_id` },
   { id: 'allocation.resident', label: 'Allocation: payment.resident vs charge.resident', sql: `SELECT pa.payment_id AS id_a, pa.charge_id AS id_b FROM payment_allocations pa JOIN payments p ON p.id = pa.payment_id JOIN charges c ON c.id = pa.charge_id WHERE p.resident_id <> c.resident_id` },
   { id: 'absence.contract', label: 'Absence: resident vs its contract resident', sql: `SELECT ta.id FROM temporary_absences ta JOIN stay_contracts sc ON sc.id = ta.contract_id WHERE ta.resident_id <> sc.resident_id` },
+  { id: 'absence.creditCharge', label: 'Absence: resident vs its creditCharge resident', sql: `SELECT ta.id FROM temporary_absences ta JOIN charges c ON c.id = ta.credit_charge_id WHERE ta.resident_id <> c.resident_id` },
 ];
 
 const ORPHAN_CHECKS = [
@@ -88,11 +90,15 @@ const ORPHAN_CHECKS = [
   { id: 'allocation.charge', label: 'Allocation without Charge', sql: `SELECT pa.payment_id AS id FROM payment_allocations pa LEFT JOIN charges c ON c.id = pa.charge_id WHERE c.id IS NULL` },
   { id: 'absence.resident', label: 'Absence without Resident', sql: `SELECT ta.id FROM temporary_absences ta LEFT JOIN residents r ON r.id = ta.resident_id WHERE r.id IS NULL` },
   { id: 'absence.contract', label: 'Absence without Contract', sql: `SELECT ta.id FROM temporary_absences ta LEFT JOIN stay_contracts sc ON sc.id = ta.contract_id WHERE sc.id IS NULL` },
+  { id: 'absence.creditCharge', label: 'Absence (creditChargeId set) with missing charge', sql: `SELECT ta.id FROM temporary_absences ta LEFT JOIN charges c ON c.id = ta.credit_charge_id WHERE ta.credit_charge_id IS NOT NULL AND c.id IS NULL` },
 ];
 
 // Required tenant-scoped unique keys (prerequisites for composite FKs). Each key
 // must exist on the parent table EXACTLY (same columns, same order) before a
 // composite FK can reference it. Sourced from docs/project/phase-9-engineering-plan.md.
+// NOTE: temporary_absences only needs the 3-column key — there is no referencing
+// relation that consumes a 2-column (organization_id, id) on it, so that key is
+// intentionally NOT listed as a migration prerequisite.
 const REQUIRED_KEYS = [
   { table: 'hostels', cols: ['organization_id', 'id'] },
   { table: 'rooms', cols: ['organization_id', 'id'] },
@@ -104,7 +110,6 @@ const REQUIRED_KEYS = [
   { table: 'charges', cols: ['organization_id', 'resident_id', 'id'] },
   { table: 'payments', cols: ['organization_id', 'id'] },
   { table: 'payments', cols: ['organization_id', 'resident_id', 'id'] },
-  { table: 'temporary_absences', cols: ['organization_id', 'id'] },
   { table: 'temporary_absences', cols: ['organization_id', 'resident_id', 'id'] },
 ];
 
@@ -133,7 +138,7 @@ async function compositeReadiness(client) {
      JOIN pg_class i ON i.oid = x.indexrelid
      CROSS JOIN LATERAL unnest(x.indkey) WITH ORDINALITY AS k(attnum, ord)
      JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = k.attnum
-     WHERE x.indisunique AND x.indpred IS NULL AND k.ord <= (x.indnkeyatts)::bigint
+     WHERE x.indisunique AND x.indpred IS NULL AND x.indisvalid AND x.indisready AND k.ord <= (x.indnkeyatts)::bigint
      GROUP BY t.relname, i.relname
      ORDER BY t.relname, i.relname`,
   );
