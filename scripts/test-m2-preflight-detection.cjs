@@ -1,12 +1,11 @@
 'use strict';
 // CI detection-regression test for the M-2 read-only preflight.
 //
-// Seeds two INDEPENDENT TemporaryAbsence->creditCharge anomalies into a throwaway
-// DB and asserts the preflight detects each one separately:
-//   - record A: org mismatch only   (absence.org != charge.org,  resident equal)
-//   - record B: resident mismatch only (absence.resident != charge.resident, org equal)
-// then runs `preflight-m2.cjs --strict` and asserts exit 1 + the two creditCharge
-// lines each count exactly 1. Exits 0 on success.
+// Seeds independent anomalies (TemporaryAbsence->creditCharge AND
+// AccommodationPackage relations) into a throwaway DB and asserts the preflight
+// detects each one separately (org vs resident vs hostel), then runs
+// `preflight-m2.cjs --strict` and asserts exit 1 + each affected check line
+// counts exactly 1. Exits 0 on success.
 //
 // Cleanup (DROP DATABASE + close connections) is in a finally block so it runs
 // even when an assertion or SQL error fails the test.
@@ -78,6 +77,21 @@ function check(label, cond, detail) {
       await c.query(`INSERT INTO charges (id, organization_id, resident_id, type, amount, period_start, period_end, due_date, updated_at) VALUES ($1,$2,$3,'RENT',600,'2020-01-01','2020-01-31','2020-01-01',now())`, [chargeA, orgA, resA]);
       const user = uuid();
       await c.query(`INSERT INTO users (id, email, password_hash, full_name, created_at, updated_at) VALUES ($1,'detect@example.com','x','Test User',now(),now())`, [user]);
+
+      // --- AccommodationPackage integrity anomalies ---
+      const hostA2 = uuid();
+      await c.query(`INSERT INTO hostels (id, organization_id, name, updated_at) VALUES ($1,$2,'HA2',now())`, [hostA2, orgA]);
+      const pkgOrgMis = uuid();
+      await c.query(`INSERT INTO accommodation_packages (id, organization_id, hostel_id, name, created_at, updated_at) VALUES ($1,$2,$3,'PKG-X',now(),now())`, [pkgOrgMis, orgB, hostA]);
+      const pkgOrgB = uuid();
+      await c.query(`INSERT INTO accommodation_packages (id, organization_id, name, created_at, updated_at) VALUES ($1,$2,'PKG-B',now(),now())`, [pkgOrgB, orgB]);
+      const pkgHostelA2 = uuid();
+      await c.query(`INSERT INTO accommodation_packages (id, organization_id, hostel_id, name, created_at, updated_at) VALUES ($1,$2,$3,'PKG-H',now(),now())`, [pkgHostelA2, orgA, hostA2]);
+      const contractPkg = uuid();
+      await c.query(`INSERT INTO stay_contracts (id, organization_id, hostel_id, resident_id, package_id, contract_number, status, start_date, rent_amount, updated_at) VALUES ($1,$2,$3,$4,$5,'CNTP1','DRAFT','2020-01-01',5000,now())`, [contractPkg, orgA, hostA, resA, pkgOrgB]);
+      const contractPkgHostel = uuid();
+      await c.query(`INSERT INTO stay_contracts (id, organization_id, hostel_id, resident_id, package_id, contract_number, status, start_date, rent_amount, updated_at) VALUES ($1,$2,$3,$4,$5,'CNTP2','DRAFT','2020-01-01',5000,now())`, [contractPkgHostel, orgA, hostA, resA2, pkgHostelA2]);
+
       // record A: absence orgA/resA -> creditCharge orgB/resA (org mismatch only)
       await c.query(`INSERT INTO temporary_absences (id, organization_id, resident_id, contract_id, credit_charge_id, status, planned_departure_date, expected_return_date, requested_by_user_id, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,'REQUESTED','2020-02-01','2020-02-15',$6,now(),now())`, [uuid(), orgA, resA, contractA, chargeB, user]);
       // record B: absence orgA/resA2 -> creditCharge orgA/resA (resident mismatch only)
@@ -89,6 +103,9 @@ function check(label, cond, detail) {
       check('strict mode exits 1 on anomalies', r.status === 1, `status=${r.status}`);
       check('cross-org creditCharge detected (org-only record)', /Absence -> Credit Charge\s+\(org must match\)\s+count=1/.test(stdout));
       check('cross-resident creditCharge detected (resident-only record)', /creditCharge resident\s+count=1/.test(stdout));
+      check('package->hostel org mismatch detected', /Package -> Hostel\s+\(org must match\)\s+count=1/.test(stdout));
+      check('contract->package org mismatch detected', /Contract -> Package\s+\(org must match\)\s+count=1/.test(stdout));
+      check('contract vs package hostel mismatch detected', /Contract hostel vs its package hostel\s+count=1/.test(stdout));
       console.log('M-2 preflight detection test passed');
     } finally {
       await c.end().catch(() => {});

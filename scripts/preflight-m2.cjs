@@ -64,6 +64,8 @@ const CROSS_ORG_CHECKS = [
   { id: 'absence.contract', label: 'Absence -> Contract       (org must match)', sql: `SELECT ta.id FROM temporary_absences ta JOIN stay_contracts sc ON sc.id = ta.contract_id WHERE ta.organization_id <> sc.organization_id` },
   { id: 'absence.resident', label: 'Absence -> Resident      (org must match)', sql: `SELECT ta.id FROM temporary_absences ta JOIN residents r ON r.id = ta.resident_id WHERE ta.organization_id <> r.organization_id` },
   { id: 'absence.creditCharge', label: 'Absence -> Credit Charge (org must match)', sql: `SELECT ta.id FROM temporary_absences ta JOIN charges c ON c.id = ta.credit_charge_id WHERE ta.organization_id <> c.organization_id` },
+  { id: 'package.hostel', label: 'Package -> Hostel         (org must match)', sql: `SELECT p.id FROM accommodation_packages p JOIN hostels h ON h.id = p.hostel_id WHERE p.organization_id <> h.organization_id` },
+  { id: 'contract.package', label: 'Contract -> Package       (org must match)', sql: `SELECT sc.id FROM stay_contracts sc JOIN accommodation_packages ap ON ap.id = sc.package_id WHERE sc.organization_id <> ap.organization_id` },
 ];
 
 const CROSS_RESIDENT_CHECKS = [
@@ -72,6 +74,10 @@ const CROSS_RESIDENT_CHECKS = [
   { id: 'allocation.resident', label: 'Allocation: payment.resident vs charge.resident', sql: `SELECT pa.payment_id AS id_a, pa.charge_id AS id_b FROM payment_allocations pa JOIN payments p ON p.id = pa.payment_id JOIN charges c ON c.id = pa.charge_id WHERE p.resident_id <> c.resident_id` },
   { id: 'absence.contract', label: 'Absence: resident vs its contract resident', sql: `SELECT ta.id FROM temporary_absences ta JOIN stay_contracts sc ON sc.id = ta.contract_id WHERE ta.resident_id <> sc.resident_id` },
   { id: 'absence.creditCharge', label: 'Absence: resident vs its creditCharge resident', sql: `SELECT ta.id FROM temporary_absences ta JOIN charges c ON c.id = ta.credit_charge_id WHERE ta.resident_id <> c.resident_id` },
+];
+
+const CROSS_HOSTEL_CHECKS = [
+  { id: 'contract.package.hostel', label: 'Contract hostel vs its package hostel', sql: `SELECT sc.id FROM stay_contracts sc JOIN accommodation_packages ap ON ap.id = sc.package_id WHERE ap.hostel_id IS NOT NULL AND sc.hostel_id <> ap.hostel_id` },
 ];
 
 const ORPHAN_CHECKS = [
@@ -91,6 +97,8 @@ const ORPHAN_CHECKS = [
   { id: 'absence.resident', label: 'Absence without Resident', sql: `SELECT ta.id FROM temporary_absences ta LEFT JOIN residents r ON r.id = ta.resident_id WHERE r.id IS NULL` },
   { id: 'absence.contract', label: 'Absence without Contract', sql: `SELECT ta.id FROM temporary_absences ta LEFT JOIN stay_contracts sc ON sc.id = ta.contract_id WHERE sc.id IS NULL` },
   { id: 'absence.creditCharge', label: 'Absence (creditChargeId set) with missing charge', sql: `SELECT ta.id FROM temporary_absences ta LEFT JOIN charges c ON c.id = ta.credit_charge_id WHERE ta.credit_charge_id IS NOT NULL AND c.id IS NULL` },
+  { id: 'package.hostel', label: 'Package (hostelId set) with missing hostel', sql: `SELECT p.id FROM accommodation_packages p LEFT JOIN hostels h ON h.id = p.hostel_id WHERE p.hostel_id IS NOT NULL AND h.id IS NULL` },
+  { id: 'contract.package', label: 'Contract (packageId set) with missing package', sql: `SELECT sc.id FROM stay_contracts sc LEFT JOIN accommodation_packages ap ON ap.id = sc.package_id WHERE sc.package_id IS NOT NULL AND ap.id IS NULL` },
 ];
 
 // Required tenant-scoped unique keys (prerequisites for composite FKs). Each key
@@ -103,6 +111,7 @@ const REQUIRED_KEYS = [
   { table: 'hostels', cols: ['organization_id', 'id'] },
   { table: 'rooms', cols: ['organization_id', 'id'] },
   { table: 'beds', cols: ['organization_id', 'id'] },
+  { table: 'accommodation_packages', cols: ['organization_id', 'id'] },
   { table: 'residents', cols: ['organization_id', 'id'] },
   { table: 'stay_contracts', cols: ['organization_id', 'id'] },
   { table: 'stay_contracts', cols: ['organization_id', 'resident_id', 'id'] },
@@ -171,6 +180,7 @@ function printGroup(title, rows) {
     await client.query('BEGIN TRANSACTION READ ONLY');
     const crossOrg = await runChecks(client, CROSS_ORG_CHECKS);
     const crossRes = await runChecks(client, CROSS_RESIDENT_CHECKS);
+    const crossHostel = await runChecks(client, CROSS_HOSTEL_CHECKS);
     const orphan = await runChecks(client, ORPHAN_CHECKS);
     const composite = await compositeReadiness(client);
     await client.query('ROLLBACK');
@@ -182,6 +192,7 @@ function printGroup(title, rows) {
 
     const totalCrossOrg = printGroup('Cross-organization mismatches (child.org != parent.org)', crossOrg);
     const totalCrossRes = printGroup('Cross-resident mismatches', crossRes);
+    const totalCrossHostel = printGroup('Cross-hostel mismatches (contract.hostel vs package.hostel)', crossHostel);
     const totalOrphan = printGroup('Orphans / missing parents (FK-enforced, expect 0)', orphan);
 
     console.log('## Composite-key readiness (required UNIQUE keys for tenant-scoped composite FKs)');
@@ -193,11 +204,12 @@ function printGroup(title, rows) {
     console.log('## Summary');
     console.log(`cross_org_mismatches:        ${totalCrossOrg}`);
     console.log(`cross_resident_mismatches:   ${totalCrossRes}`);
+    console.log(`cross_hostel_mismatches:     ${totalCrossHostel}`);
     console.log(`orphan_rows:                 ${totalOrphan}`);
     console.log(`missing required UNIQUE keys: ${composite.filter((c) => !c.ok).length}/${composite.length}`);
 
-    if (process.argv.includes('--strict') && (totalCrossOrg > 0 || totalCrossRes > 0 || totalOrphan > 0)) {
-      console.error(`STRICT: anomalies detected (cross_org=${totalCrossOrg}, cross_resident=${totalCrossRes}, orphan=${totalOrphan}); failing.`);
+    if (process.argv.includes('--strict') && (totalCrossOrg > 0 || totalCrossRes > 0 || totalCrossHostel > 0 || totalOrphan > 0)) {
+      console.error(`STRICT: anomalies detected (cross_org=${totalCrossOrg}, cross_resident=${totalCrossRes}, cross_hostel=${totalCrossHostel}, orphan=${totalOrphan}); failing.`);
       process.exitCode = 1;
     }
   } finally {

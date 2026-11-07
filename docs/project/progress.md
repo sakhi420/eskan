@@ -582,8 +582,9 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 - هیچ DDL/DML/migration/backfill، FK/index، تغییر PaymentAllocation/LockService، کد production یا OpenAPI انجام نشد. M-3 و سرویس‌های مالی مجاز نیستند. قبل از هر migration/schema تغییر، مجوز جداگانه لازم است.
 ## M-2 — Preflight روی Clone واقعی — 2026-11-07
 - Clone: `eskan_preflight_clone_20261107` از `eskan_dev` (محلی، `CREATE DATABASE ... TEMPLATE eskan_dev`)، ساخته‌شده در `2026-11-07T16:34:38Z`.
-- نتیجه (فقط `node scripts/preflight-m2.cjs --strict`): **cross_org=0، cross_resident=0، orphan=0**؛ کلیدهای composite همچنان ۱۱/۱۱ MISSING (وضعیت schema، نه خطای داده).
-- دادهٔ منبع: org=72, residents=84, stay_contracts=90, bed_assignments=72؛ جدول‌های مالی و temporary_absences خالی (۰).
+- نتیجه (فقط `node scripts/preflight-m2.cjs --strict`): **cross_org=0، cross_resident=0، cross_hostel=0، orphan=0**؛ کلیدهای composite همچنان ۱۲/۱۲ MISSING (وضعیت schema، نه خطای داده).
+- دادهٔ منبع: org=72, residents=84, stay_contracts=90, bed_assignments=72، accommodation_packages=19 (57 components)، contracts_with_package=7؛ جدول‌های مالی و temporary_absences خالی (۰).
 - تفسیر: دادهٔ موجودِ لایهٔ اقامت پاک است → migration بدون backfill ممکن؛ مسیر مالی/absence چون خالی است باید بعد از ورود دادهٔ واقعی دوباره preflight شود.
 - جزئیات: `docs/project/m2-preflight-clone-report.md`.
 - آزمون destructive روی clone اجرا نشد (طبق دستور).
+- پوشش Package اضافه شد: package→hostel (org)، contract→package (org)، contract.hostel vs package.hostel و orphanها؛ روی clone همه ۰ (۱۹ package و ۷ contract←package پاک).
