@@ -1016,7 +1016,6 @@ export type PaymentCreateWithoutResidentInput = {
 export type PaymentUncheckedCreateWithoutResidentInput = {
   id?: string
   version?: number
-  organizationId: string
   status?: $Enums.LedgerEntryStatus
   amount: number
   method: $Enums.PaymentMethod
@@ -1327,7 +1326,6 @@ export type PaymentUncheckedUpdateManyWithoutReversedByInput = {
 export type PaymentCreateManyResidentInput = {
   id?: string
   version?: number
-  organizationId: string
   status?: $Enums.LedgerEntryStatus
   amount: number
   method: $Enums.PaymentMethod
@@ -1368,7 +1366,6 @@ export type PaymentUpdateWithoutResidentInput = {
 export type PaymentUncheckedUpdateWithoutResidentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   method?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
@@ -1389,7 +1386,6 @@ export type PaymentUncheckedUpdateWithoutResidentInput = {
 export type PaymentUncheckedUpdateManyWithoutResidentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   method?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod

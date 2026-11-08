@@ -598,3 +598,29 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 - **تست منفی واقعی:** cross-org/cross-resident → `23503`؛ Package/Hostel → `23514` (تریگر). Rollback با preflight-fail بدون leftover schema.
 - جزئیات: `docs/project/m2-rehearsal-report.md`.
 - **ممنوع مانده:** اعمال روی `eskan_dev`/Staging/Production، Merge PR، شروع M-3 و سرویس‌های مالی.
+## M-2 Remediation — بازبینی مهندسی نهایی — 2026-11-08
+پس از بازبینی مستقل مالک، سه نقص اصلی (Parity، Trigger concurrency، Child index) + دو مورد تکمیلی (PaymentAllocation unique، onDelete) برطرف شد:
+
+### ۱. Prisma Schema / Database parity (نقص ۱)
+- **همهٔ ۱۹ composite FK اکنون در Prisma Schema مدل شده‌اند** (روابط composite). روابط nullable با دو رابطه مدل شدند: رابطهٔ optional با `onDelete: SetNull` (FK تک‌ستونهٔ SET NULL) + یک رابطهٔ named tenant با `onDelete: NoAction` (FK مرکب scope) — دقیقاً همان چیزی که `prisma migrate diff` تولید می‌کند.
+- FKهای تک‌ستونهٔ روابط NOT‌NULL حذف و با composite جایگزین شدند؛ نام قیدها و `ON UPDATE CASCADE` کاملاً با خروجی Prisma هم‌خوان است.
+- **تست تکرارپذیر:** `scripts/test-m2-prisma-parity.cjs` — یک دیتابیس throwaway را migrate می‌کند و `prisma migrate diff` اجرا می‌کند؛ خروجی باید **خالی** باشد (اثبات می‌کند Migration بعدی Prisma هیچ composite FK/کلید/indexی را حذف نمی‌کند). خروجی: **empty migration → 5/5 PASS**.
+
+### ۲. Trigger concurrency (نقص ۲)
+- `enforce_stay_contract_package_hostel` اکنون package را با `SELECT ... FOR UPDATE` می‌خواند تا insert/update قرارداد با تغییر `hostel_id` بسته روی همان ردیف serialize شود.
+- **تست هم‌زمانی واقعی (۲ اتصال):** `scripts/test-m2-package-hostel-concurrency.cjs` — دو ترتیب A (Update Package ← Insert Contract) و B (Insert Contract ← Update Package)؛ در هر دو یک عملیات block شده و با `23514` رد می‌شود و invariant حفظ می‌ماند. **4/4 PASS**.
+- **تست مستقل تریگر دوم** در `test-m2-migration.cjs`: تغییر hostel به مقدار ناسازگار → `23514`؛ تغییر به NULL (جهانی) → مجاز.
+
+### ۳. Child-side FK indexes (نقص ۳)
+- ۱۰ index فرزند برای composite FKها ساخته شد (rooms, beds, stay_contracts.package, bed_assignments, charges, expenses, temporary_absences×۲, payment_allocations×۲). names با Prisma هم‌خوان است.
+
+### ۴. onDelete tests (تکمیلی ب)
+- `test-m2-migration.cjs` حالا رفتار واقعی DELETE را می‌آزماید: SET NULL (package/expense.hostel/charge.contract/absence.creditCharge)، CASCADE (payment→allocation)، RESTRICT (resident و hostel دارای فرزند NOT NULL). **92/92 PASS**.
+
+### ۵. PaymentAllocation unique (تکمیلی الف)
+- `@@unique([paymentId, chargeId])` حذف شد (مطابق phase-9-engineering-plan.md F-19)؛ از migration هم حذف شد (پیش‌نیاز AllocationRelease در M-3b). این قید دیگر به فاز مالی منتقل نمی‌شود.
+
+### وضعیت نهایی
+- `test-m2-migration.cjs`: **92/92**؛ `test-m2-package-hostel-concurrency.cjs`: **4/4**؛ `test-m2-prisma-parity.cjs`: **5/5**.
+- `prisma validate` سبز؛ `npm run build` سبز؛ `prisma migrate diff` خالی (parity کامل).
+- هیچ تغییری روی `eskan_dev`/Staging/Production و Clone اصلی انجام نشد. Merge/شروع M-3 هنوز ممنوع.

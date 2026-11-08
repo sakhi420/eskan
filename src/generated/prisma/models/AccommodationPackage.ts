@@ -250,8 +250,10 @@ export type AccommodationPackageWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"AccommodationPackage"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   hostel?: Prisma.XOR<Prisma.HostelNullableScalarRelationFilter, Prisma.HostelWhereInput> | null
+  hostelTenant?: Prisma.XOR<Prisma.HostelNullableScalarRelationFilter, Prisma.HostelWhereInput> | null
   components?: Prisma.AccommodationPackageComponentListRelationFilter
   contracts?: Prisma.StayContractListRelationFilter
+  contractTenants?: Prisma.StayContractListRelationFilter
 }
 
 export type AccommodationPackageOrderByWithRelationInput = {
@@ -266,8 +268,10 @@ export type AccommodationPackageOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
   hostel?: Prisma.HostelOrderByWithRelationInput
+  hostelTenant?: Prisma.HostelOrderByWithRelationInput
   components?: Prisma.AccommodationPackageComponentOrderByRelationAggregateInput
   contracts?: Prisma.StayContractOrderByRelationAggregateInput
+  contractTenants?: Prisma.StayContractOrderByRelationAggregateInput
 }
 
 export type AccommodationPackageWhereUniqueInput = Prisma.AtLeast<{
@@ -286,8 +290,10 @@ export type AccommodationPackageWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"AccommodationPackage"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   hostel?: Prisma.XOR<Prisma.HostelNullableScalarRelationFilter, Prisma.HostelWhereInput> | null
+  hostelTenant?: Prisma.XOR<Prisma.HostelNullableScalarRelationFilter, Prisma.HostelWhereInput> | null
   components?: Prisma.AccommodationPackageComponentListRelationFilter
   contracts?: Prisma.StayContractListRelationFilter
+  contractTenants?: Prisma.StayContractListRelationFilter
 }, "id" | "organizationId_id">
 
 export type AccommodationPackageOrderByWithAggregationInput = {
@@ -332,8 +338,10 @@ export type AccommodationPackageCreateInput = {
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutPackagesInput
   hostel?: Prisma.HostelCreateNestedOneWithoutPackagesInput
+  hostelTenant?: Prisma.HostelCreateNestedOneWithoutPackageTenantsInput
   components?: Prisma.AccommodationPackageComponentCreateNestedManyWithoutPackageInput
   contracts?: Prisma.StayContractCreateNestedManyWithoutPackageInput
+  contractTenants?: Prisma.StayContractCreateNestedManyWithoutPackageTenantInput
 }
 
 export type AccommodationPackageUncheckedCreateInput = {
@@ -348,6 +356,7 @@ export type AccommodationPackageUncheckedCreateInput = {
   updatedAt?: Date | string
   components?: Prisma.AccommodationPackageComponentUncheckedCreateNestedManyWithoutPackageInput
   contracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutPackageInput
+  contractTenants?: Prisma.StayContractUncheckedCreateNestedManyWithoutPackageTenantInput
 }
 
 export type AccommodationPackageUpdateInput = {
@@ -360,8 +369,10 @@ export type AccommodationPackageUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutPackagesNestedInput
   hostel?: Prisma.HostelUpdateOneWithoutPackagesNestedInput
+  hostelTenant?: Prisma.HostelUpdateOneWithoutPackageTenantsNestedInput
   components?: Prisma.AccommodationPackageComponentUpdateManyWithoutPackageNestedInput
   contracts?: Prisma.StayContractUpdateManyWithoutPackageNestedInput
+  contractTenants?: Prisma.StayContractUpdateManyWithoutPackageTenantNestedInput
 }
 
 export type AccommodationPackageUncheckedUpdateInput = {
@@ -376,6 +387,7 @@ export type AccommodationPackageUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   components?: Prisma.AccommodationPackageComponentUncheckedUpdateManyWithoutPackageNestedInput
   contracts?: Prisma.StayContractUncheckedUpdateManyWithoutPackageNestedInput
+  contractTenants?: Prisma.StayContractUncheckedUpdateManyWithoutPackageTenantNestedInput
 }
 
 export type AccommodationPackageCreateManyInput = {
@@ -530,10 +542,24 @@ export type AccommodationPackageCreateNestedManyWithoutHostelInput = {
   connect?: Prisma.AccommodationPackageWhereUniqueInput | Prisma.AccommodationPackageWhereUniqueInput[]
 }
 
+export type AccommodationPackageCreateNestedManyWithoutHostelTenantInput = {
+  create?: Prisma.XOR<Prisma.AccommodationPackageCreateWithoutHostelTenantInput, Prisma.AccommodationPackageUncheckedCreateWithoutHostelTenantInput> | Prisma.AccommodationPackageCreateWithoutHostelTenantInput[] | Prisma.AccommodationPackageUncheckedCreateWithoutHostelTenantInput[]
+  connectOrCreate?: Prisma.AccommodationPackageCreateOrConnectWithoutHostelTenantInput | Prisma.AccommodationPackageCreateOrConnectWithoutHostelTenantInput[]
+  createMany?: Prisma.AccommodationPackageCreateManyHostelTenantInputEnvelope
+  connect?: Prisma.AccommodationPackageWhereUniqueInput | Prisma.AccommodationPackageWhereUniqueInput[]
+}
+
 export type AccommodationPackageUncheckedCreateNestedManyWithoutHostelInput = {
   create?: Prisma.XOR<Prisma.AccommodationPackageCreateWithoutHostelInput, Prisma.AccommodationPackageUncheckedCreateWithoutHostelInput> | Prisma.AccommodationPackageCreateWithoutHostelInput[] | Prisma.AccommodationPackageUncheckedCreateWithoutHostelInput[]
   connectOrCreate?: Prisma.AccommodationPackageCreateOrConnectWithoutHostelInput | Prisma.AccommodationPackageCreateOrConnectWithoutHostelInput[]
   createMany?: Prisma.AccommodationPackageCreateManyHostelInputEnvelope
+  connect?: Prisma.AccommodationPackageWhereUniqueInput | Prisma.AccommodationPackageWhereUniqueInput[]
+}
+
+export type AccommodationPackageUncheckedCreateNestedManyWithoutHostelTenantInput = {
+  create?: Prisma.XOR<Prisma.AccommodationPackageCreateWithoutHostelTenantInput, Prisma.AccommodationPackageUncheckedCreateWithoutHostelTenantInput> | Prisma.AccommodationPackageCreateWithoutHostelTenantInput[] | Prisma.AccommodationPackageUncheckedCreateWithoutHostelTenantInput[]
+  connectOrCreate?: Prisma.AccommodationPackageCreateOrConnectWithoutHostelTenantInput | Prisma.AccommodationPackageCreateOrConnectWithoutHostelTenantInput[]
+  createMany?: Prisma.AccommodationPackageCreateManyHostelTenantInputEnvelope
   connect?: Prisma.AccommodationPackageWhereUniqueInput | Prisma.AccommodationPackageWhereUniqueInput[]
 }
 
@@ -551,6 +577,20 @@ export type AccommodationPackageUpdateManyWithoutHostelNestedInput = {
   deleteMany?: Prisma.AccommodationPackageScalarWhereInput | Prisma.AccommodationPackageScalarWhereInput[]
 }
 
+export type AccommodationPackageUpdateManyWithoutHostelTenantNestedInput = {
+  create?: Prisma.XOR<Prisma.AccommodationPackageCreateWithoutHostelTenantInput, Prisma.AccommodationPackageUncheckedCreateWithoutHostelTenantInput> | Prisma.AccommodationPackageCreateWithoutHostelTenantInput[] | Prisma.AccommodationPackageUncheckedCreateWithoutHostelTenantInput[]
+  connectOrCreate?: Prisma.AccommodationPackageCreateOrConnectWithoutHostelTenantInput | Prisma.AccommodationPackageCreateOrConnectWithoutHostelTenantInput[]
+  upsert?: Prisma.AccommodationPackageUpsertWithWhereUniqueWithoutHostelTenantInput | Prisma.AccommodationPackageUpsertWithWhereUniqueWithoutHostelTenantInput[]
+  createMany?: Prisma.AccommodationPackageCreateManyHostelTenantInputEnvelope
+  set?: Prisma.AccommodationPackageWhereUniqueInput | Prisma.AccommodationPackageWhereUniqueInput[]
+  disconnect?: Prisma.AccommodationPackageWhereUniqueInput | Prisma.AccommodationPackageWhereUniqueInput[]
+  delete?: Prisma.AccommodationPackageWhereUniqueInput | Prisma.AccommodationPackageWhereUniqueInput[]
+  connect?: Prisma.AccommodationPackageWhereUniqueInput | Prisma.AccommodationPackageWhereUniqueInput[]
+  update?: Prisma.AccommodationPackageUpdateWithWhereUniqueWithoutHostelTenantInput | Prisma.AccommodationPackageUpdateWithWhereUniqueWithoutHostelTenantInput[]
+  updateMany?: Prisma.AccommodationPackageUpdateManyWithWhereWithoutHostelTenantInput | Prisma.AccommodationPackageUpdateManyWithWhereWithoutHostelTenantInput[]
+  deleteMany?: Prisma.AccommodationPackageScalarWhereInput | Prisma.AccommodationPackageScalarWhereInput[]
+}
+
 export type AccommodationPackageUncheckedUpdateManyWithoutHostelNestedInput = {
   create?: Prisma.XOR<Prisma.AccommodationPackageCreateWithoutHostelInput, Prisma.AccommodationPackageUncheckedCreateWithoutHostelInput> | Prisma.AccommodationPackageCreateWithoutHostelInput[] | Prisma.AccommodationPackageUncheckedCreateWithoutHostelInput[]
   connectOrCreate?: Prisma.AccommodationPackageCreateOrConnectWithoutHostelInput | Prisma.AccommodationPackageCreateOrConnectWithoutHostelInput[]
@@ -562,6 +602,20 @@ export type AccommodationPackageUncheckedUpdateManyWithoutHostelNestedInput = {
   connect?: Prisma.AccommodationPackageWhereUniqueInput | Prisma.AccommodationPackageWhereUniqueInput[]
   update?: Prisma.AccommodationPackageUpdateWithWhereUniqueWithoutHostelInput | Prisma.AccommodationPackageUpdateWithWhereUniqueWithoutHostelInput[]
   updateMany?: Prisma.AccommodationPackageUpdateManyWithWhereWithoutHostelInput | Prisma.AccommodationPackageUpdateManyWithWhereWithoutHostelInput[]
+  deleteMany?: Prisma.AccommodationPackageScalarWhereInput | Prisma.AccommodationPackageScalarWhereInput[]
+}
+
+export type AccommodationPackageUncheckedUpdateManyWithoutHostelTenantNestedInput = {
+  create?: Prisma.XOR<Prisma.AccommodationPackageCreateWithoutHostelTenantInput, Prisma.AccommodationPackageUncheckedCreateWithoutHostelTenantInput> | Prisma.AccommodationPackageCreateWithoutHostelTenantInput[] | Prisma.AccommodationPackageUncheckedCreateWithoutHostelTenantInput[]
+  connectOrCreate?: Prisma.AccommodationPackageCreateOrConnectWithoutHostelTenantInput | Prisma.AccommodationPackageCreateOrConnectWithoutHostelTenantInput[]
+  upsert?: Prisma.AccommodationPackageUpsertWithWhereUniqueWithoutHostelTenantInput | Prisma.AccommodationPackageUpsertWithWhereUniqueWithoutHostelTenantInput[]
+  createMany?: Prisma.AccommodationPackageCreateManyHostelTenantInputEnvelope
+  set?: Prisma.AccommodationPackageWhereUniqueInput | Prisma.AccommodationPackageWhereUniqueInput[]
+  disconnect?: Prisma.AccommodationPackageWhereUniqueInput | Prisma.AccommodationPackageWhereUniqueInput[]
+  delete?: Prisma.AccommodationPackageWhereUniqueInput | Prisma.AccommodationPackageWhereUniqueInput[]
+  connect?: Prisma.AccommodationPackageWhereUniqueInput | Prisma.AccommodationPackageWhereUniqueInput[]
+  update?: Prisma.AccommodationPackageUpdateWithWhereUniqueWithoutHostelTenantInput | Prisma.AccommodationPackageUpdateWithWhereUniqueWithoutHostelTenantInput[]
+  updateMany?: Prisma.AccommodationPackageUpdateManyWithWhereWithoutHostelTenantInput | Prisma.AccommodationPackageUpdateManyWithWhereWithoutHostelTenantInput[]
   deleteMany?: Prisma.AccommodationPackageScalarWhereInput | Prisma.AccommodationPackageScalarWhereInput[]
 }
 
@@ -585,6 +639,12 @@ export type AccommodationPackageCreateNestedOneWithoutContractsInput = {
   connect?: Prisma.AccommodationPackageWhereUniqueInput
 }
 
+export type AccommodationPackageCreateNestedOneWithoutContractTenantsInput = {
+  create?: Prisma.XOR<Prisma.AccommodationPackageCreateWithoutContractTenantsInput, Prisma.AccommodationPackageUncheckedCreateWithoutContractTenantsInput>
+  connectOrCreate?: Prisma.AccommodationPackageCreateOrConnectWithoutContractTenantsInput
+  connect?: Prisma.AccommodationPackageWhereUniqueInput
+}
+
 export type AccommodationPackageUpdateOneWithoutContractsNestedInput = {
   create?: Prisma.XOR<Prisma.AccommodationPackageCreateWithoutContractsInput, Prisma.AccommodationPackageUncheckedCreateWithoutContractsInput>
   connectOrCreate?: Prisma.AccommodationPackageCreateOrConnectWithoutContractsInput
@@ -593,6 +653,16 @@ export type AccommodationPackageUpdateOneWithoutContractsNestedInput = {
   delete?: Prisma.AccommodationPackageWhereInput | boolean
   connect?: Prisma.AccommodationPackageWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.AccommodationPackageUpdateToOneWithWhereWithoutContractsInput, Prisma.AccommodationPackageUpdateWithoutContractsInput>, Prisma.AccommodationPackageUncheckedUpdateWithoutContractsInput>
+}
+
+export type AccommodationPackageUpdateOneWithoutContractTenantsNestedInput = {
+  create?: Prisma.XOR<Prisma.AccommodationPackageCreateWithoutContractTenantsInput, Prisma.AccommodationPackageUncheckedCreateWithoutContractTenantsInput>
+  connectOrCreate?: Prisma.AccommodationPackageCreateOrConnectWithoutContractTenantsInput
+  upsert?: Prisma.AccommodationPackageUpsertWithoutContractTenantsInput
+  disconnect?: Prisma.AccommodationPackageWhereInput | boolean
+  delete?: Prisma.AccommodationPackageWhereInput | boolean
+  connect?: Prisma.AccommodationPackageWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AccommodationPackageUpdateToOneWithWhereWithoutContractTenantsInput, Prisma.AccommodationPackageUpdateWithoutContractTenantsInput>, Prisma.AccommodationPackageUncheckedUpdateWithoutContractTenantsInput>
 }
 
 export type AccommodationPackageCreateWithoutOrganizationInput = {
@@ -604,8 +674,10 @@ export type AccommodationPackageCreateWithoutOrganizationInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   hostel?: Prisma.HostelCreateNestedOneWithoutPackagesInput
+  hostelTenant?: Prisma.HostelCreateNestedOneWithoutPackageTenantsInput
   components?: Prisma.AccommodationPackageComponentCreateNestedManyWithoutPackageInput
   contracts?: Prisma.StayContractCreateNestedManyWithoutPackageInput
+  contractTenants?: Prisma.StayContractCreateNestedManyWithoutPackageTenantInput
 }
 
 export type AccommodationPackageUncheckedCreateWithoutOrganizationInput = {
@@ -619,6 +691,7 @@ export type AccommodationPackageUncheckedCreateWithoutOrganizationInput = {
   updatedAt?: Date | string
   components?: Prisma.AccommodationPackageComponentUncheckedCreateNestedManyWithoutPackageInput
   contracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutPackageInput
+  contractTenants?: Prisma.StayContractUncheckedCreateNestedManyWithoutPackageTenantInput
 }
 
 export type AccommodationPackageCreateOrConnectWithoutOrganizationInput = {
@@ -671,8 +744,10 @@ export type AccommodationPackageCreateWithoutHostelInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutPackagesInput
+  hostelTenant?: Prisma.HostelCreateNestedOneWithoutPackageTenantsInput
   components?: Prisma.AccommodationPackageComponentCreateNestedManyWithoutPackageInput
   contracts?: Prisma.StayContractCreateNestedManyWithoutPackageInput
+  contractTenants?: Prisma.StayContractCreateNestedManyWithoutPackageTenantInput
 }
 
 export type AccommodationPackageUncheckedCreateWithoutHostelInput = {
@@ -686,6 +761,7 @@ export type AccommodationPackageUncheckedCreateWithoutHostelInput = {
   updatedAt?: Date | string
   components?: Prisma.AccommodationPackageComponentUncheckedCreateNestedManyWithoutPackageInput
   contracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutPackageInput
+  contractTenants?: Prisma.StayContractUncheckedCreateNestedManyWithoutPackageTenantInput
 }
 
 export type AccommodationPackageCreateOrConnectWithoutHostelInput = {
@@ -695,6 +771,44 @@ export type AccommodationPackageCreateOrConnectWithoutHostelInput = {
 
 export type AccommodationPackageCreateManyHostelInputEnvelope = {
   data: Prisma.AccommodationPackageCreateManyHostelInput | Prisma.AccommodationPackageCreateManyHostelInput[]
+  skipDuplicates?: boolean
+}
+
+export type AccommodationPackageCreateWithoutHostelTenantInput = {
+  id?: string
+  version?: number
+  name: string
+  description?: string | null
+  status?: $Enums.ArchiveStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutPackagesInput
+  hostel?: Prisma.HostelCreateNestedOneWithoutPackagesInput
+  components?: Prisma.AccommodationPackageComponentCreateNestedManyWithoutPackageInput
+  contracts?: Prisma.StayContractCreateNestedManyWithoutPackageInput
+  contractTenants?: Prisma.StayContractCreateNestedManyWithoutPackageTenantInput
+}
+
+export type AccommodationPackageUncheckedCreateWithoutHostelTenantInput = {
+  id?: string
+  version?: number
+  name: string
+  description?: string | null
+  status?: $Enums.ArchiveStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  components?: Prisma.AccommodationPackageComponentUncheckedCreateNestedManyWithoutPackageInput
+  contracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutPackageInput
+  contractTenants?: Prisma.StayContractUncheckedCreateNestedManyWithoutPackageTenantInput
+}
+
+export type AccommodationPackageCreateOrConnectWithoutHostelTenantInput = {
+  where: Prisma.AccommodationPackageWhereUniqueInput
+  create: Prisma.XOR<Prisma.AccommodationPackageCreateWithoutHostelTenantInput, Prisma.AccommodationPackageUncheckedCreateWithoutHostelTenantInput>
+}
+
+export type AccommodationPackageCreateManyHostelTenantInputEnvelope = {
+  data: Prisma.AccommodationPackageCreateManyHostelTenantInput | Prisma.AccommodationPackageCreateManyHostelTenantInput[]
   skipDuplicates?: boolean
 }
 
@@ -714,6 +828,22 @@ export type AccommodationPackageUpdateManyWithWhereWithoutHostelInput = {
   data: Prisma.XOR<Prisma.AccommodationPackageUpdateManyMutationInput, Prisma.AccommodationPackageUncheckedUpdateManyWithoutHostelInput>
 }
 
+export type AccommodationPackageUpsertWithWhereUniqueWithoutHostelTenantInput = {
+  where: Prisma.AccommodationPackageWhereUniqueInput
+  update: Prisma.XOR<Prisma.AccommodationPackageUpdateWithoutHostelTenantInput, Prisma.AccommodationPackageUncheckedUpdateWithoutHostelTenantInput>
+  create: Prisma.XOR<Prisma.AccommodationPackageCreateWithoutHostelTenantInput, Prisma.AccommodationPackageUncheckedCreateWithoutHostelTenantInput>
+}
+
+export type AccommodationPackageUpdateWithWhereUniqueWithoutHostelTenantInput = {
+  where: Prisma.AccommodationPackageWhereUniqueInput
+  data: Prisma.XOR<Prisma.AccommodationPackageUpdateWithoutHostelTenantInput, Prisma.AccommodationPackageUncheckedUpdateWithoutHostelTenantInput>
+}
+
+export type AccommodationPackageUpdateManyWithWhereWithoutHostelTenantInput = {
+  where: Prisma.AccommodationPackageScalarWhereInput
+  data: Prisma.XOR<Prisma.AccommodationPackageUpdateManyMutationInput, Prisma.AccommodationPackageUncheckedUpdateManyWithoutHostelTenantInput>
+}
+
 export type AccommodationPackageCreateWithoutComponentsInput = {
   id?: string
   version?: number
@@ -724,7 +854,9 @@ export type AccommodationPackageCreateWithoutComponentsInput = {
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutPackagesInput
   hostel?: Prisma.HostelCreateNestedOneWithoutPackagesInput
+  hostelTenant?: Prisma.HostelCreateNestedOneWithoutPackageTenantsInput
   contracts?: Prisma.StayContractCreateNestedManyWithoutPackageInput
+  contractTenants?: Prisma.StayContractCreateNestedManyWithoutPackageTenantInput
 }
 
 export type AccommodationPackageUncheckedCreateWithoutComponentsInput = {
@@ -738,6 +870,7 @@ export type AccommodationPackageUncheckedCreateWithoutComponentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   contracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutPackageInput
+  contractTenants?: Prisma.StayContractUncheckedCreateNestedManyWithoutPackageTenantInput
 }
 
 export type AccommodationPackageCreateOrConnectWithoutComponentsInput = {
@@ -766,7 +899,9 @@ export type AccommodationPackageUpdateWithoutComponentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutPackagesNestedInput
   hostel?: Prisma.HostelUpdateOneWithoutPackagesNestedInput
+  hostelTenant?: Prisma.HostelUpdateOneWithoutPackageTenantsNestedInput
   contracts?: Prisma.StayContractUpdateManyWithoutPackageNestedInput
+  contractTenants?: Prisma.StayContractUpdateManyWithoutPackageTenantNestedInput
 }
 
 export type AccommodationPackageUncheckedUpdateWithoutComponentsInput = {
@@ -780,6 +915,7 @@ export type AccommodationPackageUncheckedUpdateWithoutComponentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contracts?: Prisma.StayContractUncheckedUpdateManyWithoutPackageNestedInput
+  contractTenants?: Prisma.StayContractUncheckedUpdateManyWithoutPackageTenantNestedInput
 }
 
 export type AccommodationPackageCreateWithoutContractsInput = {
@@ -792,7 +928,9 @@ export type AccommodationPackageCreateWithoutContractsInput = {
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutPackagesInput
   hostel?: Prisma.HostelCreateNestedOneWithoutPackagesInput
+  hostelTenant?: Prisma.HostelCreateNestedOneWithoutPackageTenantsInput
   components?: Prisma.AccommodationPackageComponentCreateNestedManyWithoutPackageInput
+  contractTenants?: Prisma.StayContractCreateNestedManyWithoutPackageTenantInput
 }
 
 export type AccommodationPackageUncheckedCreateWithoutContractsInput = {
@@ -806,11 +944,46 @@ export type AccommodationPackageUncheckedCreateWithoutContractsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   components?: Prisma.AccommodationPackageComponentUncheckedCreateNestedManyWithoutPackageInput
+  contractTenants?: Prisma.StayContractUncheckedCreateNestedManyWithoutPackageTenantInput
 }
 
 export type AccommodationPackageCreateOrConnectWithoutContractsInput = {
   where: Prisma.AccommodationPackageWhereUniqueInput
   create: Prisma.XOR<Prisma.AccommodationPackageCreateWithoutContractsInput, Prisma.AccommodationPackageUncheckedCreateWithoutContractsInput>
+}
+
+export type AccommodationPackageCreateWithoutContractTenantsInput = {
+  id?: string
+  version?: number
+  name: string
+  description?: string | null
+  status?: $Enums.ArchiveStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutPackagesInput
+  hostel?: Prisma.HostelCreateNestedOneWithoutPackagesInput
+  hostelTenant?: Prisma.HostelCreateNestedOneWithoutPackageTenantsInput
+  components?: Prisma.AccommodationPackageComponentCreateNestedManyWithoutPackageInput
+  contracts?: Prisma.StayContractCreateNestedManyWithoutPackageInput
+}
+
+export type AccommodationPackageUncheckedCreateWithoutContractTenantsInput = {
+  id?: string
+  version?: number
+  organizationId: string
+  hostelId?: string | null
+  name: string
+  description?: string | null
+  status?: $Enums.ArchiveStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  components?: Prisma.AccommodationPackageComponentUncheckedCreateNestedManyWithoutPackageInput
+  contracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutPackageInput
+}
+
+export type AccommodationPackageCreateOrConnectWithoutContractTenantsInput = {
+  where: Prisma.AccommodationPackageWhereUniqueInput
+  create: Prisma.XOR<Prisma.AccommodationPackageCreateWithoutContractTenantsInput, Prisma.AccommodationPackageUncheckedCreateWithoutContractTenantsInput>
 }
 
 export type AccommodationPackageUpsertWithoutContractsInput = {
@@ -834,7 +1007,9 @@ export type AccommodationPackageUpdateWithoutContractsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutPackagesNestedInput
   hostel?: Prisma.HostelUpdateOneWithoutPackagesNestedInput
+  hostelTenant?: Prisma.HostelUpdateOneWithoutPackageTenantsNestedInput
   components?: Prisma.AccommodationPackageComponentUpdateManyWithoutPackageNestedInput
+  contractTenants?: Prisma.StayContractUpdateManyWithoutPackageTenantNestedInput
 }
 
 export type AccommodationPackageUncheckedUpdateWithoutContractsInput = {
@@ -848,6 +1023,47 @@ export type AccommodationPackageUncheckedUpdateWithoutContractsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   components?: Prisma.AccommodationPackageComponentUncheckedUpdateManyWithoutPackageNestedInput
+  contractTenants?: Prisma.StayContractUncheckedUpdateManyWithoutPackageTenantNestedInput
+}
+
+export type AccommodationPackageUpsertWithoutContractTenantsInput = {
+  update: Prisma.XOR<Prisma.AccommodationPackageUpdateWithoutContractTenantsInput, Prisma.AccommodationPackageUncheckedUpdateWithoutContractTenantsInput>
+  create: Prisma.XOR<Prisma.AccommodationPackageCreateWithoutContractTenantsInput, Prisma.AccommodationPackageUncheckedCreateWithoutContractTenantsInput>
+  where?: Prisma.AccommodationPackageWhereInput
+}
+
+export type AccommodationPackageUpdateToOneWithWhereWithoutContractTenantsInput = {
+  where?: Prisma.AccommodationPackageWhereInput
+  data: Prisma.XOR<Prisma.AccommodationPackageUpdateWithoutContractTenantsInput, Prisma.AccommodationPackageUncheckedUpdateWithoutContractTenantsInput>
+}
+
+export type AccommodationPackageUpdateWithoutContractTenantsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutPackagesNestedInput
+  hostel?: Prisma.HostelUpdateOneWithoutPackagesNestedInput
+  hostelTenant?: Prisma.HostelUpdateOneWithoutPackageTenantsNestedInput
+  components?: Prisma.AccommodationPackageComponentUpdateManyWithoutPackageNestedInput
+  contracts?: Prisma.StayContractUpdateManyWithoutPackageNestedInput
+}
+
+export type AccommodationPackageUncheckedUpdateWithoutContractTenantsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  hostelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  components?: Prisma.AccommodationPackageComponentUncheckedUpdateManyWithoutPackageNestedInput
+  contracts?: Prisma.StayContractUncheckedUpdateManyWithoutPackageNestedInput
 }
 
 export type AccommodationPackageCreateManyOrganizationInput = {
@@ -870,8 +1086,10 @@ export type AccommodationPackageUpdateWithoutOrganizationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   hostel?: Prisma.HostelUpdateOneWithoutPackagesNestedInput
+  hostelTenant?: Prisma.HostelUpdateOneWithoutPackageTenantsNestedInput
   components?: Prisma.AccommodationPackageComponentUpdateManyWithoutPackageNestedInput
   contracts?: Prisma.StayContractUpdateManyWithoutPackageNestedInput
+  contractTenants?: Prisma.StayContractUpdateManyWithoutPackageTenantNestedInput
 }
 
 export type AccommodationPackageUncheckedUpdateWithoutOrganizationInput = {
@@ -885,6 +1103,7 @@ export type AccommodationPackageUncheckedUpdateWithoutOrganizationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   components?: Prisma.AccommodationPackageComponentUncheckedUpdateManyWithoutPackageNestedInput
   contracts?: Prisma.StayContractUncheckedUpdateManyWithoutPackageNestedInput
+  contractTenants?: Prisma.StayContractUncheckedUpdateManyWithoutPackageTenantNestedInput
 }
 
 export type AccommodationPackageUncheckedUpdateManyWithoutOrganizationInput = {
@@ -909,6 +1128,16 @@ export type AccommodationPackageCreateManyHostelInput = {
   updatedAt?: Date | string
 }
 
+export type AccommodationPackageCreateManyHostelTenantInput = {
+  id?: string
+  version?: number
+  name: string
+  description?: string | null
+  status?: $Enums.ArchiveStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
 export type AccommodationPackageUpdateWithoutHostelInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
@@ -918,8 +1147,10 @@ export type AccommodationPackageUpdateWithoutHostelInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutPackagesNestedInput
+  hostelTenant?: Prisma.HostelUpdateOneWithoutPackageTenantsNestedInput
   components?: Prisma.AccommodationPackageComponentUpdateManyWithoutPackageNestedInput
   contracts?: Prisma.StayContractUpdateManyWithoutPackageNestedInput
+  contractTenants?: Prisma.StayContractUpdateManyWithoutPackageTenantNestedInput
 }
 
 export type AccommodationPackageUncheckedUpdateWithoutHostelInput = {
@@ -933,12 +1164,51 @@ export type AccommodationPackageUncheckedUpdateWithoutHostelInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   components?: Prisma.AccommodationPackageComponentUncheckedUpdateManyWithoutPackageNestedInput
   contracts?: Prisma.StayContractUncheckedUpdateManyWithoutPackageNestedInput
+  contractTenants?: Prisma.StayContractUncheckedUpdateManyWithoutPackageTenantNestedInput
 }
 
 export type AccommodationPackageUncheckedUpdateManyWithoutHostelInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type AccommodationPackageUpdateWithoutHostelTenantInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutPackagesNestedInput
+  hostel?: Prisma.HostelUpdateOneWithoutPackagesNestedInput
+  components?: Prisma.AccommodationPackageComponentUpdateManyWithoutPackageNestedInput
+  contracts?: Prisma.StayContractUpdateManyWithoutPackageNestedInput
+  contractTenants?: Prisma.StayContractUpdateManyWithoutPackageTenantNestedInput
+}
+
+export type AccommodationPackageUncheckedUpdateWithoutHostelTenantInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  components?: Prisma.AccommodationPackageComponentUncheckedUpdateManyWithoutPackageNestedInput
+  contracts?: Prisma.StayContractUncheckedUpdateManyWithoutPackageNestedInput
+  contractTenants?: Prisma.StayContractUncheckedUpdateManyWithoutPackageTenantNestedInput
+}
+
+export type AccommodationPackageUncheckedUpdateManyWithoutHostelTenantInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumArchiveStatusFieldUpdateOperationsInput | $Enums.ArchiveStatus
@@ -954,11 +1224,13 @@ export type AccommodationPackageUncheckedUpdateManyWithoutHostelInput = {
 export type AccommodationPackageCountOutputType = {
   components: number
   contracts: number
+  contractTenants: number
 }
 
 export type AccommodationPackageCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   components?: boolean | AccommodationPackageCountOutputTypeCountComponentsArgs
   contracts?: boolean | AccommodationPackageCountOutputTypeCountContractsArgs
+  contractTenants?: boolean | AccommodationPackageCountOutputTypeCountContractTenantsArgs
 }
 
 /**
@@ -985,6 +1257,13 @@ export type AccommodationPackageCountOutputTypeCountContractsArgs<ExtArgs extend
   where?: Prisma.StayContractWhereInput
 }
 
+/**
+ * AccommodationPackageCountOutputType without action
+ */
+export type AccommodationPackageCountOutputTypeCountContractTenantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StayContractWhereInput
+}
+
 
 export type AccommodationPackageSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -998,8 +1277,10 @@ export type AccommodationPackageSelect<ExtArgs extends runtime.Types.Extensions.
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   hostel?: boolean | Prisma.AccommodationPackage$hostelArgs<ExtArgs>
+  hostelTenant?: boolean | Prisma.AccommodationPackage$hostelTenantArgs<ExtArgs>
   components?: boolean | Prisma.AccommodationPackage$componentsArgs<ExtArgs>
   contracts?: boolean | Prisma.AccommodationPackage$contractsArgs<ExtArgs>
+  contractTenants?: boolean | Prisma.AccommodationPackage$contractTenantsArgs<ExtArgs>
   _count?: boolean | Prisma.AccommodationPackageCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["accommodationPackage"]>
 
@@ -1015,6 +1296,7 @@ export type AccommodationPackageSelectCreateManyAndReturn<ExtArgs extends runtim
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   hostel?: boolean | Prisma.AccommodationPackage$hostelArgs<ExtArgs>
+  hostelTenant?: boolean | Prisma.AccommodationPackage$hostelTenantArgs<ExtArgs>
 }, ExtArgs["result"]["accommodationPackage"]>
 
 export type AccommodationPackageSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1029,6 +1311,7 @@ export type AccommodationPackageSelectUpdateManyAndReturn<ExtArgs extends runtim
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   hostel?: boolean | Prisma.AccommodationPackage$hostelArgs<ExtArgs>
+  hostelTenant?: boolean | Prisma.AccommodationPackage$hostelTenantArgs<ExtArgs>
 }, ExtArgs["result"]["accommodationPackage"]>
 
 export type AccommodationPackageSelectScalar = {
@@ -1047,17 +1330,21 @@ export type AccommodationPackageOmit<ExtArgs extends runtime.Types.Extensions.In
 export type AccommodationPackageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   hostel?: boolean | Prisma.AccommodationPackage$hostelArgs<ExtArgs>
+  hostelTenant?: boolean | Prisma.AccommodationPackage$hostelTenantArgs<ExtArgs>
   components?: boolean | Prisma.AccommodationPackage$componentsArgs<ExtArgs>
   contracts?: boolean | Prisma.AccommodationPackage$contractsArgs<ExtArgs>
+  contractTenants?: boolean | Prisma.AccommodationPackage$contractTenantsArgs<ExtArgs>
   _count?: boolean | Prisma.AccommodationPackageCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AccommodationPackageIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   hostel?: boolean | Prisma.AccommodationPackage$hostelArgs<ExtArgs>
+  hostelTenant?: boolean | Prisma.AccommodationPackage$hostelTenantArgs<ExtArgs>
 }
 export type AccommodationPackageIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   hostel?: boolean | Prisma.AccommodationPackage$hostelArgs<ExtArgs>
+  hostelTenant?: boolean | Prisma.AccommodationPackage$hostelTenantArgs<ExtArgs>
 }
 
 export type $AccommodationPackagePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1065,8 +1352,10 @@ export type $AccommodationPackagePayload<ExtArgs extends runtime.Types.Extension
   objects: {
     organization: Prisma.$OrganizationPayload<ExtArgs>
     hostel: Prisma.$HostelPayload<ExtArgs> | null
+    hostelTenant: Prisma.$HostelPayload<ExtArgs> | null
     components: Prisma.$AccommodationPackageComponentPayload<ExtArgs>[]
     contracts: Prisma.$StayContractPayload<ExtArgs>[]
+    contractTenants: Prisma.$StayContractPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1474,8 +1763,10 @@ export interface Prisma__AccommodationPackageClient<T, Null = never, ExtArgs ext
   readonly [Symbol.toStringTag]: "PrismaPromise"
   organization<T extends Prisma.OrganizationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrganizationDefaultArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   hostel<T extends Prisma.AccommodationPackage$hostelArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccommodationPackage$hostelArgs<ExtArgs>>): Prisma.Prisma__HostelClient<runtime.Types.Result.GetResult<Prisma.$HostelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  hostelTenant<T extends Prisma.AccommodationPackage$hostelTenantArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccommodationPackage$hostelTenantArgs<ExtArgs>>): Prisma.Prisma__HostelClient<runtime.Types.Result.GetResult<Prisma.$HostelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   components<T extends Prisma.AccommodationPackage$componentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccommodationPackage$componentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccommodationPackageComponentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   contracts<T extends Prisma.AccommodationPackage$contractsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccommodationPackage$contractsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StayContractPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  contractTenants<T extends Prisma.AccommodationPackage$contractTenantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccommodationPackage$contractTenantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StayContractPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1934,6 +2225,25 @@ export type AccommodationPackage$hostelArgs<ExtArgs extends runtime.Types.Extens
 }
 
 /**
+ * AccommodationPackage.hostelTenant
+ */
+export type AccommodationPackage$hostelTenantArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Hostel
+   */
+  select?: Prisma.HostelSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Hostel
+   */
+  omit?: Prisma.HostelOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.HostelInclude<ExtArgs> | null
+  where?: Prisma.HostelWhereInput
+}
+
+/**
  * AccommodationPackage.components
  */
 export type AccommodationPackage$componentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1961,6 +2271,30 @@ export type AccommodationPackage$componentsArgs<ExtArgs extends runtime.Types.Ex
  * AccommodationPackage.contracts
  */
 export type AccommodationPackage$contractsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StayContract
+   */
+  select?: Prisma.StayContractSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StayContract
+   */
+  omit?: Prisma.StayContractOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StayContractInclude<ExtArgs> | null
+  where?: Prisma.StayContractWhereInput
+  orderBy?: Prisma.StayContractOrderByWithRelationInput | Prisma.StayContractOrderByWithRelationInput[]
+  cursor?: Prisma.StayContractWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StayContractScalarFieldEnum | Prisma.StayContractScalarFieldEnum[]
+}
+
+/**
+ * AccommodationPackage.contractTenants
+ */
+export type AccommodationPackage$contractTenantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the StayContract
    */

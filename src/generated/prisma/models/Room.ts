@@ -715,7 +715,6 @@ export type RoomCreateWithoutHostelInput = {
 export type RoomUncheckedCreateWithoutHostelInput = {
   id?: string
   version?: number
-  organizationId: string
   code: string
   floor: number
   notes?: string | null
@@ -881,7 +880,6 @@ export type RoomUncheckedUpdateManyWithoutOrganizationInput = {
 export type RoomCreateManyHostelInput = {
   id?: string
   version?: number
-  organizationId: string
   code: string
   floor: number
   notes?: string | null
@@ -908,7 +906,6 @@ export type RoomUpdateWithoutHostelInput = {
 export type RoomUncheckedUpdateWithoutHostelInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   floor?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -922,7 +919,6 @@ export type RoomUncheckedUpdateWithoutHostelInput = {
 export type RoomUncheckedUpdateManyWithoutHostelInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   floor?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null

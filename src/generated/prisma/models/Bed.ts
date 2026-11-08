@@ -683,7 +683,6 @@ export type BedCreateWithoutRoomInput = {
 export type BedUncheckedCreateWithoutRoomInput = {
   id?: string
   version?: number
-  organizationId: string
   code: string
   notes?: string | null
   maintenanceStatus?: $Enums.MaintenanceStatus
@@ -840,7 +839,6 @@ export type BedUncheckedUpdateManyWithoutOrganizationInput = {
 export type BedCreateManyRoomInput = {
   id?: string
   version?: number
-  organizationId: string
   code: string
   notes?: string | null
   maintenanceStatus?: $Enums.MaintenanceStatus
@@ -865,7 +863,6 @@ export type BedUpdateWithoutRoomInput = {
 export type BedUncheckedUpdateWithoutRoomInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
@@ -878,7 +875,6 @@ export type BedUncheckedUpdateWithoutRoomInput = {
 export type BedUncheckedUpdateManyWithoutRoomInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus

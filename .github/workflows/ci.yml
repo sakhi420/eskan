@@ -84,5 +84,11 @@ jobs:
       - name: M-2 migration & DB constraint tests
         run: node scripts/test-m2-migration.cjs
 
+      - name: M-2 package/hostel concurrency tests
+        run: node scripts/test-m2-package-hostel-concurrency.cjs
+
+      - name: M-2 Prisma parity test (migrate diff empty)
+        run: node scripts/test-m2-prisma-parity.cjs
+
       - name: M-1 concurrency integration tests
         run: npm run test:integration

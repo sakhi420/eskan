@@ -786,7 +786,6 @@ export type BedAssignmentCreateWithoutBedInput = {
 export type BedAssignmentUncheckedCreateWithoutBedInput = {
   id?: string
   version?: number
-  organizationId: string
   residentId: string
   contractId: string
   status?: $Enums.AssignmentStatus
@@ -840,7 +839,6 @@ export type BedAssignmentCreateWithoutResidentInput = {
 export type BedAssignmentUncheckedCreateWithoutResidentInput = {
   id?: string
   version?: number
-  organizationId: string
   bedId: string
   contractId: string
   status?: $Enums.AssignmentStatus
@@ -894,9 +892,7 @@ export type BedAssignmentCreateWithoutContractInput = {
 export type BedAssignmentUncheckedCreateWithoutContractInput = {
   id?: string
   version?: number
-  organizationId: string
   bedId: string
-  residentId: string
   status?: $Enums.AssignmentStatus
   startDate: Date | string
   endDate?: Date | string | null
@@ -990,7 +986,6 @@ export type BedAssignmentUncheckedUpdateManyWithoutOrganizationInput = {
 export type BedAssignmentCreateManyBedInput = {
   id?: string
   version?: number
-  organizationId: string
   residentId: string
   contractId: string
   status?: $Enums.AssignmentStatus
@@ -1018,7 +1013,6 @@ export type BedAssignmentUpdateWithoutBedInput = {
 export type BedAssignmentUncheckedUpdateWithoutBedInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   residentId?: Prisma.StringFieldUpdateOperationsInput | string
   contractId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
@@ -1032,7 +1026,6 @@ export type BedAssignmentUncheckedUpdateWithoutBedInput = {
 export type BedAssignmentUncheckedUpdateManyWithoutBedInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   residentId?: Prisma.StringFieldUpdateOperationsInput | string
   contractId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
@@ -1046,7 +1039,6 @@ export type BedAssignmentUncheckedUpdateManyWithoutBedInput = {
 export type BedAssignmentCreateManyResidentInput = {
   id?: string
   version?: number
-  organizationId: string
   bedId: string
   contractId: string
   status?: $Enums.AssignmentStatus
@@ -1074,7 +1066,6 @@ export type BedAssignmentUpdateWithoutResidentInput = {
 export type BedAssignmentUncheckedUpdateWithoutResidentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   bedId?: Prisma.StringFieldUpdateOperationsInput | string
   contractId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
@@ -1088,7 +1079,6 @@ export type BedAssignmentUncheckedUpdateWithoutResidentInput = {
 export type BedAssignmentUncheckedUpdateManyWithoutResidentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   bedId?: Prisma.StringFieldUpdateOperationsInput | string
   contractId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
@@ -1102,9 +1092,7 @@ export type BedAssignmentUncheckedUpdateManyWithoutResidentInput = {
 export type BedAssignmentCreateManyContractInput = {
   id?: string
   version?: number
-  organizationId: string
   bedId: string
-  residentId: string
   status?: $Enums.AssignmentStatus
   startDate: Date | string
   endDate?: Date | string | null
@@ -1130,9 +1118,7 @@ export type BedAssignmentUpdateWithoutContractInput = {
 export type BedAssignmentUncheckedUpdateWithoutContractInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   bedId?: Prisma.StringFieldUpdateOperationsInput | string
-  residentId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1144,9 +1130,7 @@ export type BedAssignmentUncheckedUpdateWithoutContractInput = {
 export type BedAssignmentUncheckedUpdateManyWithoutContractInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   bedId?: Prisma.StringFieldUpdateOperationsInput | string
-  residentId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null

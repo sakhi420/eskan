@@ -302,6 +302,7 @@ export type ExpenseWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Expense"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   hostel?: Prisma.XOR<Prisma.HostelNullableScalarRelationFilter, Prisma.HostelWhereInput> | null
+  hostelTenant?: Prisma.XOR<Prisma.HostelNullableScalarRelationFilter, Prisma.HostelWhereInput> | null
   reversedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
 
@@ -323,6 +324,7 @@ export type ExpenseOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
   hostel?: Prisma.HostelOrderByWithRelationInput
+  hostelTenant?: Prisma.HostelOrderByWithRelationInput
   reversedBy?: Prisma.UserOrderByWithRelationInput
 }
 
@@ -347,6 +349,7 @@ export type ExpenseWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Expense"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   hostel?: Prisma.XOR<Prisma.HostelNullableScalarRelationFilter, Prisma.HostelWhereInput> | null
+  hostelTenant?: Prisma.XOR<Prisma.HostelNullableScalarRelationFilter, Prisma.HostelWhereInput> | null
   reversedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }, "id">
 
@@ -409,6 +412,7 @@ export type ExpenseCreateInput = {
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutExpensesInput
   hostel?: Prisma.HostelCreateNestedOneWithoutExpensesInput
+  hostelTenant?: Prisma.HostelCreateNestedOneWithoutExpenseTenantsInput
   reversedBy?: Prisma.UserCreateNestedOneWithoutReversedExpensesInput
 }
 
@@ -445,6 +449,7 @@ export type ExpenseUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutExpensesNestedInput
   hostel?: Prisma.HostelUpdateOneWithoutExpensesNestedInput
+  hostelTenant?: Prisma.HostelUpdateOneWithoutExpenseTenantsNestedInput
   reversedBy?: Prisma.UserUpdateOneWithoutReversedExpensesNestedInput
 }
 
@@ -682,10 +687,24 @@ export type ExpenseCreateNestedManyWithoutHostelInput = {
   connect?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
 }
 
+export type ExpenseCreateNestedManyWithoutHostelTenantInput = {
+  create?: Prisma.XOR<Prisma.ExpenseCreateWithoutHostelTenantInput, Prisma.ExpenseUncheckedCreateWithoutHostelTenantInput> | Prisma.ExpenseCreateWithoutHostelTenantInput[] | Prisma.ExpenseUncheckedCreateWithoutHostelTenantInput[]
+  connectOrCreate?: Prisma.ExpenseCreateOrConnectWithoutHostelTenantInput | Prisma.ExpenseCreateOrConnectWithoutHostelTenantInput[]
+  createMany?: Prisma.ExpenseCreateManyHostelTenantInputEnvelope
+  connect?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
+}
+
 export type ExpenseUncheckedCreateNestedManyWithoutHostelInput = {
   create?: Prisma.XOR<Prisma.ExpenseCreateWithoutHostelInput, Prisma.ExpenseUncheckedCreateWithoutHostelInput> | Prisma.ExpenseCreateWithoutHostelInput[] | Prisma.ExpenseUncheckedCreateWithoutHostelInput[]
   connectOrCreate?: Prisma.ExpenseCreateOrConnectWithoutHostelInput | Prisma.ExpenseCreateOrConnectWithoutHostelInput[]
   createMany?: Prisma.ExpenseCreateManyHostelInputEnvelope
+  connect?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
+}
+
+export type ExpenseUncheckedCreateNestedManyWithoutHostelTenantInput = {
+  create?: Prisma.XOR<Prisma.ExpenseCreateWithoutHostelTenantInput, Prisma.ExpenseUncheckedCreateWithoutHostelTenantInput> | Prisma.ExpenseCreateWithoutHostelTenantInput[] | Prisma.ExpenseUncheckedCreateWithoutHostelTenantInput[]
+  connectOrCreate?: Prisma.ExpenseCreateOrConnectWithoutHostelTenantInput | Prisma.ExpenseCreateOrConnectWithoutHostelTenantInput[]
+  createMany?: Prisma.ExpenseCreateManyHostelTenantInputEnvelope
   connect?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
 }
 
@@ -703,6 +722,20 @@ export type ExpenseUpdateManyWithoutHostelNestedInput = {
   deleteMany?: Prisma.ExpenseScalarWhereInput | Prisma.ExpenseScalarWhereInput[]
 }
 
+export type ExpenseUpdateManyWithoutHostelTenantNestedInput = {
+  create?: Prisma.XOR<Prisma.ExpenseCreateWithoutHostelTenantInput, Prisma.ExpenseUncheckedCreateWithoutHostelTenantInput> | Prisma.ExpenseCreateWithoutHostelTenantInput[] | Prisma.ExpenseUncheckedCreateWithoutHostelTenantInput[]
+  connectOrCreate?: Prisma.ExpenseCreateOrConnectWithoutHostelTenantInput | Prisma.ExpenseCreateOrConnectWithoutHostelTenantInput[]
+  upsert?: Prisma.ExpenseUpsertWithWhereUniqueWithoutHostelTenantInput | Prisma.ExpenseUpsertWithWhereUniqueWithoutHostelTenantInput[]
+  createMany?: Prisma.ExpenseCreateManyHostelTenantInputEnvelope
+  set?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
+  disconnect?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
+  delete?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
+  connect?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
+  update?: Prisma.ExpenseUpdateWithWhereUniqueWithoutHostelTenantInput | Prisma.ExpenseUpdateWithWhereUniqueWithoutHostelTenantInput[]
+  updateMany?: Prisma.ExpenseUpdateManyWithWhereWithoutHostelTenantInput | Prisma.ExpenseUpdateManyWithWhereWithoutHostelTenantInput[]
+  deleteMany?: Prisma.ExpenseScalarWhereInput | Prisma.ExpenseScalarWhereInput[]
+}
+
 export type ExpenseUncheckedUpdateManyWithoutHostelNestedInput = {
   create?: Prisma.XOR<Prisma.ExpenseCreateWithoutHostelInput, Prisma.ExpenseUncheckedCreateWithoutHostelInput> | Prisma.ExpenseCreateWithoutHostelInput[] | Prisma.ExpenseUncheckedCreateWithoutHostelInput[]
   connectOrCreate?: Prisma.ExpenseCreateOrConnectWithoutHostelInput | Prisma.ExpenseCreateOrConnectWithoutHostelInput[]
@@ -714,6 +747,20 @@ export type ExpenseUncheckedUpdateManyWithoutHostelNestedInput = {
   connect?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
   update?: Prisma.ExpenseUpdateWithWhereUniqueWithoutHostelInput | Prisma.ExpenseUpdateWithWhereUniqueWithoutHostelInput[]
   updateMany?: Prisma.ExpenseUpdateManyWithWhereWithoutHostelInput | Prisma.ExpenseUpdateManyWithWhereWithoutHostelInput[]
+  deleteMany?: Prisma.ExpenseScalarWhereInput | Prisma.ExpenseScalarWhereInput[]
+}
+
+export type ExpenseUncheckedUpdateManyWithoutHostelTenantNestedInput = {
+  create?: Prisma.XOR<Prisma.ExpenseCreateWithoutHostelTenantInput, Prisma.ExpenseUncheckedCreateWithoutHostelTenantInput> | Prisma.ExpenseCreateWithoutHostelTenantInput[] | Prisma.ExpenseUncheckedCreateWithoutHostelTenantInput[]
+  connectOrCreate?: Prisma.ExpenseCreateOrConnectWithoutHostelTenantInput | Prisma.ExpenseCreateOrConnectWithoutHostelTenantInput[]
+  upsert?: Prisma.ExpenseUpsertWithWhereUniqueWithoutHostelTenantInput | Prisma.ExpenseUpsertWithWhereUniqueWithoutHostelTenantInput[]
+  createMany?: Prisma.ExpenseCreateManyHostelTenantInputEnvelope
+  set?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
+  disconnect?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
+  delete?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
+  connect?: Prisma.ExpenseWhereUniqueInput | Prisma.ExpenseWhereUniqueInput[]
+  update?: Prisma.ExpenseUpdateWithWhereUniqueWithoutHostelTenantInput | Prisma.ExpenseUpdateWithWhereUniqueWithoutHostelTenantInput[]
+  updateMany?: Prisma.ExpenseUpdateManyWithWhereWithoutHostelTenantInput | Prisma.ExpenseUpdateManyWithWhereWithoutHostelTenantInput[]
   deleteMany?: Prisma.ExpenseScalarWhereInput | Prisma.ExpenseScalarWhereInput[]
 }
 
@@ -735,6 +782,7 @@ export type ExpenseCreateWithoutOrganizationInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   hostel?: Prisma.HostelCreateNestedOneWithoutExpensesInput
+  hostelTenant?: Prisma.HostelCreateNestedOneWithoutExpenseTenantsInput
   reversedBy?: Prisma.UserCreateNestedOneWithoutReversedExpensesInput
 }
 
@@ -817,6 +865,7 @@ export type ExpenseCreateWithoutReversedByInput = {
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutExpensesInput
   hostel?: Prisma.HostelCreateNestedOneWithoutExpensesInput
+  hostelTenant?: Prisma.HostelCreateNestedOneWithoutExpenseTenantsInput
 }
 
 export type ExpenseUncheckedCreateWithoutReversedByInput = {
@@ -876,6 +925,7 @@ export type ExpenseCreateWithoutHostelInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutExpensesInput
+  hostelTenant?: Prisma.HostelCreateNestedOneWithoutExpenseTenantsInput
   reversedBy?: Prisma.UserCreateNestedOneWithoutReversedExpensesInput
 }
 
@@ -906,6 +956,50 @@ export type ExpenseCreateManyHostelInputEnvelope = {
   skipDuplicates?: boolean
 }
 
+export type ExpenseCreateWithoutHostelTenantInput = {
+  id?: string
+  version?: number
+  category: string
+  status?: $Enums.LedgerEntryStatus
+  amount: number
+  spentAt: Date | string
+  paymentMethod?: $Enums.PaymentMethod | null
+  description?: string | null
+  reversalReason?: string | null
+  reversedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutExpensesInput
+  hostel?: Prisma.HostelCreateNestedOneWithoutExpensesInput
+  reversedBy?: Prisma.UserCreateNestedOneWithoutReversedExpensesInput
+}
+
+export type ExpenseUncheckedCreateWithoutHostelTenantInput = {
+  id?: string
+  version?: number
+  category: string
+  status?: $Enums.LedgerEntryStatus
+  amount: number
+  spentAt: Date | string
+  paymentMethod?: $Enums.PaymentMethod | null
+  description?: string | null
+  reversedById?: string | null
+  reversalReason?: string | null
+  reversedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type ExpenseCreateOrConnectWithoutHostelTenantInput = {
+  where: Prisma.ExpenseWhereUniqueInput
+  create: Prisma.XOR<Prisma.ExpenseCreateWithoutHostelTenantInput, Prisma.ExpenseUncheckedCreateWithoutHostelTenantInput>
+}
+
+export type ExpenseCreateManyHostelTenantInputEnvelope = {
+  data: Prisma.ExpenseCreateManyHostelTenantInput | Prisma.ExpenseCreateManyHostelTenantInput[]
+  skipDuplicates?: boolean
+}
+
 export type ExpenseUpsertWithWhereUniqueWithoutHostelInput = {
   where: Prisma.ExpenseWhereUniqueInput
   update: Prisma.XOR<Prisma.ExpenseUpdateWithoutHostelInput, Prisma.ExpenseUncheckedUpdateWithoutHostelInput>
@@ -920,6 +1014,22 @@ export type ExpenseUpdateWithWhereUniqueWithoutHostelInput = {
 export type ExpenseUpdateManyWithWhereWithoutHostelInput = {
   where: Prisma.ExpenseScalarWhereInput
   data: Prisma.XOR<Prisma.ExpenseUpdateManyMutationInput, Prisma.ExpenseUncheckedUpdateManyWithoutHostelInput>
+}
+
+export type ExpenseUpsertWithWhereUniqueWithoutHostelTenantInput = {
+  where: Prisma.ExpenseWhereUniqueInput
+  update: Prisma.XOR<Prisma.ExpenseUpdateWithoutHostelTenantInput, Prisma.ExpenseUncheckedUpdateWithoutHostelTenantInput>
+  create: Prisma.XOR<Prisma.ExpenseCreateWithoutHostelTenantInput, Prisma.ExpenseUncheckedCreateWithoutHostelTenantInput>
+}
+
+export type ExpenseUpdateWithWhereUniqueWithoutHostelTenantInput = {
+  where: Prisma.ExpenseWhereUniqueInput
+  data: Prisma.XOR<Prisma.ExpenseUpdateWithoutHostelTenantInput, Prisma.ExpenseUncheckedUpdateWithoutHostelTenantInput>
+}
+
+export type ExpenseUpdateManyWithWhereWithoutHostelTenantInput = {
+  where: Prisma.ExpenseScalarWhereInput
+  data: Prisma.XOR<Prisma.ExpenseUpdateManyMutationInput, Prisma.ExpenseUncheckedUpdateManyWithoutHostelTenantInput>
 }
 
 export type ExpenseCreateManyOrganizationInput = {
@@ -953,6 +1063,7 @@ export type ExpenseUpdateWithoutOrganizationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   hostel?: Prisma.HostelUpdateOneWithoutExpensesNestedInput
+  hostelTenant?: Prisma.HostelUpdateOneWithoutExpenseTenantsNestedInput
   reversedBy?: Prisma.UserUpdateOneWithoutReversedExpensesNestedInput
 }
 
@@ -1022,6 +1133,7 @@ export type ExpenseUpdateWithoutReversedByInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutExpensesNestedInput
   hostel?: Prisma.HostelUpdateOneWithoutExpensesNestedInput
+  hostelTenant?: Prisma.HostelUpdateOneWithoutExpenseTenantsNestedInput
 }
 
 export type ExpenseUncheckedUpdateWithoutReversedByInput = {
@@ -1075,6 +1187,22 @@ export type ExpenseCreateManyHostelInput = {
   updatedAt?: Date | string
 }
 
+export type ExpenseCreateManyHostelTenantInput = {
+  id?: string
+  version?: number
+  category: string
+  status?: $Enums.LedgerEntryStatus
+  amount: number
+  spentAt: Date | string
+  paymentMethod?: $Enums.PaymentMethod | null
+  description?: string | null
+  reversedById?: string | null
+  reversalReason?: string | null
+  reversedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
 export type ExpenseUpdateWithoutHostelInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1089,6 +1217,7 @@ export type ExpenseUpdateWithoutHostelInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutExpensesNestedInput
+  hostelTenant?: Prisma.HostelUpdateOneWithoutExpenseTenantsNestedInput
   reversedBy?: Prisma.UserUpdateOneWithoutReversedExpensesNestedInput
 }
 
@@ -1126,6 +1255,56 @@ export type ExpenseUncheckedUpdateManyWithoutHostelInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+export type ExpenseUpdateWithoutHostelTenantInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  spentAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  paymentMethod?: Prisma.NullableEnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutExpensesNestedInput
+  hostel?: Prisma.HostelUpdateOneWithoutExpensesNestedInput
+  reversedBy?: Prisma.UserUpdateOneWithoutReversedExpensesNestedInput
+}
+
+export type ExpenseUncheckedUpdateWithoutHostelTenantInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  spentAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  paymentMethod?: Prisma.NullableEnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ExpenseUncheckedUpdateManyWithoutHostelTenantInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  spentAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  paymentMethod?: Prisma.NullableEnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type ExpenseSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1146,6 +1325,7 @@ export type ExpenseSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   hostel?: boolean | Prisma.Expense$hostelArgs<ExtArgs>
+  hostelTenant?: boolean | Prisma.Expense$hostelTenantArgs<ExtArgs>
   reversedBy?: boolean | Prisma.Expense$reversedByArgs<ExtArgs>
 }, ExtArgs["result"]["expense"]>
 
@@ -1167,6 +1347,7 @@ export type ExpenseSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   hostel?: boolean | Prisma.Expense$hostelArgs<ExtArgs>
+  hostelTenant?: boolean | Prisma.Expense$hostelTenantArgs<ExtArgs>
   reversedBy?: boolean | Prisma.Expense$reversedByArgs<ExtArgs>
 }, ExtArgs["result"]["expense"]>
 
@@ -1188,6 +1369,7 @@ export type ExpenseSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   hostel?: boolean | Prisma.Expense$hostelArgs<ExtArgs>
+  hostelTenant?: boolean | Prisma.Expense$hostelTenantArgs<ExtArgs>
   reversedBy?: boolean | Prisma.Expense$reversedByArgs<ExtArgs>
 }, ExtArgs["result"]["expense"]>
 
@@ -1213,16 +1395,19 @@ export type ExpenseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
 export type ExpenseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   hostel?: boolean | Prisma.Expense$hostelArgs<ExtArgs>
+  hostelTenant?: boolean | Prisma.Expense$hostelTenantArgs<ExtArgs>
   reversedBy?: boolean | Prisma.Expense$reversedByArgs<ExtArgs>
 }
 export type ExpenseIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   hostel?: boolean | Prisma.Expense$hostelArgs<ExtArgs>
+  hostelTenant?: boolean | Prisma.Expense$hostelTenantArgs<ExtArgs>
   reversedBy?: boolean | Prisma.Expense$reversedByArgs<ExtArgs>
 }
 export type ExpenseIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   hostel?: boolean | Prisma.Expense$hostelArgs<ExtArgs>
+  hostelTenant?: boolean | Prisma.Expense$hostelTenantArgs<ExtArgs>
   reversedBy?: boolean | Prisma.Expense$reversedByArgs<ExtArgs>
 }
 
@@ -1231,6 +1416,7 @@ export type $ExpensePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   objects: {
     organization: Prisma.$OrganizationPayload<ExtArgs>
     hostel: Prisma.$HostelPayload<ExtArgs> | null
+    hostelTenant: Prisma.$HostelPayload<ExtArgs> | null
     reversedBy: Prisma.$UserPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1645,6 +1831,7 @@ export interface Prisma__ExpenseClient<T, Null = never, ExtArgs extends runtime.
   readonly [Symbol.toStringTag]: "PrismaPromise"
   organization<T extends Prisma.OrganizationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrganizationDefaultArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   hostel<T extends Prisma.Expense$hostelArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Expense$hostelArgs<ExtArgs>>): Prisma.Prisma__HostelClient<runtime.Types.Result.GetResult<Prisma.$HostelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  hostelTenant<T extends Prisma.Expense$hostelTenantArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Expense$hostelTenantArgs<ExtArgs>>): Prisma.Prisma__HostelClient<runtime.Types.Result.GetResult<Prisma.$HostelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   reversedBy<T extends Prisma.Expense$reversedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Expense$reversedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2094,6 +2281,25 @@ export type ExpenseDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
  * Expense.hostel
  */
 export type Expense$hostelArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Hostel
+   */
+  select?: Prisma.HostelSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Hostel
+   */
+  omit?: Prisma.HostelOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.HostelInclude<ExtArgs> | null
+  where?: Prisma.HostelWhereInput
+}
+
+/**
+ * Expense.hostelTenant
+ */
+export type Expense$hostelTenantArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the Hostel
    */

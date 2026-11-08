@@ -250,7 +250,6 @@ export type PaymentAllocationOrderByWithRelationInput = {
 
 export type PaymentAllocationWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  paymentId_chargeId?: Prisma.PaymentAllocationPaymentIdChargeIdCompoundUniqueInput
   AND?: Prisma.PaymentAllocationWhereInput | Prisma.PaymentAllocationWhereInput[]
   OR?: Prisma.PaymentAllocationWhereInput[]
   NOT?: Prisma.PaymentAllocationWhereInput | Prisma.PaymentAllocationWhereInput[]
@@ -262,7 +261,7 @@ export type PaymentAllocationWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"PaymentAllocation"> | Date | string
   payment?: Prisma.XOR<Prisma.PaymentScalarRelationFilter, Prisma.PaymentWhereInput>
   charge?: Prisma.XOR<Prisma.ChargeScalarRelationFilter, Prisma.ChargeWhereInput>
-}, "id" | "paymentId_chargeId">
+}, "id">
 
 export type PaymentAllocationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -362,11 +361,6 @@ export type PaymentAllocationListRelationFilter = {
 
 export type PaymentAllocationOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type PaymentAllocationPaymentIdChargeIdCompoundUniqueInput = {
-  paymentId: string
-  chargeId: string
 }
 
 export type PaymentAllocationCountOrderByAggregateInput = {

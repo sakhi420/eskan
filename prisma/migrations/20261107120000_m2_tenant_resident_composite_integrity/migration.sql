@@ -1,31 +1,17 @@
--- M-2: tenant/resident-scoped composite integrity.
+-- M-2: tenant/resident-scoped composite integrity (Prisma-managed composite FKs).
 --
--- Goals:
---   1. Add tenant-scoped UNIQUE keys that composite FKs need as targets:
---        (organization_id, id)               on hostels, rooms, beds, residents,
---                                            stay_contracts, charges, payments,
---                                            accommodation_packages
---        (organization_id, resident_id, id)  on stay_contracts, charges, payments,
---                                            temporary_absences
---   2. Denormalize PaymentAllocation.organization_id / resident_id (nullable ->
---      backfill from its Payment -> NOT NULL) and SWAP its payment/charge FKs for
---      tenant/resident-scoped composite FKs (same onDelete policy).
---   3. Add tenant/resident-scoped composite FKs for every audited relationship so
---      cross-organization / cross-resident rows are rejected by PostgreSQL, not by
---      the application layer alone. Existing single-column FKs and their onDelete
---      policy are KEPT (the composite FKs are additive scope enforcement).
---   4. Enforce the "hostel-specific package" rule with a BEFORE trigger on
---      stay_contracts (contract.hostel must equal package.hostel when the package
---      is hostel-specific), plus a guard trigger on accommodation_packages.
+-- The composite FKs and their supporting indexes are generated to match the Prisma
+-- schema exactly (same constraint names, ON UPDATE CASCADE), so a later
+-- `prisma migrate diff` is empty and Prisma never drops them. NULLABLE-parent
+-- relationships keep their single-column FK (ON DELETE SET NULL) plus a composite
+-- scope FK (ON DELETE NO ACTION); Prisma models both (optional relation + named
+-- tenant relation). PaymentAllocation drops the (paymentId, chargeId) unique to
+-- permit re-allocation after release (phase-9-engineering-plan F-19).
 --
--- Transactionality: like M-1, the whole migration runs in an explicit BEGIN/COMMIT
--- and the preflight executes BEFORE any DDL. PostgreSQL transactional DDL means a
--- preflight failure (or any statement error) rolls the entire migration back with
--- no partial schema left behind.
+-- Transactionality: explicit BEGIN/COMMIT; preflight runs BEFORE any DDL.
 
 BEGIN;
 
--- ---------------------------------------------------------------------------
 -- Preflight FIRST. Count every anomaly the new composite FKs/trigger would
 -- reject, and abort (rolling everything back) with actionable per-table counts
 -- if ANY is non-zero. No row is auto-corrected.
@@ -125,29 +111,59 @@ SELECT count(*) INTO bad_charge_resident_org
       bad_contract_package_org, bad_contract_package_hostel, bad_alloc_payment_charge;
   END IF;
 END $$;
--- ---------------------------------------------------------------------------
--- Step 2: tenant-scoped composite UNIQUE keys (composite FK targets).
--- ---------------------------------------------------------------------------
-CREATE UNIQUE INDEX "hostels_organization_id_id_key" ON "hostels" ("organization_id", "id");
-CREATE UNIQUE INDEX "rooms_organization_id_id_key" ON "rooms" ("organization_id", "id");
-CREATE UNIQUE INDEX "beds_organization_id_id_key" ON "beds" ("organization_id", "id");
-CREATE UNIQUE INDEX "residents_organization_id_id_key" ON "residents" ("organization_id", "id");
-CREATE UNIQUE INDEX "stay_contracts_organization_id_id_key" ON "stay_contracts" ("organization_id", "id");
-CREATE UNIQUE INDEX "stay_contracts_organization_id_resident_id_id_key" ON "stay_contracts" ("organization_id", "resident_id", "id");
-CREATE UNIQUE INDEX "charges_organization_id_id_key" ON "charges" ("organization_id", "id");
-CREATE UNIQUE INDEX "charges_organization_id_resident_id_id_key" ON "charges" ("organization_id", "resident_id", "id");
-CREATE UNIQUE INDEX "payments_organization_id_id_key" ON "payments" ("organization_id", "id");
-CREATE UNIQUE INDEX "payments_organization_id_resident_id_id_key" ON "payments" ("organization_id", "resident_id", "id");
-CREATE UNIQUE INDEX "temporary_absences_organization_id_resident_id_id_key" ON "temporary_absences" ("organization_id", "resident_id", "id");
-CREATE UNIQUE INDEX "accommodation_packages_organization_id_id_key" ON "accommodation_packages" ("organization_id", "id");
+
+-- DropForeignKey
+ALTER TABLE "bed_assignments" DROP CONSTRAINT "bed_assignments_bed_id_fkey";
+
+-- DropForeignKey
+ALTER TABLE "bed_assignments" DROP CONSTRAINT "bed_assignments_contract_id_fkey";
+
+-- DropForeignKey
+ALTER TABLE "bed_assignments" DROP CONSTRAINT "bed_assignments_resident_id_fkey";
+
+-- DropForeignKey
+ALTER TABLE "beds" DROP CONSTRAINT "beds_room_id_fkey";
+
+-- DropForeignKey
+ALTER TABLE "charges" DROP CONSTRAINT "charges_resident_id_fkey";
+
+-- DropForeignKey
+ALTER TABLE "deposit_transactions" DROP CONSTRAINT "deposit_transactions_resident_id_fkey";
+
+-- DropForeignKey
+ALTER TABLE "payment_allocations" DROP CONSTRAINT "payment_allocations_charge_id_fkey";
+
+-- DropForeignKey
+ALTER TABLE "payment_allocations" DROP CONSTRAINT "payment_allocations_payment_id_fkey";
+
+-- DropForeignKey
+ALTER TABLE "payments" DROP CONSTRAINT "payments_resident_id_fkey";
+
+-- DropForeignKey
+ALTER TABLE "rooms" DROP CONSTRAINT "rooms_hostel_id_fkey";
+
+-- DropForeignKey
+ALTER TABLE "stay_contracts" DROP CONSTRAINT "stay_contracts_hostel_id_fkey";
+
+-- DropForeignKey
+ALTER TABLE "stay_contracts" DROP CONSTRAINT "stay_contracts_resident_id_fkey";
+
+-- DropForeignKey
+ALTER TABLE "temporary_absences" DROP CONSTRAINT "temporary_absences_contract_id_fkey";
+
+-- DropForeignKey
+ALTER TABLE "temporary_absences" DROP CONSTRAINT "temporary_absences_resident_id_fkey";
+
+-- DropIndex
+DROP INDEX "payment_allocations_payment_id_charge_id_key";
 
 -- ---------------------------------------------------------------------------
--- Step 3: PaymentAllocation — add nullable columns, backfill from Payment,
---         tighten to NOT NULL, then swap its two FKs for composite FKs.
+-- PaymentAllocation: add nullable columns, backfill from Payment, tighten to
+-- NOT NULL, then swap its two FKs for composite FKs (below).
 -- ---------------------------------------------------------------------------
 ALTER TABLE "payment_allocations"
-  ADD COLUMN "organization_id" uuid,
-  ADD COLUMN "resident_id" uuid;
+  ADD COLUMN "organization_id" UUID,
+  ADD COLUMN "resident_id"     UUID;
 
 UPDATE "payment_allocations" pa
 SET "organization_id" = p.organization_id,
@@ -166,107 +182,134 @@ ALTER TABLE "payment_allocations"
   ALTER COLUMN "organization_id" SET NOT NULL,
   ALTER COLUMN "resident_id" SET NOT NULL;
 
-ALTER TABLE "payment_allocations" DROP CONSTRAINT "payment_allocations_payment_id_fkey";
-ALTER TABLE "payment_allocations" DROP CONSTRAINT "payment_allocations_charge_id_fkey";
+-- CreateIndex
+CREATE UNIQUE INDEX "accommodation_packages_organization_id_id_key" ON "accommodation_packages"("organization_id", "id");
 
-ALTER TABLE "payment_allocations"
-  ADD CONSTRAINT "payment_allocations_payment_fkey"
-  FOREIGN KEY ("organization_id", "resident_id", "payment_id")
-  REFERENCES "payments" ("organization_id", "resident_id", "id") ON DELETE CASCADE;
+-- CreateIndex
+CREATE INDEX "bed_assignments_organization_id_resident_id_contract_id_idx" ON "bed_assignments"("organization_id", "resident_id", "contract_id");
 
-ALTER TABLE "payment_allocations"
-  ADD CONSTRAINT "payment_allocations_charge_fkey"
-  FOREIGN KEY ("organization_id", "resident_id", "charge_id")
-  REFERENCES "charges" ("organization_id", "resident_id", "id") ON DELETE RESTRICT;
+-- CreateIndex
+CREATE INDEX "beds_organization_id_room_id_idx" ON "beds"("organization_id", "room_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "beds_organization_id_id_key" ON "beds"("organization_id", "id");
+
+-- CreateIndex
+CREATE INDEX "charges_organization_id_resident_id_contract_id_idx" ON "charges"("organization_id", "resident_id", "contract_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "charges_organization_id_id_key" ON "charges"("organization_id", "id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "charges_organization_id_resident_id_id_key" ON "charges"("organization_id", "resident_id", "id");
+
+-- CreateIndex
+CREATE INDEX "expenses_organization_id_hostel_id_idx" ON "expenses"("organization_id", "hostel_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "hostels_organization_id_id_key" ON "hostels"("organization_id", "id");
+
+-- CreateIndex
+CREATE INDEX "payment_allocations_organization_id_resident_id_payment_id_idx" ON "payment_allocations"("organization_id", "resident_id", "payment_id");
+
+-- CreateIndex
+CREATE INDEX "payment_allocations_organization_id_resident_id_charge_id_idx" ON "payment_allocations"("organization_id", "resident_id", "charge_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "payments_organization_id_id_key" ON "payments"("organization_id", "id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "payments_organization_id_resident_id_id_key" ON "payments"("organization_id", "resident_id", "id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "residents_organization_id_id_key" ON "residents"("organization_id", "id");
+
+-- CreateIndex
+CREATE INDEX "rooms_organization_id_hostel_id_idx" ON "rooms"("organization_id", "hostel_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "rooms_organization_id_id_key" ON "rooms"("organization_id", "id");
+
+-- CreateIndex
+CREATE INDEX "stay_contracts_organization_id_package_id_idx" ON "stay_contracts"("organization_id", "package_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "stay_contracts_organization_id_id_key" ON "stay_contracts"("organization_id", "id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "stay_contracts_organization_id_resident_id_id_key" ON "stay_contracts"("organization_id", "resident_id", "id");
+
+-- CreateIndex
+CREATE INDEX "temporary_absences_organization_id_resident_id_contract_id_idx" ON "temporary_absences"("organization_id", "resident_id", "contract_id");
+
+-- CreateIndex
+CREATE INDEX "temporary_absences_organization_id_resident_id_credit_charg_idx" ON "temporary_absences"("organization_id", "resident_id", "credit_charge_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "temporary_absences_organization_id_resident_id_id_key" ON "temporary_absences"("organization_id", "resident_id", "id");
+
+-- AddForeignKey
+ALTER TABLE "rooms" ADD CONSTRAINT "rooms_organization_id_hostel_id_fkey" FOREIGN KEY ("organization_id", "hostel_id") REFERENCES "hostels"("organization_id", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "beds" ADD CONSTRAINT "beds_organization_id_room_id_fkey" FOREIGN KEY ("organization_id", "room_id") REFERENCES "rooms"("organization_id", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "accommodation_packages" ADD CONSTRAINT "accommodation_packages_organization_id_hostel_id_fkey" FOREIGN KEY ("organization_id", "hostel_id") REFERENCES "hostels"("organization_id", "id") ON DELETE NO ACTION ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "temporary_absences" ADD CONSTRAINT "temporary_absences_organization_id_resident_id_fkey" FOREIGN KEY ("organization_id", "resident_id") REFERENCES "residents"("organization_id", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "temporary_absences" ADD CONSTRAINT "temporary_absences_organization_id_resident_id_contract_id_fkey" FOREIGN KEY ("organization_id", "resident_id", "contract_id") REFERENCES "stay_contracts"("organization_id", "resident_id", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "temporary_absences" ADD CONSTRAINT "temporary_absences_organization_id_resident_id_credit_char_fkey" FOREIGN KEY ("organization_id", "resident_id", "credit_charge_id") REFERENCES "charges"("organization_id", "resident_id", "id") ON DELETE NO ACTION ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "stay_contracts" ADD CONSTRAINT "stay_contracts_organization_id_hostel_id_fkey" FOREIGN KEY ("organization_id", "hostel_id") REFERENCES "hostels"("organization_id", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "stay_contracts" ADD CONSTRAINT "stay_contracts_organization_id_resident_id_fkey" FOREIGN KEY ("organization_id", "resident_id") REFERENCES "residents"("organization_id", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "stay_contracts" ADD CONSTRAINT "stay_contracts_organization_id_package_id_fkey" FOREIGN KEY ("organization_id", "package_id") REFERENCES "accommodation_packages"("organization_id", "id") ON DELETE NO ACTION ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "bed_assignments" ADD CONSTRAINT "bed_assignments_organization_id_bed_id_fkey" FOREIGN KEY ("organization_id", "bed_id") REFERENCES "beds"("organization_id", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "bed_assignments" ADD CONSTRAINT "bed_assignments_organization_id_resident_id_fkey" FOREIGN KEY ("organization_id", "resident_id") REFERENCES "residents"("organization_id", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "bed_assignments" ADD CONSTRAINT "bed_assignments_organization_id_resident_id_contract_id_fkey" FOREIGN KEY ("organization_id", "resident_id", "contract_id") REFERENCES "stay_contracts"("organization_id", "resident_id", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "charges" ADD CONSTRAINT "charges_organization_id_resident_id_fkey" FOREIGN KEY ("organization_id", "resident_id") REFERENCES "residents"("organization_id", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "charges" ADD CONSTRAINT "charges_organization_id_resident_id_contract_id_fkey" FOREIGN KEY ("organization_id", "resident_id", "contract_id") REFERENCES "stay_contracts"("organization_id", "resident_id", "id") ON DELETE NO ACTION ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "payments" ADD CONSTRAINT "payments_organization_id_resident_id_fkey" FOREIGN KEY ("organization_id", "resident_id") REFERENCES "residents"("organization_id", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "payment_allocations" ADD CONSTRAINT "payment_allocations_organization_id_resident_id_payment_id_fkey" FOREIGN KEY ("organization_id", "resident_id", "payment_id") REFERENCES "payments"("organization_id", "resident_id", "id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "payment_allocations" ADD CONSTRAINT "payment_allocations_organization_id_resident_id_charge_id_fkey" FOREIGN KEY ("organization_id", "resident_id", "charge_id") REFERENCES "charges"("organization_id", "resident_id", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "deposit_transactions" ADD CONSTRAINT "deposit_transactions_organization_id_resident_id_fkey" FOREIGN KEY ("organization_id", "resident_id") REFERENCES "residents"("organization_id", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "expenses" ADD CONSTRAINT "expenses_organization_id_hostel_id_fkey" FOREIGN KEY ("organization_id", "hostel_id") REFERENCES "hostels"("organization_id", "id") ON DELETE NO ACTION ON UPDATE CASCADE;
+
 
 -- ---------------------------------------------------------------------------
--- Step 4: tenant/resident-scoped composite FKs (additive; existing single-column
---         FKs and their onDelete policies are preserved).
---
--- NOT NULL parents carry ON DELETE RESTRICT (same as existing). NULLABLE parents
--- use ON DELETE NO ACTION and rely on the retained single-column FK's SET NULL:
--- when the parent is deleted, the single-column FK nulls the child key and the
--- composite FK's MATCH SIMPLE then passes (a NULL in a composite FK is skipped).
--- ---------------------------------------------------------------------------
-
-ALTER TABLE "rooms"
-  ADD CONSTRAINT "rooms_hostel_tenant_fkey"
-  FOREIGN KEY ("organization_id", "hostel_id") REFERENCES "hostels" ("organization_id", "id") ON DELETE RESTRICT;
-
-ALTER TABLE "beds"
-  ADD CONSTRAINT "beds_room_tenant_fkey"
-  FOREIGN KEY ("organization_id", "room_id") REFERENCES "rooms" ("organization_id", "id") ON DELETE RESTRICT;
-
-ALTER TABLE "stay_contracts"
-  ADD CONSTRAINT "stay_contracts_hostel_tenant_fkey"
-  FOREIGN KEY ("organization_id", "hostel_id") REFERENCES "hostels" ("organization_id", "id") ON DELETE RESTRICT;
-
-ALTER TABLE "stay_contracts"
-  ADD CONSTRAINT "stay_contracts_resident_tenant_fkey"
-  FOREIGN KEY ("organization_id", "resident_id") REFERENCES "residents" ("organization_id", "id") ON DELETE RESTRICT;
-
-ALTER TABLE "stay_contracts"
-  ADD CONSTRAINT "stay_contracts_package_tenant_fkey"
-  FOREIGN KEY ("organization_id", "package_id") REFERENCES "accommodation_packages" ("organization_id", "id");
-
-ALTER TABLE "bed_assignments"
-  ADD CONSTRAINT "bed_assignments_bed_tenant_fkey"
-  FOREIGN KEY ("organization_id", "bed_id") REFERENCES "beds" ("organization_id", "id") ON DELETE RESTRICT;
-
-ALTER TABLE "bed_assignments"
-  ADD CONSTRAINT "bed_assignments_resident_tenant_fkey"
-  FOREIGN KEY ("organization_id", "resident_id") REFERENCES "residents" ("organization_id", "id") ON DELETE RESTRICT;
-
-ALTER TABLE "bed_assignments"
-  ADD CONSTRAINT "bed_assignments_contract_tenant_fkey"
-  FOREIGN KEY ("organization_id", "resident_id", "contract_id")
-  REFERENCES "stay_contracts" ("organization_id", "resident_id", "id") ON DELETE RESTRICT;
-
-ALTER TABLE "charges"
-  ADD CONSTRAINT "charges_resident_tenant_fkey"
-  FOREIGN KEY ("organization_id", "resident_id") REFERENCES "residents" ("organization_id", "id") ON DELETE RESTRICT;
-
-ALTER TABLE "charges"
-  ADD CONSTRAINT "charges_contract_tenant_fkey"
-  FOREIGN KEY ("organization_id", "resident_id", "contract_id")
-  REFERENCES "stay_contracts" ("organization_id", "resident_id", "id");
-
-ALTER TABLE "payments"
-  ADD CONSTRAINT "payments_resident_tenant_fkey"
-  FOREIGN KEY ("organization_id", "resident_id") REFERENCES "residents" ("organization_id", "id") ON DELETE RESTRICT;
-
-ALTER TABLE "deposit_transactions"
-  ADD CONSTRAINT "deposit_transactions_resident_tenant_fkey"
-  FOREIGN KEY ("organization_id", "resident_id") REFERENCES "residents" ("organization_id", "id") ON DELETE RESTRICT;
-
-ALTER TABLE "expenses"
-  ADD CONSTRAINT "expenses_hostel_tenant_fkey"
-  FOREIGN KEY ("organization_id", "hostel_id") REFERENCES "hostels" ("organization_id", "id");
-
-ALTER TABLE "temporary_absences"
-  ADD CONSTRAINT "temporary_absences_resident_tenant_fkey"
-  FOREIGN KEY ("organization_id", "resident_id") REFERENCES "residents" ("organization_id", "id") ON DELETE RESTRICT;
-
-ALTER TABLE "temporary_absences"
-  ADD CONSTRAINT "temporary_absences_contract_tenant_fkey"
-  FOREIGN KEY ("organization_id", "resident_id", "contract_id")
-  REFERENCES "stay_contracts" ("organization_id", "resident_id", "id") ON DELETE RESTRICT;
-
-ALTER TABLE "temporary_absences"
-  ADD CONSTRAINT "temporary_absences_credit_charge_tenant_fkey"
-  FOREIGN KEY ("organization_id", "resident_id", "credit_charge_id")
-  REFERENCES "charges" ("organization_id", "resident_id", "id");
-
-ALTER TABLE "accommodation_packages"
-  ADD CONSTRAINT "accommodation_packages_hostel_tenant_fkey"
-  FOREIGN KEY ("organization_id", "hostel_id") REFERENCES "hostels" ("organization_id", "id");
-
--- ---------------------------------------------------------------------------
--- Step 5: hostel-specific package consistency (DB-enforced, not app-only).
--- A composite FK cannot express "if package.hostel != NULL then contract.hostel
--- == package.hostel", so a BEFORE trigger enforces it for every insert/update,
--- and a guard trigger forbids re-pointing a package's hostel under live
--- conflicting contracts.
+-- Hostel-specific package consistency (DB-enforced, not app-only). The contract
+-- trigger reads the package FOR UPDATE so a concurrent accommodation_packages
+-- update (which locks the same row) serializes with contract insert/update.
 -- ---------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION "enforce_stay_contract_package_hostel"()
@@ -276,7 +319,10 @@ BEGIN
   IF NEW.package_id IS NULL THEN
     RETURN NEW;
   END IF;
-  SELECT hostel_id INTO pkg_hostel FROM accommodation_packages WHERE id = NEW.package_id;
+  SELECT hostel_id INTO pkg_hostel
+    FROM accommodation_packages
+    WHERE id = NEW.package_id
+    FOR UPDATE;
   IF pkg_hostel IS NOT NULL AND pkg_hostel <> NEW.hostel_id THEN
     RAISE EXCEPTION
       'stay_contracts: package is hostel-specific; contract hostel (%) must match package hostel (%)',
@@ -310,3 +356,4 @@ CREATE TRIGGER "accommodation_packages_hostel_change_check"
   FOR EACH ROW EXECUTE FUNCTION "enforce_package_hostel_change"();
 
 COMMIT;
+
