@@ -18,7 +18,7 @@
 | 8   | ساکن/قرارداد/تخصیص | ✅ انجام شد (کد + smoke واقعی ۴۸/۴۸) | overlap, concurrency |
 | 8.1 | سخت‌سازی صحت/سازگاری (بازبینی) | ✅ انجام شد (P0 fixes + smoke ۱۴۴/۱۴۴ = 42+16+48+14+24) | atomic idempotency, CAS locking, resident overlap, transfer/checkout, fail-fast migration |
 | 8.2 | چرخه‌حیات هم‌روندی و یکپارچگی داده | ✅ انجام شد (LockService + business date + overlap contract + smoke ۱۵۷/۱۵۷ = 42+16+48+14+24+13) | resident contract overlap, row locks, business date, idempotency expiry |
-| 9   | مالی (charge/payment/deposit) | ⏳ در انتظار | decimal, reversal |
+| 9   | مالی (charge/payment/deposit) | ⏳ در انتظار — فقط سرویس‌های مالی M3 (قرارداد Gate 1، M-2 و 4c چرخه‌حیات/Idempotency ✅ انجام شد) | decimal, reversal |
 | 10  | مصارف و گزارش | ⏳ در انتظار | reports |
 | 11  | idempotency/audit/sync | ⏳ در انتظار | cursor, tombstone |
 | 12  | امنیت و سخت‌سازی | ⏳ در انتظار | OWASP, validation |
@@ -624,3 +624,28 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 - `test-m2-migration.cjs`: **92/92**؛ `test-m2-package-hostel-concurrency.cjs`: **4/4**؛ `test-m2-prisma-parity.cjs`: **5/5**.
 - `prisma validate` سبز؛ `npm run build` سبز؛ `prisma migrate diff` خالی (parity کامل).
 - هیچ تغییری روی `eskan_dev`/Staging/Production و Clone اصلی انجام نشد. Merge/شروع M-3 هنوز ممنوع.
+## 4c — چرخه‌حیات Lifecycle + Idempotency + Retention CHECK — 2026-11-08
+
+تصمیم 4c (`X-Expected-Version` + `Idempotency-Key` روی پنج عملیات Lifecycle + Retention دائمی) پیاده‌سازی و سخت‌سازی نهایی شد. این بخش وضعیت واقعی Migration و نتیجهٔ نهایی را ثبت می‌کند. (بند «هیچ تغییری روی eskan_dev انجام نشد» در بخش M-2 مربوط به وضعیت همان زمان بود؛ وضعیت فعلی در همین‌جاست.)
+
+### وضعیت Migration روی محیط‌ها
+| Migration | `eskan_dev` | CI / DB آزمایشی | Staging / Production |
+|---|---|---|---|
+| M-1 | اعمال شد (Backup + Rehearsal) | تست شد | اعمال نشد |
+| M-2 | اعمال شد (Backup + Rehearsal) | تست شد | اعمال نشد |
+| 4c — `20261108180000_idempotency_retention_class` | **اعمال نشد** | تست شد (CI) | اعمال نشد |
+| 4c — `20261108190000_idempotency_retention_consistency_check` | **اعمال نشد** | تست شد (CI) | اعمال نشد |
+
+- پیش از M-1/M-2، Backup معتبر تهیه و Rehearsal انجام شد؛ Preflight موفق بود و رکوردها حفظ شدند.
+- هیچ Migration 4c روی `eskan_dev`/Staging/Production اعمال نشده است.
+
+### نتیجهٔ نهایی 4c
+- Commit 4c: `6bffa1b` (هسته) + `c4d17ab` (سخت‌سازی)؛ CI `42499710094` — موفق (همهٔ گام‌ها).
+- Unit: 56/56؛ Integration: **26/26** (شامل ۱۸ تست `test/integration/lifecycle-versioning.integration-spec.ts` برای activate/terminate/end/transfer: نسخهٔ صحیح، Replay، نسخهٔ قدیمی → `409 RESOURCE_VERSION_CONFLICT`، بازاستفادهٔ کلید/نسخه/payload → `409 IDEMPOTENCY_KEY_REUSED`).
+- Retention CHECK: **11/11** (`scripts/test-idempotency-retention-check.cjs`: وجود constraint از `pg_constraint` + نقض `23514` برای هر ۴ حالت در INSERT و UPDATE، شامل تست مثبت UPDATE برای TRANSIENT).
+- M-2 parity: 5/5 (`prisma migrate diff` خالی).
+- ۱۸ نظر Sourcery: ۳ Resolved (با شواهد)، ۱۵ Open. موارد Auth/Organization (از جمله «Revoked Platform Admin retain access») خارج از M-3 و در مسیر مستقل پیگیری می‌شوند.
+- JCS/RFC 8785 هنوز پیاده‌نشده؛ تست اختصاصی Authorization قبل از Replay باقی مانده است.
+
+### وضعیت Merge
+- PR #1 باز است و **Merge نشده**؛ M-3 شروع نشده است.

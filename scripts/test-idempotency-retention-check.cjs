@@ -99,6 +99,7 @@ async function errCode(promise) {
        VALUES ($1,$2,'u-transient',$3,'/api/v1/retention-upd','u-hash','TRANSIENT',now())`,
       [uuid(), org, uuid()],
     );
+    check('[update] TRANSIENT -> TRANSIENT (refresh expires) allowed', (await errCode(c.query(`UPDATE idempotency_records SET expires_at = now() + interval '1 day' WHERE idempotency_key='u-transient'`))) === null);
     check('[update] TRANSIENT -> expires_at NULL rejected (23514)', (await errCode(c.query(`UPDATE idempotency_records SET expires_at=NULL WHERE idempotency_key='u-transient'`))) === '23514');
     check('[update] TRANSIENT -> PERMANENT (non-null expires) rejected (23514)', (await errCode(c.query(`UPDATE idempotency_records SET retention_class='PERMANENT' WHERE idempotency_key='u-transient'`))) === '23514');
     check('[update] TRANSIENT+expires -> PERMANENT+NULL allowed', (await errCode(c.query(`UPDATE idempotency_records SET retention_class='PERMANENT', expires_at=NULL WHERE idempotency_key='u-transient'`))) === null);
