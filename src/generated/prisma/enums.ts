@@ -81,6 +81,16 @@ export const AssignmentStatus = {
 export type AssignmentStatus = (typeof AssignmentStatus)[keyof typeof AssignmentStatus]
 
 
+export const AssignmentEndReason = {
+  CHECKOUT: 'CHECKOUT',
+  TRANSFER: 'TRANSFER',
+  TERMINATE: 'TERMINATE',
+  MANUAL_END: 'MANUAL_END'
+} as const
+
+export type AssignmentEndReason = (typeof AssignmentEndReason)[keyof typeof AssignmentEndReason]
+
+
 export const ChargeType = {
   RENT: 'RENT',
   UTILITY: 'UTILITY',
@@ -217,3 +227,11 @@ export const AbsenceStatus = {
 } as const
 
 export type AbsenceStatus = (typeof AbsenceStatus)[keyof typeof AbsenceStatus]
+
+
+export const IdempotencyRetentionClass = {
+  TRANSIENT: 'TRANSIENT',
+  PERMANENT: 'PERMANENT'
+} as const
+
+export type IdempotencyRetentionClass = (typeof IdempotencyRetentionClass)[keyof typeof IdempotencyRetentionClass]

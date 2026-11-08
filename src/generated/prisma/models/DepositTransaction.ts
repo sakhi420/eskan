@@ -854,7 +854,6 @@ export type DepositTransactionCreateWithoutResidentInput = {
 export type DepositTransactionUncheckedCreateWithoutResidentInput = {
   id?: string
   version?: number
-  organizationId: string
   type: $Enums.DepositType
   status?: $Enums.LedgerEntryStatus
   amount: number
@@ -1024,7 +1023,6 @@ export type DepositTransactionUncheckedUpdateManyWithoutReversedByInput = {
 export type DepositTransactionCreateManyResidentInput = {
   id?: string
   version?: number
-  organizationId: string
   type: $Enums.DepositType
   status?: $Enums.LedgerEntryStatus
   amount: number
@@ -1056,7 +1054,6 @@ export type DepositTransactionUpdateWithoutResidentInput = {
 export type DepositTransactionUncheckedUpdateWithoutResidentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumDepositTypeFieldUpdateOperationsInput | $Enums.DepositType
   status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
   amount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1072,7 +1069,6 @@ export type DepositTransactionUncheckedUpdateWithoutResidentInput = {
 export type DepositTransactionUncheckedUpdateManyWithoutResidentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumDepositTypeFieldUpdateOperationsInput | $Enums.DepositType
   status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
   amount?: Prisma.IntFieldUpdateOperationsInput | number

@@ -358,6 +358,8 @@ export type PaymentOrderByWithRelationInput = {
 export type PaymentWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   organizationId_receiptNumber?: Prisma.PaymentOrganizationIdReceiptNumberCompoundUniqueInput
+  organizationId_id?: Prisma.PaymentOrganizationIdIdCompoundUniqueInput
+  organizationId_residentId_id?: Prisma.PaymentOrganizationIdResidentIdIdCompoundUniqueInput
   AND?: Prisma.PaymentWhereInput | Prisma.PaymentWhereInput[]
   OR?: Prisma.PaymentWhereInput[]
   NOT?: Prisma.PaymentWhereInput | Prisma.PaymentWhereInput[]
@@ -382,7 +384,7 @@ export type PaymentWhereUniqueInput = Prisma.AtLeast<{
   resident?: Prisma.XOR<Prisma.ResidentScalarRelationFilter, Prisma.ResidentWhereInput>
   reversedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   allocations?: Prisma.PaymentAllocationListRelationFilter
-}, "id" | "organizationId_receiptNumber">
+}, "id" | "organizationId_receiptNumber" | "organizationId_id" | "organizationId_residentId_id">
 
 export type PaymentOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -595,6 +597,17 @@ export type PaymentOrderByRelationAggregateInput = {
 export type PaymentOrganizationIdReceiptNumberCompoundUniqueInput = {
   organizationId: string
   receiptNumber: string
+}
+
+export type PaymentOrganizationIdIdCompoundUniqueInput = {
+  organizationId: string
+  id: string
+}
+
+export type PaymentOrganizationIdResidentIdIdCompoundUniqueInput = {
+  organizationId: string
+  residentId: string
+  id: string
 }
 
 export type PaymentCountOrderByAggregateInput = {
@@ -1003,7 +1016,6 @@ export type PaymentCreateWithoutResidentInput = {
 export type PaymentUncheckedCreateWithoutResidentInput = {
   id?: string
   version?: number
-  organizationId: string
   status?: $Enums.LedgerEntryStatus
   amount: number
   method: $Enums.PaymentMethod
@@ -1314,7 +1326,6 @@ export type PaymentUncheckedUpdateManyWithoutReversedByInput = {
 export type PaymentCreateManyResidentInput = {
   id?: string
   version?: number
-  organizationId: string
   status?: $Enums.LedgerEntryStatus
   amount: number
   method: $Enums.PaymentMethod
@@ -1355,7 +1366,6 @@ export type PaymentUpdateWithoutResidentInput = {
 export type PaymentUncheckedUpdateWithoutResidentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   method?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
@@ -1376,7 +1386,6 @@ export type PaymentUncheckedUpdateWithoutResidentInput = {
 export type PaymentUncheckedUpdateManyWithoutResidentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   method?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod

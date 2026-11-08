@@ -7,7 +7,7 @@ import { CurrentMembership } from '../common/decorators/current-membership.decor
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuthUser, MembershipContext, RequestWithAuth } from '../auth/auth.types';
 import { Role } from '../generated/prisma/enums';
-import { envelope, requireIdempotencyKey } from '../common/http/http-utils';
+import { envelope, requireExpectedVersion, requireIdempotencyKey } from '../common/http/http-utils';
 import { BedAssignmentDto } from './dto/assignment.dto';
 import { TransferDto } from './dto/transfer.dto';
 
@@ -32,8 +32,17 @@ export class AssignmentsController {
   @Post('bed-assignments/:assignmentId/end')
   @Roles(Role.OWNER, Role.ADMIN, Role.OPERATOR)
   @HttpCode(HttpStatus.OK)
-  async end(@CurrentMembership() m: MembershipContext, @Param('assignmentId') assignmentId: string, @Req() req: RequestWithAuth) {
-    return envelope(req, await this.assignments.end(m.organizationId, assignmentId));
+  async end(
+    @CurrentMembership() m: MembershipContext,
+    @CurrentUser() user: AuthUser,
+    @Param('assignmentId') assignmentId: string,
+    @Headers('Idempotency-Key') idempotencyKey: string | undefined,
+    @Headers('X-Expected-Version') versionRaw: string | undefined,
+    @Req() req: RequestWithAuth,
+  ) {
+    const key = requireIdempotencyKey(idempotencyKey);
+    const expectedVersion = requireExpectedVersion(versionRaw);
+    return envelope(req, await this.assignments.end(m.organizationId, assignmentId, user.id, key, expectedVersion));
   }
 
   @Post('bed-assignments/:assignmentId/transfer')
@@ -44,11 +53,13 @@ export class AssignmentsController {
     @CurrentUser() user: AuthUser,
     @Param('assignmentId') assignmentId: string,
     @Headers('Idempotency-Key') idempotencyKey: string | undefined,
+    @Headers('X-Expected-Version') versionRaw: string | undefined,
     @Body() dto: TransferDto,
     @Req() req: RequestWithAuth,
   ) {
     const key = requireIdempotencyKey(idempotencyKey);
-    return envelope(req, await this.assignments.transfer(m.organizationId, assignmentId, user.id, dto, key));
+    const expectedVersion = requireExpectedVersion(versionRaw);
+    return envelope(req, await this.assignments.transfer(m.organizationId, assignmentId, user.id, dto, key, expectedVersion));
   }
 
   @Get('residents/:residentId/assignments')

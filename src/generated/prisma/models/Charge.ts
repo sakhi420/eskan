@@ -327,9 +327,11 @@ export type ChargeWhereInput = {
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   resident?: Prisma.XOR<Prisma.ResidentScalarRelationFilter, Prisma.ResidentWhereInput>
   contract?: Prisma.XOR<Prisma.StayContractNullableScalarRelationFilter, Prisma.StayContractWhereInput> | null
+  contractTenant?: Prisma.XOR<Prisma.StayContractNullableScalarRelationFilter, Prisma.StayContractWhereInput> | null
   reversedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   allocations?: Prisma.PaymentAllocationListRelationFilter
   absence?: Prisma.XOR<Prisma.TemporaryAbsenceNullableScalarRelationFilter, Prisma.TemporaryAbsenceWhereInput> | null
+  absenceTenants?: Prisma.TemporaryAbsenceListRelationFilter
 }
 
 export type ChargeOrderByWithRelationInput = {
@@ -354,13 +356,17 @@ export type ChargeOrderByWithRelationInput = {
   organization?: Prisma.OrganizationOrderByWithRelationInput
   resident?: Prisma.ResidentOrderByWithRelationInput
   contract?: Prisma.StayContractOrderByWithRelationInput
+  contractTenant?: Prisma.StayContractOrderByWithRelationInput
   reversedBy?: Prisma.UserOrderByWithRelationInput
   allocations?: Prisma.PaymentAllocationOrderByRelationAggregateInput
   absence?: Prisma.TemporaryAbsenceOrderByWithRelationInput
+  absenceTenants?: Prisma.TemporaryAbsenceOrderByRelationAggregateInput
 }
 
 export type ChargeWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  organizationId_id?: Prisma.ChargeOrganizationIdIdCompoundUniqueInput
+  organizationId_residentId_id?: Prisma.ChargeOrganizationIdResidentIdIdCompoundUniqueInput
   AND?: Prisma.ChargeWhereInput | Prisma.ChargeWhereInput[]
   OR?: Prisma.ChargeWhereInput[]
   NOT?: Prisma.ChargeWhereInput | Prisma.ChargeWhereInput[]
@@ -384,10 +390,12 @@ export type ChargeWhereUniqueInput = Prisma.AtLeast<{
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   resident?: Prisma.XOR<Prisma.ResidentScalarRelationFilter, Prisma.ResidentWhereInput>
   contract?: Prisma.XOR<Prisma.StayContractNullableScalarRelationFilter, Prisma.StayContractWhereInput> | null
+  contractTenant?: Prisma.XOR<Prisma.StayContractNullableScalarRelationFilter, Prisma.StayContractWhereInput> | null
   reversedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   allocations?: Prisma.PaymentAllocationListRelationFilter
   absence?: Prisma.XOR<Prisma.TemporaryAbsenceNullableScalarRelationFilter, Prisma.TemporaryAbsenceWhereInput> | null
-}, "id">
+  absenceTenants?: Prisma.TemporaryAbsenceListRelationFilter
+}, "id" | "organizationId_id" | "organizationId_residentId_id">
 
 export type ChargeOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -457,9 +465,11 @@ export type ChargeCreateInput = {
   organization: Prisma.OrganizationCreateNestedOneWithoutChargesInput
   resident: Prisma.ResidentCreateNestedOneWithoutChargesInput
   contract?: Prisma.StayContractCreateNestedOneWithoutChargesInput
+  contractTenant?: Prisma.StayContractCreateNestedOneWithoutChargeTenantsInput
   reversedBy?: Prisma.UserCreateNestedOneWithoutReversedChargesInput
   allocations?: Prisma.PaymentAllocationCreateNestedManyWithoutChargeInput
   absence?: Prisma.TemporaryAbsenceCreateNestedOneWithoutCreditChargeInput
+  absenceTenants?: Prisma.TemporaryAbsenceCreateNestedManyWithoutCreditChargeTenantInput
 }
 
 export type ChargeUncheckedCreateInput = {
@@ -483,6 +493,7 @@ export type ChargeUncheckedCreateInput = {
   updatedAt?: Date | string
   allocations?: Prisma.PaymentAllocationUncheckedCreateNestedManyWithoutChargeInput
   absence?: Prisma.TemporaryAbsenceUncheckedCreateNestedOneWithoutCreditChargeInput
+  absenceTenants?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutCreditChargeTenantInput
 }
 
 export type ChargeUpdateInput = {
@@ -503,9 +514,11 @@ export type ChargeUpdateInput = {
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChargesNestedInput
   resident?: Prisma.ResidentUpdateOneRequiredWithoutChargesNestedInput
   contract?: Prisma.StayContractUpdateOneWithoutChargesNestedInput
+  contractTenant?: Prisma.StayContractUpdateOneWithoutChargeTenantsNestedInput
   reversedBy?: Prisma.UserUpdateOneWithoutReversedChargesNestedInput
   allocations?: Prisma.PaymentAllocationUpdateManyWithoutChargeNestedInput
   absence?: Prisma.TemporaryAbsenceUpdateOneWithoutCreditChargeNestedInput
+  absenceTenants?: Prisma.TemporaryAbsenceUpdateManyWithoutCreditChargeTenantNestedInput
 }
 
 export type ChargeUncheckedUpdateInput = {
@@ -529,6 +542,7 @@ export type ChargeUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   allocations?: Prisma.PaymentAllocationUncheckedUpdateManyWithoutChargeNestedInput
   absence?: Prisma.TemporaryAbsenceUncheckedUpdateOneWithoutCreditChargeNestedInput
+  absenceTenants?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutCreditChargeTenantNestedInput
 }
 
 export type ChargeCreateManyInput = {
@@ -603,6 +617,17 @@ export type ChargeOrderByRelationAggregateInput = {
 export type ChargeNullableScalarRelationFilter = {
   is?: Prisma.ChargeWhereInput | null
   isNot?: Prisma.ChargeWhereInput | null
+}
+
+export type ChargeOrganizationIdIdCompoundUniqueInput = {
+  organizationId: string
+  id: string
+}
+
+export type ChargeOrganizationIdResidentIdIdCompoundUniqueInput = {
+  organizationId: string
+  residentId: string
+  id: string
 }
 
 export type ChargeCountOrderByAggregateInput = {
@@ -773,6 +798,12 @@ export type ChargeCreateNestedOneWithoutAbsenceInput = {
   connect?: Prisma.ChargeWhereUniqueInput
 }
 
+export type ChargeCreateNestedOneWithoutAbsenceTenantsInput = {
+  create?: Prisma.XOR<Prisma.ChargeCreateWithoutAbsenceTenantsInput, Prisma.ChargeUncheckedCreateWithoutAbsenceTenantsInput>
+  connectOrCreate?: Prisma.ChargeCreateOrConnectWithoutAbsenceTenantsInput
+  connect?: Prisma.ChargeWhereUniqueInput
+}
+
 export type ChargeUpdateOneWithoutAbsenceNestedInput = {
   create?: Prisma.XOR<Prisma.ChargeCreateWithoutAbsenceInput, Prisma.ChargeUncheckedCreateWithoutAbsenceInput>
   connectOrCreate?: Prisma.ChargeCreateOrConnectWithoutAbsenceInput
@@ -781,6 +812,16 @@ export type ChargeUpdateOneWithoutAbsenceNestedInput = {
   delete?: Prisma.ChargeWhereInput | boolean
   connect?: Prisma.ChargeWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.ChargeUpdateToOneWithWhereWithoutAbsenceInput, Prisma.ChargeUpdateWithoutAbsenceInput>, Prisma.ChargeUncheckedUpdateWithoutAbsenceInput>
+}
+
+export type ChargeUpdateOneWithoutAbsenceTenantsNestedInput = {
+  create?: Prisma.XOR<Prisma.ChargeCreateWithoutAbsenceTenantsInput, Prisma.ChargeUncheckedCreateWithoutAbsenceTenantsInput>
+  connectOrCreate?: Prisma.ChargeCreateOrConnectWithoutAbsenceTenantsInput
+  upsert?: Prisma.ChargeUpsertWithoutAbsenceTenantsInput
+  disconnect?: Prisma.ChargeWhereInput | boolean
+  delete?: Prisma.ChargeWhereInput | boolean
+  connect?: Prisma.ChargeWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ChargeUpdateToOneWithWhereWithoutAbsenceTenantsInput, Prisma.ChargeUpdateWithoutAbsenceTenantsInput>, Prisma.ChargeUncheckedUpdateWithoutAbsenceTenantsInput>
 }
 
 export type ChargeCreateNestedManyWithoutResidentInput = {
@@ -832,10 +873,24 @@ export type ChargeCreateNestedManyWithoutContractInput = {
   connect?: Prisma.ChargeWhereUniqueInput | Prisma.ChargeWhereUniqueInput[]
 }
 
+export type ChargeCreateNestedManyWithoutContractTenantInput = {
+  create?: Prisma.XOR<Prisma.ChargeCreateWithoutContractTenantInput, Prisma.ChargeUncheckedCreateWithoutContractTenantInput> | Prisma.ChargeCreateWithoutContractTenantInput[] | Prisma.ChargeUncheckedCreateWithoutContractTenantInput[]
+  connectOrCreate?: Prisma.ChargeCreateOrConnectWithoutContractTenantInput | Prisma.ChargeCreateOrConnectWithoutContractTenantInput[]
+  createMany?: Prisma.ChargeCreateManyContractTenantInputEnvelope
+  connect?: Prisma.ChargeWhereUniqueInput | Prisma.ChargeWhereUniqueInput[]
+}
+
 export type ChargeUncheckedCreateNestedManyWithoutContractInput = {
   create?: Prisma.XOR<Prisma.ChargeCreateWithoutContractInput, Prisma.ChargeUncheckedCreateWithoutContractInput> | Prisma.ChargeCreateWithoutContractInput[] | Prisma.ChargeUncheckedCreateWithoutContractInput[]
   connectOrCreate?: Prisma.ChargeCreateOrConnectWithoutContractInput | Prisma.ChargeCreateOrConnectWithoutContractInput[]
   createMany?: Prisma.ChargeCreateManyContractInputEnvelope
+  connect?: Prisma.ChargeWhereUniqueInput | Prisma.ChargeWhereUniqueInput[]
+}
+
+export type ChargeUncheckedCreateNestedManyWithoutContractTenantInput = {
+  create?: Prisma.XOR<Prisma.ChargeCreateWithoutContractTenantInput, Prisma.ChargeUncheckedCreateWithoutContractTenantInput> | Prisma.ChargeCreateWithoutContractTenantInput[] | Prisma.ChargeUncheckedCreateWithoutContractTenantInput[]
+  connectOrCreate?: Prisma.ChargeCreateOrConnectWithoutContractTenantInput | Prisma.ChargeCreateOrConnectWithoutContractTenantInput[]
+  createMany?: Prisma.ChargeCreateManyContractTenantInputEnvelope
   connect?: Prisma.ChargeWhereUniqueInput | Prisma.ChargeWhereUniqueInput[]
 }
 
@@ -853,6 +908,20 @@ export type ChargeUpdateManyWithoutContractNestedInput = {
   deleteMany?: Prisma.ChargeScalarWhereInput | Prisma.ChargeScalarWhereInput[]
 }
 
+export type ChargeUpdateManyWithoutContractTenantNestedInput = {
+  create?: Prisma.XOR<Prisma.ChargeCreateWithoutContractTenantInput, Prisma.ChargeUncheckedCreateWithoutContractTenantInput> | Prisma.ChargeCreateWithoutContractTenantInput[] | Prisma.ChargeUncheckedCreateWithoutContractTenantInput[]
+  connectOrCreate?: Prisma.ChargeCreateOrConnectWithoutContractTenantInput | Prisma.ChargeCreateOrConnectWithoutContractTenantInput[]
+  upsert?: Prisma.ChargeUpsertWithWhereUniqueWithoutContractTenantInput | Prisma.ChargeUpsertWithWhereUniqueWithoutContractTenantInput[]
+  createMany?: Prisma.ChargeCreateManyContractTenantInputEnvelope
+  set?: Prisma.ChargeWhereUniqueInput | Prisma.ChargeWhereUniqueInput[]
+  disconnect?: Prisma.ChargeWhereUniqueInput | Prisma.ChargeWhereUniqueInput[]
+  delete?: Prisma.ChargeWhereUniqueInput | Prisma.ChargeWhereUniqueInput[]
+  connect?: Prisma.ChargeWhereUniqueInput | Prisma.ChargeWhereUniqueInput[]
+  update?: Prisma.ChargeUpdateWithWhereUniqueWithoutContractTenantInput | Prisma.ChargeUpdateWithWhereUniqueWithoutContractTenantInput[]
+  updateMany?: Prisma.ChargeUpdateManyWithWhereWithoutContractTenantInput | Prisma.ChargeUpdateManyWithWhereWithoutContractTenantInput[]
+  deleteMany?: Prisma.ChargeScalarWhereInput | Prisma.ChargeScalarWhereInput[]
+}
+
 export type ChargeUncheckedUpdateManyWithoutContractNestedInput = {
   create?: Prisma.XOR<Prisma.ChargeCreateWithoutContractInput, Prisma.ChargeUncheckedCreateWithoutContractInput> | Prisma.ChargeCreateWithoutContractInput[] | Prisma.ChargeUncheckedCreateWithoutContractInput[]
   connectOrCreate?: Prisma.ChargeCreateOrConnectWithoutContractInput | Prisma.ChargeCreateOrConnectWithoutContractInput[]
@@ -864,6 +933,20 @@ export type ChargeUncheckedUpdateManyWithoutContractNestedInput = {
   connect?: Prisma.ChargeWhereUniqueInput | Prisma.ChargeWhereUniqueInput[]
   update?: Prisma.ChargeUpdateWithWhereUniqueWithoutContractInput | Prisma.ChargeUpdateWithWhereUniqueWithoutContractInput[]
   updateMany?: Prisma.ChargeUpdateManyWithWhereWithoutContractInput | Prisma.ChargeUpdateManyWithWhereWithoutContractInput[]
+  deleteMany?: Prisma.ChargeScalarWhereInput | Prisma.ChargeScalarWhereInput[]
+}
+
+export type ChargeUncheckedUpdateManyWithoutContractTenantNestedInput = {
+  create?: Prisma.XOR<Prisma.ChargeCreateWithoutContractTenantInput, Prisma.ChargeUncheckedCreateWithoutContractTenantInput> | Prisma.ChargeCreateWithoutContractTenantInput[] | Prisma.ChargeUncheckedCreateWithoutContractTenantInput[]
+  connectOrCreate?: Prisma.ChargeCreateOrConnectWithoutContractTenantInput | Prisma.ChargeCreateOrConnectWithoutContractTenantInput[]
+  upsert?: Prisma.ChargeUpsertWithWhereUniqueWithoutContractTenantInput | Prisma.ChargeUpsertWithWhereUniqueWithoutContractTenantInput[]
+  createMany?: Prisma.ChargeCreateManyContractTenantInputEnvelope
+  set?: Prisma.ChargeWhereUniqueInput | Prisma.ChargeWhereUniqueInput[]
+  disconnect?: Prisma.ChargeWhereUniqueInput | Prisma.ChargeWhereUniqueInput[]
+  delete?: Prisma.ChargeWhereUniqueInput | Prisma.ChargeWhereUniqueInput[]
+  connect?: Prisma.ChargeWhereUniqueInput | Prisma.ChargeWhereUniqueInput[]
+  update?: Prisma.ChargeUpdateWithWhereUniqueWithoutContractTenantInput | Prisma.ChargeUpdateWithWhereUniqueWithoutContractTenantInput[]
+  updateMany?: Prisma.ChargeUpdateManyWithWhereWithoutContractTenantInput | Prisma.ChargeUpdateManyWithWhereWithoutContractTenantInput[]
   deleteMany?: Prisma.ChargeScalarWhereInput | Prisma.ChargeScalarWhereInput[]
 }
 
@@ -906,9 +989,11 @@ export type ChargeCreateWithoutOrganizationInput = {
   updatedAt?: Date | string
   resident: Prisma.ResidentCreateNestedOneWithoutChargesInput
   contract?: Prisma.StayContractCreateNestedOneWithoutChargesInput
+  contractTenant?: Prisma.StayContractCreateNestedOneWithoutChargeTenantsInput
   reversedBy?: Prisma.UserCreateNestedOneWithoutReversedChargesInput
   allocations?: Prisma.PaymentAllocationCreateNestedManyWithoutChargeInput
   absence?: Prisma.TemporaryAbsenceCreateNestedOneWithoutCreditChargeInput
+  absenceTenants?: Prisma.TemporaryAbsenceCreateNestedManyWithoutCreditChargeTenantInput
 }
 
 export type ChargeUncheckedCreateWithoutOrganizationInput = {
@@ -931,6 +1016,7 @@ export type ChargeUncheckedCreateWithoutOrganizationInput = {
   updatedAt?: Date | string
   allocations?: Prisma.PaymentAllocationUncheckedCreateNestedManyWithoutChargeInput
   absence?: Prisma.TemporaryAbsenceUncheckedCreateNestedOneWithoutCreditChargeInput
+  absenceTenants?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutCreditChargeTenantInput
 }
 
 export type ChargeCreateOrConnectWithoutOrganizationInput = {
@@ -1001,8 +1087,10 @@ export type ChargeCreateWithoutReversedByInput = {
   organization: Prisma.OrganizationCreateNestedOneWithoutChargesInput
   resident: Prisma.ResidentCreateNestedOneWithoutChargesInput
   contract?: Prisma.StayContractCreateNestedOneWithoutChargesInput
+  contractTenant?: Prisma.StayContractCreateNestedOneWithoutChargeTenantsInput
   allocations?: Prisma.PaymentAllocationCreateNestedManyWithoutChargeInput
   absence?: Prisma.TemporaryAbsenceCreateNestedOneWithoutCreditChargeInput
+  absenceTenants?: Prisma.TemporaryAbsenceCreateNestedManyWithoutCreditChargeTenantInput
 }
 
 export type ChargeUncheckedCreateWithoutReversedByInput = {
@@ -1025,6 +1113,7 @@ export type ChargeUncheckedCreateWithoutReversedByInput = {
   updatedAt?: Date | string
   allocations?: Prisma.PaymentAllocationUncheckedCreateNestedManyWithoutChargeInput
   absence?: Prisma.TemporaryAbsenceUncheckedCreateNestedOneWithoutCreditChargeInput
+  absenceTenants?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutCreditChargeTenantInput
 }
 
 export type ChargeCreateOrConnectWithoutReversedByInput = {
@@ -1071,8 +1160,10 @@ export type ChargeCreateWithoutAbsenceInput = {
   organization: Prisma.OrganizationCreateNestedOneWithoutChargesInput
   resident: Prisma.ResidentCreateNestedOneWithoutChargesInput
   contract?: Prisma.StayContractCreateNestedOneWithoutChargesInput
+  contractTenant?: Prisma.StayContractCreateNestedOneWithoutChargeTenantsInput
   reversedBy?: Prisma.UserCreateNestedOneWithoutReversedChargesInput
   allocations?: Prisma.PaymentAllocationCreateNestedManyWithoutChargeInput
+  absenceTenants?: Prisma.TemporaryAbsenceCreateNestedManyWithoutCreditChargeTenantInput
 }
 
 export type ChargeUncheckedCreateWithoutAbsenceInput = {
@@ -1095,11 +1186,64 @@ export type ChargeUncheckedCreateWithoutAbsenceInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   allocations?: Prisma.PaymentAllocationUncheckedCreateNestedManyWithoutChargeInput
+  absenceTenants?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutCreditChargeTenantInput
 }
 
 export type ChargeCreateOrConnectWithoutAbsenceInput = {
   where: Prisma.ChargeWhereUniqueInput
   create: Prisma.XOR<Prisma.ChargeCreateWithoutAbsenceInput, Prisma.ChargeUncheckedCreateWithoutAbsenceInput>
+}
+
+export type ChargeCreateWithoutAbsenceTenantsInput = {
+  id?: string
+  version?: number
+  type: $Enums.ChargeType
+  status?: $Enums.LedgerEntryStatus
+  amount: number
+  periodStart: Date | string
+  periodEnd: Date | string
+  dueDate: Date | string
+  description?: string | null
+  postedAt?: Date | string
+  reversalReason?: string | null
+  reversedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutChargesInput
+  resident: Prisma.ResidentCreateNestedOneWithoutChargesInput
+  contract?: Prisma.StayContractCreateNestedOneWithoutChargesInput
+  contractTenant?: Prisma.StayContractCreateNestedOneWithoutChargeTenantsInput
+  reversedBy?: Prisma.UserCreateNestedOneWithoutReversedChargesInput
+  allocations?: Prisma.PaymentAllocationCreateNestedManyWithoutChargeInput
+  absence?: Prisma.TemporaryAbsenceCreateNestedOneWithoutCreditChargeInput
+}
+
+export type ChargeUncheckedCreateWithoutAbsenceTenantsInput = {
+  id?: string
+  version?: number
+  organizationId: string
+  residentId: string
+  contractId?: string | null
+  type: $Enums.ChargeType
+  status?: $Enums.LedgerEntryStatus
+  amount: number
+  periodStart: Date | string
+  periodEnd: Date | string
+  dueDate: Date | string
+  description?: string | null
+  postedAt?: Date | string
+  reversedById?: string | null
+  reversalReason?: string | null
+  reversedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  allocations?: Prisma.PaymentAllocationUncheckedCreateNestedManyWithoutChargeInput
+  absence?: Prisma.TemporaryAbsenceUncheckedCreateNestedOneWithoutCreditChargeInput
+}
+
+export type ChargeCreateOrConnectWithoutAbsenceTenantsInput = {
+  where: Prisma.ChargeWhereUniqueInput
+  create: Prisma.XOR<Prisma.ChargeCreateWithoutAbsenceTenantsInput, Prisma.ChargeUncheckedCreateWithoutAbsenceTenantsInput>
 }
 
 export type ChargeUpsertWithoutAbsenceInput = {
@@ -1131,8 +1275,10 @@ export type ChargeUpdateWithoutAbsenceInput = {
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChargesNestedInput
   resident?: Prisma.ResidentUpdateOneRequiredWithoutChargesNestedInput
   contract?: Prisma.StayContractUpdateOneWithoutChargesNestedInput
+  contractTenant?: Prisma.StayContractUpdateOneWithoutChargeTenantsNestedInput
   reversedBy?: Prisma.UserUpdateOneWithoutReversedChargesNestedInput
   allocations?: Prisma.PaymentAllocationUpdateManyWithoutChargeNestedInput
+  absenceTenants?: Prisma.TemporaryAbsenceUpdateManyWithoutCreditChargeTenantNestedInput
 }
 
 export type ChargeUncheckedUpdateWithoutAbsenceInput = {
@@ -1155,6 +1301,65 @@ export type ChargeUncheckedUpdateWithoutAbsenceInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   allocations?: Prisma.PaymentAllocationUncheckedUpdateManyWithoutChargeNestedInput
+  absenceTenants?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutCreditChargeTenantNestedInput
+}
+
+export type ChargeUpsertWithoutAbsenceTenantsInput = {
+  update: Prisma.XOR<Prisma.ChargeUpdateWithoutAbsenceTenantsInput, Prisma.ChargeUncheckedUpdateWithoutAbsenceTenantsInput>
+  create: Prisma.XOR<Prisma.ChargeCreateWithoutAbsenceTenantsInput, Prisma.ChargeUncheckedCreateWithoutAbsenceTenantsInput>
+  where?: Prisma.ChargeWhereInput
+}
+
+export type ChargeUpdateToOneWithWhereWithoutAbsenceTenantsInput = {
+  where?: Prisma.ChargeWhereInput
+  data: Prisma.XOR<Prisma.ChargeUpdateWithoutAbsenceTenantsInput, Prisma.ChargeUncheckedUpdateWithoutAbsenceTenantsInput>
+}
+
+export type ChargeUpdateWithoutAbsenceTenantsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  type?: Prisma.EnumChargeTypeFieldUpdateOperationsInput | $Enums.ChargeType
+  status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  periodStart?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  periodEnd?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  postedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutChargesNestedInput
+  resident?: Prisma.ResidentUpdateOneRequiredWithoutChargesNestedInput
+  contract?: Prisma.StayContractUpdateOneWithoutChargesNestedInput
+  contractTenant?: Prisma.StayContractUpdateOneWithoutChargeTenantsNestedInput
+  reversedBy?: Prisma.UserUpdateOneWithoutReversedChargesNestedInput
+  allocations?: Prisma.PaymentAllocationUpdateManyWithoutChargeNestedInput
+  absence?: Prisma.TemporaryAbsenceUpdateOneWithoutCreditChargeNestedInput
+}
+
+export type ChargeUncheckedUpdateWithoutAbsenceTenantsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  residentId?: Prisma.StringFieldUpdateOperationsInput | string
+  contractId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumChargeTypeFieldUpdateOperationsInput | $Enums.ChargeType
+  status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  periodStart?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  periodEnd?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  postedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  allocations?: Prisma.PaymentAllocationUncheckedUpdateManyWithoutChargeNestedInput
+  absence?: Prisma.TemporaryAbsenceUncheckedUpdateOneWithoutCreditChargeNestedInput
 }
 
 export type ChargeCreateWithoutResidentInput = {
@@ -1174,15 +1379,16 @@ export type ChargeCreateWithoutResidentInput = {
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChargesInput
   contract?: Prisma.StayContractCreateNestedOneWithoutChargesInput
+  contractTenant?: Prisma.StayContractCreateNestedOneWithoutChargeTenantsInput
   reversedBy?: Prisma.UserCreateNestedOneWithoutReversedChargesInput
   allocations?: Prisma.PaymentAllocationCreateNestedManyWithoutChargeInput
   absence?: Prisma.TemporaryAbsenceCreateNestedOneWithoutCreditChargeInput
+  absenceTenants?: Prisma.TemporaryAbsenceCreateNestedManyWithoutCreditChargeTenantInput
 }
 
 export type ChargeUncheckedCreateWithoutResidentInput = {
   id?: string
   version?: number
-  organizationId: string
   contractId?: string | null
   type: $Enums.ChargeType
   status?: $Enums.LedgerEntryStatus
@@ -1199,6 +1405,7 @@ export type ChargeUncheckedCreateWithoutResidentInput = {
   updatedAt?: Date | string
   allocations?: Prisma.PaymentAllocationUncheckedCreateNestedManyWithoutChargeInput
   absence?: Prisma.TemporaryAbsenceUncheckedCreateNestedOneWithoutCreditChargeInput
+  absenceTenants?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutCreditChargeTenantInput
 }
 
 export type ChargeCreateOrConnectWithoutResidentInput = {
@@ -1244,9 +1451,11 @@ export type ChargeCreateWithoutContractInput = {
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChargesInput
   resident: Prisma.ResidentCreateNestedOneWithoutChargesInput
+  contractTenant?: Prisma.StayContractCreateNestedOneWithoutChargeTenantsInput
   reversedBy?: Prisma.UserCreateNestedOneWithoutReversedChargesInput
   allocations?: Prisma.PaymentAllocationCreateNestedManyWithoutChargeInput
   absence?: Prisma.TemporaryAbsenceCreateNestedOneWithoutCreditChargeInput
+  absenceTenants?: Prisma.TemporaryAbsenceCreateNestedManyWithoutCreditChargeTenantInput
 }
 
 export type ChargeUncheckedCreateWithoutContractInput = {
@@ -1269,6 +1478,7 @@ export type ChargeUncheckedCreateWithoutContractInput = {
   updatedAt?: Date | string
   allocations?: Prisma.PaymentAllocationUncheckedCreateNestedManyWithoutChargeInput
   absence?: Prisma.TemporaryAbsenceUncheckedCreateNestedOneWithoutCreditChargeInput
+  absenceTenants?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutCreditChargeTenantInput
 }
 
 export type ChargeCreateOrConnectWithoutContractInput = {
@@ -1278,6 +1488,61 @@ export type ChargeCreateOrConnectWithoutContractInput = {
 
 export type ChargeCreateManyContractInputEnvelope = {
   data: Prisma.ChargeCreateManyContractInput | Prisma.ChargeCreateManyContractInput[]
+  skipDuplicates?: boolean
+}
+
+export type ChargeCreateWithoutContractTenantInput = {
+  id?: string
+  version?: number
+  type: $Enums.ChargeType
+  status?: $Enums.LedgerEntryStatus
+  amount: number
+  periodStart: Date | string
+  periodEnd: Date | string
+  dueDate: Date | string
+  description?: string | null
+  postedAt?: Date | string
+  reversalReason?: string | null
+  reversedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutChargesInput
+  resident: Prisma.ResidentCreateNestedOneWithoutChargesInput
+  contract?: Prisma.StayContractCreateNestedOneWithoutChargesInput
+  reversedBy?: Prisma.UserCreateNestedOneWithoutReversedChargesInput
+  allocations?: Prisma.PaymentAllocationCreateNestedManyWithoutChargeInput
+  absence?: Prisma.TemporaryAbsenceCreateNestedOneWithoutCreditChargeInput
+  absenceTenants?: Prisma.TemporaryAbsenceCreateNestedManyWithoutCreditChargeTenantInput
+}
+
+export type ChargeUncheckedCreateWithoutContractTenantInput = {
+  id?: string
+  version?: number
+  type: $Enums.ChargeType
+  status?: $Enums.LedgerEntryStatus
+  amount: number
+  periodStart: Date | string
+  periodEnd: Date | string
+  dueDate: Date | string
+  description?: string | null
+  postedAt?: Date | string
+  reversedById?: string | null
+  reversalReason?: string | null
+  reversedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  allocations?: Prisma.PaymentAllocationUncheckedCreateNestedManyWithoutChargeInput
+  absence?: Prisma.TemporaryAbsenceUncheckedCreateNestedOneWithoutCreditChargeInput
+  absenceTenants?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutCreditChargeTenantInput
+}
+
+export type ChargeCreateOrConnectWithoutContractTenantInput = {
+  where: Prisma.ChargeWhereUniqueInput
+  create: Prisma.XOR<Prisma.ChargeCreateWithoutContractTenantInput, Prisma.ChargeUncheckedCreateWithoutContractTenantInput>
+}
+
+export type ChargeCreateManyContractTenantInputEnvelope = {
+  data: Prisma.ChargeCreateManyContractTenantInput | Prisma.ChargeCreateManyContractTenantInput[]
   skipDuplicates?: boolean
 }
 
@@ -1295,6 +1560,22 @@ export type ChargeUpdateWithWhereUniqueWithoutContractInput = {
 export type ChargeUpdateManyWithWhereWithoutContractInput = {
   where: Prisma.ChargeScalarWhereInput
   data: Prisma.XOR<Prisma.ChargeUpdateManyMutationInput, Prisma.ChargeUncheckedUpdateManyWithoutContractInput>
+}
+
+export type ChargeUpsertWithWhereUniqueWithoutContractTenantInput = {
+  where: Prisma.ChargeWhereUniqueInput
+  update: Prisma.XOR<Prisma.ChargeUpdateWithoutContractTenantInput, Prisma.ChargeUncheckedUpdateWithoutContractTenantInput>
+  create: Prisma.XOR<Prisma.ChargeCreateWithoutContractTenantInput, Prisma.ChargeUncheckedCreateWithoutContractTenantInput>
+}
+
+export type ChargeUpdateWithWhereUniqueWithoutContractTenantInput = {
+  where: Prisma.ChargeWhereUniqueInput
+  data: Prisma.XOR<Prisma.ChargeUpdateWithoutContractTenantInput, Prisma.ChargeUncheckedUpdateWithoutContractTenantInput>
+}
+
+export type ChargeUpdateManyWithWhereWithoutContractTenantInput = {
+  where: Prisma.ChargeScalarWhereInput
+  data: Prisma.XOR<Prisma.ChargeUpdateManyMutationInput, Prisma.ChargeUncheckedUpdateManyWithoutContractTenantInput>
 }
 
 export type ChargeCreateWithoutAllocationsInput = {
@@ -1315,8 +1596,10 @@ export type ChargeCreateWithoutAllocationsInput = {
   organization: Prisma.OrganizationCreateNestedOneWithoutChargesInput
   resident: Prisma.ResidentCreateNestedOneWithoutChargesInput
   contract?: Prisma.StayContractCreateNestedOneWithoutChargesInput
+  contractTenant?: Prisma.StayContractCreateNestedOneWithoutChargeTenantsInput
   reversedBy?: Prisma.UserCreateNestedOneWithoutReversedChargesInput
   absence?: Prisma.TemporaryAbsenceCreateNestedOneWithoutCreditChargeInput
+  absenceTenants?: Prisma.TemporaryAbsenceCreateNestedManyWithoutCreditChargeTenantInput
 }
 
 export type ChargeUncheckedCreateWithoutAllocationsInput = {
@@ -1339,6 +1622,7 @@ export type ChargeUncheckedCreateWithoutAllocationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   absence?: Prisma.TemporaryAbsenceUncheckedCreateNestedOneWithoutCreditChargeInput
+  absenceTenants?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutCreditChargeTenantInput
 }
 
 export type ChargeCreateOrConnectWithoutAllocationsInput = {
@@ -1375,8 +1659,10 @@ export type ChargeUpdateWithoutAllocationsInput = {
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChargesNestedInput
   resident?: Prisma.ResidentUpdateOneRequiredWithoutChargesNestedInput
   contract?: Prisma.StayContractUpdateOneWithoutChargesNestedInput
+  contractTenant?: Prisma.StayContractUpdateOneWithoutChargeTenantsNestedInput
   reversedBy?: Prisma.UserUpdateOneWithoutReversedChargesNestedInput
   absence?: Prisma.TemporaryAbsenceUpdateOneWithoutCreditChargeNestedInput
+  absenceTenants?: Prisma.TemporaryAbsenceUpdateManyWithoutCreditChargeTenantNestedInput
 }
 
 export type ChargeUncheckedUpdateWithoutAllocationsInput = {
@@ -1399,6 +1685,7 @@ export type ChargeUncheckedUpdateWithoutAllocationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   absence?: Prisma.TemporaryAbsenceUncheckedUpdateOneWithoutCreditChargeNestedInput
+  absenceTenants?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutCreditChargeTenantNestedInput
 }
 
 export type ChargeCreateManyOrganizationInput = {
@@ -1438,9 +1725,11 @@ export type ChargeUpdateWithoutOrganizationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   resident?: Prisma.ResidentUpdateOneRequiredWithoutChargesNestedInput
   contract?: Prisma.StayContractUpdateOneWithoutChargesNestedInput
+  contractTenant?: Prisma.StayContractUpdateOneWithoutChargeTenantsNestedInput
   reversedBy?: Prisma.UserUpdateOneWithoutReversedChargesNestedInput
   allocations?: Prisma.PaymentAllocationUpdateManyWithoutChargeNestedInput
   absence?: Prisma.TemporaryAbsenceUpdateOneWithoutCreditChargeNestedInput
+  absenceTenants?: Prisma.TemporaryAbsenceUpdateManyWithoutCreditChargeTenantNestedInput
 }
 
 export type ChargeUncheckedUpdateWithoutOrganizationInput = {
@@ -1463,6 +1752,7 @@ export type ChargeUncheckedUpdateWithoutOrganizationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   allocations?: Prisma.PaymentAllocationUncheckedUpdateManyWithoutChargeNestedInput
   absence?: Prisma.TemporaryAbsenceUncheckedUpdateOneWithoutCreditChargeNestedInput
+  absenceTenants?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutCreditChargeTenantNestedInput
 }
 
 export type ChargeUncheckedUpdateManyWithoutOrganizationInput = {
@@ -1523,8 +1813,10 @@ export type ChargeUpdateWithoutReversedByInput = {
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChargesNestedInput
   resident?: Prisma.ResidentUpdateOneRequiredWithoutChargesNestedInput
   contract?: Prisma.StayContractUpdateOneWithoutChargesNestedInput
+  contractTenant?: Prisma.StayContractUpdateOneWithoutChargeTenantsNestedInput
   allocations?: Prisma.PaymentAllocationUpdateManyWithoutChargeNestedInput
   absence?: Prisma.TemporaryAbsenceUpdateOneWithoutCreditChargeNestedInput
+  absenceTenants?: Prisma.TemporaryAbsenceUpdateManyWithoutCreditChargeTenantNestedInput
 }
 
 export type ChargeUncheckedUpdateWithoutReversedByInput = {
@@ -1547,6 +1839,7 @@ export type ChargeUncheckedUpdateWithoutReversedByInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   allocations?: Prisma.PaymentAllocationUncheckedUpdateManyWithoutChargeNestedInput
   absence?: Prisma.TemporaryAbsenceUncheckedUpdateOneWithoutCreditChargeNestedInput
+  absenceTenants?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutCreditChargeTenantNestedInput
 }
 
 export type ChargeUncheckedUpdateManyWithoutReversedByInput = {
@@ -1572,7 +1865,6 @@ export type ChargeUncheckedUpdateManyWithoutReversedByInput = {
 export type ChargeCreateManyResidentInput = {
   id?: string
   version?: number
-  organizationId: string
   contractId?: string | null
   type: $Enums.ChargeType
   status?: $Enums.LedgerEntryStatus
@@ -1606,15 +1898,16 @@ export type ChargeUpdateWithoutResidentInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChargesNestedInput
   contract?: Prisma.StayContractUpdateOneWithoutChargesNestedInput
+  contractTenant?: Prisma.StayContractUpdateOneWithoutChargeTenantsNestedInput
   reversedBy?: Prisma.UserUpdateOneWithoutReversedChargesNestedInput
   allocations?: Prisma.PaymentAllocationUpdateManyWithoutChargeNestedInput
   absence?: Prisma.TemporaryAbsenceUpdateOneWithoutCreditChargeNestedInput
+  absenceTenants?: Prisma.TemporaryAbsenceUpdateManyWithoutCreditChargeTenantNestedInput
 }
 
 export type ChargeUncheckedUpdateWithoutResidentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   contractId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumChargeTypeFieldUpdateOperationsInput | $Enums.ChargeType
   status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
@@ -1631,12 +1924,12 @@ export type ChargeUncheckedUpdateWithoutResidentInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   allocations?: Prisma.PaymentAllocationUncheckedUpdateManyWithoutChargeNestedInput
   absence?: Prisma.TemporaryAbsenceUncheckedUpdateOneWithoutCreditChargeNestedInput
+  absenceTenants?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutCreditChargeTenantNestedInput
 }
 
 export type ChargeUncheckedUpdateManyWithoutResidentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   contractId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumChargeTypeFieldUpdateOperationsInput | $Enums.ChargeType
   status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
@@ -1673,6 +1966,24 @@ export type ChargeCreateManyContractInput = {
   updatedAt?: Date | string
 }
 
+export type ChargeCreateManyContractTenantInput = {
+  id?: string
+  version?: number
+  type: $Enums.ChargeType
+  status?: $Enums.LedgerEntryStatus
+  amount: number
+  periodStart: Date | string
+  periodEnd: Date | string
+  dueDate: Date | string
+  description?: string | null
+  postedAt?: Date | string
+  reversedById?: string | null
+  reversalReason?: string | null
+  reversedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
 export type ChargeUpdateWithoutContractInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1690,9 +2001,11 @@ export type ChargeUpdateWithoutContractInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChargesNestedInput
   resident?: Prisma.ResidentUpdateOneRequiredWithoutChargesNestedInput
+  contractTenant?: Prisma.StayContractUpdateOneWithoutChargeTenantsNestedInput
   reversedBy?: Prisma.UserUpdateOneWithoutReversedChargesNestedInput
   allocations?: Prisma.PaymentAllocationUpdateManyWithoutChargeNestedInput
   absence?: Prisma.TemporaryAbsenceUpdateOneWithoutCreditChargeNestedInput
+  absenceTenants?: Prisma.TemporaryAbsenceUpdateManyWithoutCreditChargeTenantNestedInput
 }
 
 export type ChargeUncheckedUpdateWithoutContractInput = {
@@ -1715,6 +2028,7 @@ export type ChargeUncheckedUpdateWithoutContractInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   allocations?: Prisma.PaymentAllocationUncheckedUpdateManyWithoutChargeNestedInput
   absence?: Prisma.TemporaryAbsenceUncheckedUpdateOneWithoutCreditChargeNestedInput
+  absenceTenants?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutCreditChargeTenantNestedInput
 }
 
 export type ChargeUncheckedUpdateManyWithoutContractInput = {
@@ -1737,6 +2051,69 @@ export type ChargeUncheckedUpdateManyWithoutContractInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+export type ChargeUpdateWithoutContractTenantInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  type?: Prisma.EnumChargeTypeFieldUpdateOperationsInput | $Enums.ChargeType
+  status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  periodStart?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  periodEnd?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  postedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutChargesNestedInput
+  resident?: Prisma.ResidentUpdateOneRequiredWithoutChargesNestedInput
+  contract?: Prisma.StayContractUpdateOneWithoutChargesNestedInput
+  reversedBy?: Prisma.UserUpdateOneWithoutReversedChargesNestedInput
+  allocations?: Prisma.PaymentAllocationUpdateManyWithoutChargeNestedInput
+  absence?: Prisma.TemporaryAbsenceUpdateOneWithoutCreditChargeNestedInput
+  absenceTenants?: Prisma.TemporaryAbsenceUpdateManyWithoutCreditChargeTenantNestedInput
+}
+
+export type ChargeUncheckedUpdateWithoutContractTenantInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  type?: Prisma.EnumChargeTypeFieldUpdateOperationsInput | $Enums.ChargeType
+  status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  periodStart?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  periodEnd?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  postedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  allocations?: Prisma.PaymentAllocationUncheckedUpdateManyWithoutChargeNestedInput
+  absence?: Prisma.TemporaryAbsenceUncheckedUpdateOneWithoutCreditChargeNestedInput
+  absenceTenants?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutCreditChargeTenantNestedInput
+}
+
+export type ChargeUncheckedUpdateManyWithoutContractTenantInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  type?: Prisma.EnumChargeTypeFieldUpdateOperationsInput | $Enums.ChargeType
+  status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  periodStart?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  periodEnd?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  postedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 /**
  * Count Type ChargeCountOutputType
@@ -1744,10 +2121,12 @@ export type ChargeUncheckedUpdateManyWithoutContractInput = {
 
 export type ChargeCountOutputType = {
   allocations: number
+  absenceTenants: number
 }
 
 export type ChargeCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   allocations?: boolean | ChargeCountOutputTypeCountAllocationsArgs
+  absenceTenants?: boolean | ChargeCountOutputTypeCountAbsenceTenantsArgs
 }
 
 /**
@@ -1765,6 +2144,13 @@ export type ChargeCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Exten
  */
 export type ChargeCountOutputTypeCountAllocationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.PaymentAllocationWhereInput
+}
+
+/**
+ * ChargeCountOutputType without action
+ */
+export type ChargeCountOutputTypeCountAbsenceTenantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TemporaryAbsenceWhereInput
 }
 
 
@@ -1790,9 +2176,11 @@ export type ChargeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   resident?: boolean | Prisma.ResidentDefaultArgs<ExtArgs>
   contract?: boolean | Prisma.Charge$contractArgs<ExtArgs>
+  contractTenant?: boolean | Prisma.Charge$contractTenantArgs<ExtArgs>
   reversedBy?: boolean | Prisma.Charge$reversedByArgs<ExtArgs>
   allocations?: boolean | Prisma.Charge$allocationsArgs<ExtArgs>
   absence?: boolean | Prisma.Charge$absenceArgs<ExtArgs>
+  absenceTenants?: boolean | Prisma.Charge$absenceTenantsArgs<ExtArgs>
   _count?: boolean | Prisma.ChargeCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["charge"]>
 
@@ -1818,6 +2206,7 @@ export type ChargeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   resident?: boolean | Prisma.ResidentDefaultArgs<ExtArgs>
   contract?: boolean | Prisma.Charge$contractArgs<ExtArgs>
+  contractTenant?: boolean | Prisma.Charge$contractTenantArgs<ExtArgs>
   reversedBy?: boolean | Prisma.Charge$reversedByArgs<ExtArgs>
 }, ExtArgs["result"]["charge"]>
 
@@ -1843,6 +2232,7 @@ export type ChargeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   resident?: boolean | Prisma.ResidentDefaultArgs<ExtArgs>
   contract?: boolean | Prisma.Charge$contractArgs<ExtArgs>
+  contractTenant?: boolean | Prisma.Charge$contractTenantArgs<ExtArgs>
   reversedBy?: boolean | Prisma.Charge$reversedByArgs<ExtArgs>
 }, ExtArgs["result"]["charge"]>
 
@@ -1872,21 +2262,25 @@ export type ChargeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   resident?: boolean | Prisma.ResidentDefaultArgs<ExtArgs>
   contract?: boolean | Prisma.Charge$contractArgs<ExtArgs>
+  contractTenant?: boolean | Prisma.Charge$contractTenantArgs<ExtArgs>
   reversedBy?: boolean | Prisma.Charge$reversedByArgs<ExtArgs>
   allocations?: boolean | Prisma.Charge$allocationsArgs<ExtArgs>
   absence?: boolean | Prisma.Charge$absenceArgs<ExtArgs>
+  absenceTenants?: boolean | Prisma.Charge$absenceTenantsArgs<ExtArgs>
   _count?: boolean | Prisma.ChargeCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ChargeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   resident?: boolean | Prisma.ResidentDefaultArgs<ExtArgs>
   contract?: boolean | Prisma.Charge$contractArgs<ExtArgs>
+  contractTenant?: boolean | Prisma.Charge$contractTenantArgs<ExtArgs>
   reversedBy?: boolean | Prisma.Charge$reversedByArgs<ExtArgs>
 }
 export type ChargeIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   resident?: boolean | Prisma.ResidentDefaultArgs<ExtArgs>
   contract?: boolean | Prisma.Charge$contractArgs<ExtArgs>
+  contractTenant?: boolean | Prisma.Charge$contractTenantArgs<ExtArgs>
   reversedBy?: boolean | Prisma.Charge$reversedByArgs<ExtArgs>
 }
 
@@ -1896,9 +2290,11 @@ export type $ChargePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     organization: Prisma.$OrganizationPayload<ExtArgs>
     resident: Prisma.$ResidentPayload<ExtArgs>
     contract: Prisma.$StayContractPayload<ExtArgs> | null
+    contractTenant: Prisma.$StayContractPayload<ExtArgs> | null
     reversedBy: Prisma.$UserPayload<ExtArgs> | null
     allocations: Prisma.$PaymentAllocationPayload<ExtArgs>[]
     absence: Prisma.$TemporaryAbsencePayload<ExtArgs> | null
+    absenceTenants: Prisma.$TemporaryAbsencePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2316,9 +2712,11 @@ export interface Prisma__ChargeClient<T, Null = never, ExtArgs extends runtime.T
   organization<T extends Prisma.OrganizationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrganizationDefaultArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   resident<T extends Prisma.ResidentDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ResidentDefaultArgs<ExtArgs>>): Prisma.Prisma__ResidentClient<runtime.Types.Result.GetResult<Prisma.$ResidentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   contract<T extends Prisma.Charge$contractArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Charge$contractArgs<ExtArgs>>): Prisma.Prisma__StayContractClient<runtime.Types.Result.GetResult<Prisma.$StayContractPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  contractTenant<T extends Prisma.Charge$contractTenantArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Charge$contractTenantArgs<ExtArgs>>): Prisma.Prisma__StayContractClient<runtime.Types.Result.GetResult<Prisma.$StayContractPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   reversedBy<T extends Prisma.Charge$reversedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Charge$reversedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   allocations<T extends Prisma.Charge$allocationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Charge$allocationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentAllocationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   absence<T extends Prisma.Charge$absenceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Charge$absenceArgs<ExtArgs>>): Prisma.Prisma__TemporaryAbsenceClient<runtime.Types.Result.GetResult<Prisma.$TemporaryAbsencePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  absenceTenants<T extends Prisma.Charge$absenceTenantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Charge$absenceTenantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TemporaryAbsencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2786,6 +3184,25 @@ export type Charge$contractArgs<ExtArgs extends runtime.Types.Extensions.Interna
 }
 
 /**
+ * Charge.contractTenant
+ */
+export type Charge$contractTenantArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StayContract
+   */
+  select?: Prisma.StayContractSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StayContract
+   */
+  omit?: Prisma.StayContractOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StayContractInclude<ExtArgs> | null
+  where?: Prisma.StayContractWhereInput
+}
+
+/**
  * Charge.reversedBy
  */
 export type Charge$reversedByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2845,6 +3262,30 @@ export type Charge$absenceArgs<ExtArgs extends runtime.Types.Extensions.Internal
    */
   include?: Prisma.TemporaryAbsenceInclude<ExtArgs> | null
   where?: Prisma.TemporaryAbsenceWhereInput
+}
+
+/**
+ * Charge.absenceTenants
+ */
+export type Charge$absenceTenantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TemporaryAbsence
+   */
+  select?: Prisma.TemporaryAbsenceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TemporaryAbsence
+   */
+  omit?: Prisma.TemporaryAbsenceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TemporaryAbsenceInclude<ExtArgs> | null
+  where?: Prisma.TemporaryAbsenceWhereInput
+  orderBy?: Prisma.TemporaryAbsenceOrderByWithRelationInput | Prisma.TemporaryAbsenceOrderByWithRelationInput[]
+  cursor?: Prisma.TemporaryAbsenceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TemporaryAbsenceScalarFieldEnum | Prisma.TemporaryAbsenceScalarFieldEnum[]
 }
 
 /**

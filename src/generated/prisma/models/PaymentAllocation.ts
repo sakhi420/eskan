@@ -36,6 +36,8 @@ export type PaymentAllocationSumAggregateOutputType = {
 
 export type PaymentAllocationMinAggregateOutputType = {
   id: string | null
+  organizationId: string | null
+  residentId: string | null
   paymentId: string | null
   chargeId: string | null
   amount: number | null
@@ -44,6 +46,8 @@ export type PaymentAllocationMinAggregateOutputType = {
 
 export type PaymentAllocationMaxAggregateOutputType = {
   id: string | null
+  organizationId: string | null
+  residentId: string | null
   paymentId: string | null
   chargeId: string | null
   amount: number | null
@@ -52,6 +56,8 @@ export type PaymentAllocationMaxAggregateOutputType = {
 
 export type PaymentAllocationCountAggregateOutputType = {
   id: number
+  organizationId: number
+  residentId: number
   paymentId: number
   chargeId: number
   amount: number
@@ -70,6 +76,8 @@ export type PaymentAllocationSumAggregateInputType = {
 
 export type PaymentAllocationMinAggregateInputType = {
   id?: true
+  organizationId?: true
+  residentId?: true
   paymentId?: true
   chargeId?: true
   amount?: true
@@ -78,6 +86,8 @@ export type PaymentAllocationMinAggregateInputType = {
 
 export type PaymentAllocationMaxAggregateInputType = {
   id?: true
+  organizationId?: true
+  residentId?: true
   paymentId?: true
   chargeId?: true
   amount?: true
@@ -86,6 +96,8 @@ export type PaymentAllocationMaxAggregateInputType = {
 
 export type PaymentAllocationCountAggregateInputType = {
   id?: true
+  organizationId?: true
+  residentId?: true
   paymentId?: true
   chargeId?: true
   amount?: true
@@ -181,6 +193,8 @@ export type PaymentAllocationGroupByArgs<ExtArgs extends runtime.Types.Extension
 
 export type PaymentAllocationGroupByOutputType = {
   id: string
+  organizationId: string
+  residentId: string
   paymentId: string
   chargeId: string
   amount: number
@@ -212,6 +226,8 @@ export type PaymentAllocationWhereInput = {
   OR?: Prisma.PaymentAllocationWhereInput[]
   NOT?: Prisma.PaymentAllocationWhereInput | Prisma.PaymentAllocationWhereInput[]
   id?: Prisma.UuidFilter<"PaymentAllocation"> | string
+  organizationId?: Prisma.UuidFilter<"PaymentAllocation"> | string
+  residentId?: Prisma.UuidFilter<"PaymentAllocation"> | string
   paymentId?: Prisma.UuidFilter<"PaymentAllocation"> | string
   chargeId?: Prisma.UuidFilter<"PaymentAllocation"> | string
   amount?: Prisma.IntFilter<"PaymentAllocation"> | number
@@ -222,6 +238,8 @@ export type PaymentAllocationWhereInput = {
 
 export type PaymentAllocationOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  organizationId?: Prisma.SortOrder
+  residentId?: Prisma.SortOrder
   paymentId?: Prisma.SortOrder
   chargeId?: Prisma.SortOrder
   amount?: Prisma.SortOrder
@@ -232,20 +250,23 @@ export type PaymentAllocationOrderByWithRelationInput = {
 
 export type PaymentAllocationWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  paymentId_chargeId?: Prisma.PaymentAllocationPaymentIdChargeIdCompoundUniqueInput
   AND?: Prisma.PaymentAllocationWhereInput | Prisma.PaymentAllocationWhereInput[]
   OR?: Prisma.PaymentAllocationWhereInput[]
   NOT?: Prisma.PaymentAllocationWhereInput | Prisma.PaymentAllocationWhereInput[]
+  organizationId?: Prisma.UuidFilter<"PaymentAllocation"> | string
+  residentId?: Prisma.UuidFilter<"PaymentAllocation"> | string
   paymentId?: Prisma.UuidFilter<"PaymentAllocation"> | string
   chargeId?: Prisma.UuidFilter<"PaymentAllocation"> | string
   amount?: Prisma.IntFilter<"PaymentAllocation"> | number
   createdAt?: Prisma.DateTimeFilter<"PaymentAllocation"> | Date | string
   payment?: Prisma.XOR<Prisma.PaymentScalarRelationFilter, Prisma.PaymentWhereInput>
   charge?: Prisma.XOR<Prisma.ChargeScalarRelationFilter, Prisma.ChargeWhereInput>
-}, "id" | "paymentId_chargeId">
+}, "id">
 
 export type PaymentAllocationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  organizationId?: Prisma.SortOrder
+  residentId?: Prisma.SortOrder
   paymentId?: Prisma.SortOrder
   chargeId?: Prisma.SortOrder
   amount?: Prisma.SortOrder
@@ -262,6 +283,8 @@ export type PaymentAllocationScalarWhereWithAggregatesInput = {
   OR?: Prisma.PaymentAllocationScalarWhereWithAggregatesInput[]
   NOT?: Prisma.PaymentAllocationScalarWhereWithAggregatesInput | Prisma.PaymentAllocationScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"PaymentAllocation"> | string
+  organizationId?: Prisma.UuidWithAggregatesFilter<"PaymentAllocation"> | string
+  residentId?: Prisma.UuidWithAggregatesFilter<"PaymentAllocation"> | string
   paymentId?: Prisma.UuidWithAggregatesFilter<"PaymentAllocation"> | string
   chargeId?: Prisma.UuidWithAggregatesFilter<"PaymentAllocation"> | string
   amount?: Prisma.IntWithAggregatesFilter<"PaymentAllocation"> | number
@@ -278,6 +301,8 @@ export type PaymentAllocationCreateInput = {
 
 export type PaymentAllocationUncheckedCreateInput = {
   id?: string
+  organizationId: string
+  residentId: string
   paymentId: string
   chargeId: string
   amount: number
@@ -294,6 +319,8 @@ export type PaymentAllocationUpdateInput = {
 
 export type PaymentAllocationUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  residentId?: Prisma.StringFieldUpdateOperationsInput | string
   paymentId?: Prisma.StringFieldUpdateOperationsInput | string
   chargeId?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -302,6 +329,8 @@ export type PaymentAllocationUncheckedUpdateInput = {
 
 export type PaymentAllocationCreateManyInput = {
   id?: string
+  organizationId: string
+  residentId: string
   paymentId: string
   chargeId: string
   amount: number
@@ -316,6 +345,8 @@ export type PaymentAllocationUpdateManyMutationInput = {
 
 export type PaymentAllocationUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  residentId?: Prisma.StringFieldUpdateOperationsInput | string
   paymentId?: Prisma.StringFieldUpdateOperationsInput | string
   chargeId?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -332,13 +363,10 @@ export type PaymentAllocationOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type PaymentAllocationPaymentIdChargeIdCompoundUniqueInput = {
-  paymentId: string
-  chargeId: string
-}
-
 export type PaymentAllocationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  organizationId?: Prisma.SortOrder
+  residentId?: Prisma.SortOrder
   paymentId?: Prisma.SortOrder
   chargeId?: Prisma.SortOrder
   amount?: Prisma.SortOrder
@@ -351,6 +379,8 @@ export type PaymentAllocationAvgOrderByAggregateInput = {
 
 export type PaymentAllocationMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  organizationId?: Prisma.SortOrder
+  residentId?: Prisma.SortOrder
   paymentId?: Prisma.SortOrder
   chargeId?: Prisma.SortOrder
   amount?: Prisma.SortOrder
@@ -359,6 +389,8 @@ export type PaymentAllocationMaxOrderByAggregateInput = {
 
 export type PaymentAllocationMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  organizationId?: Prisma.SortOrder
+  residentId?: Prisma.SortOrder
   paymentId?: Prisma.SortOrder
   chargeId?: Prisma.SortOrder
   amount?: Prisma.SortOrder
@@ -498,6 +530,8 @@ export type PaymentAllocationScalarWhereInput = {
   OR?: Prisma.PaymentAllocationScalarWhereInput[]
   NOT?: Prisma.PaymentAllocationScalarWhereInput | Prisma.PaymentAllocationScalarWhereInput[]
   id?: Prisma.UuidFilter<"PaymentAllocation"> | string
+  organizationId?: Prisma.UuidFilter<"PaymentAllocation"> | string
+  residentId?: Prisma.UuidFilter<"PaymentAllocation"> | string
   paymentId?: Prisma.UuidFilter<"PaymentAllocation"> | string
   chargeId?: Prisma.UuidFilter<"PaymentAllocation"> | string
   amount?: Prisma.IntFilter<"PaymentAllocation"> | number
@@ -604,6 +638,8 @@ export type PaymentAllocationUncheckedUpdateManyWithoutPaymentInput = {
 
 export type PaymentAllocationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  organizationId?: boolean
+  residentId?: boolean
   paymentId?: boolean
   chargeId?: boolean
   amount?: boolean
@@ -614,6 +650,8 @@ export type PaymentAllocationSelect<ExtArgs extends runtime.Types.Extensions.Int
 
 export type PaymentAllocationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  organizationId?: boolean
+  residentId?: boolean
   paymentId?: boolean
   chargeId?: boolean
   amount?: boolean
@@ -624,6 +662,8 @@ export type PaymentAllocationSelectCreateManyAndReturn<ExtArgs extends runtime.T
 
 export type PaymentAllocationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  organizationId?: boolean
+  residentId?: boolean
   paymentId?: boolean
   chargeId?: boolean
   amount?: boolean
@@ -634,13 +674,15 @@ export type PaymentAllocationSelectUpdateManyAndReturn<ExtArgs extends runtime.T
 
 export type PaymentAllocationSelectScalar = {
   id?: boolean
+  organizationId?: boolean
+  residentId?: boolean
   paymentId?: boolean
   chargeId?: boolean
   amount?: boolean
   createdAt?: boolean
 }
 
-export type PaymentAllocationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "paymentId" | "chargeId" | "amount" | "createdAt", ExtArgs["result"]["paymentAllocation"]>
+export type PaymentAllocationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "residentId" | "paymentId" | "chargeId" | "amount" | "createdAt", ExtArgs["result"]["paymentAllocation"]>
 export type PaymentAllocationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   payment?: boolean | Prisma.PaymentDefaultArgs<ExtArgs>
   charge?: boolean | Prisma.ChargeDefaultArgs<ExtArgs>
@@ -662,6 +704,8 @@ export type $PaymentAllocationPayload<ExtArgs extends runtime.Types.Extensions.I
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    organizationId: string
+    residentId: string
     paymentId: string
     chargeId: string
     amount: number
@@ -1092,6 +1136,8 @@ export interface Prisma__PaymentAllocationClient<T, Null = never, ExtArgs extend
  */
 export interface PaymentAllocationFieldRefs {
   readonly id: Prisma.FieldRef<"PaymentAllocation", 'String'>
+  readonly organizationId: Prisma.FieldRef<"PaymentAllocation", 'String'>
+  readonly residentId: Prisma.FieldRef<"PaymentAllocation", 'String'>
   readonly paymentId: Prisma.FieldRef<"PaymentAllocation", 'String'>
   readonly chargeId: Prisma.FieldRef<"PaymentAllocation", 'String'>
   readonly amount: Prisma.FieldRef<"PaymentAllocation", 'Int'>

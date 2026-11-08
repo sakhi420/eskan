@@ -2781,6 +2781,7 @@ export const BedAssignmentScalarFieldEnum = {
   status: 'status',
   startDate: 'startDate',
   endDate: 'endDate',
+  endReason: 'endReason',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2838,6 +2839,8 @@ export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeo
 
 export const PaymentAllocationScalarFieldEnum = {
   id: 'id',
+  organizationId: 'organizationId',
+  residentId: 'residentId',
   paymentId: 'paymentId',
   chargeId: 'chargeId',
   amount: 'amount',
@@ -3013,7 +3016,8 @@ export const IdempotencyRecordScalarFieldEnum = {
   statusCode: 'statusCode',
   responseBody: 'responseBody',
   createdAt: 'createdAt',
-  expiresAt: 'expiresAt'
+  expiresAt: 'expiresAt',
+  retentionClass: 'retentionClass'
 } as const
 
 export type IdempotencyRecordScalarFieldEnum = (typeof IdempotencyRecordScalarFieldEnum)[keyof typeof IdempotencyRecordScalarFieldEnum]
@@ -3316,6 +3320,20 @@ export type ListEnumAssignmentStatusFieldRefInput<$PrismaModel> = FieldRefInputT
 
 
 /**
+ * Reference to a field of type 'AssignmentEndReason'
+ */
+export type EnumAssignmentEndReasonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AssignmentEndReason'>
+    
+
+
+/**
+ * Reference to a field of type 'AssignmentEndReason[]'
+ */
+export type ListEnumAssignmentEndReasonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AssignmentEndReason[]'>
+    
+
+
+/**
  * Reference to a field of type 'ChargeType'
  */
 export type EnumChargeTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ChargeType'>
@@ -3466,6 +3484,20 @@ export type EnumSyncActionFieldRefInput<$PrismaModel> = FieldRefInputType<$Prism
  * Reference to a field of type 'SyncAction[]'
  */
 export type ListEnumSyncActionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SyncAction[]'>
+    
+
+
+/**
+ * Reference to a field of type 'IdempotencyRetentionClass'
+ */
+export type EnumIdempotencyRetentionClassFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'IdempotencyRetentionClass'>
+    
+
+
+/**
+ * Reference to a field of type 'IdempotencyRetentionClass[]'
+ */
+export type ListEnumIdempotencyRetentionClassFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'IdempotencyRetentionClass[]'>
     
 
 

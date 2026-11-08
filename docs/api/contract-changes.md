@@ -1,3 +1,9 @@
+# M-1 (2026-11-07) — additive change to BedAssignment (documented, post Gate-1 lock)
+
+1. Added `AssignmentEndReason` (`CHECKOUT | TRANSFER | TERMINATE | MANUAL_END`) and a nullable `endReason` field on the `BedAssignment` response schema. This is an explicit additive change, not a hidden edit: legacy rows keep `endReason: null` (treated as LEGACY_UNKNOWN per D-04); new service code always sets it.
+2. `assignmentEnd`, `contractTerminate` and `contractCheckout` already declared `Idempotency-Key` as required; the controllers now receive + validate the header and the services record it (replay/serialization) instead of only being "naturally idempotent".
+
+---
 ---
 
 # تصمیمات نهایی مالک — 2026-10-25 (حاکم بر قرارداد)
@@ -14,6 +20,17 @@
 
 ---
 
+# بازبینی Gate 1 (phase-9 financial) — هم‌ترازی امنیت قرارداد با ماتریس
+
+## تغییرات امنیتی (بدون تغییر migration/Prisma)
+
+1. `POST /api/v1/invitations/accept` → `security: []` (پذیرش با توکن یک‌بارمصرف؛ دعوت‌شونده لزومی به ورود قبلی ندارد).
+2. این ۵ عملیات هویتی → `security: [{ bearerAuth: [] }]` (احراز هویت الزامی ولی بدون `X-Organization-Id`؛ از endpointهای anonymous جدا شدند):
+   - `GET /api/v1/system/me` · `GET /api/v1/auth/me` · `POST /api/v1/auth/logout` · `POST /api/v1/auth/logout-all` · `POST /api/v1/auth/change-password`
+3. ماتریس مجوزها به ۵ کلاس صریح بازنویسی شد: Anonymous / احراز بدون نقش سازمانی / عضو سازمانی (هر نقش) / محدود نقش / Platform Admin — نگاه کنید به `permissions-matrix.md`.
+4. `GET /api/v1/organizations` → `security: [{ bearerAuth: [] }]` (فهرست عضویت‌ها/سازمان‌ها برای انتخاب سازمان فعال، بدون `X-Organization-Id`).
+5. هر ۱۰ عملیات `/api/v1/admin/**` → `security: [{ bearerAuth: [] }]` (بدون `X-Organization-Id`؛ مجوز سیستمی از `User.isPlatformAdmin` سمت سرور؛ `organizationId` مسیر = سازمان هدف).
+6. canonical hash به ساختار ۶فیلدی گسترش یافت (`semanticHeaders` شامل `X-Expected-Version`) و test vectorها بازمحاسبه شدند (T1–T6 با SHA-256 واقعی) — نگاه کنید به `idempotency.md`.
 # بازبینی v0.3.0 — تطبیق با مسترپرامپت v3.0 (اشتراک/کنترل + مدل پول)
 
 ## تغییرات
@@ -21,6 +38,8 @@
 1. **مدل پول به string ده‌دهی برگشت** (همراستا با اصل ۱۰ و بخش C.3 مسترپرامپت v3.0):
    `Money.amount` و مبالغ خلاصهٔ گزارش‌ها از `integer` به `string` (الگوی
    `^\d+(\.\d{1,2})?$`) تغییر کرد. این بازگشت تصمیم A-016 (عدد صحیح افغانی) است.
+
+   > ⚠️ **تاریخی — باطل‌شده:** این بازگشت بعداً در «تصمیمات نهایی مالک 2026-10-25» (بالا) لغو شد و **A-016 (عدد صحیح افغانی)** مدل حاکم است؛ این بخش فقط سابقهٔ بازبینی است.
 2. **حوزهٔ اشتراک/Trial/Entitlements** اضافه شد (طرح‌ها، وضعیت‌ها، history، پرداخت دستی).
 3. **APIهای Platform Admin** زیر `/api/v1/admin/**` اضافه شد (فعال‌سازی/تمدید/تغییر/تعلیق/
    ازسرگیری/grace/پرداخت).

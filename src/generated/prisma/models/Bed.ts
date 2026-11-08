@@ -280,6 +280,7 @@ export type BedOrderByWithRelationInput = {
 export type BedWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   roomId_code?: Prisma.BedRoomIdCodeCompoundUniqueInput
+  organizationId_id?: Prisma.BedOrganizationIdIdCompoundUniqueInput
   AND?: Prisma.BedWhereInput | Prisma.BedWhereInput[]
   OR?: Prisma.BedWhereInput[]
   NOT?: Prisma.BedWhereInput | Prisma.BedWhereInput[]
@@ -295,7 +296,7 @@ export type BedWhereUniqueInput = Prisma.AtLeast<{
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   room?: Prisma.XOR<Prisma.RoomScalarRelationFilter, Prisma.RoomWhereInput>
   assignments?: Prisma.BedAssignmentListRelationFilter
-}, "id" | "roomId_code">
+}, "id" | "roomId_code" | "organizationId_id">
 
 export type BedOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -437,6 +438,11 @@ export type BedOrderByRelationAggregateInput = {
 export type BedRoomIdCodeCompoundUniqueInput = {
   roomId: string
   code: string
+}
+
+export type BedOrganizationIdIdCompoundUniqueInput = {
+  organizationId: string
+  id: string
 }
 
 export type BedCountOrderByAggregateInput = {
@@ -677,7 +683,6 @@ export type BedCreateWithoutRoomInput = {
 export type BedUncheckedCreateWithoutRoomInput = {
   id?: string
   version?: number
-  organizationId: string
   code: string
   notes?: string | null
   maintenanceStatus?: $Enums.MaintenanceStatus
@@ -834,7 +839,6 @@ export type BedUncheckedUpdateManyWithoutOrganizationInput = {
 export type BedCreateManyRoomInput = {
   id?: string
   version?: number
-  organizationId: string
   code: string
   notes?: string | null
   maintenanceStatus?: $Enums.MaintenanceStatus
@@ -859,7 +863,6 @@ export type BedUpdateWithoutRoomInput = {
 export type BedUncheckedUpdateWithoutRoomInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus
@@ -872,7 +875,6 @@ export type BedUncheckedUpdateWithoutRoomInput = {
 export type BedUncheckedUpdateManyWithoutRoomInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceStatus?: Prisma.EnumMaintenanceStatusFieldUpdateOperationsInput | $Enums.MaintenanceStatus

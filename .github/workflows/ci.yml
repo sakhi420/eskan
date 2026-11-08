@@ -59,5 +59,39 @@ jobs:
       - name: Apply migrations
         run: npx prisma migrate deploy
 
+      - name: M-2 preflight (read-only, strict = clean baseline)
+        run: node scripts/preflight-m2.cjs --strict
+        env:
+          PREFLIGHT_ALLOW: "1"
+
+      - name: M-2 preflight detection (seeded cross-tenant anomalies)
+        run: node scripts/test-m2-preflight-detection.cjs
+
+      - name: M-2 preflight guard (fail-closed on non-test DB)
+        run: |
+          set +e
+          DATABASE_URL="postgresql://eskan:eskan_dev_password@localhost:5432/eskan_prod" node scripts/preflight-m2.cjs --strict
+          code=$?
+          set -e
+          if [ "$code" -ne 2 ]; then echo "expected guard exit 2, got $code"; exit 1; fi
+
       - name: E2E smoke tests
         run: npm run test:e2e
+
+      - name: M-1 migration & DB constraint tests
+        run: node scripts/test-m1-migration.cjs
+
+      - name: M-2 migration & DB constraint tests
+        run: node scripts/test-m2-migration.cjs
+
+      - name: M-2 package/hostel concurrency tests
+        run: node scripts/test-m2-package-hostel-concurrency.cjs
+
+      - name: M-2 Prisma parity test (migrate diff empty)
+        run: node scripts/test-m2-prisma-parity.cjs
+
+      - name: Idempotency retention consistency CHECK tests
+        run: node scripts/test-idempotency-retention-check.cjs
+
+      - name: PostgreSQL integration tests (lifecycle + concurrency + tenant isolation)
+        run: npm run test:integration

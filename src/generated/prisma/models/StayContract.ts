@@ -320,8 +320,10 @@ export type StayContractWhereInput = {
   hostel?: Prisma.XOR<Prisma.HostelScalarRelationFilter, Prisma.HostelWhereInput>
   resident?: Prisma.XOR<Prisma.ResidentScalarRelationFilter, Prisma.ResidentWhereInput>
   package?: Prisma.XOR<Prisma.AccommodationPackageNullableScalarRelationFilter, Prisma.AccommodationPackageWhereInput> | null
+  packageTenant?: Prisma.XOR<Prisma.AccommodationPackageNullableScalarRelationFilter, Prisma.AccommodationPackageWhereInput> | null
   assignments?: Prisma.BedAssignmentListRelationFilter
   charges?: Prisma.ChargeListRelationFilter
+  chargeTenants?: Prisma.ChargeListRelationFilter
   absences?: Prisma.TemporaryAbsenceListRelationFilter
 }
 
@@ -347,14 +349,18 @@ export type StayContractOrderByWithRelationInput = {
   hostel?: Prisma.HostelOrderByWithRelationInput
   resident?: Prisma.ResidentOrderByWithRelationInput
   package?: Prisma.AccommodationPackageOrderByWithRelationInput
+  packageTenant?: Prisma.AccommodationPackageOrderByWithRelationInput
   assignments?: Prisma.BedAssignmentOrderByRelationAggregateInput
   charges?: Prisma.ChargeOrderByRelationAggregateInput
+  chargeTenants?: Prisma.ChargeOrderByRelationAggregateInput
   absences?: Prisma.TemporaryAbsenceOrderByRelationAggregateInput
 }
 
 export type StayContractWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   organizationId_contractNumber?: Prisma.StayContractOrganizationIdContractNumberCompoundUniqueInput
+  organizationId_id?: Prisma.StayContractOrganizationIdIdCompoundUniqueInput
+  organizationId_residentId_id?: Prisma.StayContractOrganizationIdResidentIdIdCompoundUniqueInput
   AND?: Prisma.StayContractWhereInput | Prisma.StayContractWhereInput[]
   OR?: Prisma.StayContractWhereInput[]
   NOT?: Prisma.StayContractWhereInput | Prisma.StayContractWhereInput[]
@@ -378,10 +384,12 @@ export type StayContractWhereUniqueInput = Prisma.AtLeast<{
   hostel?: Prisma.XOR<Prisma.HostelScalarRelationFilter, Prisma.HostelWhereInput>
   resident?: Prisma.XOR<Prisma.ResidentScalarRelationFilter, Prisma.ResidentWhereInput>
   package?: Prisma.XOR<Prisma.AccommodationPackageNullableScalarRelationFilter, Prisma.AccommodationPackageWhereInput> | null
+  packageTenant?: Prisma.XOR<Prisma.AccommodationPackageNullableScalarRelationFilter, Prisma.AccommodationPackageWhereInput> | null
   assignments?: Prisma.BedAssignmentListRelationFilter
   charges?: Prisma.ChargeListRelationFilter
+  chargeTenants?: Prisma.ChargeListRelationFilter
   absences?: Prisma.TemporaryAbsenceListRelationFilter
-}, "id" | "organizationId_contractNumber">
+}, "id" | "organizationId_contractNumber" | "organizationId_id" | "organizationId_residentId_id">
 
 export type StayContractOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -449,8 +457,10 @@ export type StayContractCreateInput = {
   hostel: Prisma.HostelCreateNestedOneWithoutStayContractsInput
   resident: Prisma.ResidentCreateNestedOneWithoutStayContractsInput
   package?: Prisma.AccommodationPackageCreateNestedOneWithoutContractsInput
+  packageTenant?: Prisma.AccommodationPackageCreateNestedOneWithoutContractTenantsInput
   assignments?: Prisma.BedAssignmentCreateNestedManyWithoutContractInput
   charges?: Prisma.ChargeCreateNestedManyWithoutContractInput
+  chargeTenants?: Prisma.ChargeCreateNestedManyWithoutContractTenantInput
   absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutContractInput
 }
 
@@ -474,6 +484,7 @@ export type StayContractUncheckedCreateInput = {
   updatedAt?: Date | string
   assignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutContractInput
   charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutContractInput
+  chargeTenants?: Prisma.ChargeUncheckedCreateNestedManyWithoutContractTenantInput
   absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutContractInput
 }
 
@@ -495,8 +506,10 @@ export type StayContractUpdateInput = {
   hostel?: Prisma.HostelUpdateOneRequiredWithoutStayContractsNestedInput
   resident?: Prisma.ResidentUpdateOneRequiredWithoutStayContractsNestedInput
   package?: Prisma.AccommodationPackageUpdateOneWithoutContractsNestedInput
+  packageTenant?: Prisma.AccommodationPackageUpdateOneWithoutContractTenantsNestedInput
   assignments?: Prisma.BedAssignmentUpdateManyWithoutContractNestedInput
   charges?: Prisma.ChargeUpdateManyWithoutContractNestedInput
+  chargeTenants?: Prisma.ChargeUpdateManyWithoutContractTenantNestedInput
   absences?: Prisma.TemporaryAbsenceUpdateManyWithoutContractNestedInput
 }
 
@@ -520,6 +533,7 @@ export type StayContractUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutContractNestedInput
   charges?: Prisma.ChargeUncheckedUpdateManyWithoutContractNestedInput
+  chargeTenants?: Prisma.ChargeUncheckedUpdateManyWithoutContractTenantNestedInput
   absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutContractNestedInput
 }
 
@@ -597,6 +611,17 @@ export type StayContractScalarRelationFilter = {
 export type StayContractOrganizationIdContractNumberCompoundUniqueInput = {
   organizationId: string
   contractNumber: string
+}
+
+export type StayContractOrganizationIdIdCompoundUniqueInput = {
+  organizationId: string
+  id: string
+}
+
+export type StayContractOrganizationIdResidentIdIdCompoundUniqueInput = {
+  organizationId: string
+  residentId: string
+  id: string
 }
 
 export type StayContractCountOrderByAggregateInput = {
@@ -765,10 +790,24 @@ export type StayContractCreateNestedManyWithoutPackageInput = {
   connect?: Prisma.StayContractWhereUniqueInput | Prisma.StayContractWhereUniqueInput[]
 }
 
+export type StayContractCreateNestedManyWithoutPackageTenantInput = {
+  create?: Prisma.XOR<Prisma.StayContractCreateWithoutPackageTenantInput, Prisma.StayContractUncheckedCreateWithoutPackageTenantInput> | Prisma.StayContractCreateWithoutPackageTenantInput[] | Prisma.StayContractUncheckedCreateWithoutPackageTenantInput[]
+  connectOrCreate?: Prisma.StayContractCreateOrConnectWithoutPackageTenantInput | Prisma.StayContractCreateOrConnectWithoutPackageTenantInput[]
+  createMany?: Prisma.StayContractCreateManyPackageTenantInputEnvelope
+  connect?: Prisma.StayContractWhereUniqueInput | Prisma.StayContractWhereUniqueInput[]
+}
+
 export type StayContractUncheckedCreateNestedManyWithoutPackageInput = {
   create?: Prisma.XOR<Prisma.StayContractCreateWithoutPackageInput, Prisma.StayContractUncheckedCreateWithoutPackageInput> | Prisma.StayContractCreateWithoutPackageInput[] | Prisma.StayContractUncheckedCreateWithoutPackageInput[]
   connectOrCreate?: Prisma.StayContractCreateOrConnectWithoutPackageInput | Prisma.StayContractCreateOrConnectWithoutPackageInput[]
   createMany?: Prisma.StayContractCreateManyPackageInputEnvelope
+  connect?: Prisma.StayContractWhereUniqueInput | Prisma.StayContractWhereUniqueInput[]
+}
+
+export type StayContractUncheckedCreateNestedManyWithoutPackageTenantInput = {
+  create?: Prisma.XOR<Prisma.StayContractCreateWithoutPackageTenantInput, Prisma.StayContractUncheckedCreateWithoutPackageTenantInput> | Prisma.StayContractCreateWithoutPackageTenantInput[] | Prisma.StayContractUncheckedCreateWithoutPackageTenantInput[]
+  connectOrCreate?: Prisma.StayContractCreateOrConnectWithoutPackageTenantInput | Prisma.StayContractCreateOrConnectWithoutPackageTenantInput[]
+  createMany?: Prisma.StayContractCreateManyPackageTenantInputEnvelope
   connect?: Prisma.StayContractWhereUniqueInput | Prisma.StayContractWhereUniqueInput[]
 }
 
@@ -786,6 +825,20 @@ export type StayContractUpdateManyWithoutPackageNestedInput = {
   deleteMany?: Prisma.StayContractScalarWhereInput | Prisma.StayContractScalarWhereInput[]
 }
 
+export type StayContractUpdateManyWithoutPackageTenantNestedInput = {
+  create?: Prisma.XOR<Prisma.StayContractCreateWithoutPackageTenantInput, Prisma.StayContractUncheckedCreateWithoutPackageTenantInput> | Prisma.StayContractCreateWithoutPackageTenantInput[] | Prisma.StayContractUncheckedCreateWithoutPackageTenantInput[]
+  connectOrCreate?: Prisma.StayContractCreateOrConnectWithoutPackageTenantInput | Prisma.StayContractCreateOrConnectWithoutPackageTenantInput[]
+  upsert?: Prisma.StayContractUpsertWithWhereUniqueWithoutPackageTenantInput | Prisma.StayContractUpsertWithWhereUniqueWithoutPackageTenantInput[]
+  createMany?: Prisma.StayContractCreateManyPackageTenantInputEnvelope
+  set?: Prisma.StayContractWhereUniqueInput | Prisma.StayContractWhereUniqueInput[]
+  disconnect?: Prisma.StayContractWhereUniqueInput | Prisma.StayContractWhereUniqueInput[]
+  delete?: Prisma.StayContractWhereUniqueInput | Prisma.StayContractWhereUniqueInput[]
+  connect?: Prisma.StayContractWhereUniqueInput | Prisma.StayContractWhereUniqueInput[]
+  update?: Prisma.StayContractUpdateWithWhereUniqueWithoutPackageTenantInput | Prisma.StayContractUpdateWithWhereUniqueWithoutPackageTenantInput[]
+  updateMany?: Prisma.StayContractUpdateManyWithWhereWithoutPackageTenantInput | Prisma.StayContractUpdateManyWithWhereWithoutPackageTenantInput[]
+  deleteMany?: Prisma.StayContractScalarWhereInput | Prisma.StayContractScalarWhereInput[]
+}
+
 export type StayContractUncheckedUpdateManyWithoutPackageNestedInput = {
   create?: Prisma.XOR<Prisma.StayContractCreateWithoutPackageInput, Prisma.StayContractUncheckedCreateWithoutPackageInput> | Prisma.StayContractCreateWithoutPackageInput[] | Prisma.StayContractUncheckedCreateWithoutPackageInput[]
   connectOrCreate?: Prisma.StayContractCreateOrConnectWithoutPackageInput | Prisma.StayContractCreateOrConnectWithoutPackageInput[]
@@ -797,6 +850,20 @@ export type StayContractUncheckedUpdateManyWithoutPackageNestedInput = {
   connect?: Prisma.StayContractWhereUniqueInput | Prisma.StayContractWhereUniqueInput[]
   update?: Prisma.StayContractUpdateWithWhereUniqueWithoutPackageInput | Prisma.StayContractUpdateWithWhereUniqueWithoutPackageInput[]
   updateMany?: Prisma.StayContractUpdateManyWithWhereWithoutPackageInput | Prisma.StayContractUpdateManyWithWhereWithoutPackageInput[]
+  deleteMany?: Prisma.StayContractScalarWhereInput | Prisma.StayContractScalarWhereInput[]
+}
+
+export type StayContractUncheckedUpdateManyWithoutPackageTenantNestedInput = {
+  create?: Prisma.XOR<Prisma.StayContractCreateWithoutPackageTenantInput, Prisma.StayContractUncheckedCreateWithoutPackageTenantInput> | Prisma.StayContractCreateWithoutPackageTenantInput[] | Prisma.StayContractUncheckedCreateWithoutPackageTenantInput[]
+  connectOrCreate?: Prisma.StayContractCreateOrConnectWithoutPackageTenantInput | Prisma.StayContractCreateOrConnectWithoutPackageTenantInput[]
+  upsert?: Prisma.StayContractUpsertWithWhereUniqueWithoutPackageTenantInput | Prisma.StayContractUpsertWithWhereUniqueWithoutPackageTenantInput[]
+  createMany?: Prisma.StayContractCreateManyPackageTenantInputEnvelope
+  set?: Prisma.StayContractWhereUniqueInput | Prisma.StayContractWhereUniqueInput[]
+  disconnect?: Prisma.StayContractWhereUniqueInput | Prisma.StayContractWhereUniqueInput[]
+  delete?: Prisma.StayContractWhereUniqueInput | Prisma.StayContractWhereUniqueInput[]
+  connect?: Prisma.StayContractWhereUniqueInput | Prisma.StayContractWhereUniqueInput[]
+  update?: Prisma.StayContractUpdateWithWhereUniqueWithoutPackageTenantInput | Prisma.StayContractUpdateWithWhereUniqueWithoutPackageTenantInput[]
+  updateMany?: Prisma.StayContractUpdateManyWithWhereWithoutPackageTenantInput | Prisma.StayContractUpdateManyWithWhereWithoutPackageTenantInput[]
   deleteMany?: Prisma.StayContractScalarWhereInput | Prisma.StayContractScalarWhereInput[]
 }
 
@@ -884,6 +951,12 @@ export type StayContractCreateNestedOneWithoutChargesInput = {
   connect?: Prisma.StayContractWhereUniqueInput
 }
 
+export type StayContractCreateNestedOneWithoutChargeTenantsInput = {
+  create?: Prisma.XOR<Prisma.StayContractCreateWithoutChargeTenantsInput, Prisma.StayContractUncheckedCreateWithoutChargeTenantsInput>
+  connectOrCreate?: Prisma.StayContractCreateOrConnectWithoutChargeTenantsInput
+  connect?: Prisma.StayContractWhereUniqueInput
+}
+
 export type StayContractUpdateOneWithoutChargesNestedInput = {
   create?: Prisma.XOR<Prisma.StayContractCreateWithoutChargesInput, Prisma.StayContractUncheckedCreateWithoutChargesInput>
   connectOrCreate?: Prisma.StayContractCreateOrConnectWithoutChargesInput
@@ -892,6 +965,16 @@ export type StayContractUpdateOneWithoutChargesNestedInput = {
   delete?: Prisma.StayContractWhereInput | boolean
   connect?: Prisma.StayContractWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.StayContractUpdateToOneWithWhereWithoutChargesInput, Prisma.StayContractUpdateWithoutChargesInput>, Prisma.StayContractUncheckedUpdateWithoutChargesInput>
+}
+
+export type StayContractUpdateOneWithoutChargeTenantsNestedInput = {
+  create?: Prisma.XOR<Prisma.StayContractCreateWithoutChargeTenantsInput, Prisma.StayContractUncheckedCreateWithoutChargeTenantsInput>
+  connectOrCreate?: Prisma.StayContractCreateOrConnectWithoutChargeTenantsInput
+  upsert?: Prisma.StayContractUpsertWithoutChargeTenantsInput
+  disconnect?: Prisma.StayContractWhereInput | boolean
+  delete?: Prisma.StayContractWhereInput | boolean
+  connect?: Prisma.StayContractWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.StayContractUpdateToOneWithWhereWithoutChargeTenantsInput, Prisma.StayContractUpdateWithoutChargeTenantsInput>, Prisma.StayContractUncheckedUpdateWithoutChargeTenantsInput>
 }
 
 export type StayContractCreateWithoutOrganizationInput = {
@@ -911,8 +994,10 @@ export type StayContractCreateWithoutOrganizationInput = {
   hostel: Prisma.HostelCreateNestedOneWithoutStayContractsInput
   resident: Prisma.ResidentCreateNestedOneWithoutStayContractsInput
   package?: Prisma.AccommodationPackageCreateNestedOneWithoutContractsInput
+  packageTenant?: Prisma.AccommodationPackageCreateNestedOneWithoutContractTenantsInput
   assignments?: Prisma.BedAssignmentCreateNestedManyWithoutContractInput
   charges?: Prisma.ChargeCreateNestedManyWithoutContractInput
+  chargeTenants?: Prisma.ChargeCreateNestedManyWithoutContractTenantInput
   absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutContractInput
 }
 
@@ -935,6 +1020,7 @@ export type StayContractUncheckedCreateWithoutOrganizationInput = {
   updatedAt?: Date | string
   assignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutContractInput
   charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutContractInput
+  chargeTenants?: Prisma.ChargeUncheckedCreateNestedManyWithoutContractTenantInput
   absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutContractInput
 }
 
@@ -1004,15 +1090,16 @@ export type StayContractCreateWithoutHostelInput = {
   organization: Prisma.OrganizationCreateNestedOneWithoutStayContractsInput
   resident: Prisma.ResidentCreateNestedOneWithoutStayContractsInput
   package?: Prisma.AccommodationPackageCreateNestedOneWithoutContractsInput
+  packageTenant?: Prisma.AccommodationPackageCreateNestedOneWithoutContractTenantsInput
   assignments?: Prisma.BedAssignmentCreateNestedManyWithoutContractInput
   charges?: Prisma.ChargeCreateNestedManyWithoutContractInput
+  chargeTenants?: Prisma.ChargeCreateNestedManyWithoutContractTenantInput
   absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutContractInput
 }
 
 export type StayContractUncheckedCreateWithoutHostelInput = {
   id?: string
   version?: number
-  organizationId: string
   residentId: string
   contractNumber: string
   status?: $Enums.ContractStatus
@@ -1028,6 +1115,7 @@ export type StayContractUncheckedCreateWithoutHostelInput = {
   updatedAt?: Date | string
   assignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutContractInput
   charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutContractInput
+  chargeTenants?: Prisma.ChargeUncheckedCreateNestedManyWithoutContractTenantInput
   absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutContractInput
 }
 
@@ -1074,8 +1162,10 @@ export type StayContractCreateWithoutPackageInput = {
   organization: Prisma.OrganizationCreateNestedOneWithoutStayContractsInput
   hostel: Prisma.HostelCreateNestedOneWithoutStayContractsInput
   resident: Prisma.ResidentCreateNestedOneWithoutStayContractsInput
+  packageTenant?: Prisma.AccommodationPackageCreateNestedOneWithoutContractTenantsInput
   assignments?: Prisma.BedAssignmentCreateNestedManyWithoutContractInput
   charges?: Prisma.ChargeCreateNestedManyWithoutContractInput
+  chargeTenants?: Prisma.ChargeCreateNestedManyWithoutContractTenantInput
   absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutContractInput
 }
 
@@ -1098,6 +1188,7 @@ export type StayContractUncheckedCreateWithoutPackageInput = {
   updatedAt?: Date | string
   assignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutContractInput
   charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutContractInput
+  chargeTenants?: Prisma.ChargeUncheckedCreateNestedManyWithoutContractTenantInput
   absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutContractInput
 }
 
@@ -1108,6 +1199,62 @@ export type StayContractCreateOrConnectWithoutPackageInput = {
 
 export type StayContractCreateManyPackageInputEnvelope = {
   data: Prisma.StayContractCreateManyPackageInput | Prisma.StayContractCreateManyPackageInput[]
+  skipDuplicates?: boolean
+}
+
+export type StayContractCreateWithoutPackageTenantInput = {
+  id?: string
+  version?: number
+  contractNumber: string
+  status?: $Enums.ContractStatus
+  startDate: Date | string
+  endDate?: Date | string | null
+  rentAmount: number
+  billingCycle?: $Enums.BillingCycle
+  depositAmount?: number | null
+  packageSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutStayContractsInput
+  hostel: Prisma.HostelCreateNestedOneWithoutStayContractsInput
+  resident: Prisma.ResidentCreateNestedOneWithoutStayContractsInput
+  package?: Prisma.AccommodationPackageCreateNestedOneWithoutContractsInput
+  assignments?: Prisma.BedAssignmentCreateNestedManyWithoutContractInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutContractInput
+  chargeTenants?: Prisma.ChargeCreateNestedManyWithoutContractTenantInput
+  absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutContractInput
+}
+
+export type StayContractUncheckedCreateWithoutPackageTenantInput = {
+  id?: string
+  version?: number
+  hostelId: string
+  residentId: string
+  contractNumber: string
+  status?: $Enums.ContractStatus
+  startDate: Date | string
+  endDate?: Date | string | null
+  rentAmount: number
+  billingCycle?: $Enums.BillingCycle
+  depositAmount?: number | null
+  packageSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutContractInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutContractInput
+  chargeTenants?: Prisma.ChargeUncheckedCreateNestedManyWithoutContractTenantInput
+  absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutContractInput
+}
+
+export type StayContractCreateOrConnectWithoutPackageTenantInput = {
+  where: Prisma.StayContractWhereUniqueInput
+  create: Prisma.XOR<Prisma.StayContractCreateWithoutPackageTenantInput, Prisma.StayContractUncheckedCreateWithoutPackageTenantInput>
+}
+
+export type StayContractCreateManyPackageTenantInputEnvelope = {
+  data: Prisma.StayContractCreateManyPackageTenantInput | Prisma.StayContractCreateManyPackageTenantInput[]
   skipDuplicates?: boolean
 }
 
@@ -1125,6 +1272,22 @@ export type StayContractUpdateWithWhereUniqueWithoutPackageInput = {
 export type StayContractUpdateManyWithWhereWithoutPackageInput = {
   where: Prisma.StayContractScalarWhereInput
   data: Prisma.XOR<Prisma.StayContractUpdateManyMutationInput, Prisma.StayContractUncheckedUpdateManyWithoutPackageInput>
+}
+
+export type StayContractUpsertWithWhereUniqueWithoutPackageTenantInput = {
+  where: Prisma.StayContractWhereUniqueInput
+  update: Prisma.XOR<Prisma.StayContractUpdateWithoutPackageTenantInput, Prisma.StayContractUncheckedUpdateWithoutPackageTenantInput>
+  create: Prisma.XOR<Prisma.StayContractCreateWithoutPackageTenantInput, Prisma.StayContractUncheckedCreateWithoutPackageTenantInput>
+}
+
+export type StayContractUpdateWithWhereUniqueWithoutPackageTenantInput = {
+  where: Prisma.StayContractWhereUniqueInput
+  data: Prisma.XOR<Prisma.StayContractUpdateWithoutPackageTenantInput, Prisma.StayContractUncheckedUpdateWithoutPackageTenantInput>
+}
+
+export type StayContractUpdateManyWithWhereWithoutPackageTenantInput = {
+  where: Prisma.StayContractScalarWhereInput
+  data: Prisma.XOR<Prisma.StayContractUpdateManyMutationInput, Prisma.StayContractUncheckedUpdateManyWithoutPackageTenantInput>
 }
 
 export type StayContractCreateWithoutAbsencesInput = {
@@ -1145,8 +1308,10 @@ export type StayContractCreateWithoutAbsencesInput = {
   hostel: Prisma.HostelCreateNestedOneWithoutStayContractsInput
   resident: Prisma.ResidentCreateNestedOneWithoutStayContractsInput
   package?: Prisma.AccommodationPackageCreateNestedOneWithoutContractsInput
+  packageTenant?: Prisma.AccommodationPackageCreateNestedOneWithoutContractTenantsInput
   assignments?: Prisma.BedAssignmentCreateNestedManyWithoutContractInput
   charges?: Prisma.ChargeCreateNestedManyWithoutContractInput
+  chargeTenants?: Prisma.ChargeCreateNestedManyWithoutContractTenantInput
 }
 
 export type StayContractUncheckedCreateWithoutAbsencesInput = {
@@ -1169,6 +1334,7 @@ export type StayContractUncheckedCreateWithoutAbsencesInput = {
   updatedAt?: Date | string
   assignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutContractInput
   charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutContractInput
+  chargeTenants?: Prisma.ChargeUncheckedCreateNestedManyWithoutContractTenantInput
 }
 
 export type StayContractCreateOrConnectWithoutAbsencesInput = {
@@ -1205,8 +1371,10 @@ export type StayContractUpdateWithoutAbsencesInput = {
   hostel?: Prisma.HostelUpdateOneRequiredWithoutStayContractsNestedInput
   resident?: Prisma.ResidentUpdateOneRequiredWithoutStayContractsNestedInput
   package?: Prisma.AccommodationPackageUpdateOneWithoutContractsNestedInput
+  packageTenant?: Prisma.AccommodationPackageUpdateOneWithoutContractTenantsNestedInput
   assignments?: Prisma.BedAssignmentUpdateManyWithoutContractNestedInput
   charges?: Prisma.ChargeUpdateManyWithoutContractNestedInput
+  chargeTenants?: Prisma.ChargeUpdateManyWithoutContractTenantNestedInput
 }
 
 export type StayContractUncheckedUpdateWithoutAbsencesInput = {
@@ -1229,6 +1397,7 @@ export type StayContractUncheckedUpdateWithoutAbsencesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutContractNestedInput
   charges?: Prisma.ChargeUncheckedUpdateManyWithoutContractNestedInput
+  chargeTenants?: Prisma.ChargeUncheckedUpdateManyWithoutContractTenantNestedInput
 }
 
 export type StayContractCreateWithoutResidentInput = {
@@ -1248,15 +1417,16 @@ export type StayContractCreateWithoutResidentInput = {
   organization: Prisma.OrganizationCreateNestedOneWithoutStayContractsInput
   hostel: Prisma.HostelCreateNestedOneWithoutStayContractsInput
   package?: Prisma.AccommodationPackageCreateNestedOneWithoutContractsInput
+  packageTenant?: Prisma.AccommodationPackageCreateNestedOneWithoutContractTenantsInput
   assignments?: Prisma.BedAssignmentCreateNestedManyWithoutContractInput
   charges?: Prisma.ChargeCreateNestedManyWithoutContractInput
+  chargeTenants?: Prisma.ChargeCreateNestedManyWithoutContractTenantInput
   absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutContractInput
 }
 
 export type StayContractUncheckedCreateWithoutResidentInput = {
   id?: string
   version?: number
-  organizationId: string
   hostelId: string
   contractNumber: string
   status?: $Enums.ContractStatus
@@ -1272,6 +1442,7 @@ export type StayContractUncheckedCreateWithoutResidentInput = {
   updatedAt?: Date | string
   assignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutContractInput
   charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutContractInput
+  chargeTenants?: Prisma.ChargeUncheckedCreateNestedManyWithoutContractTenantInput
   absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutContractInput
 }
 
@@ -1319,7 +1490,9 @@ export type StayContractCreateWithoutAssignmentsInput = {
   hostel: Prisma.HostelCreateNestedOneWithoutStayContractsInput
   resident: Prisma.ResidentCreateNestedOneWithoutStayContractsInput
   package?: Prisma.AccommodationPackageCreateNestedOneWithoutContractsInput
+  packageTenant?: Prisma.AccommodationPackageCreateNestedOneWithoutContractTenantsInput
   charges?: Prisma.ChargeCreateNestedManyWithoutContractInput
+  chargeTenants?: Prisma.ChargeCreateNestedManyWithoutContractTenantInput
   absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutContractInput
 }
 
@@ -1342,6 +1515,7 @@ export type StayContractUncheckedCreateWithoutAssignmentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutContractInput
+  chargeTenants?: Prisma.ChargeUncheckedCreateNestedManyWithoutContractTenantInput
   absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutContractInput
 }
 
@@ -1379,7 +1553,9 @@ export type StayContractUpdateWithoutAssignmentsInput = {
   hostel?: Prisma.HostelUpdateOneRequiredWithoutStayContractsNestedInput
   resident?: Prisma.ResidentUpdateOneRequiredWithoutStayContractsNestedInput
   package?: Prisma.AccommodationPackageUpdateOneWithoutContractsNestedInput
+  packageTenant?: Prisma.AccommodationPackageUpdateOneWithoutContractTenantsNestedInput
   charges?: Prisma.ChargeUpdateManyWithoutContractNestedInput
+  chargeTenants?: Prisma.ChargeUpdateManyWithoutContractTenantNestedInput
   absences?: Prisma.TemporaryAbsenceUpdateManyWithoutContractNestedInput
 }
 
@@ -1402,6 +1578,7 @@ export type StayContractUncheckedUpdateWithoutAssignmentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   charges?: Prisma.ChargeUncheckedUpdateManyWithoutContractNestedInput
+  chargeTenants?: Prisma.ChargeUncheckedUpdateManyWithoutContractTenantNestedInput
   absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutContractNestedInput
 }
 
@@ -1423,7 +1600,9 @@ export type StayContractCreateWithoutChargesInput = {
   hostel: Prisma.HostelCreateNestedOneWithoutStayContractsInput
   resident: Prisma.ResidentCreateNestedOneWithoutStayContractsInput
   package?: Prisma.AccommodationPackageCreateNestedOneWithoutContractsInput
+  packageTenant?: Prisma.AccommodationPackageCreateNestedOneWithoutContractTenantsInput
   assignments?: Prisma.BedAssignmentCreateNestedManyWithoutContractInput
+  chargeTenants?: Prisma.ChargeCreateNestedManyWithoutContractTenantInput
   absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutContractInput
 }
 
@@ -1446,12 +1625,65 @@ export type StayContractUncheckedCreateWithoutChargesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   assignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutContractInput
+  chargeTenants?: Prisma.ChargeUncheckedCreateNestedManyWithoutContractTenantInput
   absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutContractInput
 }
 
 export type StayContractCreateOrConnectWithoutChargesInput = {
   where: Prisma.StayContractWhereUniqueInput
   create: Prisma.XOR<Prisma.StayContractCreateWithoutChargesInput, Prisma.StayContractUncheckedCreateWithoutChargesInput>
+}
+
+export type StayContractCreateWithoutChargeTenantsInput = {
+  id?: string
+  version?: number
+  contractNumber: string
+  status?: $Enums.ContractStatus
+  startDate: Date | string
+  endDate?: Date | string | null
+  rentAmount: number
+  billingCycle?: $Enums.BillingCycle
+  depositAmount?: number | null
+  packageSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutStayContractsInput
+  hostel: Prisma.HostelCreateNestedOneWithoutStayContractsInput
+  resident: Prisma.ResidentCreateNestedOneWithoutStayContractsInput
+  package?: Prisma.AccommodationPackageCreateNestedOneWithoutContractsInput
+  packageTenant?: Prisma.AccommodationPackageCreateNestedOneWithoutContractTenantsInput
+  assignments?: Prisma.BedAssignmentCreateNestedManyWithoutContractInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutContractInput
+  absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutContractInput
+}
+
+export type StayContractUncheckedCreateWithoutChargeTenantsInput = {
+  id?: string
+  version?: number
+  organizationId: string
+  hostelId: string
+  residentId: string
+  contractNumber: string
+  status?: $Enums.ContractStatus
+  startDate: Date | string
+  endDate?: Date | string | null
+  rentAmount: number
+  billingCycle?: $Enums.BillingCycle
+  depositAmount?: number | null
+  packageId?: string | null
+  packageSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutContractInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutContractInput
+  absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutContractInput
+}
+
+export type StayContractCreateOrConnectWithoutChargeTenantsInput = {
+  where: Prisma.StayContractWhereUniqueInput
+  create: Prisma.XOR<Prisma.StayContractCreateWithoutChargeTenantsInput, Prisma.StayContractUncheckedCreateWithoutChargeTenantsInput>
 }
 
 export type StayContractUpsertWithoutChargesInput = {
@@ -1483,7 +1715,9 @@ export type StayContractUpdateWithoutChargesInput = {
   hostel?: Prisma.HostelUpdateOneRequiredWithoutStayContractsNestedInput
   resident?: Prisma.ResidentUpdateOneRequiredWithoutStayContractsNestedInput
   package?: Prisma.AccommodationPackageUpdateOneWithoutContractsNestedInput
+  packageTenant?: Prisma.AccommodationPackageUpdateOneWithoutContractTenantsNestedInput
   assignments?: Prisma.BedAssignmentUpdateManyWithoutContractNestedInput
+  chargeTenants?: Prisma.ChargeUpdateManyWithoutContractTenantNestedInput
   absences?: Prisma.TemporaryAbsenceUpdateManyWithoutContractNestedInput
 }
 
@@ -1506,6 +1740,65 @@ export type StayContractUncheckedUpdateWithoutChargesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutContractNestedInput
+  chargeTenants?: Prisma.ChargeUncheckedUpdateManyWithoutContractTenantNestedInput
+  absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutContractNestedInput
+}
+
+export type StayContractUpsertWithoutChargeTenantsInput = {
+  update: Prisma.XOR<Prisma.StayContractUpdateWithoutChargeTenantsInput, Prisma.StayContractUncheckedUpdateWithoutChargeTenantsInput>
+  create: Prisma.XOR<Prisma.StayContractCreateWithoutChargeTenantsInput, Prisma.StayContractUncheckedCreateWithoutChargeTenantsInput>
+  where?: Prisma.StayContractWhereInput
+}
+
+export type StayContractUpdateToOneWithWhereWithoutChargeTenantsInput = {
+  where?: Prisma.StayContractWhereInput
+  data: Prisma.XOR<Prisma.StayContractUpdateWithoutChargeTenantsInput, Prisma.StayContractUncheckedUpdateWithoutChargeTenantsInput>
+}
+
+export type StayContractUpdateWithoutChargeTenantsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  contractNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumContractStatusFieldUpdateOperationsInput | $Enums.ContractStatus
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  rentAmount?: Prisma.IntFieldUpdateOperationsInput | number
+  billingCycle?: Prisma.EnumBillingCycleFieldUpdateOperationsInput | $Enums.BillingCycle
+  depositAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  packageSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutStayContractsNestedInput
+  hostel?: Prisma.HostelUpdateOneRequiredWithoutStayContractsNestedInput
+  resident?: Prisma.ResidentUpdateOneRequiredWithoutStayContractsNestedInput
+  package?: Prisma.AccommodationPackageUpdateOneWithoutContractsNestedInput
+  packageTenant?: Prisma.AccommodationPackageUpdateOneWithoutContractTenantsNestedInput
+  assignments?: Prisma.BedAssignmentUpdateManyWithoutContractNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutContractNestedInput
+  absences?: Prisma.TemporaryAbsenceUpdateManyWithoutContractNestedInput
+}
+
+export type StayContractUncheckedUpdateWithoutChargeTenantsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  hostelId?: Prisma.StringFieldUpdateOperationsInput | string
+  residentId?: Prisma.StringFieldUpdateOperationsInput | string
+  contractNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumContractStatusFieldUpdateOperationsInput | $Enums.ContractStatus
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  rentAmount?: Prisma.IntFieldUpdateOperationsInput | number
+  billingCycle?: Prisma.EnumBillingCycleFieldUpdateOperationsInput | $Enums.BillingCycle
+  depositAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  packageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  packageSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutContractNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutContractNestedInput
   absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutContractNestedInput
 }
 
@@ -1545,8 +1838,10 @@ export type StayContractUpdateWithoutOrganizationInput = {
   hostel?: Prisma.HostelUpdateOneRequiredWithoutStayContractsNestedInput
   resident?: Prisma.ResidentUpdateOneRequiredWithoutStayContractsNestedInput
   package?: Prisma.AccommodationPackageUpdateOneWithoutContractsNestedInput
+  packageTenant?: Prisma.AccommodationPackageUpdateOneWithoutContractTenantsNestedInput
   assignments?: Prisma.BedAssignmentUpdateManyWithoutContractNestedInput
   charges?: Prisma.ChargeUpdateManyWithoutContractNestedInput
+  chargeTenants?: Prisma.ChargeUpdateManyWithoutContractTenantNestedInput
   absences?: Prisma.TemporaryAbsenceUpdateManyWithoutContractNestedInput
 }
 
@@ -1569,6 +1864,7 @@ export type StayContractUncheckedUpdateWithoutOrganizationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutContractNestedInput
   charges?: Prisma.ChargeUncheckedUpdateManyWithoutContractNestedInput
+  chargeTenants?: Prisma.ChargeUncheckedUpdateManyWithoutContractTenantNestedInput
   absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutContractNestedInput
 }
 
@@ -1594,7 +1890,6 @@ export type StayContractUncheckedUpdateManyWithoutOrganizationInput = {
 export type StayContractCreateManyHostelInput = {
   id?: string
   version?: number
-  organizationId: string
   residentId: string
   contractNumber: string
   status?: $Enums.ContractStatus
@@ -1627,15 +1922,16 @@ export type StayContractUpdateWithoutHostelInput = {
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutStayContractsNestedInput
   resident?: Prisma.ResidentUpdateOneRequiredWithoutStayContractsNestedInput
   package?: Prisma.AccommodationPackageUpdateOneWithoutContractsNestedInput
+  packageTenant?: Prisma.AccommodationPackageUpdateOneWithoutContractTenantsNestedInput
   assignments?: Prisma.BedAssignmentUpdateManyWithoutContractNestedInput
   charges?: Prisma.ChargeUpdateManyWithoutContractNestedInput
+  chargeTenants?: Prisma.ChargeUpdateManyWithoutContractTenantNestedInput
   absences?: Prisma.TemporaryAbsenceUpdateManyWithoutContractNestedInput
 }
 
 export type StayContractUncheckedUpdateWithoutHostelInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   residentId?: Prisma.StringFieldUpdateOperationsInput | string
   contractNumber?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumContractStatusFieldUpdateOperationsInput | $Enums.ContractStatus
@@ -1651,13 +1947,13 @@ export type StayContractUncheckedUpdateWithoutHostelInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutContractNestedInput
   charges?: Prisma.ChargeUncheckedUpdateManyWithoutContractNestedInput
+  chargeTenants?: Prisma.ChargeUncheckedUpdateManyWithoutContractTenantNestedInput
   absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutContractNestedInput
 }
 
 export type StayContractUncheckedUpdateManyWithoutHostelInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   residentId?: Prisma.StringFieldUpdateOperationsInput | string
   contractNumber?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumContractStatusFieldUpdateOperationsInput | $Enums.ContractStatus
@@ -1692,6 +1988,24 @@ export type StayContractCreateManyPackageInput = {
   updatedAt?: Date | string
 }
 
+export type StayContractCreateManyPackageTenantInput = {
+  id?: string
+  version?: number
+  hostelId: string
+  residentId: string
+  contractNumber: string
+  status?: $Enums.ContractStatus
+  startDate: Date | string
+  endDate?: Date | string | null
+  rentAmount: number
+  billingCycle?: $Enums.BillingCycle
+  depositAmount?: number | null
+  packageSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
 export type StayContractUpdateWithoutPackageInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1709,8 +2023,10 @@ export type StayContractUpdateWithoutPackageInput = {
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutStayContractsNestedInput
   hostel?: Prisma.HostelUpdateOneRequiredWithoutStayContractsNestedInput
   resident?: Prisma.ResidentUpdateOneRequiredWithoutStayContractsNestedInput
+  packageTenant?: Prisma.AccommodationPackageUpdateOneWithoutContractTenantsNestedInput
   assignments?: Prisma.BedAssignmentUpdateManyWithoutContractNestedInput
   charges?: Prisma.ChargeUpdateManyWithoutContractNestedInput
+  chargeTenants?: Prisma.ChargeUpdateManyWithoutContractTenantNestedInput
   absences?: Prisma.TemporaryAbsenceUpdateManyWithoutContractNestedInput
 }
 
@@ -1733,6 +2049,7 @@ export type StayContractUncheckedUpdateWithoutPackageInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutContractNestedInput
   charges?: Prisma.ChargeUncheckedUpdateManyWithoutContractNestedInput
+  chargeTenants?: Prisma.ChargeUncheckedUpdateManyWithoutContractTenantNestedInput
   absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutContractNestedInput
 }
 
@@ -1755,10 +2072,73 @@ export type StayContractUncheckedUpdateManyWithoutPackageInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+export type StayContractUpdateWithoutPackageTenantInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  contractNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumContractStatusFieldUpdateOperationsInput | $Enums.ContractStatus
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  rentAmount?: Prisma.IntFieldUpdateOperationsInput | number
+  billingCycle?: Prisma.EnumBillingCycleFieldUpdateOperationsInput | $Enums.BillingCycle
+  depositAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  packageSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutStayContractsNestedInput
+  hostel?: Prisma.HostelUpdateOneRequiredWithoutStayContractsNestedInput
+  resident?: Prisma.ResidentUpdateOneRequiredWithoutStayContractsNestedInput
+  package?: Prisma.AccommodationPackageUpdateOneWithoutContractsNestedInput
+  assignments?: Prisma.BedAssignmentUpdateManyWithoutContractNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutContractNestedInput
+  chargeTenants?: Prisma.ChargeUpdateManyWithoutContractTenantNestedInput
+  absences?: Prisma.TemporaryAbsenceUpdateManyWithoutContractNestedInput
+}
+
+export type StayContractUncheckedUpdateWithoutPackageTenantInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  hostelId?: Prisma.StringFieldUpdateOperationsInput | string
+  residentId?: Prisma.StringFieldUpdateOperationsInput | string
+  contractNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumContractStatusFieldUpdateOperationsInput | $Enums.ContractStatus
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  rentAmount?: Prisma.IntFieldUpdateOperationsInput | number
+  billingCycle?: Prisma.EnumBillingCycleFieldUpdateOperationsInput | $Enums.BillingCycle
+  depositAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  packageSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutContractNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutContractNestedInput
+  chargeTenants?: Prisma.ChargeUncheckedUpdateManyWithoutContractTenantNestedInput
+  absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutContractNestedInput
+}
+
+export type StayContractUncheckedUpdateManyWithoutPackageTenantInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  hostelId?: Prisma.StringFieldUpdateOperationsInput | string
+  residentId?: Prisma.StringFieldUpdateOperationsInput | string
+  contractNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumContractStatusFieldUpdateOperationsInput | $Enums.ContractStatus
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  rentAmount?: Prisma.IntFieldUpdateOperationsInput | number
+  billingCycle?: Prisma.EnumBillingCycleFieldUpdateOperationsInput | $Enums.BillingCycle
+  depositAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  packageSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type StayContractCreateManyResidentInput = {
   id?: string
   version?: number
-  organizationId: string
   hostelId: string
   contractNumber: string
   status?: $Enums.ContractStatus
@@ -1791,15 +2171,16 @@ export type StayContractUpdateWithoutResidentInput = {
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutStayContractsNestedInput
   hostel?: Prisma.HostelUpdateOneRequiredWithoutStayContractsNestedInput
   package?: Prisma.AccommodationPackageUpdateOneWithoutContractsNestedInput
+  packageTenant?: Prisma.AccommodationPackageUpdateOneWithoutContractTenantsNestedInput
   assignments?: Prisma.BedAssignmentUpdateManyWithoutContractNestedInput
   charges?: Prisma.ChargeUpdateManyWithoutContractNestedInput
+  chargeTenants?: Prisma.ChargeUpdateManyWithoutContractTenantNestedInput
   absences?: Prisma.TemporaryAbsenceUpdateManyWithoutContractNestedInput
 }
 
 export type StayContractUncheckedUpdateWithoutResidentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   hostelId?: Prisma.StringFieldUpdateOperationsInput | string
   contractNumber?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumContractStatusFieldUpdateOperationsInput | $Enums.ContractStatus
@@ -1815,13 +2196,13 @@ export type StayContractUncheckedUpdateWithoutResidentInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutContractNestedInput
   charges?: Prisma.ChargeUncheckedUpdateManyWithoutContractNestedInput
+  chargeTenants?: Prisma.ChargeUncheckedUpdateManyWithoutContractTenantNestedInput
   absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutContractNestedInput
 }
 
 export type StayContractUncheckedUpdateManyWithoutResidentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   hostelId?: Prisma.StringFieldUpdateOperationsInput | string
   contractNumber?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumContractStatusFieldUpdateOperationsInput | $Enums.ContractStatus
@@ -1845,12 +2226,14 @@ export type StayContractUncheckedUpdateManyWithoutResidentInput = {
 export type StayContractCountOutputType = {
   assignments: number
   charges: number
+  chargeTenants: number
   absences: number
 }
 
 export type StayContractCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assignments?: boolean | StayContractCountOutputTypeCountAssignmentsArgs
   charges?: boolean | StayContractCountOutputTypeCountChargesArgs
+  chargeTenants?: boolean | StayContractCountOutputTypeCountChargeTenantsArgs
   absences?: boolean | StayContractCountOutputTypeCountAbsencesArgs
 }
 
@@ -1875,6 +2258,13 @@ export type StayContractCountOutputTypeCountAssignmentsArgs<ExtArgs extends runt
  * StayContractCountOutputType without action
  */
 export type StayContractCountOutputTypeCountChargesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ChargeWhereInput
+}
+
+/**
+ * StayContractCountOutputType without action
+ */
+export type StayContractCountOutputTypeCountChargeTenantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ChargeWhereInput
 }
 
@@ -1908,8 +2298,10 @@ export type StayContractSelect<ExtArgs extends runtime.Types.Extensions.Internal
   hostel?: boolean | Prisma.HostelDefaultArgs<ExtArgs>
   resident?: boolean | Prisma.ResidentDefaultArgs<ExtArgs>
   package?: boolean | Prisma.StayContract$packageArgs<ExtArgs>
+  packageTenant?: boolean | Prisma.StayContract$packageTenantArgs<ExtArgs>
   assignments?: boolean | Prisma.StayContract$assignmentsArgs<ExtArgs>
   charges?: boolean | Prisma.StayContract$chargesArgs<ExtArgs>
+  chargeTenants?: boolean | Prisma.StayContract$chargeTenantsArgs<ExtArgs>
   absences?: boolean | Prisma.StayContract$absencesArgs<ExtArgs>
   _count?: boolean | Prisma.StayContractCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["stayContract"]>
@@ -1936,6 +2328,7 @@ export type StayContractSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   hostel?: boolean | Prisma.HostelDefaultArgs<ExtArgs>
   resident?: boolean | Prisma.ResidentDefaultArgs<ExtArgs>
   package?: boolean | Prisma.StayContract$packageArgs<ExtArgs>
+  packageTenant?: boolean | Prisma.StayContract$packageTenantArgs<ExtArgs>
 }, ExtArgs["result"]["stayContract"]>
 
 export type StayContractSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1960,6 +2353,7 @@ export type StayContractSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   hostel?: boolean | Prisma.HostelDefaultArgs<ExtArgs>
   resident?: boolean | Prisma.ResidentDefaultArgs<ExtArgs>
   package?: boolean | Prisma.StayContract$packageArgs<ExtArgs>
+  packageTenant?: boolean | Prisma.StayContract$packageTenantArgs<ExtArgs>
 }, ExtArgs["result"]["stayContract"]>
 
 export type StayContractSelectScalar = {
@@ -1988,8 +2382,10 @@ export type StayContractInclude<ExtArgs extends runtime.Types.Extensions.Interna
   hostel?: boolean | Prisma.HostelDefaultArgs<ExtArgs>
   resident?: boolean | Prisma.ResidentDefaultArgs<ExtArgs>
   package?: boolean | Prisma.StayContract$packageArgs<ExtArgs>
+  packageTenant?: boolean | Prisma.StayContract$packageTenantArgs<ExtArgs>
   assignments?: boolean | Prisma.StayContract$assignmentsArgs<ExtArgs>
   charges?: boolean | Prisma.StayContract$chargesArgs<ExtArgs>
+  chargeTenants?: boolean | Prisma.StayContract$chargeTenantsArgs<ExtArgs>
   absences?: boolean | Prisma.StayContract$absencesArgs<ExtArgs>
   _count?: boolean | Prisma.StayContractCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -1998,12 +2394,14 @@ export type StayContractIncludeCreateManyAndReturn<ExtArgs extends runtime.Types
   hostel?: boolean | Prisma.HostelDefaultArgs<ExtArgs>
   resident?: boolean | Prisma.ResidentDefaultArgs<ExtArgs>
   package?: boolean | Prisma.StayContract$packageArgs<ExtArgs>
+  packageTenant?: boolean | Prisma.StayContract$packageTenantArgs<ExtArgs>
 }
 export type StayContractIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   hostel?: boolean | Prisma.HostelDefaultArgs<ExtArgs>
   resident?: boolean | Prisma.ResidentDefaultArgs<ExtArgs>
   package?: boolean | Prisma.StayContract$packageArgs<ExtArgs>
+  packageTenant?: boolean | Prisma.StayContract$packageTenantArgs<ExtArgs>
 }
 
 export type $StayContractPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2013,8 +2411,10 @@ export type $StayContractPayload<ExtArgs extends runtime.Types.Extensions.Intern
     hostel: Prisma.$HostelPayload<ExtArgs>
     resident: Prisma.$ResidentPayload<ExtArgs>
     package: Prisma.$AccommodationPackagePayload<ExtArgs> | null
+    packageTenant: Prisma.$AccommodationPackagePayload<ExtArgs> | null
     assignments: Prisma.$BedAssignmentPayload<ExtArgs>[]
     charges: Prisma.$ChargePayload<ExtArgs>[]
+    chargeTenants: Prisma.$ChargePayload<ExtArgs>[]
     absences: Prisma.$TemporaryAbsencePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -2433,8 +2833,10 @@ export interface Prisma__StayContractClient<T, Null = never, ExtArgs extends run
   hostel<T extends Prisma.HostelDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.HostelDefaultArgs<ExtArgs>>): Prisma.Prisma__HostelClient<runtime.Types.Result.GetResult<Prisma.$HostelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   resident<T extends Prisma.ResidentDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ResidentDefaultArgs<ExtArgs>>): Prisma.Prisma__ResidentClient<runtime.Types.Result.GetResult<Prisma.$ResidentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   package<T extends Prisma.StayContract$packageArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StayContract$packageArgs<ExtArgs>>): Prisma.Prisma__AccommodationPackageClient<runtime.Types.Result.GetResult<Prisma.$AccommodationPackagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  packageTenant<T extends Prisma.StayContract$packageTenantArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StayContract$packageTenantArgs<ExtArgs>>): Prisma.Prisma__AccommodationPackageClient<runtime.Types.Result.GetResult<Prisma.$AccommodationPackagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   assignments<T extends Prisma.StayContract$assignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StayContract$assignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BedAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   charges<T extends Prisma.StayContract$chargesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StayContract$chargesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChargePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  chargeTenants<T extends Prisma.StayContract$chargeTenantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StayContract$chargeTenantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChargePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   absences<T extends Prisma.StayContract$absencesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StayContract$absencesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TemporaryAbsencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2902,6 +3304,25 @@ export type StayContract$packageArgs<ExtArgs extends runtime.Types.Extensions.In
 }
 
 /**
+ * StayContract.packageTenant
+ */
+export type StayContract$packageTenantArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AccommodationPackage
+   */
+  select?: Prisma.AccommodationPackageSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AccommodationPackage
+   */
+  omit?: Prisma.AccommodationPackageOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AccommodationPackageInclude<ExtArgs> | null
+  where?: Prisma.AccommodationPackageWhereInput
+}
+
+/**
  * StayContract.assignments
  */
 export type StayContract$assignmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2929,6 +3350,30 @@ export type StayContract$assignmentsArgs<ExtArgs extends runtime.Types.Extension
  * StayContract.charges
  */
 export type StayContract$chargesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Charge
+   */
+  select?: Prisma.ChargeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Charge
+   */
+  omit?: Prisma.ChargeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ChargeInclude<ExtArgs> | null
+  where?: Prisma.ChargeWhereInput
+  orderBy?: Prisma.ChargeOrderByWithRelationInput | Prisma.ChargeOrderByWithRelationInput[]
+  cursor?: Prisma.ChargeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ChargeScalarFieldEnum | Prisma.ChargeScalarFieldEnum[]
+}
+
+/**
+ * StayContract.chargeTenants
+ */
+export type StayContract$chargeTenantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the Charge
    */

@@ -323,6 +323,7 @@ export const BedAssignmentScalarFieldEnum = {
   status: 'status',
   startDate: 'startDate',
   endDate: 'endDate',
+  endReason: 'endReason',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -380,6 +381,8 @@ export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeo
 
 export const PaymentAllocationScalarFieldEnum = {
   id: 'id',
+  organizationId: 'organizationId',
+  residentId: 'residentId',
   paymentId: 'paymentId',
   chargeId: 'chargeId',
   amount: 'amount',
@@ -555,7 +558,8 @@ export const IdempotencyRecordScalarFieldEnum = {
   statusCode: 'statusCode',
   responseBody: 'responseBody',
   createdAt: 'createdAt',
-  expiresAt: 'expiresAt'
+  expiresAt: 'expiresAt',
+  retentionClass: 'retentionClass'
 } as const
 
 export type IdempotencyRecordScalarFieldEnum = (typeof IdempotencyRecordScalarFieldEnum)[keyof typeof IdempotencyRecordScalarFieldEnum]

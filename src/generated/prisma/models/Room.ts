@@ -293,6 +293,7 @@ export type RoomOrderByWithRelationInput = {
 export type RoomWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   hostelId_code?: Prisma.RoomHostelIdCodeCompoundUniqueInput
+  organizationId_id?: Prisma.RoomOrganizationIdIdCompoundUniqueInput
   AND?: Prisma.RoomWhereInput | Prisma.RoomWhereInput[]
   OR?: Prisma.RoomWhereInput[]
   NOT?: Prisma.RoomWhereInput | Prisma.RoomWhereInput[]
@@ -309,7 +310,7 @@ export type RoomWhereUniqueInput = Prisma.AtLeast<{
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   hostel?: Prisma.XOR<Prisma.HostelScalarRelationFilter, Prisma.HostelWhereInput>
   beds?: Prisma.BedListRelationFilter
-}, "id" | "hostelId_code">
+}, "id" | "hostelId_code" | "organizationId_id">
 
 export type RoomOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -460,6 +461,11 @@ export type RoomOrderByRelationAggregateInput = {
 export type RoomHostelIdCodeCompoundUniqueInput = {
   hostelId: string
   code: string
+}
+
+export type RoomOrganizationIdIdCompoundUniqueInput = {
+  organizationId: string
+  id: string
 }
 
 export type RoomCountOrderByAggregateInput = {
@@ -709,7 +715,6 @@ export type RoomCreateWithoutHostelInput = {
 export type RoomUncheckedCreateWithoutHostelInput = {
   id?: string
   version?: number
-  organizationId: string
   code: string
   floor: number
   notes?: string | null
@@ -875,7 +880,6 @@ export type RoomUncheckedUpdateManyWithoutOrganizationInput = {
 export type RoomCreateManyHostelInput = {
   id?: string
   version?: number
-  organizationId: string
   code: string
   floor: number
   notes?: string | null
@@ -902,7 +906,6 @@ export type RoomUpdateWithoutHostelInput = {
 export type RoomUncheckedUpdateWithoutHostelInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   floor?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -916,7 +919,6 @@ export type RoomUncheckedUpdateWithoutHostelInput = {
 export type RoomUncheckedUpdateManyWithoutHostelInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   floor?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null

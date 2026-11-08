@@ -78,7 +78,7 @@ export class BedsService {
     organizationId: string,
     roomId: string,
   ): Promise<void> {
-    await this.locks.lockRoom(tx, roomId);
+    await this.locks.lockRoom(tx, roomId, organizationId);
     const room = await tx.room.findFirst({
       where: { id: roomId, organizationId },
       select: { id: true, status: true },
@@ -167,7 +167,7 @@ export class BedsService {
       return await this.prisma.$transaction(async (tx) => {
         // Lock the bed so a concurrent assignment create (which locks the bed in
         // the canonical order) serializes before the maintenance-status guard below.
-        await this.locks.lockBed(tx, bedId);
+        await this.locks.lockBed(tx, bedId, organizationId);
 
         const bed = await tx.bed.findFirst({
           where: { id: bedId, organizationId },
@@ -225,7 +225,7 @@ export class BedsService {
     return this.prisma.$transaction(async (tx) => {
       // Lock the bed row so a concurrent assignment create (which locks the bed
       // in the canonical order) serializes before the check-and-set below.
-      await this.locks.lockBed(tx, bedId);
+      await this.locks.lockBed(tx, bedId, organizationId);
 
       const bed = await tx.bed.findFirst({
         where: { id: bedId, organizationId },

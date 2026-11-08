@@ -47,7 +47,7 @@ export function exclusiveEndForInclusiveLastDay(lastDay: string): string; // las
   و `new.startDate = transitionStart`. به هیچ‌وجه `+1` اعمال نمی‌شود.
 - **Terminate (خاتمهٔ قرارداد، نه Reversal مالی):** خاتمهٔ قرارداد با مفاهیم اقامتی ثبت می‌شود، نه
   واژگان مالی برگشت: `terminationReason`, `terminatedBy`, `terminatedAt`, `effectiveEndDate`.
-  - D-01 (تصمیم باز → پیشنهاد پیش‌فرض): قرارداد `DRAFT` صرفاً «لغو» می‌شود؛ قرارداد `ACTIVE`
+  - D-01 (قطعی): قرارداد `DRAFT` صرفاً «لغو» می‌شود؛ قرارداد `ACTIVE`
     منحصراً از مسیر **Checkout اتمیک** خاتمه می‌یابد (بستن قرارداد + پایان‌دادن همهٔ تخصیص‌های
     فعال در یک تراکنش با یک `effectiveEndDate`). هیچ قرارداد ACTIVE بدون بسته‌شدن تخصیص فعالِ
     تخت خاتمه نمی‌یابد.
@@ -236,7 +236,7 @@ model AbsenceCredit {
   ذخیره نمی‌شود**؛ purge policy نباید رکورد مالی را دوباره قابل اجرا کند (یا soft-archive).
 
 ### Receipt numbering
-- شمارنده به ازای `(organizationId, period)` (مثلاً سال) باشد؛ درج اتمی با قفل ردیف روی
+- شمارنده فقط در سطح `organizationId` باشد (بدون reset سالانه)؛ درج اتمی با قفل ردیف روی
   `ReceiptCounter`.
 - **gap policy (تصمیم D-03):** شمارهٔ رسید unique و پایدار است؛ gapless بودن تضمین نمی‌شود
   مگر الزام حقوقی/عملیاتی صریح باشد.
@@ -256,7 +256,7 @@ ADR-0004: OpenAPI منبع حقیقت است؛ پس قرارداد مالی **پ
 | مرحله | محتوا | خروجی / Gate |
 |---|---|---|
 | **Gate 0 — Design Lock** | رفع تناقض‌های فوق + تصویب D-01..D-18 | این سند (نسخهٔ 0.3) commit شود؛ هیچ P0 باز نماند |
-| **Gate 1 — Contract Lock** | OpenAPI برای **Charge / Payment / Allocation / AllocationRelease / LedgerReversal / PaymentRefund / Deposit / Expense / Credit / AbsenceCredit / Receipt / Account / Statement**، enum خطاها، `lastOccupiedDateInclusive` vs `endDateExclusive`، permission matrix، replay | `openapi:validate` سبز؛ **مجوز شروع طراحی — قرارداد هنوز قفل نشده و پیش از Controller تکمیل می‌شود** |
+| **Gate 1 — Contract Lock** | OpenAPI برای **Charge / Payment / Allocation / AllocationRelease / LedgerReversal / PaymentRefund / Deposit / Expense / Credit (Charge با entrySide=CREDIT) / AbsenceCredit / Receipt / Account / Statement**، enum خطاها، `lastOccupiedDateInclusive` vs `endDateExclusive`، permission matrix، replay | `openapi:validate` سبز؛ **مجوز شروع طراحی — قرارداد هنوز قفل نشده و پیش از Controller تکمیل می‌شود** |
 | **M-1 — Date + Amount** | helper تاریخ، اصلاح `end`/`checkout`/`terminate`، same-day، CHECK های amount/period، preflight legacy date (بدون blanket +1) | test تاریخ + oracle |
 | **M-2 — Composite FK** | unique مرکب (tenant+resident)، ستون‌های org/resident در Allocation، preflight cross-org/resident، swap FK | rehearsal روی clone |
 | **M-3a — Charge/Credit Engine** | Charge، natural key، cycle/proration، credit/adjustment، idempotency، audit + oracle ماه‌های ۲۸..۳۱ |
@@ -282,9 +282,13 @@ ADR-0004: OpenAPI منبع حقیقت است؛ پس قرارداد مالی **پ
 
 ---
 
-## ۱۰. تصمیم‌های باز مالک محصول (D-xx)
+## ۱۰. تصمیم‌های محصولی D-01 تا D-18 (قطعی)
 
-| شناسه | تصمیم پیشنهادی (سیاست پیش‌فرض ESKAN — نیازمند تأیید مالک) |
+> وضعیت: **Approved by delegated product decision** — تصمیم‌های D-01 تا D-18 در
+> `ESKAN_PHASE9_EXECUTION_DIRECTIVE_v1_FA.md` تصویب‌شده و قطعی‌اند و در صورت تعارض،
+> آن سند بر این پلان مقدم است. جدول زیر صرفاً شرح هر تصمیم است، نه «نیازمند تأیید».
+
+| شناسه | تصمیم قطعی |
 |---|---|
 | D-01 | قرارداد `DRAFT` قابل لغو؛ `ACTIVE` فقط از مسیر Checkout اتمیک خاتمه یابد؛ بدون backdate در MVP؛ مبنای `Asia/Kabul`. |
 | D-02 | بدون partial reversal در MVP؛ سند اشتباه full void + اصلاح جزئی با Credit/Debit مستقل مثبت؛ refund واقعی رویداد جدا. |

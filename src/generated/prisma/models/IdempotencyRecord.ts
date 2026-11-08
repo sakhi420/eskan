@@ -45,6 +45,7 @@ export type IdempotencyRecordMinAggregateOutputType = {
   statusCode: number | null
   createdAt: Date | null
   expiresAt: Date | null
+  retentionClass: $Enums.IdempotencyRetentionClass | null
 }
 
 export type IdempotencyRecordMaxAggregateOutputType = {
@@ -58,6 +59,7 @@ export type IdempotencyRecordMaxAggregateOutputType = {
   statusCode: number | null
   createdAt: Date | null
   expiresAt: Date | null
+  retentionClass: $Enums.IdempotencyRetentionClass | null
 }
 
 export type IdempotencyRecordCountAggregateOutputType = {
@@ -72,6 +74,7 @@ export type IdempotencyRecordCountAggregateOutputType = {
   responseBody: number
   createdAt: number
   expiresAt: number
+  retentionClass: number
   _all: number
 }
 
@@ -95,6 +98,7 @@ export type IdempotencyRecordMinAggregateInputType = {
   statusCode?: true
   createdAt?: true
   expiresAt?: true
+  retentionClass?: true
 }
 
 export type IdempotencyRecordMaxAggregateInputType = {
@@ -108,6 +112,7 @@ export type IdempotencyRecordMaxAggregateInputType = {
   statusCode?: true
   createdAt?: true
   expiresAt?: true
+  retentionClass?: true
 }
 
 export type IdempotencyRecordCountAggregateInputType = {
@@ -122,6 +127,7 @@ export type IdempotencyRecordCountAggregateInputType = {
   responseBody?: true
   createdAt?: true
   expiresAt?: true
+  retentionClass?: true
   _all?: true
 }
 
@@ -222,7 +228,8 @@ export type IdempotencyRecordGroupByOutputType = {
   statusCode: number | null
   responseBody: runtime.JsonValue | null
   createdAt: Date
-  expiresAt: Date
+  expiresAt: Date | null
+  retentionClass: $Enums.IdempotencyRetentionClass
   _count: IdempotencyRecordCountAggregateOutputType | null
   _avg: IdempotencyRecordAvgAggregateOutputType | null
   _sum: IdempotencyRecordSumAggregateOutputType | null
@@ -259,7 +266,8 @@ export type IdempotencyRecordWhereInput = {
   statusCode?: Prisma.IntNullableFilter<"IdempotencyRecord"> | number | null
   responseBody?: Prisma.JsonNullableFilter<"IdempotencyRecord">
   createdAt?: Prisma.DateTimeFilter<"IdempotencyRecord"> | Date | string
-  expiresAt?: Prisma.DateTimeFilter<"IdempotencyRecord"> | Date | string
+  expiresAt?: Prisma.DateTimeNullableFilter<"IdempotencyRecord"> | Date | string | null
+  retentionClass?: Prisma.EnumIdempotencyRetentionClassFilter<"IdempotencyRecord"> | $Enums.IdempotencyRetentionClass
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
 }
 
@@ -274,7 +282,8 @@ export type IdempotencyRecordOrderByWithRelationInput = {
   statusCode?: Prisma.SortOrderInput | Prisma.SortOrder
   responseBody?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  expiresAt?: Prisma.SortOrder
+  expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  retentionClass?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
 }
 
@@ -293,7 +302,8 @@ export type IdempotencyRecordWhereUniqueInput = Prisma.AtLeast<{
   statusCode?: Prisma.IntNullableFilter<"IdempotencyRecord"> | number | null
   responseBody?: Prisma.JsonNullableFilter<"IdempotencyRecord">
   createdAt?: Prisma.DateTimeFilter<"IdempotencyRecord"> | Date | string
-  expiresAt?: Prisma.DateTimeFilter<"IdempotencyRecord"> | Date | string
+  expiresAt?: Prisma.DateTimeNullableFilter<"IdempotencyRecord"> | Date | string | null
+  retentionClass?: Prisma.EnumIdempotencyRetentionClassFilter<"IdempotencyRecord"> | $Enums.IdempotencyRetentionClass
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
 }, "id" | "organizationId_idempotencyKey_endpoint">
 
@@ -308,7 +318,8 @@ export type IdempotencyRecordOrderByWithAggregationInput = {
   statusCode?: Prisma.SortOrderInput | Prisma.SortOrder
   responseBody?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  expiresAt?: Prisma.SortOrder
+  expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  retentionClass?: Prisma.SortOrder
   _count?: Prisma.IdempotencyRecordCountOrderByAggregateInput
   _avg?: Prisma.IdempotencyRecordAvgOrderByAggregateInput
   _max?: Prisma.IdempotencyRecordMaxOrderByAggregateInput
@@ -330,7 +341,8 @@ export type IdempotencyRecordScalarWhereWithAggregatesInput = {
   statusCode?: Prisma.IntNullableWithAggregatesFilter<"IdempotencyRecord"> | number | null
   responseBody?: Prisma.JsonNullableWithAggregatesFilter<"IdempotencyRecord">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"IdempotencyRecord"> | Date | string
-  expiresAt?: Prisma.DateTimeWithAggregatesFilter<"IdempotencyRecord"> | Date | string
+  expiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"IdempotencyRecord"> | Date | string | null
+  retentionClass?: Prisma.EnumIdempotencyRetentionClassWithAggregatesFilter<"IdempotencyRecord"> | $Enums.IdempotencyRetentionClass
 }
 
 export type IdempotencyRecordCreateInput = {
@@ -343,7 +355,8 @@ export type IdempotencyRecordCreateInput = {
   statusCode?: number | null
   responseBody?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
-  expiresAt: Date | string
+  expiresAt?: Date | string | null
+  retentionClass?: $Enums.IdempotencyRetentionClass
   organization: Prisma.OrganizationCreateNestedOneWithoutIdempotencyRecordsInput
 }
 
@@ -358,7 +371,8 @@ export type IdempotencyRecordUncheckedCreateInput = {
   statusCode?: number | null
   responseBody?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
-  expiresAt: Date | string
+  expiresAt?: Date | string | null
+  retentionClass?: $Enums.IdempotencyRetentionClass
 }
 
 export type IdempotencyRecordUpdateInput = {
@@ -371,7 +385,8 @@ export type IdempotencyRecordUpdateInput = {
   statusCode?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   responseBody?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionClass?: Prisma.EnumIdempotencyRetentionClassFieldUpdateOperationsInput | $Enums.IdempotencyRetentionClass
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutIdempotencyRecordsNestedInput
 }
 
@@ -386,7 +401,8 @@ export type IdempotencyRecordUncheckedUpdateInput = {
   statusCode?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   responseBody?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionClass?: Prisma.EnumIdempotencyRetentionClassFieldUpdateOperationsInput | $Enums.IdempotencyRetentionClass
 }
 
 export type IdempotencyRecordCreateManyInput = {
@@ -400,7 +416,8 @@ export type IdempotencyRecordCreateManyInput = {
   statusCode?: number | null
   responseBody?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
-  expiresAt: Date | string
+  expiresAt?: Date | string | null
+  retentionClass?: $Enums.IdempotencyRetentionClass
 }
 
 export type IdempotencyRecordUpdateManyMutationInput = {
@@ -413,7 +430,8 @@ export type IdempotencyRecordUpdateManyMutationInput = {
   statusCode?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   responseBody?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionClass?: Prisma.EnumIdempotencyRetentionClassFieldUpdateOperationsInput | $Enums.IdempotencyRetentionClass
 }
 
 export type IdempotencyRecordUncheckedUpdateManyInput = {
@@ -427,7 +445,8 @@ export type IdempotencyRecordUncheckedUpdateManyInput = {
   statusCode?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   responseBody?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionClass?: Prisma.EnumIdempotencyRetentionClassFieldUpdateOperationsInput | $Enums.IdempotencyRetentionClass
 }
 
 export type IdempotencyRecordListRelationFilter = {
@@ -458,6 +477,7 @@ export type IdempotencyRecordCountOrderByAggregateInput = {
   responseBody?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  retentionClass?: Prisma.SortOrder
 }
 
 export type IdempotencyRecordAvgOrderByAggregateInput = {
@@ -475,6 +495,7 @@ export type IdempotencyRecordMaxOrderByAggregateInput = {
   statusCode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  retentionClass?: Prisma.SortOrder
 }
 
 export type IdempotencyRecordMinOrderByAggregateInput = {
@@ -488,6 +509,7 @@ export type IdempotencyRecordMinOrderByAggregateInput = {
   statusCode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  retentionClass?: Prisma.SortOrder
 }
 
 export type IdempotencyRecordSumOrderByAggregateInput = {
@@ -536,6 +558,10 @@ export type IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput =
   deleteMany?: Prisma.IdempotencyRecordScalarWhereInput | Prisma.IdempotencyRecordScalarWhereInput[]
 }
 
+export type EnumIdempotencyRetentionClassFieldUpdateOperationsInput = {
+  set?: $Enums.IdempotencyRetentionClass
+}
+
 export type IdempotencyRecordCreateWithoutOrganizationInput = {
   id?: string
   idempotencyKey: string
@@ -546,7 +572,8 @@ export type IdempotencyRecordCreateWithoutOrganizationInput = {
   statusCode?: number | null
   responseBody?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
-  expiresAt: Date | string
+  expiresAt?: Date | string | null
+  retentionClass?: $Enums.IdempotencyRetentionClass
 }
 
 export type IdempotencyRecordUncheckedCreateWithoutOrganizationInput = {
@@ -559,7 +586,8 @@ export type IdempotencyRecordUncheckedCreateWithoutOrganizationInput = {
   statusCode?: number | null
   responseBody?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
-  expiresAt: Date | string
+  expiresAt?: Date | string | null
+  retentionClass?: $Enums.IdempotencyRetentionClass
 }
 
 export type IdempotencyRecordCreateOrConnectWithoutOrganizationInput = {
@@ -602,7 +630,8 @@ export type IdempotencyRecordScalarWhereInput = {
   statusCode?: Prisma.IntNullableFilter<"IdempotencyRecord"> | number | null
   responseBody?: Prisma.JsonNullableFilter<"IdempotencyRecord">
   createdAt?: Prisma.DateTimeFilter<"IdempotencyRecord"> | Date | string
-  expiresAt?: Prisma.DateTimeFilter<"IdempotencyRecord"> | Date | string
+  expiresAt?: Prisma.DateTimeNullableFilter<"IdempotencyRecord"> | Date | string | null
+  retentionClass?: Prisma.EnumIdempotencyRetentionClassFilter<"IdempotencyRecord"> | $Enums.IdempotencyRetentionClass
 }
 
 export type IdempotencyRecordCreateManyOrganizationInput = {
@@ -615,7 +644,8 @@ export type IdempotencyRecordCreateManyOrganizationInput = {
   statusCode?: number | null
   responseBody?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
-  expiresAt: Date | string
+  expiresAt?: Date | string | null
+  retentionClass?: $Enums.IdempotencyRetentionClass
 }
 
 export type IdempotencyRecordUpdateWithoutOrganizationInput = {
@@ -628,7 +658,8 @@ export type IdempotencyRecordUpdateWithoutOrganizationInput = {
   statusCode?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   responseBody?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionClass?: Prisma.EnumIdempotencyRetentionClassFieldUpdateOperationsInput | $Enums.IdempotencyRetentionClass
 }
 
 export type IdempotencyRecordUncheckedUpdateWithoutOrganizationInput = {
@@ -641,7 +672,8 @@ export type IdempotencyRecordUncheckedUpdateWithoutOrganizationInput = {
   statusCode?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   responseBody?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionClass?: Prisma.EnumIdempotencyRetentionClassFieldUpdateOperationsInput | $Enums.IdempotencyRetentionClass
 }
 
 export type IdempotencyRecordUncheckedUpdateManyWithoutOrganizationInput = {
@@ -654,7 +686,8 @@ export type IdempotencyRecordUncheckedUpdateManyWithoutOrganizationInput = {
   statusCode?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   responseBody?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionClass?: Prisma.EnumIdempotencyRetentionClassFieldUpdateOperationsInput | $Enums.IdempotencyRetentionClass
 }
 
 
@@ -671,6 +704,7 @@ export type IdempotencyRecordSelect<ExtArgs extends runtime.Types.Extensions.Int
   responseBody?: boolean
   createdAt?: boolean
   expiresAt?: boolean
+  retentionClass?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["idempotencyRecord"]>
 
@@ -686,6 +720,7 @@ export type IdempotencyRecordSelectCreateManyAndReturn<ExtArgs extends runtime.T
   responseBody?: boolean
   createdAt?: boolean
   expiresAt?: boolean
+  retentionClass?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["idempotencyRecord"]>
 
@@ -701,6 +736,7 @@ export type IdempotencyRecordSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   responseBody?: boolean
   createdAt?: boolean
   expiresAt?: boolean
+  retentionClass?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["idempotencyRecord"]>
 
@@ -716,9 +752,10 @@ export type IdempotencyRecordSelectScalar = {
   responseBody?: boolean
   createdAt?: boolean
   expiresAt?: boolean
+  retentionClass?: boolean
 }
 
-export type IdempotencyRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "idempotencyKey" | "userId" | "endpoint" | "requestHash" | "responseHash" | "statusCode" | "responseBody" | "createdAt" | "expiresAt", ExtArgs["result"]["idempotencyRecord"]>
+export type IdempotencyRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "idempotencyKey" | "userId" | "endpoint" | "requestHash" | "responseHash" | "statusCode" | "responseBody" | "createdAt" | "expiresAt" | "retentionClass", ExtArgs["result"]["idempotencyRecord"]>
 export type IdempotencyRecordInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
 }
@@ -745,7 +782,8 @@ export type $IdempotencyRecordPayload<ExtArgs extends runtime.Types.Extensions.I
     statusCode: number | null
     responseBody: runtime.JsonValue | null
     createdAt: Date
-    expiresAt: Date
+    expiresAt: Date | null
+    retentionClass: $Enums.IdempotencyRetentionClass
   }, ExtArgs["result"]["idempotencyRecord"]>
   composites: {}
 }
@@ -1181,6 +1219,7 @@ export interface IdempotencyRecordFieldRefs {
   readonly responseBody: Prisma.FieldRef<"IdempotencyRecord", 'Json'>
   readonly createdAt: Prisma.FieldRef<"IdempotencyRecord", 'DateTime'>
   readonly expiresAt: Prisma.FieldRef<"IdempotencyRecord", 'DateTime'>
+  readonly retentionClass: Prisma.FieldRef<"IdempotencyRecord", 'IdempotencyRetentionClass'>
 }
     
 

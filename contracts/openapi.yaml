@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: ESKAN Backend API
-  version: 0.4.0
+  version: 0.5.0
   description: |
     قرارداد رسمی API سامانهٔ اسکان (ESKAN) — مدیریت لیلیه‌های خصوصی.
     منبع حقیقت قرارداد: این فایل. مسیر محصول زیر `/api/v1`.
@@ -118,6 +118,7 @@ paths:
       tags: [system]
       summary: authenticated user summary
       operationId: systemMe
+      security: [{ bearerAuth: [] }]
       responses:
         '200':
           description: current user
@@ -212,6 +213,7 @@ paths:
       tags: [auth]
       summary: revoke current session
       operationId: authLogout
+      security: [{ bearerAuth: [] }]
       requestBody:
         required: true
         content:
@@ -227,6 +229,7 @@ paths:
       tags: [auth]
       summary: revoke all sessions of the user
       operationId: authLogoutAll
+      security: [{ bearerAuth: [] }]
       responses:
         '409': { $ref: '#/components/responses/Conflict' }
         '204': { description: revoked }
@@ -236,6 +239,7 @@ paths:
       tags: [auth]
       summary: current user
       operationId: authMe
+      security: [{ bearerAuth: [] }]
       responses:
         '200':
           description: current user
@@ -253,6 +257,7 @@ paths:
       tags: [auth]
       summary: change own password
       operationId: authChangePassword
+      security: [{ bearerAuth: [] }]
       requestBody:
         required: true
         content:
@@ -286,6 +291,10 @@ paths:
       operationId: organizationPatchCurrent
       parameters:
         - in: header
+          name: Idempotency-Key
+          required: true
+          schema: { type: string, format: uuid }
+        - in: header
           name: X-Expected-Version
           required: true
           schema: { type: integer }
@@ -297,6 +306,7 @@ paths:
             schema: { $ref: '#/components/schemas/OrganizationUpdateRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '200':
           description: updated
@@ -338,6 +348,15 @@ paths:
           name: membershipId
           required: true
           schema: { type: string, format: uuid }
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: { type: string, format: uuid }
+        - in: header
+          name: X-Expected-Version
+          required: true
+          schema: { type: integer }
+          description: expected version
       requestBody:
         required: true
         content:
@@ -345,6 +364,7 @@ paths:
             schema: { $ref: '#/components/schemas/MembershipUpdateRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '200':
           description: updated
@@ -395,6 +415,7 @@ paths:
             schema: { $ref: '#/components/schemas/HostelRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '201':
@@ -432,6 +453,7 @@ paths:
       operationId: hostelUpdate
       parameters:
         - { name: hostelId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
         - { name: X-Expected-Version, in: header, required: true, schema: { type: integer } }
       requestBody:
         required: true
@@ -440,6 +462,7 @@ paths:
             schema: { $ref: '#/components/schemas/HostelRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -458,9 +481,12 @@ paths:
       tags: [hostels]
       summary: archive hostel
       operationId: hostelArchive
-      parameters: [{ name: hostelId, in: path, required: true, schema: { type: string, format: uuid } }]
+      parameters:
+        - { name: hostelId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '404': { $ref: '#/components/responses/NotFound' }
         '200':
@@ -509,6 +535,7 @@ paths:
             schema: { $ref: '#/components/schemas/RoomRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -547,6 +574,7 @@ paths:
       operationId: roomUpdate
       parameters:
         - { name: roomId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
         - { name: X-Expected-Version, in: header, required: true, schema: { type: integer } }
       requestBody:
         required: true
@@ -555,6 +583,7 @@ paths:
             schema: { $ref: '#/components/schemas/RoomRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -573,9 +602,12 @@ paths:
       tags: [rooms]
       summary: archive room
       operationId: roomArchive
-      parameters: [{ name: roomId, in: path, required: true, schema: { type: string, format: uuid } }]
+      parameters:
+        - { name: roomId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '404': { $ref: '#/components/responses/NotFound' }
         '200':
@@ -624,6 +656,7 @@ paths:
             schema: { $ref: '#/components/schemas/BedRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -662,6 +695,7 @@ paths:
       operationId: bedUpdate
       parameters:
         - { name: bedId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
         - { name: X-Expected-Version, in: header, required: true, schema: { type: integer } }
       requestBody:
         required: true
@@ -670,6 +704,7 @@ paths:
             schema: { $ref: '#/components/schemas/BedRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -688,9 +723,12 @@ paths:
       tags: [beds]
       summary: deactivate bed
       operationId: bedDeactivate
-      parameters: [{ name: bedId, in: path, required: true, schema: { type: string, format: uuid } }]
+      parameters:
+        - { name: bedId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '404': { $ref: '#/components/responses/NotFound' }
         '200':
@@ -748,6 +786,7 @@ paths:
                   data: { $ref: '#/components/schemas/AccommodationPackage' }
                   meta: { $ref: '#/components/schemas/Meta' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/Error' }
         '409': { $ref: '#/components/responses/Error' }
         '422': { $ref: '#/components/responses/Error' }
@@ -777,7 +816,8 @@ paths:
       operationId: packageUpdate
       parameters:
         - { name: packageId, in: path, required: true, schema: { type: string, format: uuid } }
-        - { name: X-Expected-Version, in: header, required: false, schema: { type: integer } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: true, schema: { type: integer } }
       requestBody:
         required: true
         content:
@@ -795,6 +835,7 @@ paths:
                   data: { $ref: '#/components/schemas/AccommodationPackage' }
                   meta: { $ref: '#/components/schemas/Meta' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/Error' }
         '409': { $ref: '#/components/responses/Error' }
         '422': { $ref: '#/components/responses/Error' }
@@ -803,9 +844,12 @@ paths:
       tags: [packages]
       summary: archive accommodation package
       operationId: packageArchive
-      parameters: [{ name: packageId, in: path, required: true, schema: { type: string, format: uuid } }]
+      parameters:
+        - { name: packageId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '404': { $ref: '#/components/responses/NotFound' }
         '200':
@@ -854,6 +898,7 @@ paths:
             schema: { $ref: '#/components/schemas/ResidentRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '201':
@@ -891,6 +936,7 @@ paths:
       operationId: residentUpdate
       parameters:
         - { name: residentId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
         - { name: X-Expected-Version, in: header, required: true, schema: { type: integer } }
       requestBody:
         required: true
@@ -899,6 +945,7 @@ paths:
             schema: { $ref: '#/components/schemas/ResidentRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -917,9 +964,12 @@ paths:
       tags: [residents]
       summary: archive resident (only if no active contract/debt)
       operationId: residentArchive
-      parameters: [{ name: residentId, in: path, required: true, schema: { type: string, format: uuid } }]
+      parameters:
+        - { name: residentId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '404': { $ref: '#/components/responses/NotFound' }
         '200':
@@ -1025,6 +1075,7 @@ paths:
             schema: { $ref: '#/components/schemas/ContractRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '201':
@@ -1063,6 +1114,7 @@ paths:
       operationId: contractUpdate
       parameters:
         - { name: contractId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
         - { name: X-Expected-Version, in: header, required: true, schema: { type: integer } }
       requestBody:
         required: true
@@ -1071,6 +1123,7 @@ paths:
             schema: { $ref: '#/components/schemas/ContractRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -1089,9 +1142,14 @@ paths:
       tags: [contracts]
       summary: activate contract
       operationId: contractActivate
-      parameters: [{ name: contractId, in: path, required: true, schema: { type: string, format: uuid } }]
+      parameters:
+        - { name: contractId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, description: "Idempotency key for retry/replay safety. Reusing the key with a different request returns 409 IDEMPOTENCY_KEY_REUSED.", schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: true, description: "Version of the contract the client observed when deciding to activate. A stale version returns 409 RESOURCE_VERSION_CONFLICT.", schema: { type: integer, minimum: 1 } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/ValidationError' }
         '409': { $ref: '#/components/responses/Conflict' }
         '404': { $ref: '#/components/responses/NotFound' }
         '200':
@@ -1109,9 +1167,14 @@ paths:
       tags: [contracts]
       summary: terminate contract
       operationId: contractTerminate
-      parameters: [{ name: contractId, in: path, required: true, schema: { type: string, format: uuid } }]
+      parameters:
+        - { name: contractId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, description: "Idempotency key for retry/replay safety. Reusing the key with a different request returns 409 IDEMPOTENCY_KEY_REUSED.", schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: true, description: "Version of the contract the client observed when deciding to terminate. A stale version returns 409 RESOURCE_VERSION_CONFLICT.", schema: { type: integer, minimum: 1 } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/ValidationError' }
         '409': { $ref: '#/components/responses/Conflict' }
         '404': { $ref: '#/components/responses/NotFound' }
         '200':
@@ -1129,9 +1192,14 @@ paths:
       tags: [contracts]
       summary: checkout contract (end assignments and close)
       operationId: contractCheckout
-      parameters: [{ name: contractId, in: path, required: true, schema: { type: string, format: uuid } }]
+      parameters:
+        - { name: contractId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, description: "Idempotency key for retry/replay safety. Reusing the key with a different request returns 409 IDEMPOTENCY_KEY_REUSED.", schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: true, description: "Version of the contract the client observed when deciding to check out. A stale version returns 409 RESOURCE_VERSION_CONFLICT.", schema: { type: integer, minimum: 1 } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/ValidationError' }
         '409': { $ref: '#/components/responses/Conflict' }
         '404': { $ref: '#/components/responses/NotFound' }
         '200':
@@ -1158,6 +1226,7 @@ paths:
             schema: { $ref: '#/components/schemas/BedAssignmentRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '201':
           description: created
@@ -1175,9 +1244,14 @@ paths:
       tags: [bed-assignments]
       summary: end bed assignment
       operationId: assignmentEnd
-      parameters: [{ name: assignmentId, in: path, required: true, schema: { type: string, format: uuid } }]
+      parameters:
+        - { name: assignmentId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, description: "Idempotency key for retry/replay safety. Reusing the key with a different request returns 409 IDEMPOTENCY_KEY_REUSED.", schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: true, description: "Version of the assignment the client observed when deciding to end it. A stale version returns 409 RESOURCE_VERSION_CONFLICT.", schema: { type: integer, minimum: 1 } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/ValidationError' }
         '409': { $ref: '#/components/responses/Conflict' }
         '404': { $ref: '#/components/responses/NotFound' }
         '200':
@@ -1197,13 +1271,15 @@ paths:
       operationId: assignmentTransfer
       parameters:
         - { name: assignmentId, in: path, required: true, schema: { type: string, format: uuid } }
-        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, description: "Idempotency key for retry/replay safety. Reusing the key with a different request returns 409 IDEMPOTENCY_KEY_REUSED.", schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: true, description: "Version of the source assignment the client observed when deciding to transfer. A stale version returns 409 RESOURCE_VERSION_CONFLICT.", schema: { type: integer, minimum: 1 } }
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              description: "Transfer boundary: `startDate` is the shared transition point — the previous assignment ends AT `startDate` (exclusive) and the new one starts at the same value, with no +1 applied (D-01/F-20). `endDate` is exclusive (half-open)."
               required: [bedId, startDate]
               properties:
                 bedId: { type: string, format: uuid }
@@ -1211,6 +1287,7 @@ paths:
                 endDate: { type: string, format: date }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '409': { $ref: '#/components/responses/Conflict' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -1261,7 +1338,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/TemporaryAbsenceRequest' }
+            schema: { $ref: '#/components/schemas/TemporaryAbsenceCreateRequest' }
       responses:
         '201':
           description: absence created
@@ -1274,6 +1351,7 @@ paths:
                   data: { $ref: '#/components/schemas/TemporaryAbsence' }
                   meta: { $ref: '#/components/schemas/Meta' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/Error' }
         '409': { $ref: '#/components/responses/Error' }
         '422': { $ref: '#/components/responses/Error' }
@@ -1300,15 +1378,17 @@ paths:
     patch:
       tags: [absences]
       summary: update / approve / close temporary absence
+      description: "Records `actualReturnDate` and moves the absence to RETURNED. Credit generation is a separate idempotent operation (POST /absences/{absenceId}/credits), NOT done in this call; credits are issued only after the actual return is approved (D-12) and never rewritten afterward."
       operationId: absenceUpdate
       parameters:
         - { name: absenceId, in: path, required: true, schema: { type: string, format: uuid } }
-        - { name: X-Expected-Version, in: header, required: false, schema: { type: integer } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: true, schema: { type: integer } }
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/TemporaryAbsenceRequest' }
+            schema: { $ref: '#/components/schemas/TemporaryAbsenceUpdateRequest' }
       responses:
         '200':
           description: absence updated
@@ -1321,9 +1401,35 @@ paths:
                   data: { $ref: '#/components/schemas/TemporaryAbsence' }
                   meta: { $ref: '#/components/schemas/Meta' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/Error' }
         '409': { $ref: '#/components/responses/Error' }
         '422': { $ref: '#/components/responses/Error' }
+  /api/v1/absences/{absenceId}/credits:
+    post:
+      tags: [absences]
+      summary: generate monthly absence credits after actual return
+      description: "Idempotent generation of monthly AbsenceCredit lines, run AFTER `actualReturnDate` is recorded (absence status=RETURNED). All month lines are created atomically in one transaction; each links to a Charge with entrySide=CREDIT. The (absenceId, periodStart) unique key prevents duplicate credits on retry, and success moves the absence to CLOSED."
+      operationId: absenceCreditGenerate
+      parameters:
+        - { name: absenceId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '200':
+          description: credits generated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/AbsenceCreditResult' }
+                  meta: { $ref: '#/components/schemas/Meta' }
   /api/v1/charges:
     get:
       tags: [charges]
@@ -1348,6 +1454,7 @@ paths:
     post:
       tags: [charges]
       summary: create charge
+      description: "Creates an obligation posting. `entrySide=DEBIT` (normal charge) is allowed for OWNER/ADMIN/OPERATOR; `entrySide=CREDIT` (discount/absence credit) is allowed only for OWNER/ADMIN (403 otherwise)."
       operationId: chargeCreate
       parameters:
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
@@ -1358,6 +1465,7 @@ paths:
             schema: { $ref: '#/components/schemas/ChargeRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '201':
@@ -1397,6 +1505,7 @@ paths:
       parameters:
         - { name: chargeId, in: path, required: true, schema: { type: string, format: uuid } }
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: false, schema: { type: integer } }
       requestBody:
         required: true
         content:
@@ -1404,6 +1513,7 @@ paths:
             schema: { $ref: '#/components/schemas/ReversalRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -1486,11 +1596,13 @@ paths:
   /api/v1/payments/{paymentId}/reverse:
     post:
       tags: [payments]
-      summary: reverse payment
+      summary: reverse payment (void with allocation release)
+      description: "Atomic void (D-02): active allocations are released first with append-only AllocationRelease entries (sum of releases ≤ allocated amount), then a reversal with the opposite side is recorded. A real cash return is a separate PaymentRefund, never part of this call. A payment that has any recorded refund may NOT be fully voided until that refund is resolved (no amount is ever returned twice). The payment is not voided while valid allocations remain unreleased."
       operationId: paymentReverse
       parameters:
         - { name: paymentId, in: path, required: true, schema: { type: string, format: uuid } }
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: false, schema: { type: integer } }
       requestBody:
         required: true
         content:
@@ -1498,6 +1610,7 @@ paths:
             schema: { $ref: '#/components/schemas/ReversalRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -1509,7 +1622,7 @@ paths:
                 type: object
                 required: [data, meta]
                 properties:
-                  data: { $ref: '#/components/schemas/Payment' }
+                  data: { $ref: '#/components/schemas/PaymentVoidResult' }
                   meta: { $ref: '#/components/schemas/Meta' }
   /api/v1/residents/{residentId}/payments:
     get:
@@ -1590,6 +1703,7 @@ paths:
       parameters:
         - { name: depositTransactionId, in: path, required: true, schema: { type: string, format: uuid } }
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: false, schema: { type: integer } }
       requestBody:
         required: true
         content:
@@ -1597,6 +1711,7 @@ paths:
             schema: { $ref: '#/components/schemas/ReversalRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -1619,6 +1734,7 @@ paths:
       parameters:
         - { name: depositTransactionId, in: path, required: true, schema: { type: string, format: uuid } }
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: false, schema: { type: integer } }
       requestBody:
         required: true
         content:
@@ -1649,6 +1765,7 @@ paths:
       parameters:
         - { name: depositTransactionId, in: path, required: true, schema: { type: string, format: uuid } }
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: false, schema: { type: integer } }
       requestBody:
         required: true
         content:
@@ -1703,6 +1820,7 @@ paths:
             schema: { $ref: '#/components/schemas/ExpenseRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '201':
@@ -1742,6 +1860,7 @@ paths:
       parameters:
         - { name: expenseId, in: path, required: true, schema: { type: string, format: uuid } }
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: false, schema: { type: integer } }
       requestBody:
         required: true
         content:
@@ -1749,6 +1868,7 @@ paths:
             schema: { $ref: '#/components/schemas/ReversalRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -1797,6 +1917,7 @@ paths:
             schema: { $ref: '#/components/schemas/PaymentAllocationRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -1814,10 +1935,12 @@ paths:
     post:
       tags: [payments]
       summary: release part of an allocation
+      description: "Append-only release; the sum of releases for one allocation must not exceed its amount (enforced atomically)."
       operationId: allocationRelease
       parameters:
         - { name: allocationId, in: path, required: true, schema: { type: string, format: uuid } }
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: false, schema: { type: integer } }
       requestBody:
         required: true
         content:
@@ -1825,6 +1948,7 @@ paths:
             schema: { $ref: '#/components/schemas/AllocationReleaseRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -1842,10 +1966,12 @@ paths:
     post:
       tags: [payments]
       summary: refund unallocated amount of a payment
+      description: "Actual cash return to the payer. Separate from reversal/void. Refundable amount is limited to the payment's unallocated balance."
       operationId: paymentRefund
       parameters:
         - { name: paymentId, in: path, required: true, schema: { type: string, format: uuid } }
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: false, schema: { type: integer } }
       requestBody:
         required: true
         content:
@@ -1853,6 +1979,7 @@ paths:
             schema: { $ref: '#/components/schemas/PaymentRefundRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -1893,6 +2020,7 @@ paths:
       parameters:
         - { name: residentId, in: path, required: true, schema: { type: string, format: uuid } }
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: false, schema: { type: integer } }
       requestBody:
         required: true
         content:
@@ -1912,7 +2040,7 @@ paths:
                 type: object
                 required: [data, meta]
                 properties:
-                  data: { $ref: '#/components/schemas/DepositApplication' }
+                  data: { $ref: '#/components/schemas/DepositApplicationResult' }
                   meta: { $ref: '#/components/schemas/Meta' }
   /api/v1/billing-runs/preview:
     post:
@@ -2106,6 +2234,8 @@ paths:
       tags: [sync]
       summary: register a device for sync
       operationId: syncRegisterDevice
+      parameters:
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       requestBody:
         required: true
         content:
@@ -2168,6 +2298,8 @@ paths:
       tags: [sync]
       summary: request full resync for a device
       operationId: syncResyncRequest
+      parameters:
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '409': { $ref: '#/components/responses/Conflict' }
@@ -2196,6 +2328,8 @@ paths:
       tags: [organizations]
       summary: create member invitation (owner only)
       operationId: invitationCreate
+      parameters:
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       requestBody:
         required: true
         content:
@@ -2223,8 +2357,10 @@ paths:
       operationId: invitationRevoke
       parameters:
         - { name: invitationId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '200':
           description: revoked
@@ -2242,6 +2378,9 @@ paths:
       tags: [organizations]
       summary: accept an invitation with a one-time token
       operationId: invitationAccept
+      security: []
+      parameters:
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       requestBody:
         required: true
         content:
@@ -2267,6 +2406,7 @@ paths:
       tags: [organizations]
       summary: list my memberships and organizations
       operationId: organizationListMine
+      security: [{ bearerAuth: [] }]
       responses:
         '200':
           description: memberships
@@ -2340,6 +2480,7 @@ paths:
       tags: [platform-admin]
       summary: list organizations (platform admin only)
       operationId: adminOrganizationList
+      security: [{ bearerAuth: [] }]
       description: requires PLATFORM_ADMIN system-level role
       parameters:
         - { name: page, in: query, required: false, schema: { type: integer, default: 1 } }
@@ -2347,6 +2488,7 @@ paths:
         - { name: q, in: query, required: false, schema: { type: string } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '200':
           description: organizations
           content:
@@ -2362,11 +2504,13 @@ paths:
       tags: [platform-admin]
       summary: view an organization subscription (platform admin only)
       operationId: adminSubscriptionGet
+      security: [{ bearerAuth: [] }]
       description: requires PLATFORM_ADMIN system-level role
       parameters:
         - { name: organizationId, in: path, required: true, schema: { type: string, format: uuid } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
         '200':
           description: subscription
@@ -2383,6 +2527,7 @@ paths:
       tags: [platform-admin]
       summary: view an organization subscription history (platform admin only)
       operationId: adminSubscriptionHistory
+      security: [{ bearerAuth: [] }]
       description: requires PLATFORM_ADMIN system-level role
       parameters:
         - { name: organizationId, in: path, required: true, schema: { type: string, format: uuid } }
@@ -2390,6 +2535,7 @@ paths:
         - { name: size, in: query, required: false, schema: { type: integer, default: 20 } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
         '200':
           description: history
@@ -2406,6 +2552,7 @@ paths:
       tags: [platform-admin]
       summary: activate a paid plan after manual verification (platform admin only)
       operationId: adminSubscriptionActivate
+      security: [{ bearerAuth: [] }]
       description: requires PLATFORM_ADMIN system-level role
       parameters:
         - { name: organizationId, in: path, required: true, schema: { type: string, format: uuid } }
@@ -2417,6 +2564,7 @@ paths:
             schema: { $ref: '#/components/schemas/AdminActivateRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -2435,9 +2583,11 @@ paths:
       tags: [platform-admin]
       summary: extend a paid period (platform admin only)
       operationId: adminSubscriptionExtend
+      security: [{ bearerAuth: [] }]
       description: requires PLATFORM_ADMIN system-level role
       parameters:
         - { name: organizationId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       requestBody:
         required: true
         content:
@@ -2445,6 +2595,7 @@ paths:
             schema: { $ref: '#/components/schemas/AdminExtendRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -2463,9 +2614,11 @@ paths:
       tags: [platform-admin]
       summary: change an organization plan (platform admin only)
       operationId: adminSubscriptionChangePlan
+      security: [{ bearerAuth: [] }]
       description: requires PLATFORM_ADMIN system-level role
       parameters:
         - { name: organizationId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       requestBody:
         required: true
         content:
@@ -2473,6 +2626,7 @@ paths:
             schema: { $ref: '#/components/schemas/AdminChangePlanRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -2491,9 +2645,11 @@ paths:
       tags: [platform-admin]
       summary: suspend a subscription (platform admin only)
       operationId: adminSubscriptionSuspend
+      security: [{ bearerAuth: [] }]
       description: requires PLATFORM_ADMIN system-level role
       parameters:
         - { name: organizationId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       requestBody:
         required: true
         content:
@@ -2501,6 +2657,7 @@ paths:
             schema: { $ref: '#/components/schemas/AdminSuspendRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -2519,9 +2676,11 @@ paths:
       tags: [platform-admin]
       summary: resume a suspended subscription (platform admin only)
       operationId: adminSubscriptionResume
+      security: [{ bearerAuth: [] }]
       description: requires PLATFORM_ADMIN system-level role
       parameters:
         - { name: organizationId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       requestBody:
         required: true
         content:
@@ -2529,6 +2688,7 @@ paths:
             schema: { $ref: '#/components/schemas/AdminResumeRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -2547,9 +2707,11 @@ paths:
       tags: [platform-admin]
       summary: grant a grace period (platform admin only)
       operationId: adminSubscriptionGrantGrace
+      security: [{ bearerAuth: [] }]
       description: requires PLATFORM_ADMIN system-level role
       parameters:
         - { name: organizationId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
       requestBody:
         required: true
         content:
@@ -2557,6 +2719,7 @@ paths:
             schema: { $ref: '#/components/schemas/AdminGrantGraceRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -2575,6 +2738,7 @@ paths:
       tags: [platform-admin]
       summary: record a verified manual subscription payment (platform admin only)
       operationId: adminSubscriptionPayment
+      security: [{ bearerAuth: [] }]
       description: requires PLATFORM_ADMIN system-level role; records an out-of-band verified payment
       parameters:
         - { name: organizationId, in: path, required: true, schema: { type: string, format: uuid } }
@@ -2586,6 +2750,7 @@ paths:
             schema: { $ref: '#/components/schemas/AdminManualPaymentRequest' }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -3134,6 +3299,7 @@ components:
         notes: { type: string, maxLength: 2000 }
     ContractRequest:
       type: object
+      description: "`endDate` is exclusive (half-open [startDate, endDate)); the last inclusive stay day is endDate - 1 day. Checkout (closing) sets endDate = lastDay + 1."
       required: [hostelId, residentId, startDate, rent]
       properties:
         hostelId: { type: string, format: uuid }
@@ -3150,6 +3316,7 @@ components:
         notes: { type: string, maxLength: 2000 }
     BedAssignmentRequest:
       type: object
+      description: "`endDate` is exclusive (half-open [startDate, endDate)); leave unset for an open-ended assignment (COALESCE to infinity)."
       required: [bedId, residentId, contractId, startDate]
       properties:
         bedId: { type: string, format: uuid }
@@ -3244,10 +3411,15 @@ components:
       enum: [CASH, BANK_TRANSFER, MOBILE_MONEY, OTHER]
     DepositType:
       type: string
-      enum: [RECEIVED, REFUNDED, FORFEITED, APPLIED_TO_CHARGES]
+      description: "Deposit ledger event kind. Application to charges is NOT a DepositTransaction type; it is the independent DepositApplication entity."
+      enum: [RECEIVED, REFUNDED, FORFEITED]
     AssignmentStatus:
       type: string
       enum: [ACTIVE, ENDED]
+    AssignmentEndReason:
+      type: string
+      description: "Why a bed assignment ended. Null on legacy rows (LEGACY_UNKNOWN per D-04)."
+      enum: [CHECKOUT, TRANSFER, TERMINATE, MANUAL_END]
     SyncAction:
       type: string
       enum: [UPSERT, TOMBSTONE]
@@ -3259,7 +3431,8 @@ components:
       enum: [OPERATIONAL, NEEDS_CLEANING, NEEDS_REPAIR, OUT_OF_SERVICE]
     AbsenceStatus:
       type: string
-      enum: [REQUESTED, APPROVED, ADJUSTED, CLOSED]
+      description: "REQUESTED/APPROVED/ADJUSTED = before actual return; RETURNED = actualReturnDate recorded but AbsenceCredit not yet generated; CLOSED = credits generated and absence finalized."
+      enum: [REQUESTED, APPROVED, ADJUSTED, RETURNED, CLOSED]
     Organization:
       type: object
       required: [id, version, name, timezone, defaultCurrency, createdAt, updatedAt]
@@ -3364,6 +3537,7 @@ components:
         updatedAt: { type: string, format: date-time }
     StayContract:
       type: object
+      description: "`endDate` is exclusive (half-open [startDate, endDate)); `lastOccupiedDateInclusive` (= endDate - 1 day) is the last billable/shown stay day."
       required: [id, version, organizationId, hostelId, residentId, contractNumber, status, startDate, rent, billingCycle, createdAt, updatedAt]
       properties:
         id: { type: string, format: uuid }
@@ -3374,7 +3548,8 @@ components:
         contractNumber: { type: string }
         status: { $ref: '#/components/schemas/ContractStatus' }
         startDate: { type: string, format: date }
-        endDate: { type: string, format: date }
+        endDate: { type: string, format: date, nullable: true, description: "Exclusive end of the half-open interval; null = open-ended." }
+        lastOccupiedDateInclusive: { type: string, format: date, nullable: true, readOnly: true, description: "Computed: endDate - 1 day; null when endDate is null." }
         rent: { $ref: '#/components/schemas/Money' }
         billingCycle: { type: string }
         deposit: { $ref: '#/components/schemas/Money' }
@@ -3387,6 +3562,7 @@ components:
         updatedAt: { type: string, format: date-time }
     BedAssignment:
       type: object
+      description: "`endDate` is exclusive (half-open [startDate, endDate)); `lastOccupiedDateInclusive` (= endDate - 1 day) is the last occupied day shown to the user."
       required: [id, version, organizationId, bedId, residentId, contractId, status, startDate, createdAt, updatedAt]
       properties:
         id: { type: string, format: uuid }
@@ -3397,7 +3573,9 @@ components:
         contractId: { type: string, format: uuid }
         status: { $ref: '#/components/schemas/AssignmentStatus' }
         startDate: { type: string, format: date }
-        endDate: { type: string, format: date }
+        endDate: { type: string, format: date, nullable: true, description: "Exclusive end of the half-open interval; null = open-ended." }
+        lastOccupiedDateInclusive: { type: string, format: date, nullable: true, readOnly: true, description: "Computed: endDate - 1 day; null when endDate is null." }
+        endReason: { $ref: '#/components/schemas/AssignmentEndReason', nullable: true, description: "Why the assignment ended; null for legacy rows (LEGACY_UNKNOWN per D-04)." }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
     Charge:
@@ -3422,23 +3600,6 @@ components:
         postedAt: { type: string, format: date-time }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
-    Credit:
-      type: object
-      description: "Manual discount/adjustment posting with positive amount and explicit CREDIT side (D-02/D-07). Never a negative Charge."
-      required: [id, version, organizationId, residentId, money, reason, actorUserId, postedAt, createdAt]
-      properties:
-        id: { type: string, format: uuid }
-        version: { type: integer }
-        organizationId: { type: string, format: uuid }
-        residentId: { type: string, format: uuid }
-        contractId: { type: string, format: uuid }
-        money: { $ref: '#/components/schemas/Money' }
-        reason: { type: string }
-        actorUserId: { type: string, format: uuid }
-        reversedBy: { type: string, format: uuid }
-        postedAt: { type: string, format: date-time }
-        createdAt: { type: string, format: date-time }
-        updatedAt: { type: string, format: date-time }
     AbsenceCredit:
       type: object
       description: "Monthly absence credit line (one per calendar month). Uniquely keyed by (absenceId, periodStart) so a multi-month absence yields several month rows (F-21). Links the absence to the emitted CREDIT posting."
@@ -3453,6 +3614,15 @@ components:
         periodEnd: { type: string, format: date }
         money: { $ref: '#/components/schemas/Money' }
         createdAt: { type: string, format: date-time }
+    AbsenceCreditResult:
+      type: object
+      description: "Result of generating absence credits: all monthly AbsenceCredit lines produced for an absence, plus the total credit amount."
+      required: [credits, totalCredit]
+      properties:
+        credits:
+          type: array
+          items: { $ref: '#/components/schemas/AbsenceCredit' }
+        totalCredit: { $ref: '#/components/schemas/Amount' }
     PaymentAllocation:
       type: object
       required: [id, paymentId, chargeId, money, createdAt]
@@ -3530,13 +3700,13 @@ components:
       enum: [DEBIT, CREDIT]
     LedgerReversal:
       type: object
-      description: "Reversal event. `side` MUST be the opposite of the source posting's side (a DEBIT charge reverses with CREDIT, and vice versa). Append-only."
+      description: "Reversal event. `side` MUST be the opposite of the source posting's side (a DEBIT charge reverses with CREDIT, and vice versa). A credit is a Charge with entrySide=CREDIT, so it reverses under sourceType=CHARGE. Append-only."
       required: [id, organizationId, residentId, sourceType, sourceId, side, money, reason, actorUserId, idempotencyKey, createdAt]
       properties:
         id: { type: string, format: uuid }
         organizationId: { type: string, format: uuid }
         residentId: { type: string, format: uuid }
-        sourceType: { type: string, enum: [CHARGE, CREDIT, PAYMENT, DEPOSIT, EXPENSE] }
+        sourceType: { type: string, enum: [CHARGE, PAYMENT, DEPOSIT, EXPENSE] }
         sourceId: { type: string, format: uuid }
         side: { $ref: '#/components/schemas/EntrySide' }
         money: { $ref: '#/components/schemas/Money' }
@@ -3546,6 +3716,7 @@ components:
         createdAt: { type: string, format: date-time }
     AllocationRelease:
       type: object
+      description: "Append-only release of (part of) a payment allocation. The sum of releases for one allocation MUST NOT exceed the allocation amount; releases precede payment void/reversal so no voided payment keeps live allocations in the balance."
       required: [id, organizationId, residentId, allocationId, money, reason, actorUserId, createdAt]
       properties:
         id: { type: string, format: uuid }
@@ -3564,6 +3735,7 @@ components:
         reason: { type: string, minLength: 1, maxLength: 500 }
     PaymentRefund:
       type: object
+      description: "Actual cash return to the payer (outflow), separate from a payment reversal/void. Only the unallocated amount of a payment can be refunded."
       required: [id, organizationId, residentId, paymentId, money, reason, actorUserId, createdAt]
       properties:
         id: { type: string, format: uuid }
@@ -3580,13 +3752,24 @@ components:
       properties:
         money: { $ref: '#/components/schemas/Money' }
         reason: { type: string, minLength: 1, maxLength: 500 }
+    PaymentVoidResult:
+      type: object
+      description: "Result of an atomic payment void: the reversed payment plus the append-only AllocationRelease events and the LedgerReversal created in the same transaction."
+      required: [payment, releases, reversal]
+      properties:
+        payment: { $ref: '#/components/schemas/Payment' }
+        releases:
+          type: array
+          items: { $ref: '#/components/schemas/AllocationRelease' }
+        reversal: { $ref: '#/components/schemas/LedgerReversal' }
     ProvisionalReceipt:
       type: object
+      description: "Server-side receipt mapping: a client-local `provisionalReceiptId` mapped to the organization-official `receiptNumber` after server accept/commit. Server responses are always `ISSUED`; `PENDING_SYNC` exists only as a local Flutter/Drift client state and never appears in a server document."
       required: [provisionalReceiptId, status]
       properties:
         provisionalReceiptId: { type: string }
         officialReceiptNumber: { type: string }
-        status: { type: string, enum: [PENDING_SYNC, ISSUED] }
+        status: { type: string, enum: [ISSUED] }
     UnallocatedBalance:
       type: object
       required: [residentId, amount]
@@ -3595,9 +3778,10 @@ components:
         amount: { $ref: '#/components/schemas/Amount' }
     DepositApplicationRequest:
       type: object
-      description: "Applies deposit funds to selected charges at final checkout (D-10). Explicit manager action only; never automatic. Each line references a resident charge; the total must not exceed the available deposit or each charge's outstanding amount."
-      required: [charges, reason]
+      description: "Applies a specific deposit to selected charges at final checkout (D-10). Explicit manager action only; never automatic. `depositTransactionId` selects WHICH received deposit is consumed; each line references a resident charge. Total must not exceed the selected deposit's available balance or each charge's outstanding amount."
+      required: [depositTransactionId, charges, reason]
       properties:
+        depositTransactionId: { type: string, format: uuid }
         reason: { type: string, minLength: 1, maxLength: 500 }
         charges:
           type: array
@@ -3622,6 +3806,16 @@ components:
         reason: { type: string }
         actorUserId: { type: string, format: uuid }
         createdAt: { type: string, format: date-time }
+    DepositApplicationResult:
+      type: object
+      description: "Atomic result of applying one deposit to multiple charges (D-10). The whole operation is all-or-nothing: if any single application fails, none is persisted."
+      required: [applications, totalApplied, remainingDepositBalance]
+      properties:
+        applications:
+          type: array
+          items: { $ref: '#/components/schemas/DepositApplication' }
+        totalApplied: { $ref: '#/components/schemas/Amount' }
+        remainingDepositBalance: { $ref: '#/components/schemas/Amount' }
     DepositRefundRequest:
       type: object
       description: "Refund of a received deposit (full or partial). Refunded + applied + forfeited must never exceed the held amount (D-08)."
@@ -3723,9 +3917,6 @@ components:
         payments:
           type: array
           items: { $ref: '#/components/schemas/Payment' }
-        credits:
-          type: array
-          items: { $ref: '#/components/schemas/Credit' }
         depositTransactions:
           type: array
           items: { $ref: '#/components/schemas/DepositTransaction' }
@@ -3886,14 +4077,24 @@ components:
           items: { $ref: '#/components/schemas/AbsenceCredit' }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
-    TemporaryAbsenceRequest:
+    TemporaryAbsenceCreateRequest:
       type: object
+      description: "Creates an absence (starts as REQUESTED). `actualReturnDate`/RETURNED/CLOSED cannot be set at creation; record the return via PATCH then generate credits via POST /absences/{id}/credits."
       required: [contractId, plannedDepartureDate, expectedReturnDate]
       properties:
         contractId: { type: string, format: uuid }
         plannedDepartureDate: { type: string, format: date }
+        expectedReturnDate: { type: string, format: date }
+        reason: { type: string, maxLength: 500 }
+        notes: { type: string, maxLength: 2000 }
+    TemporaryAbsenceUpdateRequest:
+      type: object
+      description: "Updates an absence. `actualReturnDate` moves it to RETURNED (credit generation is a separate POST). CLOSED cannot be set directly."
+      properties:
+        plannedDepartureDate: { type: string, format: date }
         actualDepartureDate: { type: string, format: date }
         expectedReturnDate: { type: string, format: date }
+        actualReturnDate: { type: string, format: date, description: "Records the actual return; moves the absence to RETURNED." }
         reason: { type: string, maxLength: 500 }
         notes: { type: string, maxLength: 2000 }
     TemporaryAbsencePage:

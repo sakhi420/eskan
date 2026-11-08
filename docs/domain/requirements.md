@@ -33,7 +33,7 @@
 
 | ID | اولویت | نیازمندی |
 |----|--------|----------|
-| REQ-NF-001 | MUST | مبالغ با NUMERIC(19,2) و decimal.js؛ هرگز Float/Double |
+| REQ-NF-001 | MUST | مبالغ عدد صحیح AFN (`Money.amount` integer طبق A-016)؛ گردکردن نیم‌به‌بالا با decimal.js و ذخیرهٔ integer؛ هرگز Float/Double |
 | REQ-NF-002 | MUST | اعتبارسنجی همهٔ ورودی‌ها؛ رد فیلد ناشناخته |
 | REQ-NF-003 | MUST | خطاها با RFC 9457 Problem Details + code پایدار + traceId |
 | REQ-NF-004 | MUST | عملیات مالی/اقامت چندجدولی در transaction |
