@@ -1,6 +1,6 @@
 'use strict';
 /**
- * M-2 package/hostel trigger concurrency tests (issue #2).
+ * M-2 package/hostel trigger concurrency tests (issue #2) — deterministic.
  *
  * The contract BEFORE trigger reads the package with SELECT ... FOR UPDATE so a
  * concurrent accommodation_packages.hostel_id update and a stay_contracts
@@ -8,7 +8,12 @@
  * orders:
  *   A. UPDATE package (hostel A->B)  then  INSERT contract.
  *   B. INSERT contract               then  UPDATE package (hostel A->B).
- * One operation blocks, then rejects with 23514; the invariant survives.
+ *
+ * No fixed sleep is used. A third *monitor* connection inspects pg_stat_activity
+ * and pg_blocking_pids() to PROVE the second connection (identified by
+ * application_name) is actually blocked on the first before that first
+ * transaction is committed. If the wait is never observed, the test FAILS
+ * instead of relying on timing.
  */
 const { Client } = require('pg');
 const fs = require('fs');
@@ -43,6 +48,82 @@ function readMigrations() {
 const results = [];
 const check = (name, ok, extra = '') => results.push(`${ok ? 'PASS' : 'FAIL'} - ${name}${extra ? ' - ' + extra : ''}`);
 
+const INVARIANT_SQL = `SELECT count(*)::int n
+  FROM stay_contracts sc
+  JOIN accommodation_packages p ON p.id = sc.package_id
+ WHERE p.hostel_id IS NOT NULL AND sc.hostel_id <> p.hostel_id`;
+
+async function backendPid(c) {
+  return (await c.query('SELECT pg_backend_pid() AS pid')).rows[0].pid;
+}
+
+// Deterministic barrier: a third connection polls pg_stat_activity until it has
+// PROOF that the backend `blockedPid` (identified by `appName`) is waiting on a
+// lock held by `blockerPid` (via pg_blocking_pids). No fixed sleep is used.
+async function waitForLockWait(monitor, blockedPid, blockerPid, appName, timeoutMs = 10000) {
+  const deadline = Date.now() + timeoutMs;
+  let last = null;
+  while (Date.now() < deadline) {
+    const res = await monitor.query(
+      `SELECT a.pid, a.state, a.wait_event_type, a.wait_event, a.application_name,
+              pg_blocking_pids(a.pid) AS blockers
+         FROM pg_stat_activity a
+        WHERE a.pid = $1`,
+      [blockedPid],
+    );
+    const row = res.rows[0];
+    if (row) {
+      last = row;
+      const blockers = (row.blockers || []).map(Number);
+      if (blockers.includes(Number(blockerPid)) && row.application_name === appName) {
+        return { observed: true, row, blockers };
+      }
+    }
+    await sleep(25);
+  }
+  const blockers = last ? (last.blockers || []).map(Number) : [];
+  return { observed: false, row: last, blockers };
+}
+
+// blocker() opens a transaction on A and takes the package row lock, staying
+// uncommitted. blocked() runs on B inside its own transaction. We only commit A
+// once B is PROVEN blocked on A; blocked()'s outcome is then observed.
+async function runBlockingPair(label, dbA, dbB, monitor, d, blocker, blocked) {
+  const aPid = await backendPid(dbA);
+  const bPid = await backendPid(dbB);
+  const appName = `m2concB_${process.pid}_${crypto.randomBytes(3).toString('hex')}`;
+  await dbB.query(`SET application_name = '${appName}'`);
+
+  await blocker(dbA, d);
+
+  const bPromise = (async () => {
+    await dbB.query('BEGIN');
+    try {
+      await dbB.query(`SET LOCAL lock_timeout = '30000ms'`);
+      await blocked(dbB, d);
+      await dbB.query('COMMIT');
+      return 'committed';
+    } catch (e) {
+      await dbB.query('ROLLBACK').catch(() => {});
+      return e.code;
+    }
+  })();
+
+  const w = await waitForLockWait(monitor, bPid, aPid, appName, 10000);
+  check(
+    `[${label}] dbB blocked on dbA lock (pg_blocking_pids)`,
+    w.observed,
+    w.observed
+      ? `blockers=[${w.blockers.join(',')}] wait=${w.row.wait_event_type}/${w.row.wait_event}`
+      : (w.row
+          ? `NOT observed: state=${w.row.state} wait=${w.row.wait_event_type}/${w.row.wait_event} blockers=[${w.blockers.join(',')}]`
+          : 'NOT observed: no pg_stat_activity row'),
+  );
+
+  await dbA.query('COMMIT');
+  return await bPromise;
+}
+
 async function seed(c) {
   const o = uuid(), h1 = uuid(), h2 = uuid(), pkg = uuid(), res = uuid();
   await c.query(`INSERT INTO organizations (id, name, updated_at) VALUES ($1,'O',now())`, [o]);
@@ -52,71 +133,52 @@ async function seed(c) {
   return { o, h1, h2, pkg, res };
 }
 
-// A. UPDATE package (hostel A->B) committed while a contract INSERT waits on the
-//    package FOR UPDATE. The INSERT must then observe hostel B and reject.
-async function scenarioUpdateThenInsert(dbA, dbB) {
+// A. UPDATE package (hostel A->B) committed while a contract INSERT is *proven*
+//    to be blocked on the package FOR UPDATE. After the package move commits, the
+//    INSERT observes hostel B and rejects (23514).
+async function scenarioUpdateThenInsert(dbA, dbB, monitor) {
   const d = await seed(dbA);
-  await dbA.query('BEGIN');
-  await dbA.query(`UPDATE accommodation_packages SET hostel_id=$2, updated_at=now() WHERE id=$1`, [d.pkg, d.h2]);
-
-  let bResult = null;
-  const bPromise = (async () => {
-    await dbB.query('BEGIN');
-    try {
-      await dbB.query(`SET LOCAL lock_timeout = '8000ms'`);
-      await dbB.query(
+  const bOutcome = await runBlockingPair(
+    'conc A',
+    dbA, dbB, monitor, d,
+    async (a, s) => {
+      await a.query('BEGIN');
+      await a.query(`UPDATE accommodation_packages SET hostel_id=$2, updated_at=now() WHERE id=$1`, [s.pkg, s.h2]);
+    },
+    async (b, s) => {
+      await b.query(
         `INSERT INTO stay_contracts (id, organization_id, hostel_id, resident_id, contract_number, package_id, status, start_date, rent_amount, updated_at)
          VALUES ($1,$2,$3,$4,'C-A',$5,'ACTIVE','2020-01-01',100,now())`,
-        [uuid(), d.o, d.h1, d.res, d.pkg],
+        [uuid(), s.o, s.h1, s.res, s.pkg],
       );
-      await dbB.query('COMMIT');
-      bResult = 'inserted';
-    } catch (e) {
-      await dbB.query('ROLLBACK').catch(() => {});
-      bResult = e.code;
-    }
-  })();
-
-  await sleep(700);
-  await dbA.query('COMMIT');
-  await bPromise;
-
-  check('[conc A] insert blocked then rejected after package move (23514)', bResult === '23514', 'result=' + bResult);
-  const bad = await dbA.query(`SELECT count(*)::int n FROM stay_contracts sc JOIN accommodation_packages p ON p.id=sc.package_id WHERE p.hostel_id IS NOT NULL AND sc.hostel_id <> p.hostel_id`);
+    },
+  );
+  check('[conc A] insert blocked then rejected after package move (23514)', bOutcome === '23514', 'result=' + bOutcome);
+  const bad = await dbA.query(INVARIANT_SQL);
   check('[conc A] invariant preserved (0 mismatches)', bad.rows[0].n === 0, 'mismatches=' + bad.rows[0].n);
 }
 // B. INSERT contract (FOR UPDATE on package) committed while a package-host
-//    UPDATE waits. After the insert commits, the package-host UPDATE must be
-//    rejected by the guard trigger.
-async function scenarioInsertThenUpdate(dbA, dbB) {
+//    UPDATE is *proven* blocked on the same package row. After the insert
+//    commits, the package-host UPDATE is rejected by the guard trigger (23514).
+async function scenarioInsertThenUpdate(dbA, dbB, monitor) {
   const d = await seed(dbA);
-  await dbA.query('BEGIN');
-  await dbA.query(
-    `INSERT INTO stay_contracts (id, organization_id, hostel_id, resident_id, contract_number, package_id, status, start_date, rent_amount, updated_at)
-     VALUES ($1,$2,$3,$4,'C-B',$5,'ACTIVE','2020-01-01',100,now())`,
-    [uuid(), d.o, d.h1, d.res, d.pkg],
+  const bOutcome = await runBlockingPair(
+    'conc B',
+    dbA, dbB, monitor, d,
+    async (a, s) => {
+      await a.query('BEGIN');
+      await a.query(
+        `INSERT INTO stay_contracts (id, organization_id, hostel_id, resident_id, contract_number, package_id, status, start_date, rent_amount, updated_at)
+         VALUES ($1,$2,$3,$4,'C-B',$5,'ACTIVE','2020-01-01',100,now())`,
+        [uuid(), s.o, s.h1, s.res, s.pkg],
+      );
+    },
+    async (b, s) => {
+      await b.query(`UPDATE accommodation_packages SET hostel_id=$2, updated_at=now() WHERE id=$1`, [s.pkg, s.h2]);
+    },
   );
-
-  let bResult = null;
-  const bPromise = (async () => {
-    await dbB.query('BEGIN');
-    try {
-      await dbB.query(`SET LOCAL lock_timeout = '8000ms'`);
-      await dbB.query(`UPDATE accommodation_packages SET hostel_id=$2, updated_at=now() WHERE id=$1`, [d.pkg, d.h2]);
-      await dbB.query('COMMIT');
-      bResult = 'updated';
-    } catch (e) {
-      await dbB.query('ROLLBACK').catch(() => {});
-      bResult = e.code;
-    }
-  })();
-
-  await sleep(700);
-  await dbA.query('COMMIT');
-  await bPromise;
-
-  check('[conc B] package update rejected by guard after contract insert (23514)', bResult === '23514', 'result=' + bResult);
-  const bad = await dbA.query(`SELECT count(*)::int n FROM stay_contracts sc JOIN accommodation_packages p ON p.id=sc.package_id WHERE p.hostel_id IS NOT NULL AND sc.hostel_id <> p.hostel_id`);
+  check('[conc B] package update rejected by guard after contract insert (23514)', bOutcome === '23514', 'result=' + bOutcome);
+  const bad = await dbA.query(INVARIANT_SQL);
   check('[conc B] invariant preserved (0 mismatches)', bad.rows[0].n === 0, 'mismatches=' + bad.rows[0].n);
 }
 
@@ -136,14 +198,17 @@ async function scenarioInsertThenUpdate(dbA, dbB) {
 
   const dbA = new Client({ connectionString: dbUrl(name) });
   const dbB = new Client({ connectionString: dbUrl(name) });
+  const monitor = new Client({ connectionString: dbUrl(name) });
   await dbA.connect();
   await dbB.connect();
+  await monitor.connect();
   try {
-    await scenarioUpdateThenInsert(dbA, dbB);
-    await scenarioInsertThenUpdate(dbA, dbB);
+    await scenarioUpdateThenInsert(dbA, dbB, monitor);
+    await scenarioInsertThenUpdate(dbA, dbB, monitor);
   } finally {
     await dbA.end().catch(() => {});
     await dbB.end().catch(() => {});
+    await monitor.end().catch(() => {});
     await admin.query(`DROP DATABASE IF EXISTS "${name}" WITH (FORCE)`).catch(() => {});
     await admin.end().catch(() => {});
   }
