@@ -276,18 +276,17 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
     }
   }
 
-  async end(organizationId: string, assignmentId: string, userId: string, idempotencyKey: string) {
+  async end(organizationId: string, assignmentId: string, userId: string, idempotencyKey: string, expectedVersion: number) {
     const endpoint = `/api/v1/bed-assignments/${assignmentId}/end`;
-    const requestHash = this.idempotency.hash({ assignmentId });
+    const requestHash = this.idempotency.hash({ endpoint, assignmentId, expectedVersion });
     return this.idempotency.runAtomic<ReturnType<typeof toAssignmentDto>>(
-      { organizationId, key: idempotencyKey, endpoint, userId, requestHash, statusCode: 200 },
+      { organizationId, key: idempotencyKey, endpoint, userId, requestHash, statusCode: 200, retentionClass: 'PERMANENT' },
       async (tx) => {
         const assignment = await tx.bedAssignment.findFirst({
           where: { id: assignmentId, organizationId },
           select: ASSIGNMENT_SELECT,
         });
         if (!assignment) throw AppError.notFound('Assignment not found');
-        if (assignment.status === AssignmentStatus.ENDED) return toAssignmentDto(assignment); // idempotent
 
         // Serialize against a concurrent checkout/transfer by taking the same
         // parent chain (Hostel -> Room -> Bed -> Resident -> Contract): both lock
@@ -300,7 +299,12 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
           select: ASSIGNMENT_SELECT,
         });
         if (!current) throw AppError.notFound('Assignment not found');
-        if (current.status === AssignmentStatus.ENDED) return toAssignmentDto(current);
+        if (current.version !== expectedVersion) {
+          throw AppError.conflict('Assignment has changed since it was read; refresh and retry', ErrorCode.RESOURCE_VERSION_CONFLICT);
+        }
+        if (current.status !== AssignmentStatus.ACTIVE) {
+          throw AppError.conflict('Only ACTIVE assignments can be ended', ErrorCode.BUSINESS_RULE_VIOLATION);
+        }
 
         // The end date is a business date in the org's timezone, never `new Date()`
         // (which would truncate inconsistently and could even land on the start date).
@@ -321,7 +325,7 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
         const exclusiveEnd = exclusiveEndForInclusiveLastDay(today);
 
         const result = await tx.bedAssignment.updateMany({
-          where: { id: assignmentId, organizationId, status: AssignmentStatus.ACTIVE, version: current.version },
+          where: { id: assignmentId, organizationId, status: AssignmentStatus.ACTIVE, version: expectedVersion },
           data: {
             status: AssignmentStatus.ENDED,
             endDate: toBusinessDateOnly(exclusiveEnd),
@@ -342,7 +346,7 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
    * Transfer: atomically end the current assignment and start a new one on a
    * different bed, preserving the outgoing assignment as history.
    */
-  async transfer(organizationId: string, assignmentId: string, userId: string, dto: TransferDto, idempotencyKey: string) {
+  async transfer(organizationId: string, assignmentId: string, userId: string, dto: TransferDto, idempotencyKey: string, expectedVersion: number) {
     if (dto.endDate && dto.endDate <= dto.startDate) {
       throw AppError.validation('endDate must be after startDate', [
         { field: 'endDate', code: 'invalid', message: 'must be after startDate' },
@@ -350,19 +354,16 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
     }
 
     const endpoint = `/api/v1/bed-assignments/${assignmentId}/transfer`;
-    const requestHash = this.idempotency.hash(dto);
+    const requestHash = this.idempotency.hash({ endpoint, assignmentId, expectedVersion, dto });
 
     return this.idempotency.runAtomic<{ previous: ReturnType<typeof toAssignmentDto>; assignment: ReturnType<typeof toAssignmentDto> }>(
-      { organizationId, key: idempotencyKey, endpoint, userId, requestHash, statusCode: 200 },
+      { organizationId, key: idempotencyKey, endpoint, userId, requestHash, statusCode: 200, retentionClass: 'PERMANENT' },
       async (tx) => {
         const current = await tx.bedAssignment.findFirst({
           where: { id: assignmentId, organizationId },
           select: ASSIGNMENT_SELECT,
         });
         if (!current) throw AppError.notFound('Assignment not found');
-        if (current.status === AssignmentStatus.ENDED) {
-          throw AppError.conflict('Assignment has already ended', ErrorCode.BUSINESS_RULE_VIOLATION);
-        }
         if (dto.bedId === current.bedId) {
           throw AppError.conflict('Cannot transfer to the same bed', ErrorCode.BUSINESS_RULE_VIOLATION);
         }
@@ -390,6 +391,20 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
         await this.locks.lockBed(tx, dto.bedId, organizationId);
         await this.locks.lockResident(tx, current.residentId, organizationId);
         await this.locks.lockContract(tx, current.contractId, organizationId);
+
+        // Authoritative source re-read AFTER locking: compare the client-observed
+        // version before any transition, so a stale transfer fails with a conflict.
+        const source = await tx.bedAssignment.findFirst({
+          where: { id: assignmentId, organizationId },
+          select: ASSIGNMENT_SELECT,
+        });
+        if (!source) throw AppError.notFound('Assignment not found');
+        if (source.version !== expectedVersion) {
+          throw AppError.conflict('Assignment has changed since it was read; refresh and retry', ErrorCode.RESOURCE_VERSION_CONFLICT);
+        }
+        if (source.status !== AssignmentStatus.ACTIVE) {
+          throw AppError.conflict('Only ACTIVE assignments can be transferred', ErrorCode.BUSINESS_RULE_VIOLATION);
+        }
 
         // Authoritative destination re-read after acquiring the locks.
         const bed = await tx.bed.findFirst({
@@ -441,7 +456,7 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
 
       // CAS: end the current assignment only if still ACTIVE and unmodified.
         const endedResult = await tx.bedAssignment.updateMany({
-          where: { id: assignmentId, organizationId, status: AssignmentStatus.ACTIVE, version: current.version },
+          where: { id: assignmentId, organizationId, status: AssignmentStatus.ACTIVE, version: expectedVersion },
           data: { status: AssignmentStatus.ENDED, endDate: transitionStart, endReason: AssignmentEndReason.TRANSFER, version: { increment: 1 } },
         });
         if (endedResult.count === 0) {

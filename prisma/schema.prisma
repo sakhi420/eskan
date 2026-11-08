@@ -796,6 +796,11 @@ model OrganizationSyncState {
   @@map("organization_sync_state")
 }
 
+enum IdempotencyRetentionClass {
+  TRANSIENT
+  PERMANENT
+}
+
 model IdempotencyRecord {
   id             String   @id @default(uuid()) @db.Uuid
   organizationId String   @map("organization_id") @db.Uuid
@@ -807,7 +812,8 @@ model IdempotencyRecord {
   statusCode     Int?     @map("status_code")
   responseBody   Json?    @map("response_body")
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  expiresAt      DateTime @map("expires_at") @db.Timestamptz(3)
+  expiresAt      DateTime?                  @map("expires_at") @db.Timestamptz(3)
+  retentionClass IdempotencyRetentionClass @default(TRANSIENT) @map("retention_class")
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 

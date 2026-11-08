@@ -73,7 +73,7 @@ describe('ContractsService.checkout', () => {
       .mockResolvedValueOnce({ id: 'c1', status: 'ACTIVE', startDate: new Date('2026-11-07T00:00:00.000Z'), version: 1 })
       .mockResolvedValueOnce(contractRow());
 
-    await svc.checkout('o1', 'c1', 'u-1', 'idem-1');
+    await svc.checkout('o1', 'c1', 'u-1', 'idem-1', 1);
 
     const updateArg = prisma.stayContract.updateMany.mock.calls[0][0];
     expect(updateArg.data.endDate.toISOString()).toBe('2026-11-08T00:00:00.000Z');
@@ -91,7 +91,7 @@ describe('ContractsService.checkout', () => {
       .mockResolvedValueOnce({ hostelId: 'h1', residentId: 'r1' })
       .mockResolvedValueOnce({ id: 'c1', status: 'ACTIVE', startDate: new Date('2026-11-07T00:00:00.000Z'), version: 1 });
 
-    await expect(svc.checkout('o1', 'c1', 'u-1', 'idem-1')).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
+    await expect(svc.checkout('o1', 'c1', 'u-1', 'idem-1', 1)).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
     expect(prisma.stayContract.updateMany).not.toHaveBeenCalled();
   });
 });
@@ -103,7 +103,7 @@ describe('ContractsService.terminate', () => {
       .mockResolvedValueOnce({ status: 'DRAFT', version: 2 })
       .mockResolvedValueOnce(contractRow({ status: 'TERMINATED' }));
 
-    await svc.terminate('o1', 'c1', 'u-1', 'idem-1');
+    await svc.terminate('o1', 'c1', 'u-1', 'idem-1', 2);
 
     expect(prisma.stayContract.updateMany).toHaveBeenCalledWith({
       where: { id: 'c1', organizationId: 'o1', status: 'DRAFT', version: 2 },
@@ -115,7 +115,7 @@ describe('ContractsService.terminate', () => {
     const { svc, prisma } = makeService();
     prisma.stayContract.findFirst.mockResolvedValueOnce({ status: 'ACTIVE', version: 2 });
 
-    await expect(svc.terminate('o1', 'c1', 'u-1', 'idem-1')).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
+    await expect(svc.terminate('o1', 'c1', 'u-1', 'idem-1', 2)).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
     expect(prisma.stayContract.updateMany).not.toHaveBeenCalled();
   });
 
@@ -123,7 +123,7 @@ describe('ContractsService.terminate', () => {
     const { svc, prisma } = makeService();
     prisma.stayContract.findFirst.mockResolvedValueOnce({ status: 'CLOSED', version: 2 });
 
-    await expect(svc.terminate('o1', 'c1', 'u-1', 'idem-1')).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
+    await expect(svc.terminate('o1', 'c1', 'u-1', 'idem-1', 2)).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
     expect(prisma.stayContract.updateMany).not.toHaveBeenCalled();
   });
 });

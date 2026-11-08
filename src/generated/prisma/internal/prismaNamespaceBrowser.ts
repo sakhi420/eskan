@@ -558,7 +558,8 @@ export const IdempotencyRecordScalarFieldEnum = {
   statusCode: 'statusCode',
   responseBody: 'responseBody',
   createdAt: 'createdAt',
-  expiresAt: 'expiresAt'
+  expiresAt: 'expiresAt',
+  retentionClass: 'retentionClass'
 } as const
 
 export type IdempotencyRecordScalarFieldEnum = (typeof IdempotencyRecordScalarFieldEnum)[keyof typeof IdempotencyRecordScalarFieldEnum]

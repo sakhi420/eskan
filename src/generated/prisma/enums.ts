@@ -227,3 +227,11 @@ export const AbsenceStatus = {
 } as const
 
 export type AbsenceStatus = (typeof AbsenceStatus)[keyof typeof AbsenceStatus]
+
+
+export const IdempotencyRetentionClass = {
+  TRANSIENT: 'TRANSIENT',
+  PERMANENT: 'PERMANENT'
+} as const
+
+export type IdempotencyRetentionClass = (typeof IdempotencyRetentionClass)[keyof typeof IdempotencyRetentionClass]

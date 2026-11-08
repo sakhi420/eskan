@@ -742,6 +742,23 @@ export type EnumSyncActionWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumSyncActionFilter<$PrismaModel>
 }
 
+export type EnumIdempotencyRetentionClassFilter<$PrismaModel = never> = {
+  equals?: $Enums.IdempotencyRetentionClass | Prisma.EnumIdempotencyRetentionClassFieldRefInput<$PrismaModel>
+  in?: $Enums.IdempotencyRetentionClass[] | Prisma.ListEnumIdempotencyRetentionClassFieldRefInput<$PrismaModel>
+  notIn?: $Enums.IdempotencyRetentionClass[] | Prisma.ListEnumIdempotencyRetentionClassFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumIdempotencyRetentionClassFilter<$PrismaModel> | $Enums.IdempotencyRetentionClass
+}
+
+export type EnumIdempotencyRetentionClassWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.IdempotencyRetentionClass | Prisma.EnumIdempotencyRetentionClassFieldRefInput<$PrismaModel>
+  in?: $Enums.IdempotencyRetentionClass[] | Prisma.ListEnumIdempotencyRetentionClassFieldRefInput<$PrismaModel>
+  notIn?: $Enums.IdempotencyRetentionClass[] | Prisma.ListEnumIdempotencyRetentionClassFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumIdempotencyRetentionClassWithAggregatesFilter<$PrismaModel> | $Enums.IdempotencyRetentionClass
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumIdempotencyRetentionClassFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumIdempotencyRetentionClassFilter<$PrismaModel>
+}
+
 export type NestedUuidFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -1450,6 +1467,23 @@ export type NestedEnumSyncActionWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumSyncActionFilter<$PrismaModel>
   _max?: Prisma.NestedEnumSyncActionFilter<$PrismaModel>
+}
+
+export type NestedEnumIdempotencyRetentionClassFilter<$PrismaModel = never> = {
+  equals?: $Enums.IdempotencyRetentionClass | Prisma.EnumIdempotencyRetentionClassFieldRefInput<$PrismaModel>
+  in?: $Enums.IdempotencyRetentionClass[] | Prisma.ListEnumIdempotencyRetentionClassFieldRefInput<$PrismaModel>
+  notIn?: $Enums.IdempotencyRetentionClass[] | Prisma.ListEnumIdempotencyRetentionClassFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumIdempotencyRetentionClassFilter<$PrismaModel> | $Enums.IdempotencyRetentionClass
+}
+
+export type NestedEnumIdempotencyRetentionClassWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.IdempotencyRetentionClass | Prisma.EnumIdempotencyRetentionClassFieldRefInput<$PrismaModel>
+  in?: $Enums.IdempotencyRetentionClass[] | Prisma.ListEnumIdempotencyRetentionClassFieldRefInput<$PrismaModel>
+  notIn?: $Enums.IdempotencyRetentionClass[] | Prisma.ListEnumIdempotencyRetentionClassFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumIdempotencyRetentionClassWithAggregatesFilter<$PrismaModel> | $Enums.IdempotencyRetentionClass
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumIdempotencyRetentionClassFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumIdempotencyRetentionClassFilter<$PrismaModel>
 }
 
 

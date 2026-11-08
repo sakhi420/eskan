@@ -115,14 +115,18 @@ describe('M-1 concurrency (real PostgreSQL + real Prisma/services)', () => {
     }
   }, 60000);
 
-  it('double concurrent checkout (different keys) → single transition, both CLOSED', async () => {
+  it('double concurrent checkout (different keys, same version) → exactly one succeeds', async () => {
     const f = await seedFixture(db);
-    const [r1, r2] = await Promise.all([
-      contracts.checkout(f.org, f.contract, randomUUID(), randomUUID()),
-      contracts.checkout(f.org, f.contract, randomUUID(), randomUUID()),
+    const results = await Promise.allSettled([
+      contracts.checkout(f.org, f.contract, randomUUID(), randomUUID(), 1),
+      contracts.checkout(f.org, f.contract, randomUUID(), randomUUID(), 1),
     ]);
-    expect(r1.status).toBe('CLOSED');
-    expect(r2.status).toBe('CLOSED');
+    const ok = results.filter((r) => r.status === 'fulfilled') as PromiseFulfilledResult<any>[];
+    const fail = results.filter((r) => r.status === 'rejected') as PromiseRejectedResult[];
+    expect(ok).toHaveLength(1);
+    expect(ok[0].value.status).toBe('CLOSED');
+    expect(fail).toHaveLength(1);
+    expect((fail[0].reason as { code?: string }).code).toBe('RESOURCE_VERSION_CONFLICT');
 
     const row = await db.query(`SELECT status, version, end_date FROM stay_contracts WHERE id=$1`, [f.contract]);
     expect(row.rows[0].status).toBe('CLOSED');
@@ -140,8 +144,8 @@ describe('M-1 concurrency (real PostgreSQL + real Prisma/services)', () => {
     const f = await seedFixture(db);
     const key = randomUUID();
     const [r1, r2] = await Promise.all([
-      contracts.checkout(f.org, f.contract, randomUUID(), key),
-      contracts.checkout(f.org, f.contract, randomUUID(), key),
+      contracts.checkout(f.org, f.contract, randomUUID(), key, 1),
+      contracts.checkout(f.org, f.contract, randomUUID(), key, 1),
     ]);
     expect(r1.status).toBe('CLOSED');
     expect(r2.status).toBe('CLOSED');
@@ -159,8 +163,8 @@ describe('M-1 concurrency (real PostgreSQL + real Prisma/services)', () => {
   it('checkout vs transfer race → contract CLOSED with no active assignment', async () => {
     const f = await seedFixture(db);
     const results = await Promise.allSettled([
-      contracts.checkout(f.org, f.contract, randomUUID(), randomUUID()),
-      assignments.transfer(f.org, f.assignment, randomUUID(), { bedId: f.bed2, startDate: '2025-01-01' }, randomUUID()),
+      contracts.checkout(f.org, f.contract, randomUUID(), randomUUID(), 1),
+      assignments.transfer(f.org, f.assignment, randomUUID(), { bedId: f.bed2, startDate: '2025-01-01' }, randomUUID(), 1),
     ]);
 
     expect(results[0].status).toBe('fulfilled'); // checkout always reaches CLOSED
@@ -198,5 +202,29 @@ describe('M-1 concurrency (real PostgreSQL + real Prisma/services)', () => {
       expect(asgs.rows[0].end_reason).toBe('CHECKOUT');
       // transfer legitimately lost the race (assignment already ended / contract closed)
     }
+  });
+
+  it('same idempotency key with a different expectedVersion → 409 IDEMPOTENCY_KEY_REUSED', async () => {
+    const f = await seedFixture(db);
+    const key = randomUUID();
+    await contracts.checkout(f.org, f.contract, randomUUID(), key, 1);
+
+    await expect(contracts.checkout(f.org, f.contract, randomUUID(), key, 2)).rejects.toMatchObject({
+      code: 'IDEMPOTENCY_KEY_REUSED',
+    });
+  });
+
+  it('checkout persists PERMANENT idempotency retention (expires_at IS NULL)', async () => {
+    const f = await seedFixture(db);
+    const key = randomUUID();
+    await contracts.checkout(f.org, f.contract, randomUUID(), key, 1);
+
+    const rec = await db.query(
+      `SELECT retention_class, expires_at FROM idempotency_records WHERE organization_id=$1 AND idempotency_key=$2`,
+      [f.org, key],
+    );
+    expect(rec.rows).toHaveLength(1);
+    expect(rec.rows[0].retention_class).toBe('PERMANENT');
+    expect(rec.rows[0].expires_at).toBeNull();
   });
 });

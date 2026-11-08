@@ -1144,7 +1144,8 @@ paths:
       operationId: contractActivate
       parameters:
         - { name: contractId, in: path, required: true, schema: { type: string, format: uuid } }
-        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, description: "Idempotency key for retry/replay safety. Reusing the key with a different request returns 409 IDEMPOTENCY_KEY_REUSED.", schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: true, description: "Version of the contract the client observed when deciding to activate. A stale version returns 409 RESOURCE_VERSION_CONFLICT.", schema: { type: integer } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
@@ -1167,7 +1168,8 @@ paths:
       operationId: contractTerminate
       parameters:
         - { name: contractId, in: path, required: true, schema: { type: string, format: uuid } }
-        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, description: "Idempotency key for retry/replay safety. Reusing the key with a different request returns 409 IDEMPOTENCY_KEY_REUSED.", schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: true, description: "Version of the contract the client observed when deciding to terminate. A stale version returns 409 RESOURCE_VERSION_CONFLICT.", schema: { type: integer } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
@@ -1190,7 +1192,8 @@ paths:
       operationId: contractCheckout
       parameters:
         - { name: contractId, in: path, required: true, schema: { type: string, format: uuid } }
-        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, description: "Idempotency key for retry/replay safety. Reusing the key with a different request returns 409 IDEMPOTENCY_KEY_REUSED.", schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: true, description: "Version of the contract the client observed when deciding to check out. A stale version returns 409 RESOURCE_VERSION_CONFLICT.", schema: { type: integer } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
@@ -1240,7 +1243,8 @@ paths:
       operationId: assignmentEnd
       parameters:
         - { name: assignmentId, in: path, required: true, schema: { type: string, format: uuid } }
-        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, description: "Idempotency key for retry/replay safety. Reusing the key with a different request returns 409 IDEMPOTENCY_KEY_REUSED.", schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: true, description: "Version of the assignment the client observed when deciding to end it. A stale version returns 409 RESOURCE_VERSION_CONFLICT.", schema: { type: integer } }
       responses:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
@@ -1263,7 +1267,8 @@ paths:
       operationId: assignmentTransfer
       parameters:
         - { name: assignmentId, in: path, required: true, schema: { type: string, format: uuid } }
-        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, description: "Idempotency key for retry/replay safety. Reusing the key with a different request returns 409 IDEMPOTENCY_KEY_REUSED.", schema: { type: string, format: uuid } }
+        - { name: X-Expected-Version, in: header, required: true, description: "Version of the source assignment the client observed when deciding to transfer. A stale version returns 409 RESOURCE_VERSION_CONFLICT.", schema: { type: integer } }
       requestBody:
         required: true
         content:

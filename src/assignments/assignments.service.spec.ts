@@ -78,7 +78,7 @@ describe('AssignmentsService.end', () => {
         assignmentRow({ status: 'ENDED', endDate: new Date('2026-11-08T00:00:00.000Z'), endReason: 'MANUAL_END' }),
       );
 
-    await svc.end('o1', 'a-1', 'u-1', 'idem-1');
+    await svc.end('o1', 'a-1', 'u-1', 'idem-1', 1);
 
     expect(prisma.bedAssignment.updateMany).toHaveBeenCalledTimes(1);
     const arg = prisma.bedAssignment.updateMany.mock.calls[0][0];
@@ -94,17 +94,17 @@ describe('AssignmentsService.end', () => {
       assignmentRow({ startDate: new Date('2026-11-07T00:00:00.000Z') }),
     );
 
-    await expect(svc.end('o1', 'a-1', 'u-1', 'idem-1')).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
+    await expect(svc.end('o1', 'a-1', 'u-1', 'idem-1', 1)).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
     expect(prisma.bedAssignment.updateMany).not.toHaveBeenCalled();
   });
 
-  it('is idempotent for an already-ENDED assignment', async () => {
+  it('rejects ending with a stale version (RESOURCE_VERSION_CONFLICT)', async () => {
     const { svc, prisma } = makeService();
-    prisma.bedAssignment.findFirst.mockResolvedValueOnce(
-      assignmentRow({ status: 'ENDED', endDate: new Date('2026-11-08T00:00:00.000Z'), endReason: 'MANUAL_END' }),
+    prisma.bedAssignment.findFirst.mockResolvedValue(
+      assignmentRow({ status: 'ENDED', version: 2, endDate: new Date('2026-11-08T00:00:00.000Z'), endReason: 'MANUAL_END' }),
     );
 
-    await expect(svc.end('o1', 'a-1', 'u-1', 'idem-1')).resolves.toMatchObject({ id: 'a-1', status: 'ENDED' });
+    await expect(svc.end('o1', 'a-1', 'u-1', 'idem-1', 1)).rejects.toMatchObject({ code: 'RESOURCE_VERSION_CONFLICT' });
     expect(prisma.bedAssignment.updateMany).not.toHaveBeenCalled();
   });
 });
@@ -113,9 +113,9 @@ describe('AssignmentsService.transfer', () => {
   it('ends the previous assignment exactly at transitionStart with TRANSFER reason (no +1)', async () => {
     const { svc, prisma } = makeService();
     const transition = new Date('2026-11-15T00:00:00.000Z');
-    prisma.bedAssignment.findFirst.mockResolvedValueOnce(
-      assignmentRow({ startDate: new Date('2026-11-01T00:00:00.000Z') }),
-    );
+    prisma.bedAssignment.findFirst
+      .mockResolvedValueOnce(assignmentRow({ startDate: new Date('2026-11-01T00:00:00.000Z') }))
+      .mockResolvedValueOnce(assignmentRow({ startDate: new Date('2026-11-01T00:00:00.000Z') }));
     prisma.bed.findFirst
       .mockResolvedValueOnce({ roomId: 'room-1', room: { hostelId: 'h1' } })
       .mockResolvedValueOnce({
@@ -136,7 +136,7 @@ describe('AssignmentsService.transfer', () => {
       assignmentRow({ id: 'a-2', bedId: 'b2', startDate: transition }),
     );
 
-    await svc.transfer('o1', 'a-1', 'u-1', { bedId: 'b2', startDate: '2026-11-15' } as any, 'idem-1');
+    await svc.transfer('o1', 'a-1', 'u-1', { bedId: 'b2', startDate: '2026-11-15' } as any, 'idem-1', 1);
 
     const arg = prisma.bedAssignment.updateMany.mock.calls[0][0];
     expect(arg.data.endReason).toBe('TRANSFER');

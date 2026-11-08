@@ -60,8 +60,17 @@ export class ContractsController {
   @Post('contracts/:contractId/activate')
   @Roles(Role.OWNER, Role.ADMIN, Role.OPERATOR)
   @HttpCode(HttpStatus.OK)
-  async activate(@CurrentMembership() m: MembershipContext, @Param('contractId') contractId: string, @Req() req: RequestWithAuth) {
-    return envelope(req, await this.contracts.activate(m.organizationId, contractId));
+  async activate(
+    @CurrentMembership() m: MembershipContext,
+    @CurrentUser() user: AuthUser,
+    @Param('contractId') contractId: string,
+    @Headers('Idempotency-Key') idempotencyKey: string | undefined,
+    @Headers('X-Expected-Version') versionRaw: string | undefined,
+    @Req() req: RequestWithAuth,
+  ) {
+    const key = requireIdempotencyKey(idempotencyKey);
+    const expectedVersion = requireExpectedVersion(versionRaw);
+    return envelope(req, await this.contracts.activate(m.organizationId, contractId, user.id, key, expectedVersion));
   }
 
   @Post('contracts/:contractId/terminate')
@@ -72,10 +81,12 @@ export class ContractsController {
     @CurrentUser() user: AuthUser,
     @Param('contractId') contractId: string,
     @Headers('Idempotency-Key') idempotencyKey: string | undefined,
+    @Headers('X-Expected-Version') versionRaw: string | undefined,
     @Req() req: RequestWithAuth,
   ) {
     const key = requireIdempotencyKey(idempotencyKey);
-    return envelope(req, await this.contracts.terminate(m.organizationId, contractId, user.id, key));
+    const expectedVersion = requireExpectedVersion(versionRaw);
+    return envelope(req, await this.contracts.terminate(m.organizationId, contractId, user.id, key, expectedVersion));
   }
 
   @Post('contracts/:contractId/checkout')
@@ -86,9 +97,11 @@ export class ContractsController {
     @CurrentUser() user: AuthUser,
     @Param('contractId') contractId: string,
     @Headers('Idempotency-Key') idempotencyKey: string | undefined,
+    @Headers('X-Expected-Version') versionRaw: string | undefined,
     @Req() req: RequestWithAuth,
   ) {
     const key = requireIdempotencyKey(idempotencyKey);
-    return envelope(req, await this.contracts.checkout(m.organizationId, contractId, user.id, key));
+    const expectedVersion = requireExpectedVersion(versionRaw);
+    return envelope(req, await this.contracts.checkout(m.organizationId, contractId, user.id, key, expectedVersion));
   }
 }

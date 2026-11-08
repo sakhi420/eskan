@@ -29,12 +29,15 @@ function stableStringify(value: unknown): string {
  */
 const IDEMPOTENCY_RETENTION_DAYS = 30;
 
+export type IdempotencyRetention = 'TRANSIENT' | 'PERMANENT';
+
 interface ClaimArgs {
   organizationId: string;
   key: string;
   endpoint: string;
   userId: string;
   requestHash: string;
+  retentionClass?: IdempotencyRetention;
 }
 
 interface RunAtomicArgs extends ClaimArgs {
@@ -68,7 +71,9 @@ export class IdempotencyService {
     // Enforce the retention policy lazily: a record past its expiry is treated
     // as absent (the key can be safely reused) and is removed now so it no
     // longer occupies storage or participates in the unique index.
-    if (existing.expiresAt != null && existing.expiresAt.getTime() <= Date.now()) {
+    // PERMANENT records (queueable offline-first lifecycle mutations) are never
+    // lazily expired or deleted; only TRANSIENT records follow the 30-day window.
+    if (existing.retentionClass !== 'PERMANENT' && existing.expiresAt != null && existing.expiresAt.getTime() <= Date.now()) {
       await this.prisma.idempotencyRecord.deleteMany({ where: { id: existing.id } });
       return null;
     }
@@ -96,6 +101,7 @@ export class IdempotencyService {
    * P2002 once the winner commits; `runAtomic` turns that into a stored replay.
    */
   async claim(tx: Prisma.TransactionClient, args: ClaimArgs): Promise<void> {
+    const retentionClass = args.retentionClass ?? 'TRANSIENT';
     await tx.idempotencyRecord.create({
       data: {
         organizationId: args.organizationId,
@@ -103,7 +109,8 @@ export class IdempotencyService {
         endpoint: args.endpoint,
         userId: args.userId,
         requestHash: args.requestHash,
-        expiresAt: this.expiresAt(),
+        retentionClass,
+        expiresAt: retentionClass === 'PERMANENT' ? null : this.expiresAt(),
       },
     });
   }

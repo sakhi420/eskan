@@ -3016,7 +3016,8 @@ export const IdempotencyRecordScalarFieldEnum = {
   statusCode: 'statusCode',
   responseBody: 'responseBody',
   createdAt: 'createdAt',
-  expiresAt: 'expiresAt'
+  expiresAt: 'expiresAt',
+  retentionClass: 'retentionClass'
 } as const
 
 export type IdempotencyRecordScalarFieldEnum = (typeof IdempotencyRecordScalarFieldEnum)[keyof typeof IdempotencyRecordScalarFieldEnum]
@@ -3483,6 +3484,20 @@ export type EnumSyncActionFieldRefInput<$PrismaModel> = FieldRefInputType<$Prism
  * Reference to a field of type 'SyncAction[]'
  */
 export type ListEnumSyncActionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SyncAction[]'>
+    
+
+
+/**
+ * Reference to a field of type 'IdempotencyRetentionClass'
+ */
+export type EnumIdempotencyRetentionClassFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'IdempotencyRetentionClass'>
+    
+
+
+/**
+ * Reference to a field of type 'IdempotencyRetentionClass[]'
+ */
+export type ListEnumIdempotencyRetentionClassFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'IdempotencyRetentionClass[]'>
     
 
 
