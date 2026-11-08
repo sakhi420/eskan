@@ -640,7 +640,7 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 - هیچ Migration 4c روی `eskan_dev`/Staging/Production اعمال نشده است.
 
 ### نتیجهٔ نهایی 4c
-- Commit 4c: `6bffa1b` (هسته) + `c4d17ab` (سخت‌سازی)؛ CI `42499710094` — موفق (همهٔ گام‌ها).
+- Commit: `6bffa1b` → `c4d17ab` → `d84b453`؛ CI نهایی `42502182823` — موفق (همهٔ گام‌ها). (اجرای `42499710094` نتیجهٔ تاریخی مرحلهٔ سخت‌سازی روی `c4d17ab` با CHECK 10/10 بود.)
 - Unit: 56/56؛ Integration: **26/26** (شامل ۱۸ تست `test/integration/lifecycle-versioning.integration-spec.ts` برای activate/terminate/end/transfer: نسخهٔ صحیح، Replay، نسخهٔ قدیمی → `409 RESOURCE_VERSION_CONFLICT`، بازاستفادهٔ کلید/نسخه/payload → `409 IDEMPOTENCY_KEY_REUSED`).
 - Retention CHECK: **11/11** (`scripts/test-idempotency-retention-check.cjs`: وجود constraint از `pg_constraint` + نقض `23514` برای هر ۴ حالت در INSERT و UPDATE، شامل تست مثبت UPDATE برای TRANSIENT).
 - M-2 parity: 5/5 (`prisma migrate diff` خالی).
