@@ -412,6 +412,9 @@ export const ModelName = {
   StayContract: 'StayContract',
   BedAssignment: 'BedAssignment',
   Charge: 'Charge',
+  ChargePackageComponent: 'ChargePackageComponent',
+  AbsenceCredit: 'AbsenceCredit',
+  BillingRun: 'BillingRun',
   Payment: 'Payment',
   PaymentAllocation: 'PaymentAllocation',
   DepositTransaction: 'DepositTransaction',
@@ -440,7 +443,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "organization" | "user" | "organizationMembership" | "invitation" | "refreshSession" | "hostel" | "room" | "bed" | "accommodationPackage" | "accommodationPackageComponent" | "temporaryAbsence" | "resident" | "stayContract" | "bedAssignment" | "charge" | "payment" | "paymentAllocation" | "depositTransaction" | "expense" | "subscriptionPlan" | "organizationSubscription" | "subscriptionEvent" | "manualSubscriptionPayment" | "syncDevice" | "syncChange" | "organizationSyncState" | "idempotencyRecord" | "auditEvent"
+    modelProps: "organization" | "user" | "organizationMembership" | "invitation" | "refreshSession" | "hostel" | "room" | "bed" | "accommodationPackage" | "accommodationPackageComponent" | "temporaryAbsence" | "resident" | "stayContract" | "bedAssignment" | "charge" | "chargePackageComponent" | "absenceCredit" | "billingRun" | "payment" | "paymentAllocation" | "depositTransaction" | "expense" | "subscriptionPlan" | "organizationSubscription" | "subscriptionEvent" | "manualSubscriptionPayment" | "syncDevice" | "syncChange" | "organizationSyncState" | "idempotencyRecord" | "auditEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1551,6 +1554,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ChargeCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ChargeCountAggregateOutputType> | number
+        }
+      }
+    }
+    ChargePackageComponent: {
+      payload: Prisma.$ChargePackageComponentPayload<ExtArgs>
+      fields: Prisma.ChargePackageComponentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ChargePackageComponentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChargePackageComponentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ChargePackageComponentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChargePackageComponentPayload>
+        }
+        findFirst: {
+          args: Prisma.ChargePackageComponentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChargePackageComponentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ChargePackageComponentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChargePackageComponentPayload>
+        }
+        findMany: {
+          args: Prisma.ChargePackageComponentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChargePackageComponentPayload>[]
+        }
+        create: {
+          args: Prisma.ChargePackageComponentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChargePackageComponentPayload>
+        }
+        createMany: {
+          args: Prisma.ChargePackageComponentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ChargePackageComponentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChargePackageComponentPayload>[]
+        }
+        delete: {
+          args: Prisma.ChargePackageComponentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChargePackageComponentPayload>
+        }
+        update: {
+          args: Prisma.ChargePackageComponentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChargePackageComponentPayload>
+        }
+        deleteMany: {
+          args: Prisma.ChargePackageComponentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ChargePackageComponentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ChargePackageComponentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChargePackageComponentPayload>[]
+        }
+        upsert: {
+          args: Prisma.ChargePackageComponentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChargePackageComponentPayload>
+        }
+        aggregate: {
+          args: Prisma.ChargePackageComponentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateChargePackageComponent>
+        }
+        groupBy: {
+          args: Prisma.ChargePackageComponentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ChargePackageComponentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ChargePackageComponentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ChargePackageComponentCountAggregateOutputType> | number
+        }
+      }
+    }
+    AbsenceCredit: {
+      payload: Prisma.$AbsenceCreditPayload<ExtArgs>
+      fields: Prisma.AbsenceCreditFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AbsenceCreditFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbsenceCreditPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AbsenceCreditFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbsenceCreditPayload>
+        }
+        findFirst: {
+          args: Prisma.AbsenceCreditFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbsenceCreditPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AbsenceCreditFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbsenceCreditPayload>
+        }
+        findMany: {
+          args: Prisma.AbsenceCreditFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbsenceCreditPayload>[]
+        }
+        create: {
+          args: Prisma.AbsenceCreditCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbsenceCreditPayload>
+        }
+        createMany: {
+          args: Prisma.AbsenceCreditCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AbsenceCreditCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbsenceCreditPayload>[]
+        }
+        delete: {
+          args: Prisma.AbsenceCreditDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbsenceCreditPayload>
+        }
+        update: {
+          args: Prisma.AbsenceCreditUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbsenceCreditPayload>
+        }
+        deleteMany: {
+          args: Prisma.AbsenceCreditDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AbsenceCreditUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AbsenceCreditUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbsenceCreditPayload>[]
+        }
+        upsert: {
+          args: Prisma.AbsenceCreditUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbsenceCreditPayload>
+        }
+        aggregate: {
+          args: Prisma.AbsenceCreditAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAbsenceCredit>
+        }
+        groupBy: {
+          args: Prisma.AbsenceCreditGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AbsenceCreditGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AbsenceCreditCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AbsenceCreditCountAggregateOutputType> | number
+        }
+      }
+    }
+    BillingRun: {
+      payload: Prisma.$BillingRunPayload<ExtArgs>
+      fields: Prisma.BillingRunFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BillingRunFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingRunPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BillingRunFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingRunPayload>
+        }
+        findFirst: {
+          args: Prisma.BillingRunFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingRunPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BillingRunFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingRunPayload>
+        }
+        findMany: {
+          args: Prisma.BillingRunFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingRunPayload>[]
+        }
+        create: {
+          args: Prisma.BillingRunCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingRunPayload>
+        }
+        createMany: {
+          args: Prisma.BillingRunCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BillingRunCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingRunPayload>[]
+        }
+        delete: {
+          args: Prisma.BillingRunDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingRunPayload>
+        }
+        update: {
+          args: Prisma.BillingRunUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingRunPayload>
+        }
+        deleteMany: {
+          args: Prisma.BillingRunDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BillingRunUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BillingRunUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingRunPayload>[]
+        }
+        upsert: {
+          args: Prisma.BillingRunUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingRunPayload>
+        }
+        aggregate: {
+          args: Prisma.BillingRunAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBillingRun>
+        }
+        groupBy: {
+          args: Prisma.BillingRunGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BillingRunGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BillingRunCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BillingRunCountAggregateOutputType> | number
         }
       }
     }
@@ -2796,6 +3021,7 @@ export const ChargeScalarFieldEnum = {
   residentId: 'residentId',
   contractId: 'contractId',
   type: 'type',
+  entrySide: 'entrySide',
   status: 'status',
   amount: 'amount',
   periodStart: 'periodStart',
@@ -2811,6 +3037,52 @@ export const ChargeScalarFieldEnum = {
 } as const
 
 export type ChargeScalarFieldEnum = (typeof ChargeScalarFieldEnum)[keyof typeof ChargeScalarFieldEnum]
+
+
+export const ChargePackageComponentScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  residentId: 'residentId',
+  chargeId: 'chargeId',
+  kind: 'kind',
+  name: 'name',
+  amount: 'amount',
+  deductibleOnAbsence: 'deductibleOnAbsence',
+  sortOrder: 'sortOrder'
+} as const
+
+export type ChargePackageComponentScalarFieldEnum = (typeof ChargePackageComponentScalarFieldEnum)[keyof typeof ChargePackageComponentScalarFieldEnum]
+
+
+export const AbsenceCreditScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  residentId: 'residentId',
+  absenceId: 'absenceId',
+  chargeId: 'chargeId',
+  periodStart: 'periodStart',
+  periodEnd: 'periodEnd',
+  amount: 'amount',
+  createdAt: 'createdAt'
+} as const
+
+export type AbsenceCreditScalarFieldEnum = (typeof AbsenceCreditScalarFieldEnum)[keyof typeof AbsenceCreditScalarFieldEnum]
+
+
+export const BillingRunScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  periodStart: 'periodStart',
+  periodEnd: 'periodEnd',
+  businessKey: 'businessKey',
+  dueDayOfMonth: 'dueDayOfMonth',
+  status: 'status',
+  totalAmount: 'totalAmount',
+  createdByUserId: 'createdByUserId',
+  createdAt: 'createdAt'
+} as const
+
+export type BillingRunScalarFieldEnum = (typeof BillingRunScalarFieldEnum)[keyof typeof BillingRunScalarFieldEnum]
 
 
 export const PaymentScalarFieldEnum = {
@@ -3348,6 +3620,20 @@ export type ListEnumChargeTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$P
 
 
 /**
+ * Reference to a field of type 'EntrySide'
+ */
+export type EnumEntrySideFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EntrySide'>
+    
+
+
+/**
+ * Reference to a field of type 'EntrySide[]'
+ */
+export type ListEnumEntrySideFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EntrySide[]'>
+    
+
+
+/**
  * Reference to a field of type 'LedgerEntryStatus'
  */
 export type EnumLedgerEntryStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LedgerEntryStatus'>
@@ -3358,6 +3644,20 @@ export type EnumLedgerEntryStatusFieldRefInput<$PrismaModel> = FieldRefInputType
  * Reference to a field of type 'LedgerEntryStatus[]'
  */
 export type ListEnumLedgerEntryStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LedgerEntryStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'BillingRunStatus'
+ */
+export type EnumBillingRunStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BillingRunStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'BillingRunStatus[]'
+ */
+export type ListEnumBillingRunStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BillingRunStatus[]'>
     
 
 
@@ -3680,6 +3980,9 @@ export type GlobalOmitConfig = {
   stayContract?: Prisma.StayContractOmit
   bedAssignment?: Prisma.BedAssignmentOmit
   charge?: Prisma.ChargeOmit
+  chargePackageComponent?: Prisma.ChargePackageComponentOmit
+  absenceCredit?: Prisma.AbsenceCreditOmit
+  billingRun?: Prisma.BillingRunOmit
   payment?: Prisma.PaymentOmit
   paymentAllocation?: Prisma.PaymentAllocationOmit
   depositTransaction?: Prisma.DepositTransactionOmit

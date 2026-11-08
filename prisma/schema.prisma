@@ -158,6 +158,16 @@ enum AbsenceStatus {
   CLOSED
 }
 
+enum EntrySide {
+  DEBIT
+  CREDIT
+}
+
+enum BillingRunStatus {
+  PREVIEW
+  POSTED
+}
+
 model Organization {
   id              String   @id @default(uuid()) @db.Uuid
   version         Int      @default(1)
@@ -189,6 +199,7 @@ model Organization {
   auditEvents                AuditEvent[]
   packages                   AccommodationPackage[]
   temporaryAbsences          TemporaryAbsence[]
+  billingRuns                BillingRun[]
 
   @@map("organizations")
 }
@@ -215,6 +226,7 @@ model User {
   auditEvents            AuditEvent[]                @relation("AuditEventActor")
   requestedAbsences      TemporaryAbsence[]          @relation("AbsenceRequestedBy")
   approvedAbsences       TemporaryAbsence[]          @relation("AbsenceApprovedBy")
+  billingRunsCreated     BillingRun[]                 @relation("BillingRunCreatedBy")
 
   @@map("users")
 }
@@ -418,6 +430,7 @@ model TemporaryAbsence {
   approvedBy         User?        @relation("AbsenceApprovedBy", fields: [approvedByUserId], references: [id], onDelete: SetNull)
   creditCharge       Charge?      @relation("AbsenceCreditCharge", fields: [creditChargeId], references: [id], onDelete: SetNull)
   creditChargeTenant Charge?      @relation("AbsenceCreditChargeTenant", fields: [organizationId, residentId, creditChargeId], references: [organizationId, residentId, id], onDelete: NoAction)
+  credits            AbsenceCredit[]
 
   @@unique([organizationId, residentId, id])
   @@index([organizationId, residentId])
@@ -529,6 +542,7 @@ model Charge {
   residentId     String            @map("resident_id") @db.Uuid
   contractId     String?           @map("contract_id") @db.Uuid
   type           ChargeType
+  entrySide      EntrySide         @default(DEBIT) @map("entry_side")
   status         LedgerEntryStatus @default(POSTED)
   amount         Int
   periodStart    DateTime          @map("period_start") @db.Date
@@ -550,6 +564,8 @@ model Charge {
   allocations    PaymentAllocation[]
   absence        TemporaryAbsence?  @relation("AbsenceCreditCharge")
   absenceTenants TemporaryAbsence[] @relation("AbsenceCreditChargeTenant")
+  components     ChargePackageComponent[]
+  absenceCredits AbsenceCredit[]
 
   @@unique([organizationId, id])
   @@unique([organizationId, residentId, id])
@@ -558,6 +574,63 @@ model Charge {
   @@index([organizationId, contractId])
   @@index([organizationId, residentId, contractId])
   @@map("charges")
+}
+
+model ChargePackageComponent {
+  id                  String               @id @default(uuid()) @db.Uuid
+  organizationId      String               @map("organization_id") @db.Uuid
+  residentId          String               @map("resident_id") @db.Uuid
+  chargeId            String               @map("charge_id") @db.Uuid
+  kind                PackageComponentKind
+  name                String
+  amount              Int
+  deductibleOnAbsence Boolean              @default(false) @map("deductible_on_absence")
+  sortOrder           Int                  @default(0) @map("sort_order")
+
+  charge Charge @relation(fields: [organizationId, residentId, chargeId], references: [organizationId, residentId, id], onDelete: Cascade)
+
+  @@index([organizationId, residentId, chargeId])
+  @@map("charge_package_components")
+}
+
+model AbsenceCredit {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  residentId     String   @map("resident_id") @db.Uuid
+  absenceId      String   @map("absence_id") @db.Uuid
+  chargeId       String   @map("charge_id") @db.Uuid
+  periodStart    DateTime @map("period_start") @db.Date
+  periodEnd      DateTime @map("period_end") @db.Date
+  amount         Int
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  absence TemporaryAbsence @relation(fields: [organizationId, residentId, absenceId], references: [organizationId, residentId, id], onDelete: Restrict)
+  charge  Charge           @relation(fields: [organizationId, residentId, chargeId], references: [organizationId, residentId, id], onDelete: Restrict)
+
+  @@unique([organizationId, absenceId, periodStart, periodEnd])
+  @@index([organizationId, residentId, absenceId])
+  @@map("absence_credits")
+}
+
+model BillingRun {
+  id              String           @id @default(uuid()) @db.Uuid
+  organizationId  String           @map("organization_id") @db.Uuid
+  periodStart     DateTime         @map("period_start") @db.Date
+  periodEnd       DateTime         @map("period_end") @db.Date
+  businessKey     String           @map("business_key")
+  dueDayOfMonth   Int?             @map("due_day_of_month")
+  status          BillingRunStatus @default(POSTED)
+  totalAmount     Int              @map("total_amount")
+  createdByUserId String           @map("created_by_user_id") @db.Uuid
+  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  createdBy    User         @relation("BillingRunCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([organizationId, periodStart, periodEnd])
+  @@unique([organizationId, businessKey])
+  @@index([organizationId, periodStart])
+  @@map("billing_runs")
 }
 
 model Payment {

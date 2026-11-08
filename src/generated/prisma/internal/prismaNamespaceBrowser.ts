@@ -66,6 +66,9 @@ export const ModelName = {
   StayContract: 'StayContract',
   BedAssignment: 'BedAssignment',
   Charge: 'Charge',
+  ChargePackageComponent: 'ChargePackageComponent',
+  AbsenceCredit: 'AbsenceCredit',
+  BillingRun: 'BillingRun',
   Payment: 'Payment',
   PaymentAllocation: 'PaymentAllocation',
   DepositTransaction: 'DepositTransaction',
@@ -338,6 +341,7 @@ export const ChargeScalarFieldEnum = {
   residentId: 'residentId',
   contractId: 'contractId',
   type: 'type',
+  entrySide: 'entrySide',
   status: 'status',
   amount: 'amount',
   periodStart: 'periodStart',
@@ -353,6 +357,52 @@ export const ChargeScalarFieldEnum = {
 } as const
 
 export type ChargeScalarFieldEnum = (typeof ChargeScalarFieldEnum)[keyof typeof ChargeScalarFieldEnum]
+
+
+export const ChargePackageComponentScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  residentId: 'residentId',
+  chargeId: 'chargeId',
+  kind: 'kind',
+  name: 'name',
+  amount: 'amount',
+  deductibleOnAbsence: 'deductibleOnAbsence',
+  sortOrder: 'sortOrder'
+} as const
+
+export type ChargePackageComponentScalarFieldEnum = (typeof ChargePackageComponentScalarFieldEnum)[keyof typeof ChargePackageComponentScalarFieldEnum]
+
+
+export const AbsenceCreditScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  residentId: 'residentId',
+  absenceId: 'absenceId',
+  chargeId: 'chargeId',
+  periodStart: 'periodStart',
+  periodEnd: 'periodEnd',
+  amount: 'amount',
+  createdAt: 'createdAt'
+} as const
+
+export type AbsenceCreditScalarFieldEnum = (typeof AbsenceCreditScalarFieldEnum)[keyof typeof AbsenceCreditScalarFieldEnum]
+
+
+export const BillingRunScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  periodStart: 'periodStart',
+  periodEnd: 'periodEnd',
+  businessKey: 'businessKey',
+  dueDayOfMonth: 'dueDayOfMonth',
+  status: 'status',
+  totalAmount: 'totalAmount',
+  createdByUserId: 'createdByUserId',
+  createdAt: 'createdAt'
+} as const
+
+export type BillingRunScalarFieldEnum = (typeof BillingRunScalarFieldEnum)[keyof typeof BillingRunScalarFieldEnum]
 
 
 export const PaymentScalarFieldEnum = {
