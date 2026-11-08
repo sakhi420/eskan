@@ -10,7 +10,7 @@
 | 1   | تحلیل دامنه و نیازها | ✅ انجام شد | glossary, workflows, requirements |
 | 1.5 | Scope lock | ✅ انجام شد | mvp-scope |
 | 2   | معماری و ADR | ✅ انجام شد | spike, threat model |
-| 3   | قرارداد OpenAPI | ✅ انجام شد (v0.3.0، بازتطبیق با مسترپرامپت v3.0) | contract-first + subscriptions |
+| 3   | قرارداد OpenAPI | ✅ انجام شد (نسخهٔ فعلی **0.5.0**؛ ارتقا از v0.3.0) | contract-first + subscriptions |
 | 4   | اسکلت پروژه | ✅ انجام شد (build/test/migration/health واقعی) | nest, prisma, pg |
 | 5   | دیتابیس و migration | ✅ انجام شد (۲۵+ جدول، constraint test ۸/۸) | prisma schema |
 | 6   | احراز هویت و tenancy | ✅ انجام شد (build/seed/smoke واقعی) | auth, refresh, BOLA |
@@ -657,5 +657,23 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 - نتایج تست: Unit 56/56؛ Integration 26/26؛ Retention CHECK 11/11؛ M-1 40/40؛ M-2 92/92؛ M-2 concurrency 6/6؛ M-2 parity 5/5.
 - OpenAPI validation موفق بود (با ۶ هشدار از پیش موجود).
 - M-3 سرویس‌های مالی **شروع نشده** است.
-- هر دو Migration 4c (`20261108180000_idempotency_retention_class` و `20261108190000_idempotency_retention_consistency_check`) همچنان روی `eskan_dev`/Staging/Production اعمال‌نشده ثبت شده‌اند (مشروط به راستی‌آزمایی واقعی دیتابیس محلی در همین checkpoint).
+- هر دو Migration 4c (`20261108180000_idempotency_retention_class` و `20261108190000_idempotency_retention_consistency_check`) در زمان این checkpoint همچنان روی `eskan_dev` اعمال‌نشده بودند؛ **اعمال واقعی روی `eskan_dev` در checkpoint بعدی («اعمال 4c روی eskan_dev») ثبت شده است.** Staging/Production همچنان اعمال‌نشده‌اند.
 - ⚠️ بند «PR #1 باز است و Merge نشده» در بخش 4c بالاتر، وضعیت همان مقطع تاریخی را ثبت کرده و پس از این ادغام دیگر معتبر نیست.
+
+## اعمال 4c روی `eskan_dev` — 2026-11-08
+
+- **دو Migration 4c با موفقیت روی `eskan_dev` اعمال شدند** (با `npx prisma migrate deploy`؛ نه `migrate dev`):
+  - `20261108180000_idempotency_retention_class`
+  - `20261108190000_idempotency_retention_consistency_check`
+- وضعیت Migration: **۱۲/۱۲**؛ `prisma migrate status` → «Database schema is up to date!».
+- **Backup پیش‌از-Migration (تازه، نقطهٔ بازیابی):**
+  - مسیر: `backups\eskan_dev_pre_migrate_2026-11-08-18-50-59.dump`
+  - اندازه: `254,777 bytes`
+  - SHA256: `04b854c30a0acf63b84cfb43ea83c2309a89b5cb4d00c6fca6a1a03c21c4c599`
+- **حفظ داده:** `idempotency_records` → **۴۲۷** رکورد حفظ شد؛ **۰** رکورد ناسازگار (consistency CHECK).
+- **ستون‌ها:** `retention_class` (NOT NULL) اضافه شد؛ `expires_at` اکنون nullable.
+- **CHECK constraint:** `idempotency_records_retention_consistency_check` حاضر است.
+- رکوردهای قدیمی همچنان `TRANSIENT` و دارای `expires_at` غیر NULL (بدون backfill حدسی).
+- **M3 (سرویس‌های مالی) در زمان این checkpoint شروع نشده بود.**
+- **Staging و Production دست‌نخورده باقی مانده‌اند.**
+- **قرارداد OpenAPI:** نسخهٔ فعلی **`0.5.0`**.

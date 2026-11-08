@@ -1,7 +1,7 @@
 # دستور اجرایی قطعی فاز ۹ اسکان — نسخهٔ ۱.۰
 
 **مخزن:** `sakhi420/eskan`  
-**خط مبنا:** `main` در commit `a1374eb4906f1be0d0ae4306c4acec60bdfbb28e`  
+**خط مبنا (اصلاحیهٔ 2026-11-08):** ادامهٔ کار از آخرین `origin/main` — commit `6e8d0f8971036a103b225e4369e47dbcc4959d8a` — انجام شود؛ **نه** از commit تاریخی `a1374eb4906f1be0d0ae4306c4acec60bdfbb28e`. هیچ reset به commit قدیمی انجام نشود.
 **مالک تصمیم‌های محصول و معماری:** ChatGPT بر اساس اختیار صریح مالک پروژه  
 **نقش عامل کدنویس:** اجرا، تست، اصلاح و تحویل کد؛ نه بازگشایی تصمیم‌های این سند و نه تحویل صرفاً مستندات.
 
@@ -147,7 +147,7 @@ ESKAN در MVP **Resident Receivables Subledger** است، نه حسابداری
 
 ### Gate 0 — Baseline و آماده‌سازی تست (بدون schema mutation)
 
-1. شاخه، commit و working tree را ثبت کن؛ مبنا `a1374eb` است. یک branch اجرایی مستقل بساز؛ force push ممنوع.
+1. شاخه، commit و working tree را ثبت کن؛ مبنا آخرین `origin/main` است (پس از ادغام PR #1؛ commit `6e8d0f8`)، **نه** `a1374eb`. یک branch اجرایی مستقل بساز؛ force push ممنوع.
 2. `npm ci`, `npm run build`, `npm run openapi:validate`, `npx prisma validate`, `npx prisma generate` و تست‌های موجود را اجرا و خروجی واقعی را ثبت کن.
 3. وضعیت migration دیتابیس dev/test را بررسی کن؛ روی دیتابیس production یا دادهٔ واقعی migration آزمایشی اجرا نکن.
 4. Jest ESM مشکل‌دار را در همین Gate حل کن یا test runner سازگار تثبیت کن؛ suite را skip/delete نکن. اگر CI وجود ندارد، workflow واقعی build + OpenAPI + Prisma + PostgreSQL integration ایجاد کن.
@@ -257,7 +257,7 @@ ESKAN در MVP **Resident Receivables Subledger** است، نه حسابداری
 
 ## 9. قرارداد قفل و رفتار عامل کدنویس
 
-- مستقیم از commit `a1374eb` شروع کن؛ تغییرات دیگری را reset یا overwrite نکن.
+- مستقیم از آخرین `origin/main` (commit `6e8d0f8`) شروع کن و به commit تاریخی `a1374eb` reset یا overwrite نکن.
 - branch جدا بساز و تغییرات را در commitهای کوچک Gate-based تحویل بده؛ force push ممنوع.
 - برای هر Gate، اول کد و تست را پیاده کن؛ فقط فایل‌های ضروری مثل `progress.md` را به‌روزرسانی کن. فایل تحلیل جدید یا نسخهٔ تازهٔ طرح نساز، مگر واقعاً برای اجرای کد ضرورت داشته باشد.
 - از ایجاد معماری اضافه، event bus، CQRS کامل، Redis، Kafka، microservices یا abstraction غیرضروری خودداری کن.
