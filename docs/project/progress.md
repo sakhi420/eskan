@@ -649,3 +649,13 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 
 ### وضعیت Merge
 - PR #1 باز است و **Merge نشده**؛ M-3 شروع نشده است.
+## Post-Merge Checkpoint — 2026-11-08
+
+- **PR #1 با موفقیت ادغام شد.**
+- Merge commit: `1edcb437191d9ee84834a5bcfae1971f38ea0a4e`؛ والد ادغام شامل `a84d4ee` است؛ `main` اکنون روی همین merge commit قرار دارد.
+- Post-merge CI `42507580953` روی همان merge SHA — **موفق**.
+- نتایج تست: Unit 56/56؛ Integration 26/26؛ Retention CHECK 11/11؛ M-1 40/40؛ M-2 92/92؛ M-2 concurrency 6/6؛ M-2 parity 5/5.
+- OpenAPI validation موفق بود (با ۶ هشدار از پیش موجود).
+- M-3 سرویس‌های مالی **شروع نشده** است.
+- هر دو Migration 4c (`20261108180000_idempotency_retention_class` و `20261108190000_idempotency_retention_consistency_check`) همچنان روی `eskan_dev`/Staging/Production اعمال‌نشده ثبت شده‌اند (مشروط به راستی‌آزمایی واقعی دیتابیس محلی در همین checkpoint).
+- ⚠️ بند «PR #1 باز است و Merge نشده» در بخش 4c بالاتر، وضعیت همان مقطع تاریخی را ثبت کرده و پس از این ادغام دیگر معتبر نیست.
