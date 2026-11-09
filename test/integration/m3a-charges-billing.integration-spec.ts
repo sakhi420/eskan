@@ -393,6 +393,49 @@ describe('M3a Charge / Billing / Credit (real PostgreSQL + real services)', () =
       await expect(charges.postBilling(f.org, f.user, { periodStart: '2026-11-01', periodEnd: '2026-12-01' } as any, randomUUID(), 'trace'))
         .rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
     });
+
+    it('fails Preview and Post when an overlapping YEARLY contract exists (no silent skip, no charge)', async () => {
+      const f = await seedContract(db); // MONTHLY ACTIVE contract for f.resident
+      // Seed a pre-existing YEARLY contract for a second resident (as an older DB
+      // would have), so a valid MONTHLY contract still exists but the run must fail.
+      const resB = randomUUID();
+      await db.query(`INSERT INTO residents (id, organization_id, full_name, updated_at) VALUES ($1,$2,'R-YEARLY',now())`, [resB, f.org]);
+      await db.query(
+        `INSERT INTO stay_contracts (id, organization_id, hostel_id, resident_id, contract_number, status, start_date, rent_amount, billing_cycle, package_id, package_snapshot, updated_at)
+         VALUES ($1,$2,$3,$4,'CNT-YEARLY','ACTIVE','2026-10-01',15000,'YEARLY',$5,$6::jsonb,now())`,
+        [randomUUID(), f.org, f.hostel, resB, f.package, JSON.stringify(RENT_SNAPSHOT)],
+      );
+
+      const req = { periodStart: '2026-11-01', periodEnd: '2026-12-01' } as any;
+      await expect(charges.previewBilling(f.org, req)).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
+      await expect(charges.postBilling(f.org, f.user, req, randomUUID(), 'trace')).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
+
+      const runs = await db.query('SELECT count(*)::int n FROM billing_runs WHERE organization_id=$1', [f.org]);
+      expect(runs.rows[0].n).toBe(0);
+      const chargeN = await db.query('SELECT count(*)::int n FROM charges WHERE organization_id=$1', [f.org]);
+      expect(chargeN.rows[0].n).toBe(0);
+    });
+
+    it('reports a hostel due day of 31 in Preview and clamps to month end in Post', async () => {
+      const org = randomUUID(), user = randomUUID(), hostel = randomUUID(), resident = randomUUID(), contract = randomUUID(), pkg = randomUUID();
+      await db.query(`INSERT INTO organizations (id, name, updated_at) VALUES ($1,'Org',now())`, [org]);
+      await db.query(`INSERT INTO users (id, email, password_hash, full_name, updated_at) VALUES ($1,$2,'x','User',now())`, [user, `u-${randomUUID()}@e.com`]);
+      await db.query(`INSERT INTO hostels (id, organization_id, name, rent_due_day_of_month, absence_min_days, updated_at) VALUES ($1,$2,'H',31,3,now())`, [hostel, org]);
+      await db.query(`INSERT INTO residents (id, organization_id, full_name, updated_at) VALUES ($1,$2,'R',now())`, [resident, org]);
+      await db.query(`INSERT INTO accommodation_packages (id, organization_id, name, updated_at) VALUES ($1,$2,'P',now())`, [pkg, org]);
+      await db.query(
+        `INSERT INTO stay_contracts (id, organization_id, hostel_id, resident_id, contract_number, status, start_date, rent_amount, package_id, package_snapshot, updated_at)
+         VALUES ($1,$2,$3,$4,'CNT-31','ACTIVE','2026-10-01',16000,$5,$6::jsonb,now())`,
+        [contract, org, hostel, resident, pkg, JSON.stringify(RENT_SNAPSHOT)],
+      );
+
+      const p: any = await charges.previewBilling(org, { periodStart: '2026-11-01', periodEnd: '2026-12-01' } as any);
+      expect((p.lines[0] as any).dueDayOfMonth).toBe(31);
+
+      await charges.postBilling(org, user, { periodStart: '2026-11-01', periodEnd: '2026-12-01' } as any, randomUUID(), 'trace');
+      const due = await db.query(`SELECT to_char(due_date, 'YYYY-MM-DD') AS d FROM charges WHERE contract_id=$1`, [contract]);
+      expect(due.rows[0].d).toBe('2026-11-30');
+    });
   });
 
   async function seedAbsence(f: Fixture, departure: string, returnDate: string) {

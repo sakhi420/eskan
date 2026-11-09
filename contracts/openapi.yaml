@@ -3847,7 +3847,7 @@ components:
         money: { $ref: '#/components/schemas/Money' }
         periodStart: { type: string, format: date }
         periodEnd: { type: string, format: date }
-        dueDayOfMonth: { type: integer, minimum: 1, maximum: 28, description: "Resolved due day: request override ?? hostel default ?? 1." }
+        dueDayOfMonth: { type: integer, minimum: 1, maximum: 31, description: "Resolved due day: request override ?? hostel default ?? 1. Post clamps the actual calendar due date to the month's final day (e.g. 31 → 30 in a 30-day month)." }
         components:
           type: array
           items: { $ref: '#/components/schemas/BillingComponent' }

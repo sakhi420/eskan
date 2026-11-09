@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client';
-import { AbsenceStatus, ChargeType, ContractStatus, EntrySide, LedgerEntryStatus, ResidentStatus, SyncAction } from '../generated/prisma/enums';
+import { AbsenceStatus, BillingCycle, ChargeType, ContractStatus, EntrySide, LedgerEntryStatus, ResidentStatus, SyncAction } from '../generated/prisma/enums';
 import { PrismaService } from '../database/prisma.service';
 import { AppError } from '../common/errors/app-error';
 import { ErrorCode } from '../common/errors/error-codes';
@@ -246,10 +246,24 @@ export class ChargesService {
       },
       orderBy: { id: 'asc' },
       select: {
-        id: true, residentId: true, rentAmount: true, packageSnapshot: true, startDate: true, endDate: true,
+        id: true, residentId: true, rentAmount: true, packageSnapshot: true, startDate: true, endDate: true, billingCycle: true,
         hostel: { select: { rentDueDayOfMonth: true } },
       },
     });
+  }
+
+  private assertNoYearlyContracts(
+    contracts: Array<{ billingCycle: BillingCycle }>,
+  ): void {
+    // P1: a pre-existing YEARLY contract from before this patch must never be
+    // billed monthly (nor silently skipped). Fail the whole run when one overlaps
+    // the requested month, leaving historical data untouched.
+    if (contracts.some((c) => c.billingCycle === BillingCycle.YEARLY)) {
+      throw AppError.conflict(
+        'A YEARLY contract overlaps this billing month; annual billing is not supported yet',
+        ErrorCode.BUSINESS_RULE_VIOLATION,
+      );
+    }
   }
 
   private buildLines(
@@ -300,6 +314,7 @@ export class ChargesService {
       ]);
     }
     const contracts = await this.prisma.$transaction((tx) => this.loadBillingContracts(tx, organizationId, periodStart, periodEnd, dto.residentId));
+    this.assertNoYearlyContracts(contracts);
     const { lines, total } = this.buildLines(contracts, periodStart, periodEnd, dto.dueDayOfMonth);
     return { periodStart: dto.periodStart, periodEnd: dto.periodEnd, lines, totalAmount: total.toString() };
   }
@@ -349,6 +364,7 @@ export class ChargesService {
         // the authoritative rows (canonical Organization -> Resident -> Contract
         // locking order; see lock.service.ts).
         const contracts = await this.loadBillingContracts(tx, organizationId, periodStart, periodEnd);
+        this.assertNoYearlyContracts(contracts);
         const { lines, total } = this.buildLines(contracts, periodStart, periodEnd, dto.dueDayOfMonth);
 
         if (lines.length === 0 || total === 0n) {
