@@ -75,6 +75,19 @@ export function prorateComponents(
   return { total, components: rounded };
 }
 
+/**
+ * True when [start, end) is exactly one canonical calendar month: `start` is
+ * the first day of a month and `end` is the first day of the next month.
+ *
+ * Billing is monthly in the MVP (F-23), so a BillingRun period must satisfy
+ * this shape. Multi-month or non-calendar boundaries are rejected rather than
+ * silently billed with a single-month formula.
+ */
+export function isCanonicalBillingMonth(start: Date, end: Date): boolean {
+  const s = monthStart(start);
+  return start.getTime() === s.getTime() && end.getTime() === nextMonthStart(s).getTime();
+}
+
 /** Splits a half-open interval across calendar-month boundaries (for multi-month absence credits). */
 export function splitIntoMonths(start: Date, end: Date): Array<{ periodStart: Date; periodEnd: Date }> {
   const periods: Array<{ periodStart: Date; periodEnd: Date }> = [];

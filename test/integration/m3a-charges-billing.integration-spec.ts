@@ -140,9 +140,30 @@ describe('M3a Charge / Billing / Credit (real PostgreSQL + real services)', () =
 
     it('creates a positive CREDIT charge with entrySide CREDIT', async () => {
       const f = await seedContract(db);
-      const r: any = await charges.createCharge(f.org, f.user, chargeDto(f, { type: 'ADJUSTMENT', contractId: undefined, entrySide: 'CREDIT', money: { amount: 500, currency: 'AFN' } }) as any, randomUUID(), 'trace');
+      const r: any = await charges.createCharge(f.org, f.user, chargeDto(f, { type: 'ADJUSTMENT', contractId: undefined, entrySide: 'CREDIT', description: 'Overcharge refund', money: { amount: 500, currency: 'AFN' } }) as any, randomUUID(), 'trace');
       expect(r.entrySide).toBe('CREDIT');
       expect(r.money.amount).toBe(500);
+    });
+
+    it('RENT with a non-canonical (mid-month) period is rejected', async () => {
+      const f = await seedContract(db);
+      await expect(
+        charges.createCharge(f.org, f.user, chargeDto(f, { periodStart: '2026-11-16', periodEnd: '2026-12-01' }) as any, randomUUID(), 'trace'),
+      ).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+    });
+
+    it('CREDIT without a reason is rejected', async () => {
+      const f = await seedContract(db);
+      await expect(
+        charges.createCharge(f.org, f.user, chargeDto(f, { type: 'ADJUSTMENT', contractId: undefined, entrySide: 'CREDIT', money: { amount: 500, currency: 'AFN' } }) as any, randomUUID(), 'trace'),
+      ).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+    });
+
+    it('CREDIT classified as RENT is rejected (must be ADJUSTMENT)', async () => {
+      const f = await seedContract(db);
+      await expect(
+        charges.createCharge(f.org, f.user, chargeDto(f, { entrySide: 'CREDIT', description: 'refund', money: { amount: 500, currency: 'AFN' } }) as any, randomUUID(), 'trace'),
+      ).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
     });
 
     it('zero amount violates the DB CHECK (23514)', async () => {
@@ -202,13 +223,71 @@ describe('M3a Charge / Billing / Credit (real PostgreSQL + real services)', () =
       const p: any = await charges.previewBilling(f.org, { periodStart: '2026-11-01', periodEnd: '2026-12-01' } as any);
       expect(p.lines.length).toBe(0);
     });
+
+    it('rejects a non-canonical (mid-month or multi-month) period', async () => {
+      const f = await seedContract(db);
+      await expect(charges.postBilling(f.org, f.user, { periodStart: '2026-11-16', periodEnd: '2026-12-01' } as any, randomUUID(), 'trace')).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+      await expect(charges.postBilling(f.org, f.user, { periodStart: '2026-11-01', periodEnd: '2027-01-01' } as any, randomUUID(), 'trace')).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+    });
+
+    it('rejects posting a billing run with no chargeable contracts', async () => {
+      const f = await seedContract(db);
+      await db.query(`DELETE FROM stay_contracts WHERE organization_id=$1`, [f.org]);
+      await expect(charges.postBilling(f.org, f.user, { periodStart: '2026-11-01', periodEnd: '2026-12-01' } as any, randomUUID(), 'trace')).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
+      const runs = await db.query('SELECT count(*)::int n FROM billing_runs WHERE organization_id=$1', [f.org]);
+      expect(runs.rows[0].n).toBe(0);
+    });
+
+    it('uses each hostel rent_due_day_of_month for its own contracts', async () => {
+      const org = randomUUID(), user = randomUUID();
+      const hostelA = randomUUID(), hostelB = randomUUID();
+      const residentA = randomUUID(), residentB = randomUUID();
+      const contractA = randomUUID(), contractB = randomUUID();
+      const pkg = randomUUID();
+      await db.query(`INSERT INTO organizations (id, name, updated_at) VALUES ($1,'Org',now())`, [org]);
+      await db.query(`INSERT INTO users (id, email, password_hash, full_name, updated_at) VALUES ($1,$2,'x','User',now())`, [user, `u-${randomUUID()}@example.com`]);
+      await db.query(`INSERT INTO hostels (id, organization_id, name, rent_due_day_of_month, absence_min_days, updated_at) VALUES ($1,$2,'A',5,3,now()), ($3,$2,'B',10,3,now())`, [hostelA, org, hostelB]);
+      await db.query(`INSERT INTO residents (id, organization_id, full_name, updated_at) VALUES ($1,$2,'RA',now()), ($3,$2,'RB',now())`, [residentA, org, residentB]);
+      await db.query(`INSERT INTO accommodation_packages (id, organization_id, name, updated_at) VALUES ($1,$2,'P',now())`, [pkg, org]);
+      const snap = JSON.stringify(RENT_SNAPSHOT);
+      await db.query(
+        `INSERT INTO stay_contracts (id, organization_id, hostel_id, resident_id, contract_number, status, start_date, rent_amount, package_id, package_snapshot, updated_at)
+         VALUES ($1,$2,$3,$4,'C1','ACTIVE','2026-10-01',15000,$5,$6::jsonb,now()), ($7,$2,$8,$9,'C2','ACTIVE','2026-10-01',15000,$5,$6::jsonb,now())`,
+        [contractA, org, hostelA, residentA, pkg, snap, contractB, hostelB, residentB],
+      );
+      await charges.postBilling(org, user, { periodStart: '2026-11-01', periodEnd: '2026-12-01' } as any, randomUUID(), 'trace');
+      const due = await db.query(`SELECT to_char(due_date, 'YYYY-MM-DD') AS d FROM charges WHERE organization_id=$1 ORDER BY due_date`, [org]);
+      expect(due.rows.map((r: any) => r.d)).toEqual(['2026-11-05', '2026-11-10']);
+    });
+
+    it('aggregate totalAmount exceeds int32 without overflow', async () => {
+      const org = randomUUID(), user = randomUUID(), hostel = randomUUID();
+      const residentA = randomUUID(), residentB = randomUUID();
+      const contractA = randomUUID(), contractB = randomUUID();
+      const pkg = randomUUID();
+      await db.query(`INSERT INTO organizations (id, name, updated_at) VALUES ($1,'Org',now())`, [org]);
+      await db.query(`INSERT INTO users (id, email, password_hash, full_name, updated_at) VALUES ($1,$2,'x','User',now())`, [user, `u-${randomUUID()}@e.com`]);
+      await db.query(`INSERT INTO hostels (id, organization_id, name, rent_due_day_of_month, absence_min_days, updated_at) VALUES ($1,$2,'H',5,3,now())`, [hostel, org]);
+      await db.query(`INSERT INTO residents (id, organization_id, full_name, updated_at) VALUES ($1,$2,'RA',now()), ($3,$2,'RB',now())`, [residentA, org, residentB]);
+      await db.query(`INSERT INTO accommodation_packages (id, organization_id, name, updated_at) VALUES ($1,$2,'P',now())`, [pkg, org]);
+      const snap = JSON.stringify([{ kind: 'ACCOMMODATION', name: 'Room', amount: 2000000000, deductibleOnAbsence: false }]);
+      await db.query(
+        `INSERT INTO stay_contracts (id, organization_id, hostel_id, resident_id, contract_number, status, start_date, rent_amount, package_id, package_snapshot, updated_at)
+         VALUES ($1,$2,$3,$4,'C1','ACTIVE','2026-10-01',2000000000,$5,$6::jsonb,now()), ($7,$2,$3,$8,'C2','ACTIVE','2026-10-01',2000000000,$5,$6::jsonb,now())`,
+        [contractA, org, hostel, residentA, pkg, snap, contractB, residentB],
+      );
+      const r: any = await charges.postBilling(org, user, { periodStart: '2026-11-01', periodEnd: '2026-12-01' } as any, randomUUID(), 'trace');
+      expect(r.totalAmount).toBe('4000000000');
+      const row = await db.query('SELECT total_amount::text t FROM billing_runs WHERE organization_id=$1', [org]);
+      expect(row.rows[0].t).toBe('4000000000');
+    });
   });
 
   async function seedAbsence(f: Fixture, departure: string, returnDate: string) {
     const id = randomUUID();
     await db.query(
       `INSERT INTO temporary_absences (id, organization_id, resident_id, contract_id, status, planned_departure_date, expected_return_date, actual_departure_date, actual_return_date, approved_at, requested_by_user_id, updated_at)
-       VALUES ($1,$2,$3,$4,'APPROVED',$5,$6,$7,$8,now(),$9,now())`,
+       VALUES ($1,$2,$3,$4,'RETURNED',$5,$6,$7,$8,now(),$9,now())`,
       [id, f.org, f.resident, f.contract, departure, returnDate, departure, returnDate, f.user],
     );
     return id;
@@ -266,12 +345,34 @@ describe('M3a Charge / Billing / Credit (real PostgreSQL + real services)', () =
       expect(rows.rows[0].n).toBe(1);
     });
 
-    it('rejects credit generation before an approved actual return', async () => {
+    it('rejects credit generation for a non-RETURNED (APPROVED) absence', async () => {
       const f = await seedContract(db);
       const id = randomUUID();
       await db.query(
         `INSERT INTO temporary_absences (id, organization_id, resident_id, contract_id, status, planned_departure_date, expected_return_date, requested_by_user_id, updated_at)
          VALUES ($1,$2,$3,$4,'APPROVED','2026-11-01','2026-11-10',$5,now())`,
+        [id, f.org, f.resident, f.contract, f.user],
+      );
+      await expect(charges.generateAbsenceCredits(f.org, f.user, id, randomUUID(), 'trace')).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
+    });
+
+    it('rejects an APPROVED absence even when all return dates are present (must be RETURNED)', async () => {
+      const f = await seedContract(db);
+      const id = randomUUID();
+      await db.query(
+        `INSERT INTO temporary_absences (id, organization_id, resident_id, contract_id, status, planned_departure_date, expected_return_date, actual_departure_date, actual_return_date, approved_at, requested_by_user_id, updated_at)
+         VALUES ($1,$2,$3,$4,'APPROVED','2026-11-01','2026-11-10','2026-11-01','2026-11-04',now(),$5,now())`,
+        [id, f.org, f.resident, f.contract, f.user],
+      );
+      await expect(charges.generateAbsenceCredits(f.org, f.user, id, randomUUID(), 'trace')).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
+    });
+
+    it('rejects a RETURNED absence missing actual return data', async () => {
+      const f = await seedContract(db);
+      const id = randomUUID();
+      await db.query(
+        `INSERT INTO temporary_absences (id, organization_id, resident_id, contract_id, status, planned_departure_date, expected_return_date, actual_departure_date, actual_return_date, approved_at, requested_by_user_id, updated_at)
+         VALUES ($1,$2,$3,$4,'RETURNED','2026-11-01','2026-11-10','2026-11-01',NULL,now(),$5,now())`,
         [id, f.org, f.resident, f.contract, f.user],
       );
       await expect(charges.generateAbsenceCredits(f.org, f.user, id, randomUUID(), 'trace')).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });

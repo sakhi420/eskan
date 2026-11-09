@@ -3861,21 +3861,20 @@ components:
         totalAmount: { $ref: '#/components/schemas/Amount' }
     BillingPreviewRequest:
       type: object
-      description: "Preview-only request (no side effects, no Idempotency-Key). `periodEnd` is exclusive; `dueDayOfMonth` (1..28, clamped to month end) overrides the organization rent due-day default."
+      description: "Preview-only request (no side effects, no Idempotency-Key), for a single calendar month `[periodStart=first-of-month, periodEnd=first-of-next-month)`. `dueDayOfMonth` (1..28, clamped to month end) overrides each hostel's rent due-day default; `residentId` optionally narrows the preview to a single resident."
       required: [periodStart, periodEnd]
       properties:
-        periodStart: { type: string, format: date }
-        periodEnd: { type: string, format: date }
+        periodStart: { type: string, format: date, description: "First day of the month." }
+        periodEnd: { type: string, format: date, description: "First day of the next month (exclusive)." }
         residentId: { type: string, format: uuid }
         dueDayOfMonth: { type: integer, minimum: 1, maximum: 28 }
     BillingPostRequest:
       type: object
-      description: "Final, idempotent billing issuance. Requires Idempotency-Key; the (organization, periodStart, periodEnd) business key forbids issuing the same rent period twice (F-23)."
+      description: "Final, idempotent billing issuance for one full calendar month `[periodStart=first-of-month, periodEnd=first-of-next-month)`. Requires Idempotency-Key; the (organization, periodStart, periodEnd) business key forbids issuing the same rent period twice (F-23). Post always covers the whole organization; there is no per-resident Post."
       required: [periodStart, periodEnd]
       properties:
-        periodStart: { type: string, format: date }
-        periodEnd: { type: string, format: date }
-        residentId: { type: string, format: uuid }
+        periodStart: { type: string, format: date, description: "First day of the month." }
+        periodEnd: { type: string, format: date, description: "First day of the next month (exclusive)." }
         dueDayOfMonth: { type: integer, minimum: 1, maximum: 28 }
     BillingRun:
       type: object

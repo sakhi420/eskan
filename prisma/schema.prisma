@@ -155,6 +155,7 @@ enum AbsenceStatus {
   REQUESTED
   APPROVED
   ADJUSTED
+  RETURNED
   CLOSED
 }
 
@@ -620,7 +621,7 @@ model BillingRun {
   businessKey     String           @map("business_key")
   dueDayOfMonth   Int?             @map("due_day_of_month")
   status          BillingRunStatus @default(POSTED)
-  totalAmount     Int              @map("total_amount")
+  totalAmount     BigInt           @map("total_amount")
   createdByUserId String           @map("created_by_user_id") @db.Uuid
   createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
 

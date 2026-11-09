@@ -223,6 +223,7 @@ export const AbsenceStatus = {
   REQUESTED: 'REQUESTED',
   APPROVED: 'APPROVED',
   ADJUSTED: 'ADJUSTED',
+  RETURNED: 'RETURNED',
   CLOSED: 'CLOSED'
 } as const
 

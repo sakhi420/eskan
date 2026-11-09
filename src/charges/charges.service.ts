@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client';
-import { ChargeType, ContractStatus, EntrySide, LedgerEntryStatus, ResidentStatus, SyncAction } from '../generated/prisma/enums';
+import { AbsenceStatus, ChargeType, ContractStatus, EntrySide, LedgerEntryStatus, ResidentStatus, SyncAction } from '../generated/prisma/enums';
 import { PrismaService } from '../database/prisma.service';
 import { AppError } from '../common/errors/app-error';
 import { ErrorCode } from '../common/errors/error-codes';
@@ -13,7 +13,7 @@ import { isUniqueViolation } from '../common/prisma/unique-violation';
 import { ChargeDto } from './dto/charge.dto';
 import { BillingPreviewRequestDto, BillingPostRequestDto } from './dto/billing.dto';
 import {
-  daysBetweenExclusive, daysInMonth, parseDateOnly,
+  daysBetweenExclusive, daysInMonth, isCanonicalBillingMonth, parseDateOnly,
   prorateComponents, splitIntoMonths, toISO, type ProratableComponent,
 } from './proration';
 
@@ -99,12 +99,40 @@ export class ChargesService {
     }
     const entrySide = dto.entrySide ?? EntrySide.DEBIT;
 
+    // RENT business key is (organization, contract, billing month) so that the
+    // manual /charges path and the billing Post path converge on one canonical
+    // period and can never both create a RENT debt for the same month (F-23).
+    if (dto.type === ChargeType.RENT) {
+      if (!isCanonicalBillingMonth(parseDateOnly(dto.periodStart), parseDateOnly(dto.periodEnd))) {
+        throw AppError.validation('RENT period must be a single calendar month [first-of-month, first-of-next-month)', [
+          { field: 'periodEnd', code: 'invalid', message: 'RENT period must span exactly one calendar month' },
+        ]);
+      }
+    }
+
+    // Manual credits require a non-empty reason and must be classified as an
+    // ADJUSTMENT (never RENT), so they never occupy the RENT business key
+    // (D-07).
+    if (entrySide === EntrySide.CREDIT) {
+      if (!dto.description || dto.description.trim().length === 0) {
+        throw AppError.validation('A reason (description) is required for credits', [
+          { field: 'description', code: 'required', message: 'description is required for CREDIT' },
+        ]);
+      }
+      if (dto.type === ChargeType.RENT) {
+        throw AppError.validation('Manual CREDIT must use type ADJUSTMENT, not RENT', [
+          { field: 'type', code: 'invalid', message: 'CREDIT must be classified as ADJUSTMENT' },
+        ]);
+      }
+    }
+
     const endpoint = '/api/v1/charges';
     const requestHash = canonicalRequestHash({ method: 'POST', route: endpoint, body: dto });
 
     return this.idempotency.runAtomic<ReturnType<typeof toChargeDto>>(
       { organizationId, key: idempotencyKey, endpoint, userId, requestHash, statusCode: 201, retentionClass: 'PERMANENT' },
       async (tx) => {
+        await this.locks.lockOrganization(tx, organizationId);
         await this.locks.lockResident(tx, dto.residentId, organizationId);
         const resident = await tx.resident.findFirst({
           where: { id: dto.residentId, organizationId }, select: { id: true, status: true },
@@ -223,7 +251,7 @@ export class ChargesService {
     periodEnd: Date,
   ) {
     const calendarDays = daysInMonth(periodStart);
-    const lines: Array<{ residentId: string; contractId: string; money: { amount: number; currency: string }; periodStart: string; periodEnd: string; components: Array<{ kind: string; name: string; amount: number }> }> = [];
+    const lines: Array<{ residentId: string; contractId: string; dueDayOfMonth: number | null; money: { amount: number; currency: string }; periodStart: string; periodEnd: string; components: Array<{ kind: string; name: string; amount: number }> }> = [];
     for (const c of contracts) {
       const occStart = c.startDate > periodStart ? c.startDate : periodStart;
       const occEnd = c.endDate && c.endDate < periodEnd ? c.endDate : periodEnd;
@@ -232,12 +260,16 @@ export class ChargesService {
       const { total, components } = prorateComponents(this.contractComponents(c.rentAmount, c.packageSnapshot), occupiedDays, calendarDays);
       lines.push({
         residentId: c.residentId, contractId: c.id,
+        dueDayOfMonth: c.hostel.rentDueDayOfMonth,
         money: { amount: total, currency: 'AFN' },
-        periodStart: toISO(occStart), periodEnd: toISO(occEnd),
+        // Charge period is the canonical billing month, not the occupancy
+        // overlap, so RENT de-duplicates against the manual /charges path via
+        // the same (organization, contract, month) business key.
+        periodStart: toISO(periodStart), periodEnd: toISO(periodEnd),
         components: components.map((x) => ({ kind: x.kind, name: x.name, amount: x.amount })),
       });
     }
-    return { lines, total: lines.reduce((acc, l) => acc + l.money.amount, 0) };
+    return { lines, total: lines.reduce((acc, l) => acc + BigInt(l.money.amount), 0n) };
   }
 
   private clampDueDate(periodStart: Date, dueDay: number): Date {
@@ -248,14 +280,14 @@ export class ChargesService {
   async previewBilling(organizationId: string, dto: BillingPreviewRequestDto) {
     const periodStart = parseDateOnly(dto.periodStart);
     const periodEnd = parseDateOnly(dto.periodEnd);
-    if (periodEnd <= periodStart) {
-      throw AppError.validation('periodEnd must be after periodStart', [
-        { field: 'periodEnd', code: 'invalid', message: 'must be after periodStart' },
+    if (!isCanonicalBillingMonth(periodStart, periodEnd)) {
+      throw AppError.validation('Billing period must be a single calendar month [first-of-month, first-of-next-month)', [
+        { field: 'periodEnd', code: 'invalid', message: 'period must span exactly one calendar month' },
       ]);
     }
     const contracts = await this.prisma.$transaction((tx) => this.loadBillingContracts(tx, organizationId, periodStart, periodEnd, dto.residentId));
     const { lines, total } = this.buildLines(contracts, periodStart, periodEnd);
-    return { periodStart: dto.periodStart, periodEnd: dto.periodEnd, lines, totalAmount: String(total) };
+    return { periodStart: dto.periodStart, periodEnd: dto.periodEnd, lines, totalAmount: total.toString() };
   }
 
   async postBilling(
@@ -267,9 +299,9 @@ export class ChargesService {
   ) {
     const periodStart = parseDateOnly(dto.periodStart);
     const periodEnd = parseDateOnly(dto.periodEnd);
-    if (periodEnd <= periodStart) {
-      throw AppError.validation('periodEnd must be after periodStart', [
-        { field: 'periodEnd', code: 'invalid', message: 'must be after periodStart' },
+    if (!isCanonicalBillingMonth(periodStart, periodEnd)) {
+      throw AppError.validation('Billing period must be a single calendar month [first-of-month, first-of-next-month)', [
+        { field: 'periodEnd', code: 'invalid', message: 'period must span exactly one calendar month' },
       ]);
     }
     const businessKey = `${dto.periodStart}|${dto.periodEnd}`;
@@ -282,6 +314,8 @@ export class ChargesService {
     }>(
       { organizationId, key: idempotencyKey, endpoint, userId, requestHash, statusCode: 201, retentionClass: 'PERMANENT' },
       async (tx) => {
+        await this.locks.lockOrganization(tx, organizationId);
+
         const existing = await tx.billingRun.findFirst({
           where: { organizationId, periodStart, periodEnd }, select: { id: true },
         });
@@ -289,8 +323,24 @@ export class ChargesService {
           throw AppError.conflict('Billing run already posted for this period', ErrorCode.BUSINESS_RULE_VIOLATION);
         }
 
-        const contracts = await this.loadBillingContracts(tx, organizationId, periodStart, periodEnd, dto.residentId);
+        const snapshot = await this.loadBillingContracts(tx, organizationId, periodStart, periodEnd);
+        for (const rid of [...new Set(snapshot.map((c) => c.residentId))].sort()) {
+          await this.locks.lockResident(tx, rid, organizationId);
+        }
+        for (const cid of snapshot.map((c) => c.id).sort()) {
+          await this.locks.lockContract(tx, cid, organizationId);
+        }
+
+        // Re-read under the held locks so status/period decisions are made on
+        // the authoritative rows (canonical Organization -> Resident -> Contract
+        // locking order; see lock.service.ts).
+        const contracts = await this.loadBillingContracts(tx, organizationId, periodStart, periodEnd);
         const { lines, total } = this.buildLines(contracts, periodStart, periodEnd);
+
+        if (lines.length === 0 || total === 0n) {
+          throw AppError.conflict('No chargeable contracts for this billing period', ErrorCode.BUSINESS_RULE_VIOLATION);
+        }
+
         const businessDate = await businessTodayForOrg(tx, organizationId);
 
         let run: { id: string; createdAt: Date };
@@ -310,11 +360,12 @@ export class ChargesService {
           throw err;
         }
 
-        const defaultDueDay = contracts[0]?.hostel.rentDueDayOfMonth ?? 1;
-        const dueDay = dto.dueDayOfMonth ?? defaultDueDay;
-
         for (const line of lines) {
           if (line.money.amount <= 0) continue;
+          // Per-hostel due day (no blanket `contracts[0]` default): the override
+          // in the request applies to the whole run, otherwise each contract's
+          // own hostel rent_due_day_of_month is used.
+          const dueDay = dto.dueDayOfMonth ?? line.dueDayOfMonth ?? 1;
           const dueDate = this.clampDueDate(periodStart, dueDay);
           let charge: ChargeRow;
           try {
@@ -348,7 +399,7 @@ export class ChargesService {
         await this.reportPosting(tx, {
           organizationId, actorUserId: userId, traceId, businessDate,
           entityType: 'BILLING_RUN', entityId: run.id, entityVersion: 1, action: 'BILLING_RUN_POSTED',
-          after: { businessDate, periodStart: dto.periodStart, periodEnd: dto.periodEnd, totalAmount: total, chargeCount: lines.filter((l) => l.money.amount > 0).length } as unknown as Prisma.InputJsonValue,
+          after: { businessDate, periodStart: dto.periodStart, periodEnd: dto.periodEnd, totalAmount: total.toString(), chargeCount: lines.filter((l) => l.money.amount > 0).length } as unknown as Prisma.InputJsonValue,
         });
 
         return {
@@ -370,7 +421,7 @@ export class ChargesService {
         chargeId: r.chargeId, periodStart: toISODate(r.periodStart), periodEnd: toISODate(r.periodEnd),
         money: { amount: r.amount, currency: 'AFN' }, createdAt: r.createdAt.toISOString(),
       })),
-      totalCredit: String(rows.reduce((acc, r) => acc + r.amount, 0)),
+      totalCredit: rows.reduce((acc, r) => acc + BigInt(r.amount), 0n).toString(),
     };
   }
 
@@ -394,6 +445,19 @@ export class ChargesService {
     return this.idempotency.runAtomic<{ credits: CreditLine[]; totalCredit: string }>(
       { organizationId, key: idempotencyKey, endpoint, userId, requestHash, statusCode: 200, retentionClass: 'PERMANENT' },
       async (tx) => {
+        await this.locks.lockOrganization(tx, organizationId);
+
+        const pre = await tx.temporaryAbsence.findFirst({
+          where: { id: absenceId, organizationId },
+          select: { id: true, residentId: true, contractId: true },
+        });
+        if (!pre) throw AppError.notFound('Absence not found');
+
+        // Canonical financial lock order, then re-read under the held locks.
+        await this.locks.lockResident(tx, pre.residentId, organizationId);
+        await this.locks.lockContract(tx, pre.contractId, organizationId);
+        await this.locks.lockTemporaryAbsence(tx, pre.id, organizationId);
+
         const absence = await tx.temporaryAbsence.findFirst({
           where: { id: absenceId, organizationId },
           select: {
@@ -404,8 +468,17 @@ export class ChargesService {
         });
         if (!absence) throw AppError.notFound('Absence not found');
 
-        if (absence.status === 'CLOSED') {
+        // CLOSED => idempotent re-read of already-generated credits (no new
+        // credits are ever produced). Only RETURNED absences may generate.
+        if (absence.status === AbsenceStatus.CLOSED) {
           return this.existingCredits(tx, organizationId, absenceId);
+        }
+
+        if (absence.status !== AbsenceStatus.RETURNED) {
+          throw AppError.conflict(
+            'Absence must be in RETURNED status before credits can be generated',
+            ErrorCode.BUSINESS_RULE_VIOLATION,
+          );
         }
 
         if (!absence.actualDepartureDate || !absence.actualReturnDate || !absence.approvedAt) {
@@ -435,7 +508,7 @@ export class ChargesService {
         const businessDate = await businessTodayForOrg(tx, organizationId);
         const months = splitIntoMonths(absence.actualDepartureDate, absence.actualReturnDate);
         const credits: CreditLine[] = [];
-        let totalCredit = 0;
+        let totalCredit = 0n;
 
         for (const m of months) {
           const occupiedDays = daysBetweenExclusive(m.periodStart, m.periodEnd);
@@ -475,7 +548,7 @@ export class ChargesService {
             } as unknown as Prisma.InputJsonValue,
           });
 
-          totalCredit += total;
+          totalCredit += BigInt(total);
           credits.push({
             id: credit.id, organizationId, residentId: absence.residentId, absenceId, chargeId: charge.id,
             periodStart: toISO(m.periodStart), periodEnd: toISO(m.periodEnd),

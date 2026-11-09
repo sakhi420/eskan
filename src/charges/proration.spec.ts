@@ -1,5 +1,5 @@
 import {
-  daysBetweenExclusive, daysInMonth, parseDateOnly, prorate, prorateComponents, splitIntoMonths, toISO,
+  daysBetweenExclusive, daysInMonth, isCanonicalBillingMonth, parseDateOnly, prorate, prorateComponents, splitIntoMonths, toISO,
 } from './proration';
 
 describe('proration', () => {
@@ -46,5 +46,14 @@ describe('proration', () => {
 
   it('counts half-open days (return day excluded)', () => {
     expect(daysBetweenExclusive(parseDateOnly('2026-11-01'), parseDateOnly('2026-11-04'))).toBe(3);
+  });
+
+  it('recognizes canonical billing months and rejects non-canonical ones', () => {
+    expect(isCanonicalBillingMonth(parseDateOnly('2026-11-01'), parseDateOnly('2026-12-01'))).toBe(true);
+    expect(isCanonicalBillingMonth(parseDateOnly('2026-02-01'), parseDateOnly('2026-03-01'))).toBe(true);
+    expect(isCanonicalBillingMonth(parseDateOnly('2024-02-01'), parseDateOnly('2024-03-01'))).toBe(true); // leap year
+    expect(isCanonicalBillingMonth(parseDateOnly('2026-11-16'), parseDateOnly('2026-12-01'))).toBe(false);
+    expect(isCanonicalBillingMonth(parseDateOnly('2026-11-01'), parseDateOnly('2027-01-01'))).toBe(false);
+    expect(isCanonicalBillingMonth(parseDateOnly('2026-11-01'), parseDateOnly('2026-11-30'))).toBe(false);
   });
 });

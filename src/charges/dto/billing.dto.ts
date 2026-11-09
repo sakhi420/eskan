@@ -27,10 +27,6 @@ export class BillingPostRequestDto {
   periodEnd!: string;
 
   @IsOptional()
-  @IsUUID()
-  residentId?: string;
-
-  @IsOptional()
   @IsInt()
   @Min(1)
   @Max(28)

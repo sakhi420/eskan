@@ -39,9 +39,9 @@ describe('LockService', () => {
     expect(sql).not.toContain('organization_id');
   });
 
-  it('lockOrganization delegates to lockGlobal (no organization filter)', async () => {
+  it('lockOrganization serializes via an advisory lock (no row lock)', async () => {
     await svc.lockOrganization(tx as never, 'org-1');
-    expect(q).toHaveBeenCalledWith(expect.stringContaining('WHERE id = $1 FOR UPDATE'), 'org-1');
+    expect(q).toHaveBeenCalledWith(expect.stringContaining('pg_advisory_xact_lock'), 'org-1');
   });
 
   it('org-scoped helpers forward organizationId', async () => {

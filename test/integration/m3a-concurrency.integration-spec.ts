@@ -117,4 +117,30 @@ describe('M3a concurrency (real PostgreSQL + barrier)', () => {
     const runs = await db.query('SELECT count(*)::int n FROM billing_runs WHERE organization_id=$1', [f.org]);
     expect(runs.rows[0].n).toBe(1);
   });
+
+  it('two concurrent absence-credit generations yield exactly one credit set', async () => {
+    const f = await seed();
+    await db.query(
+      `UPDATE stay_contracts SET package_snapshot = $2::jsonb WHERE id = $1`,
+      [f.contract, JSON.stringify([{ kind: 'BOARD', name: 'Food', amount: 5000, deductibleOnAbsence: true }])],
+    );
+    const absenceId = randomUUID();
+    await db.query(
+      `INSERT INTO temporary_absences (id, organization_id, resident_id, contract_id, status, planned_departure_date, expected_return_date, actual_departure_date, actual_return_date, approved_at, requested_by_user_id, updated_at)
+       VALUES ($1,$2,$3,$4,'RETURNED','2026-11-01','2026-11-10','2026-11-01','2026-11-04',now(),$5,now())`,
+      [absenceId, f.org, f.resident, f.contract, f.user],
+    );
+    const gate = barrier(2);
+    const fire = () => gate().then(() => charges.generateAbsenceCredits(f.org, f.user, absenceId, randomUUID(), 'trace'));
+    let ok = 0;
+    await Promise.allSettled([fire(), fire()]).then((res) => {
+      for (const r of res) {
+        if (r.status === 'fulfilled') ok += 1;
+        else if ((r.reason as any)?.code !== 'BUSINESS_RULE_VIOLATION') throw r.reason;
+      }
+    });
+    expect(ok).toBeGreaterThanOrEqual(1);
+    const rows = await db.query('SELECT count(*)::int n FROM absence_credits WHERE absence_id=$1', [absenceId]);
+    expect(rows.rows[0].n).toBe(1);
+  });
 });

@@ -33,7 +33,7 @@ export type BillingRunAvgAggregateOutputType = {
 
 export type BillingRunSumAggregateOutputType = {
   dueDayOfMonth: number | null
-  totalAmount: number | null
+  totalAmount: bigint | null
 }
 
 export type BillingRunMinAggregateOutputType = {
@@ -44,7 +44,7 @@ export type BillingRunMinAggregateOutputType = {
   businessKey: string | null
   dueDayOfMonth: number | null
   status: $Enums.BillingRunStatus | null
-  totalAmount: number | null
+  totalAmount: bigint | null
   createdByUserId: string | null
   createdAt: Date | null
 }
@@ -57,7 +57,7 @@ export type BillingRunMaxAggregateOutputType = {
   businessKey: string | null
   dueDayOfMonth: number | null
   status: $Enums.BillingRunStatus | null
-  totalAmount: number | null
+  totalAmount: bigint | null
   createdByUserId: string | null
   createdAt: Date | null
 }
@@ -221,7 +221,7 @@ export type BillingRunGroupByOutputType = {
   businessKey: string
   dueDayOfMonth: number | null
   status: $Enums.BillingRunStatus
-  totalAmount: number
+  totalAmount: bigint
   createdByUserId: string
   createdAt: Date
   _count: BillingRunCountAggregateOutputType | null
@@ -257,7 +257,7 @@ export type BillingRunWhereInput = {
   businessKey?: Prisma.StringFilter<"BillingRun"> | string
   dueDayOfMonth?: Prisma.IntNullableFilter<"BillingRun"> | number | null
   status?: Prisma.EnumBillingRunStatusFilter<"BillingRun"> | $Enums.BillingRunStatus
-  totalAmount?: Prisma.IntFilter<"BillingRun"> | number
+  totalAmount?: Prisma.BigIntFilter<"BillingRun"> | bigint | number
   createdByUserId?: Prisma.UuidFilter<"BillingRun"> | string
   createdAt?: Prisma.DateTimeFilter<"BillingRun"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -292,7 +292,7 @@ export type BillingRunWhereUniqueInput = Prisma.AtLeast<{
   businessKey?: Prisma.StringFilter<"BillingRun"> | string
   dueDayOfMonth?: Prisma.IntNullableFilter<"BillingRun"> | number | null
   status?: Prisma.EnumBillingRunStatusFilter<"BillingRun"> | $Enums.BillingRunStatus
-  totalAmount?: Prisma.IntFilter<"BillingRun"> | number
+  totalAmount?: Prisma.BigIntFilter<"BillingRun"> | bigint | number
   createdByUserId?: Prisma.UuidFilter<"BillingRun"> | string
   createdAt?: Prisma.DateTimeFilter<"BillingRun"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -328,7 +328,7 @@ export type BillingRunScalarWhereWithAggregatesInput = {
   businessKey?: Prisma.StringWithAggregatesFilter<"BillingRun"> | string
   dueDayOfMonth?: Prisma.IntNullableWithAggregatesFilter<"BillingRun"> | number | null
   status?: Prisma.EnumBillingRunStatusWithAggregatesFilter<"BillingRun"> | $Enums.BillingRunStatus
-  totalAmount?: Prisma.IntWithAggregatesFilter<"BillingRun"> | number
+  totalAmount?: Prisma.BigIntWithAggregatesFilter<"BillingRun"> | bigint | number
   createdByUserId?: Prisma.UuidWithAggregatesFilter<"BillingRun"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"BillingRun"> | Date | string
 }
@@ -340,7 +340,7 @@ export type BillingRunCreateInput = {
   businessKey: string
   dueDayOfMonth?: number | null
   status?: $Enums.BillingRunStatus
-  totalAmount: number
+  totalAmount: bigint | number
   createdAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutBillingRunsInput
   createdBy: Prisma.UserCreateNestedOneWithoutBillingRunsCreatedInput
@@ -354,7 +354,7 @@ export type BillingRunUncheckedCreateInput = {
   businessKey: string
   dueDayOfMonth?: number | null
   status?: $Enums.BillingRunStatus
-  totalAmount: number
+  totalAmount: bigint | number
   createdByUserId: string
   createdAt?: Date | string
 }
@@ -366,7 +366,7 @@ export type BillingRunUpdateInput = {
   businessKey?: Prisma.StringFieldUpdateOperationsInput | string
   dueDayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumBillingRunStatusFieldUpdateOperationsInput | $Enums.BillingRunStatus
-  totalAmount?: Prisma.IntFieldUpdateOperationsInput | number
+  totalAmount?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutBillingRunsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutBillingRunsCreatedNestedInput
@@ -380,7 +380,7 @@ export type BillingRunUncheckedUpdateInput = {
   businessKey?: Prisma.StringFieldUpdateOperationsInput | string
   dueDayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumBillingRunStatusFieldUpdateOperationsInput | $Enums.BillingRunStatus
-  totalAmount?: Prisma.IntFieldUpdateOperationsInput | number
+  totalAmount?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -393,7 +393,7 @@ export type BillingRunCreateManyInput = {
   businessKey: string
   dueDayOfMonth?: number | null
   status?: $Enums.BillingRunStatus
-  totalAmount: number
+  totalAmount: bigint | number
   createdByUserId: string
   createdAt?: Date | string
 }
@@ -405,7 +405,7 @@ export type BillingRunUpdateManyMutationInput = {
   businessKey?: Prisma.StringFieldUpdateOperationsInput | string
   dueDayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumBillingRunStatusFieldUpdateOperationsInput | $Enums.BillingRunStatus
-  totalAmount?: Prisma.IntFieldUpdateOperationsInput | number
+  totalAmount?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -417,7 +417,7 @@ export type BillingRunUncheckedUpdateManyInput = {
   businessKey?: Prisma.StringFieldUpdateOperationsInput | string
   dueDayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumBillingRunStatusFieldUpdateOperationsInput | $Enums.BillingRunStatus
-  totalAmount?: Prisma.IntFieldUpdateOperationsInput | number
+  totalAmount?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -580,6 +580,14 @@ export type EnumBillingRunStatusFieldUpdateOperationsInput = {
   set?: $Enums.BillingRunStatus
 }
 
+export type BigIntFieldUpdateOperationsInput = {
+  set?: bigint | number
+  increment?: bigint | number
+  decrement?: bigint | number
+  multiply?: bigint | number
+  divide?: bigint | number
+}
+
 export type BillingRunCreateWithoutOrganizationInput = {
   id?: string
   periodStart: Date | string
@@ -587,7 +595,7 @@ export type BillingRunCreateWithoutOrganizationInput = {
   businessKey: string
   dueDayOfMonth?: number | null
   status?: $Enums.BillingRunStatus
-  totalAmount: number
+  totalAmount: bigint | number
   createdAt?: Date | string
   createdBy: Prisma.UserCreateNestedOneWithoutBillingRunsCreatedInput
 }
@@ -599,7 +607,7 @@ export type BillingRunUncheckedCreateWithoutOrganizationInput = {
   businessKey: string
   dueDayOfMonth?: number | null
   status?: $Enums.BillingRunStatus
-  totalAmount: number
+  totalAmount: bigint | number
   createdByUserId: string
   createdAt?: Date | string
 }
@@ -641,7 +649,7 @@ export type BillingRunScalarWhereInput = {
   businessKey?: Prisma.StringFilter<"BillingRun"> | string
   dueDayOfMonth?: Prisma.IntNullableFilter<"BillingRun"> | number | null
   status?: Prisma.EnumBillingRunStatusFilter<"BillingRun"> | $Enums.BillingRunStatus
-  totalAmount?: Prisma.IntFilter<"BillingRun"> | number
+  totalAmount?: Prisma.BigIntFilter<"BillingRun"> | bigint | number
   createdByUserId?: Prisma.UuidFilter<"BillingRun"> | string
   createdAt?: Prisma.DateTimeFilter<"BillingRun"> | Date | string
 }
@@ -653,7 +661,7 @@ export type BillingRunCreateWithoutCreatedByInput = {
   businessKey: string
   dueDayOfMonth?: number | null
   status?: $Enums.BillingRunStatus
-  totalAmount: number
+  totalAmount: bigint | number
   createdAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutBillingRunsInput
 }
@@ -666,7 +674,7 @@ export type BillingRunUncheckedCreateWithoutCreatedByInput = {
   businessKey: string
   dueDayOfMonth?: number | null
   status?: $Enums.BillingRunStatus
-  totalAmount: number
+  totalAmount: bigint | number
   createdAt?: Date | string
 }
 
@@ -703,7 +711,7 @@ export type BillingRunCreateManyOrganizationInput = {
   businessKey: string
   dueDayOfMonth?: number | null
   status?: $Enums.BillingRunStatus
-  totalAmount: number
+  totalAmount: bigint | number
   createdByUserId: string
   createdAt?: Date | string
 }
@@ -715,7 +723,7 @@ export type BillingRunUpdateWithoutOrganizationInput = {
   businessKey?: Prisma.StringFieldUpdateOperationsInput | string
   dueDayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumBillingRunStatusFieldUpdateOperationsInput | $Enums.BillingRunStatus
-  totalAmount?: Prisma.IntFieldUpdateOperationsInput | number
+  totalAmount?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneRequiredWithoutBillingRunsCreatedNestedInput
 }
@@ -727,7 +735,7 @@ export type BillingRunUncheckedUpdateWithoutOrganizationInput = {
   businessKey?: Prisma.StringFieldUpdateOperationsInput | string
   dueDayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumBillingRunStatusFieldUpdateOperationsInput | $Enums.BillingRunStatus
-  totalAmount?: Prisma.IntFieldUpdateOperationsInput | number
+  totalAmount?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -739,7 +747,7 @@ export type BillingRunUncheckedUpdateManyWithoutOrganizationInput = {
   businessKey?: Prisma.StringFieldUpdateOperationsInput | string
   dueDayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumBillingRunStatusFieldUpdateOperationsInput | $Enums.BillingRunStatus
-  totalAmount?: Prisma.IntFieldUpdateOperationsInput | number
+  totalAmount?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -752,7 +760,7 @@ export type BillingRunCreateManyCreatedByInput = {
   businessKey: string
   dueDayOfMonth?: number | null
   status?: $Enums.BillingRunStatus
-  totalAmount: number
+  totalAmount: bigint | number
   createdAt?: Date | string
 }
 
@@ -763,7 +771,7 @@ export type BillingRunUpdateWithoutCreatedByInput = {
   businessKey?: Prisma.StringFieldUpdateOperationsInput | string
   dueDayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumBillingRunStatusFieldUpdateOperationsInput | $Enums.BillingRunStatus
-  totalAmount?: Prisma.IntFieldUpdateOperationsInput | number
+  totalAmount?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutBillingRunsNestedInput
 }
@@ -776,7 +784,7 @@ export type BillingRunUncheckedUpdateWithoutCreatedByInput = {
   businessKey?: Prisma.StringFieldUpdateOperationsInput | string
   dueDayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumBillingRunStatusFieldUpdateOperationsInput | $Enums.BillingRunStatus
-  totalAmount?: Prisma.IntFieldUpdateOperationsInput | number
+  totalAmount?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -788,7 +796,7 @@ export type BillingRunUncheckedUpdateManyWithoutCreatedByInput = {
   businessKey?: Prisma.StringFieldUpdateOperationsInput | string
   dueDayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumBillingRunStatusFieldUpdateOperationsInput | $Enums.BillingRunStatus
-  totalAmount?: Prisma.IntFieldUpdateOperationsInput | number
+  totalAmount?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -880,7 +888,7 @@ export type $BillingRunPayload<ExtArgs extends runtime.Types.Extensions.Internal
     businessKey: string
     dueDayOfMonth: number | null
     status: $Enums.BillingRunStatus
-    totalAmount: number
+    totalAmount: bigint
     createdByUserId: string
     createdAt: Date
   }, ExtArgs["result"]["billingRun"]>
@@ -1315,7 +1323,7 @@ export interface BillingRunFieldRefs {
   readonly businessKey: Prisma.FieldRef<"BillingRun", 'String'>
   readonly dueDayOfMonth: Prisma.FieldRef<"BillingRun", 'Int'>
   readonly status: Prisma.FieldRef<"BillingRun", 'BillingRunStatus'>
-  readonly totalAmount: Prisma.FieldRef<"BillingRun", 'Int'>
+  readonly totalAmount: Prisma.FieldRef<"BillingRun", 'BigInt'>
   readonly createdByUserId: Prisma.FieldRef<"BillingRun", 'String'>
   readonly createdAt: Prisma.FieldRef<"BillingRun", 'DateTime'>
 }
