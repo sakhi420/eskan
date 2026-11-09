@@ -93,5 +93,8 @@ jobs:
       - name: Idempotency retention consistency CHECK tests
         run: node scripts/test-idempotency-retention-check.cjs
 
+      - name: M3a migrations & DB constraint tests
+        run: node scripts/test-m3a-migration.cjs
+
       - name: PostgreSQL integration tests (lifecycle + concurrency + tenant isolation)
         run: npm run test:integration

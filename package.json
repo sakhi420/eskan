@@ -18,6 +18,7 @@
     "test:m2-concurrency": "node scripts/test-m2-package-hostel-concurrency.cjs",
     "test:m2-parity": "node scripts/test-m2-prisma-parity.cjs",
     "test:retention-check": "node scripts/test-idempotency-retention-check.cjs",
+    "test:m3a-migration": "node scripts/test-m3a-migration.cjs",
     "lint": "eslint \"{src,test}/**/*.ts\"",
     "format:check": "prettier --check \"{src,test,prisma}/**/*.{ts,json,prisma}\"",
     "openapi:validate": "npx @redocly/cli@1.25.15 lint contracts/openapi.yaml",
