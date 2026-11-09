@@ -119,8 +119,8 @@ export class ChargesService {
           { field: 'description', code: 'required', message: 'description is required for CREDIT' },
         ]);
       }
-      if (dto.type === ChargeType.RENT) {
-        throw AppError.validation('Manual CREDIT must use type ADJUSTMENT, not RENT', [
+      if (dto.type !== ChargeType.ADJUSTMENT) {
+        throw AppError.validation('Manual CREDIT must use type ADJUSTMENT', [
           { field: 'type', code: 'invalid', message: 'CREDIT must be classified as ADJUSTMENT' },
         ]);
       }
@@ -256,24 +256,31 @@ export class ChargesService {
     contracts: Array<{ id: string; residentId: string; rentAmount: number; packageSnapshot: Prisma.JsonValue | null; startDate: Date; endDate: Date | null; hostel: { rentDueDayOfMonth: number | null } }>,
     periodStart: Date,
     periodEnd: Date,
+    dueDayOfMonth?: number,
   ) {
     const calendarDays = daysInMonth(periodStart);
-    const lines: Array<{ residentId: string; contractId: string; dueDayOfMonth: number | null; money: { amount: number; currency: string }; periodStart: string; periodEnd: string; components: Array<{ kind: string; name: string; amount: number }> }> = [];
+    const lines: Array<{ residentId: string; contractId: string; dueDayOfMonth: number; money: { amount: number; currency: string }; periodStart: string; periodEnd: string; components: Array<{ kind: string; name: string; amount: number; deductibleOnAbsence: boolean }> }> = [];
     for (const c of contracts) {
       const occStart = c.startDate > periodStart ? c.startDate : periodStart;
       const occEnd = c.endDate && c.endDate < periodEnd ? c.endDate : periodEnd;
       const occupiedDays = daysBetweenExclusive(occStart, occEnd);
       if (occupiedDays <= 0) continue;
       const { total, components } = prorateComponents(this.contractComponents(c.rentAmount, c.packageSnapshot), occupiedDays, calendarDays);
+      // A line whose prorated amount rounds to zero carries no charge. Preview
+      // and Post must agree, so zero-value lines are omitted here (the Money
+      // minimum is 1).
+      if (total <= 0) continue;
       lines.push({
         residentId: c.residentId, contractId: c.id,
-        dueDayOfMonth: c.hostel.rentDueDayOfMonth,
+        // Shared due-day resolution: request override ?? hostel default ?? 1,
+        // so Preview and Post never diverge on the due day.
+        dueDayOfMonth: dueDayOfMonth ?? c.hostel.rentDueDayOfMonth ?? 1,
         money: { amount: total, currency: 'AFN' },
         // Charge period is the canonical billing month, not the occupancy
         // overlap, so RENT de-duplicates against the manual /charges path via
         // the same (organization, contract, month) business key.
         periodStart: toISO(periodStart), periodEnd: toISO(periodEnd),
-        components: components.map((x) => ({ kind: x.kind, name: x.name, amount: x.amount })),
+        components: components.map((x) => ({ kind: x.kind, name: x.name, amount: x.amount, deductibleOnAbsence: x.deductibleOnAbsence })),
       });
     }
     return { lines, total: lines.reduce((acc, l) => acc + BigInt(l.money.amount), 0n) };
@@ -293,7 +300,7 @@ export class ChargesService {
       ]);
     }
     const contracts = await this.prisma.$transaction((tx) => this.loadBillingContracts(tx, organizationId, periodStart, periodEnd, dto.residentId));
-    const { lines, total } = this.buildLines(contracts, periodStart, periodEnd);
+    const { lines, total } = this.buildLines(contracts, periodStart, periodEnd, dto.dueDayOfMonth);
     return { periodStart: dto.periodStart, periodEnd: dto.periodEnd, lines, totalAmount: total.toString() };
   }
 
@@ -342,7 +349,7 @@ export class ChargesService {
         // the authoritative rows (canonical Organization -> Resident -> Contract
         // locking order; see lock.service.ts).
         const contracts = await this.loadBillingContracts(tx, organizationId, periodStart, periodEnd);
-        const { lines, total } = this.buildLines(contracts, periodStart, periodEnd);
+        const { lines, total } = this.buildLines(contracts, periodStart, periodEnd, dto.dueDayOfMonth);
 
         if (lines.length === 0 || total === 0n) {
           throw AppError.conflict('No chargeable contracts for this billing period', ErrorCode.BUSINESS_RULE_VIOLATION);
@@ -371,8 +378,10 @@ export class ChargesService {
           if (line.money.amount <= 0) continue;
           // Per-hostel due day (no blanket `contracts[0]` default): the override
           // in the request applies to the whole run, otherwise each contract's
-          // own hostel rent_due_day_of_month is used.
-          const dueDay = dto.dueDayOfMonth ?? line.dueDayOfMonth ?? 1;
+          // own hostel rent_due_day_of_month is used. buildLines already
+          // resolved `request override ?? hostel default ?? 1` so Preview and
+          // Post use the exact same due-day value.
+          const dueDay = line.dueDayOfMonth;
           const dueDate = this.clampDueDate(periodStart, dueDay);
           let charge: ChargeRow;
           try {
@@ -384,7 +393,7 @@ export class ChargesService {
                 dueDate, description: null,
                 components: {
                   create: line.components.map((x, i) => ({
-                    kind: x.kind as never, name: x.name, amount: x.amount, deductibleOnAbsence: false, sortOrder: i,
+                    kind: x.kind as never, name: x.name, amount: x.amount, deductibleOnAbsence: x.deductibleOnAbsence, sortOrder: i,
                   })),
                 },
               },
@@ -535,7 +544,19 @@ export class ChargesService {
                 })),
               },
             },
-            select: { id: true },
+            select: { id: true, version: true },
+          });
+
+          // Canonical Charge for the absence credit must emit its own CHARGE
+          // audit + sync event (D-07 / financial event stream), not just the
+          // ABSENCE_CREDIT record.
+          await this.reportPosting(tx, {
+            organizationId, actorUserId: userId, traceId, businessDate,
+            entityType: 'CHARGE', entityId: charge.id, entityVersion: charge.version, action: 'CREDIT_POSTED',
+            after: {
+              businessDate, absenceId, type: ChargeType.ADJUSTMENT, entrySide: EntrySide.CREDIT, amount: total,
+              periodStart: toISO(m.periodStart), periodEnd: toISO(m.periodEnd),
+            } as unknown as Prisma.InputJsonValue,
           });
 
           const credit = await tx.absenceCredit.create({

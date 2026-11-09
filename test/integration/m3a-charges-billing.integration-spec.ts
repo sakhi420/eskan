@@ -166,6 +166,19 @@ describe('M3a Charge / Billing / Credit (real PostgreSQL + real services)', () =
       ).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
     });
 
+    it.each([['UTILITY'], ['DAMAGE'], ['OTHER']])('CREDIT classified as %s is rejected (must be ADJUSTMENT)', async (type) => {
+      const f = await seedContract(db);
+      await expect(
+        charges.createCharge(
+          f.org,
+          f.user,
+          chargeDto(f, { type, contractId: undefined, entrySide: 'CREDIT', description: 'refund', money: { amount: 500, currency: 'AFN' } }) as any,
+          randomUUID(),
+          'trace',
+        ),
+      ).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+    });
+
     it('zero amount violates the DB CHECK (23514)', async () => {
       const f = await seedContract(db);
       await expect(db.query(`INSERT INTO charges (id, organization_id, resident_id, type, entry_side, amount, period_start, period_end, due_date, updated_at) VALUES ($1,$2,$3,'OTHER','DEBIT',0,'2026-11-01','2026-12-01','2026-11-01',now())`, [randomUUID(), f.org, f.resident])).rejects.toMatchObject({ code: '23514' });
@@ -347,6 +360,39 @@ describe('M3a Charge / Billing / Credit (real PostgreSQL + real services)', () =
       const row = await db.query('SELECT total_amount::text t FROM billing_runs WHERE organization_id=$1', [org]);
       expect(row.rows[0].t).toBe('4000000000');
     });
+
+    it('preview and post agree on the due-day override (request beats hostel default)', async () => {
+      const f = await seedContract(db); // hostel rent_due_day_of_month = 5
+      const req = { periodStart: '2026-11-01', periodEnd: '2026-12-01', dueDayOfMonth: 20 } as any;
+      const p: any = await charges.previewBilling(f.org, req);
+      expect(p.lines.length).toBe(1);
+      expect((p.lines[0] as any).dueDayOfMonth).toBe(20);
+      await charges.postBilling(f.org, f.user, req, randomUUID(), 'trace');
+      const due = await db.query(`SELECT to_char(due_date, 'YYYY-MM-DD') AS d FROM charges WHERE contract_id=$1`, [f.contract]);
+      expect(due.rows[0].d).toBe('2026-11-20');
+    });
+
+    it('persists deductibleOnAbsence from the contract snapshot (not hardcoded false)', async () => {
+      const f = await seedContract(db);
+      await charges.postBilling(f.org, f.user, { periodStart: '2026-11-01', periodEnd: '2026-12-01' } as any, randomUUID(), 'trace');
+      const rows = await db.query(
+        `SELECT kind, deductible_on_absence FROM charge_package_components cpc JOIN charges c ON c.id=cpc.charge_id WHERE c.contract_id=$1 ORDER BY cpc.sort_order`,
+        [f.contract],
+      );
+      const byKind: Record<string, boolean> = {};
+      for (const r of rows.rows) byKind[r.kind] = r.deductible_on_absence;
+      expect(byKind.ACCOMMODATION).toBe(false);
+      expect(byKind.BOARD).toBe(true);
+      expect(byKind.SERVICE).toBe(false);
+    });
+
+    it('omits preview and post lines whose prorated amount rounds to zero', async () => {
+      const f = await seedContract(db, { startDate: '2026-11-30', snapshot: [{ kind: 'ACCOMMODATION', name: 'Room', amount: 1, deductibleOnAbsence: false }] });
+      const p: any = await charges.previewBilling(f.org, { periodStart: '2026-11-01', periodEnd: '2026-12-01' } as any);
+      expect(p.lines.length).toBe(0);
+      await expect(charges.postBilling(f.org, f.user, { periodStart: '2026-11-01', periodEnd: '2026-12-01' } as any, randomUUID(), 'trace'))
+        .rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
+    });
   });
 
   async function seedAbsence(f: Fixture, departure: string, returnDate: string) {
@@ -387,6 +433,21 @@ describe('M3a Charge / Billing / Credit (real PostgreSQL + real services)', () =
       expect(r.totalCredit).toBe('5000');
       const breakdown = await db.query(`SELECT count(*)::int n FROM charge_package_components c JOIN absence_credits a ON a.charge_id=c.charge_id WHERE a.absence_id=$1`, [absenceId]);
       expect(breakdown.rows[0].n).toBe(1);
+    });
+
+    it('emits both CHARGE and ABSENCE_CREDIT audit + sync events in the same transaction', async () => {
+      const f = await seedContract(db);
+      const absenceId = await seedAbsence(f, '2026-11-01', '2026-11-04');
+      await charges.generateAbsenceCredits(f.org, f.user, absenceId, randomUUID(), 'trace');
+
+      const chargeAudit = await db.query(`SELECT count(*)::int n FROM audit_events WHERE organization_id=$1 AND entity_type='CHARGE' AND action='CREDIT_POSTED'`, [f.org]);
+      expect(chargeAudit.rows[0].n).toBe(1);
+      const creditAudit = await db.query(`SELECT count(*)::int n FROM audit_events WHERE organization_id=$1 AND entity_type='ABSENCE_CREDIT' AND action='ABSENCE_CREDIT_POSTED'`, [f.org]);
+      expect(creditAudit.rows[0].n).toBe(1);
+      const chargeSync = await db.query(`SELECT count(*)::int n FROM sync_changes WHERE organization_id=$1 AND entity_type='CHARGE'`, [f.org]);
+      expect(chargeSync.rows[0].n).toBe(1);
+      const creditSync = await db.query(`SELECT count(*)::int n FROM sync_changes WHERE organization_id=$1 AND entity_type='ABSENCE_CREDIT'`, [f.org]);
+      expect(creditSync.rows[0].n).toBe(1);
     });
 
     it('splits a multi-month absence into monthly credit lines', async () => {

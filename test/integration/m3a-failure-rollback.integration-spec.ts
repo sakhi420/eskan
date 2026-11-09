@@ -141,5 +141,34 @@ describe('M3a failure rollback (real PostgreSQL)', () => {
     expect(credits.rows[0].n).toBe(0);
     const status = await db.query('SELECT status FROM temporary_absences WHERE id=$1', [absenceId]);
     expect(status.rows[0].status).toBe('RETURNED');
+    const chargeN = await db.query('SELECT count(*)::int n FROM charges WHERE organization_id=$1', [f.org]);
+    expect(chargeN.rows[0].n).toBe(0);
+    const auditN = await db.query('SELECT count(*)::int n FROM audit_events WHERE organization_id=$1', [f.org]);
+    expect(auditN.rows[0].n).toBe(0);
+    const syncN = await db.query('SELECT count(*)::int n FROM sync_changes WHERE organization_id=$1', [f.org]);
+    expect(syncN.rows[0].n).toBe(0);
+  });
+
+  it('sync failure rolls back absence credits + charge + audit + sync + idempotency', async () => {
+    const f = await seed();
+    const absenceId = randomUUID();
+    await db.query(
+      `INSERT INTO temporary_absences (id, organization_id, resident_id, contract_id, status, planned_departure_date, expected_return_date, actual_departure_date, actual_return_date, approved_at, requested_by_user_id, updated_at)
+       VALUES ($1,$2,$3,$4,'RETURNED','2026-11-01','2026-11-10','2026-11-01','2026-11-04',now(),$5,now())`,
+      [absenceId, f.org, f.resident, f.contract, f.user],
+    );
+    const charges = new ChargesService(prisma, new IdempotencyService(prisma), failingPosting('syncChange'), new LockService());
+    await expect(charges.generateAbsenceCredits(f.org, f.user, absenceId, randomUUID(), 'trace')).rejects.toThrow('injected sync failure');
+
+    const credits = await db.query('SELECT count(*)::int n FROM absence_credits WHERE absence_id=$1', [absenceId]);
+    expect(credits.rows[0].n).toBe(0);
+    const status = await db.query('SELECT status FROM temporary_absences WHERE id=$1', [absenceId]);
+    expect(status.rows[0].status).toBe('RETURNED');
+    const chargeN = await db.query('SELECT count(*)::int n FROM charges WHERE organization_id=$1', [f.org]);
+    expect(chargeN.rows[0].n).toBe(0);
+    const auditN = await db.query('SELECT count(*)::int n FROM audit_events WHERE organization_id=$1', [f.org]);
+    expect(auditN.rows[0].n).toBe(0);
+    const syncN = await db.query('SELECT count(*)::int n FROM sync_changes WHERE organization_id=$1', [f.org]);
+    expect(syncN.rows[0].n).toBe(0);
   });
 });

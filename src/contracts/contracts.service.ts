@@ -111,6 +111,15 @@ private async resolve(
     organizationId: string,
     dto: ContractDto,
   ): Promise<{ rentAmount: number; snapshot: ComponentSnapshot[] }> {
+    // D-02/P1: only MONTHLY billing is implemented in M3a. Accepting YEARLY
+    // while the monthly BillingRun silently ignores non-monthly cycles would
+    // either double-charge or never charge the resident. Reject YEARLY at the
+    // API boundary until a real annual billing workflow exists.
+    if (dto.billingCycle === BillingCycle.YEARLY) {
+      throw AppError.validation('YEARLY billing is not supported yet; use MONTHLY', [
+        { field: 'billingCycle', code: 'unsupported', message: 'only MONTHLY billing is supported' },
+      ]);
+    }
     if (dto.endDate && dto.endDate <= dto.startDate) {
       throw AppError.validation('endDate must be after startDate', [
         { field: 'endDate', code: 'invalid', message: 'must be after startDate' },

@@ -127,3 +127,23 @@ describe('ContractsService.terminate', () => {
     expect(prisma.stayContract.updateMany).not.toHaveBeenCalled();
   });
 });
+
+describe('ContractsService billing-cycle guard (YEARLY unsupported in M3a)', () => {
+  const yearDto = () => ({
+    hostelId: 'h1', residentId: 'r1', startDate: '2026-11-01',
+    rent: { amount: 5000, currency: 'AFN' }, billingCycle: 'YEARLY',
+  });
+
+  it('rejects YEARLY on create before any DB read', async () => {
+    const { svc } = makeService();
+    await expect(svc.create('o1', 'u-1', yearDto() as any, 'idem-1')).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+  });
+
+  it('rejects YEARLY on update before any package reconcile', async () => {
+    const { svc, prisma } = makeService();
+    prisma.stayContract.findFirst.mockResolvedValueOnce({ id: 'c1', status: 'DRAFT', version: 1, hostelId: 'h1', residentId: 'r1' });
+    await expect(svc.update('o1', 'c1', 1, yearDto() as any))
+      .rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+    expect(prisma.stayContract.updateMany).not.toHaveBeenCalled();
+  });
+});
