@@ -172,6 +172,54 @@ describe('M3a Charge / Billing / Credit (real PostgreSQL + real services)', () =
     });
   });
 
+  describe('DB-level RENT integrity', () => {
+    it('RENT without contract_id is rejected by the DB CHECK', async () => {
+      const f = await seedContract(db);
+      await expect(
+        db.query(
+          `INSERT INTO charges (id, organization_id, resident_id, type, entry_side, amount, period_start, period_end, due_date, updated_at)
+           VALUES ($1,$2,$3,'RENT','DEBIT',100,'2026-11-01','2026-12-01','2026-11-01',now())`,
+          [randomUUID(), f.org, f.resident],
+        ),
+      ).rejects.toMatchObject({ code: '23514' });
+    });
+
+    it('RENT with contract_id is accepted', async () => {
+      const f = await seedContract(db);
+      await expect(
+        db.query(
+          `INSERT INTO charges (id, organization_id, resident_id, contract_id, type, entry_side, amount, period_start, period_end, due_date, updated_at)
+           VALUES ($1,$2,$3,$4,'RENT','DEBIT',100,'2026-11-01','2026-12-01','2026-11-01',now())`,
+          [randomUUID(), f.org, f.resident, f.contract],
+        ),
+      ).resolves.toBeDefined();
+    });
+
+    it('two RENT charges for the same org+contract+month → only one is accepted', async () => {
+      const f = await seedContract(db);
+      const ins = (id: string) =>
+        db.query(
+          `INSERT INTO charges (id, organization_id, resident_id, contract_id, type, entry_side, amount, period_start, period_end, due_date, updated_at)
+           VALUES ($1,$2,$3,$4,'RENT','DEBIT',100,'2026-11-01','2026-12-01','2026-11-01',now())`,
+          [id, f.org, f.resident, f.contract],
+        );
+      await ins(randomUUID());
+      await expect(ins(randomUUID())).rejects.toMatchObject({ code: '23505' });
+    });
+
+    it('two ADJUSTMENT charges without contract are allowed', async () => {
+      const f = await seedContract(db);
+      const ins = (id: string) =>
+        db.query(
+          `INSERT INTO charges (id, organization_id, resident_id, type, entry_side, amount, period_start, period_end, due_date, updated_at)
+           VALUES ($1,$2,$3,'ADJUSTMENT','CREDIT',100,'2026-11-01','2026-11-30','2026-11-01',now())`,
+          [id, f.org, f.resident],
+        );
+      await ins(randomUUID());
+      await expect(ins(randomUUID())).resolves.toBeDefined();
+    });
+  });
+
   describe('Billing', () => {
     it('preview writes nothing to the database', async () => {
       const f = await seedContract(db);
@@ -218,8 +266,26 @@ describe('M3a Charge / Billing / Credit (real PostgreSQL + real services)', () =
       expect(r.totalAmount).toBe('16000');
     });
 
-    it('does not bill a non-ACTIVE contract', async () => {
+    it('does not bill a non-ACTIVE (DRAFT) contract', async () => {
       const f = await seedContract(db, { status: 'DRAFT', startDate: '2026-11-01' });
+      const p: any = await charges.previewBilling(f.org, { periodStart: '2026-11-01', periodEnd: '2026-12-01' } as any);
+      expect(p.lines.length).toBe(0);
+    });
+
+    it('bills a CLOSED contract for its actual occupied days (prorated to endDate)', async () => {
+      const f = await seedContract(db, { status: 'CLOSED', startDate: '2026-11-01', endDate: '2026-11-16' });
+      const r: any = await charges.postBilling(f.org, f.user, { periodStart: '2026-11-01', periodEnd: '2026-12-01' } as any, randomUUID(), 'trace');
+      expect(r.totalAmount).toBe('8000'); // 15 of 30 days of 16000
+    });
+
+    it('does not bill a CLOSED contract that ended before the period', async () => {
+      const f = await seedContract(db, { status: 'CLOSED', startDate: '2026-09-01', endDate: '2026-10-31' });
+      const p: any = await charges.previewBilling(f.org, { periodStart: '2026-11-01', periodEnd: '2026-12-01' } as any);
+      expect(p.lines.length).toBe(0);
+    });
+
+    it('does not bill a TERMINATED contract', async () => {
+      const f = await seedContract(db, { status: 'TERMINATED', startDate: '2026-11-01' });
       const p: any = await charges.previewBilling(f.org, { periodStart: '2026-11-01', periodEnd: '2026-12-01' } as any);
       expect(p.lines.length).toBe(0);
     });

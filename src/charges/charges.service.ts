@@ -231,9 +231,16 @@ export class ChargesService {
   private async loadBillingContracts(
     tx: Prisma.TransactionClient, organizationId: string, periodStart: Date, periodEnd: Date, residentId?: string,
   ) {
+    // ACTIVE and CLOSED contracts are billable when their actual occupancy
+    // overlaps the billing period. DRAFT/TERMINATED contracts are never billed.
+    // A CLOSED contract that ended before the period start naturally falls out
+    // of the overlap (`endDate > periodStart` is false), so a resident who left
+    // before the month is not billed — but one who left mid-month is prorated.
     return tx.stayContract.findMany({
       where: {
-        organizationId, status: ContractStatus.ACTIVE, startDate: { lt: periodEnd },
+        organizationId,
+        status: { in: [ContractStatus.ACTIVE, ContractStatus.CLOSED] },
+        startDate: { lt: periodEnd },
         OR: [{ endDate: null }, { endDate: { gt: periodStart } }],
         ...(residentId ? { residentId } : {}),
       },

@@ -279,6 +279,12 @@ async update(organizationId: string, contractId: string, expectedVersion: number
     return this.idempotency.runAtomic<ReturnType<typeof toStayContractDto>>(
       { organizationId, key: idempotencyKey, endpoint, userId, requestHash, statusCode: 200, retentionClass: 'PERMANENT' },
       async (tx) => {
+        // Serialize against Billing (which also takes this advisory Organization
+        // lock first) so a contract transition and a billing run for the same
+        // organization are strictly ordered and the billable set can never be
+        // observed half-way through a lifecycle change.
+        await this.locks.lockOrganization(tx, organizationId);
+
         const contract = await tx.stayContract.findFirst({
           where: { id: contractId, organizationId },
           select: { hostelId: true, residentId: true },
@@ -404,6 +410,11 @@ async update(organizationId: string, contractId: string, expectedVersion: number
     return this.idempotency.runAtomic<ReturnType<typeof toStayContractDto>>(
       { organizationId, key: idempotencyKey, endpoint, userId, requestHash, statusCode: 200, retentionClass: 'PERMANENT' },
       async (tx) => {
+        // Serialize against Billing (same advisory Organization lock) so a
+        // checkout and a billing run for the same organization are strictly
+        // ordered; nothing is billed while a contract is mid-checkout.
+        await this.locks.lockOrganization(tx, organizationId);
+
         // Discover the parent ids so we can lock the canonical chain, then
         // re-read authoritatively before validating and closing.
         const initial = await tx.stayContract.findFirst({

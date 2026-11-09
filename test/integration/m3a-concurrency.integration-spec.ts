@@ -7,6 +7,7 @@ import { IdempotencyService } from '../../src/common/idempotency/idempotency.ser
 import { LockService } from '../../src/common/concurrency/lock.service';
 import { PostingService } from '../../src/common/finance/posting.service';
 import { ChargesService } from '../../src/charges/charges.service';
+import { ContractsService } from '../../src/contracts/contracts.service';
 
 const BASE_URL = process.env.DATABASE_URL || 'postgresql://postgres@127.0.0.1:5432/eskan_dev';
 const prismaCli = resolve(process.cwd(), 'node_modules', 'prisma', 'build', 'index.js');
@@ -38,6 +39,7 @@ describe('M3a concurrency (real PostgreSQL + barrier)', () => {
   let dbName: string;
   let prisma: PrismaService;
   let charges: ChargesService;
+  let contracts: ContractsService;
 
   beforeAll(async () => {
     jest.setTimeout(30000);
@@ -50,7 +52,10 @@ describe('M3a concurrency (real PostgreSQL + barrier)', () => {
     if (r.status !== 0) throw new Error(`migrate deploy failed: ${r.stdout}${r.stderr}`);
     process.env.DATABASE_URL = url;
     prisma = new PrismaService();
-    charges = new ChargesService(prisma, new IdempotencyService(prisma), new PostingService(), new LockService());
+    const idem = new IdempotencyService(prisma);
+    const locks = new LockService();
+    charges = new ChargesService(prisma, idem, new PostingService(), locks);
+    contracts = new ContractsService(prisma, idem, locks);
     db = new Client({ connectionString: url });
     await db.connect();
   }, 120000);
@@ -142,5 +147,67 @@ describe('M3a concurrency (real PostgreSQL + barrier)', () => {
     expect(ok).toBeGreaterThanOrEqual(1);
     const rows = await db.query('SELECT count(*)::int n FROM absence_credits WHERE absence_id=$1', [absenceId]);
     expect(rows.rows[0].n).toBe(1);
+  });
+
+  it('billing vs contract-activate race is atomic (no duplicate, no unlocked new contract)', async () => {
+    const org = randomUUID(), user = randomUUID(), hostel = randomUUID();
+    const residentA = randomUUID(), residentB = randomUUID();
+    const activeContract = randomUUID(), draftContract = randomUUID();
+    await db.query(`INSERT INTO organizations (id, name, updated_at) VALUES ($1,'Org',now())`, [org]);
+    await db.query(`INSERT INTO users (id, email, password_hash, full_name, updated_at) VALUES ($1,$2,'x','U',now())`, [user, `u-${randomUUID()}@e.com`]);
+    await db.query(`INSERT INTO hostels (id, organization_id, name, updated_at) VALUES ($1,$2,'H',now())`, [hostel, org]);
+    await db.query(`INSERT INTO residents (id, organization_id, full_name, updated_at) VALUES ($1,$2,'RA',now()), ($3,$2,'RB',now())`, [residentA, org, residentB]);
+    await db.query(
+      `INSERT INTO stay_contracts (id, organization_id, hostel_id, resident_id, contract_number, status, start_date, rent_amount, updated_at)
+       VALUES ($1,$2,$3,$4,'C1','ACTIVE','2026-10-01',15000,now()), ($5,$2,$3,$6,'C2','DRAFT','2026-10-01',15000,now())`,
+      [activeContract, org, hostel, residentA, draftContract, residentB],
+    );
+
+    const gate = barrier(2);
+    const fireBilling = () => gate().then(() => charges.postBilling(org, user, { periodStart: '2026-11-01', periodEnd: '2026-12-01' } as any, randomUUID(), 'trace'));
+    const fireActivate = () => gate().then(() => contracts.activate(org, draftContract, user, randomUUID(), 1));
+
+    const results = await Promise.allSettled([fireBilling(), fireActivate()]);
+    for (const r of results) {
+      if (r.status === 'rejected') throw r.reason;
+    }
+
+    const status = await db.query('SELECT status FROM stay_contracts WHERE id=$1', [draftContract]);
+    expect(status.rows[0].status).toBe('ACTIVE');
+
+    const perContract = await db.query(`SELECT contract_id, count(*)::int n FROM charges WHERE type='RENT' AND organization_id=$1 GROUP BY contract_id`, [org]);
+    const m = new Map<string, number>(perContract.rows.map((r: any) => [r.contract_id, r.n]));
+    expect(m.get(activeContract)).toBe(1);
+    expect([0, 1]).toContain(m.get(draftContract) ?? 0);
+    expect(Array.from(m.values()).every((n) => n === 1)).toBe(true);
+  });
+
+  it('billing vs checkout race is atomic (exactly one RENT charge, contract CLOSED)', async () => {
+    const org = randomUUID(), user = randomUUID(), hostel = randomUUID();
+    const resident = randomUUID(), contract = randomUUID();
+    await db.query(`INSERT INTO organizations (id, name, updated_at) VALUES ($1,'Org',now())`, [org]);
+    await db.query(`INSERT INTO users (id, email, password_hash, full_name, updated_at) VALUES ($1,$2,'x','U',now())`, [user, `u-${randomUUID()}@e.com`]);
+    await db.query(`INSERT INTO hostels (id, organization_id, name, updated_at) VALUES ($1,$2,'H',now())`, [hostel, org]);
+    await db.query(`INSERT INTO residents (id, organization_id, full_name, updated_at) VALUES ($1,$2,'R',now())`, [resident, org]);
+    await db.query(
+      `INSERT INTO stay_contracts (id, organization_id, hostel_id, resident_id, contract_number, status, start_date, rent_amount, updated_at)
+       VALUES ($1,$2,$3,$4,'C1','ACTIVE','2026-10-01',15000,now())`,
+      [contract, org, hostel, resident],
+    );
+
+    const gate = barrier(2);
+    const fireBilling = () => gate().then(() => charges.postBilling(org, user, { periodStart: '2026-11-01', periodEnd: '2026-12-01' } as any, randomUUID(), 'trace'));
+    const fireCheckout = () => gate().then(() => contracts.checkout(org, contract, user, randomUUID(), 1));
+
+    const results = await Promise.allSettled([fireBilling(), fireCheckout()]);
+    for (const r of results) {
+      if (r.status === 'rejected') throw r.reason;
+    }
+
+    const status = await db.query('SELECT status FROM stay_contracts WHERE id=$1', [contract]);
+    expect(status.rows[0].status).toBe('CLOSED');
+
+    const rent = await db.query(`SELECT count(*)::int n FROM charges WHERE type='RENT' AND contract_id=$1`, [contract]);
+    expect(rent.rows[0].n).toBe(1);
   });
 });
