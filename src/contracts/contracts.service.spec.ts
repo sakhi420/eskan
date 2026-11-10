@@ -26,12 +26,15 @@ function prismaMock() {
   const prisma: any = {
     stayContract: {
       findFirst: jest.fn(),
+      findMany: jest.fn().mockResolvedValue([]),
       updateMany: jest.fn().mockResolvedValue({ count: 1 }),
     },
     bedAssignment: {
       findMany: jest.fn().mockResolvedValue([]),
       updateMany: jest.fn().mockResolvedValue({ count: 0 }),
     },
+    hostel: { findFirst: jest.fn() },
+    resident: { findFirst: jest.fn() },
   };
   prisma.$transaction = jest.fn(async (fn: (tx: any) => Promise<unknown>) => fn(prisma));
   return prisma;
@@ -125,5 +128,106 @@ describe('ContractsService.terminate', () => {
 
     await expect(svc.terminate('o1', 'c1', 'u-1', 'idem-1', 2)).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
     expect(prisma.stayContract.updateMany).not.toHaveBeenCalled();
+  });
+});
+
+describe('ContractsService billing-cycle guard (YEARLY unsupported in M3a)', () => {
+  const yearDto = () => ({
+    hostelId: 'h1', residentId: 'r1', startDate: '2026-11-01',
+    rent: { amount: 5000, currency: 'AFN' }, billingCycle: 'YEARLY',
+  });
+
+  it('rejects YEARLY on create before any DB read', async () => {
+    const { svc } = makeService();
+    await expect(svc.create('o1', 'u-1', yearDto() as any, 'idem-1')).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+  });
+
+  it('rejects YEARLY on update before any package reconcile', async () => {
+    const { svc, prisma } = makeService();
+    prisma.stayContract.findFirst.mockResolvedValueOnce({ id: 'c1', status: 'DRAFT', version: 1, hostelId: 'h1', residentId: 'r1' });
+    await expect(svc.update('o1', 'c1', 1, yearDto() as any))
+      .rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+    expect(prisma.stayContract.updateMany).not.toHaveBeenCalled();
+  });
+});
+
+describe('ContractsService.update preserves the existing billing cycle', () => {
+  const noCycleDto = () => ({
+    hostelId: 'h1', residentId: 'r1', startDate: '2026-11-01',
+    rent: { amount: 5000, currency: 'AFN' }, notes: 'edited',
+  });
+
+  function mockParents(prisma: any) {
+    prisma.hostel.findFirst.mockResolvedValueOnce({ id: 'h1', status: 'ACTIVE' });
+    prisma.resident.findFirst.mockResolvedValueOnce({ id: 'r1', status: 'ACTIVE' });
+  }
+
+  it('preserves a legacy YEARLY draft when billingCycle is omitted (no silent MONTHLY downgrade)', async () => {
+    const { svc, prisma } = makeService();
+    prisma.stayContract.findFirst
+      .mockResolvedValueOnce({ id: 'c1', status: 'DRAFT', version: 1, hostelId: 'h1', residentId: 'r1', billingCycle: 'YEARLY' })
+      .mockResolvedValueOnce(contractRow({ billingCycle: 'YEARLY' }));
+    mockParents(prisma);
+
+    await svc.update('o1', 'c1', 1, noCycleDto() as any);
+
+    const data = prisma.stayContract.updateMany.mock.calls[0][0].data;
+    expect(data.billingCycle).toBe('YEARLY');
+  });
+
+  it('preserves MONTHLY when changing other fields without billingCycle', async () => {
+    const { svc, prisma } = makeService();
+    prisma.stayContract.findFirst
+      .mockResolvedValueOnce({ id: 'c1', status: 'DRAFT', version: 1, hostelId: 'h1', residentId: 'r1', billingCycle: 'MONTHLY' })
+      .mockResolvedValueOnce(contractRow({ billingCycle: 'MONTHLY' }));
+    mockParents(prisma);
+
+    await svc.update('o1', 'c1', 1, noCycleDto() as any);
+
+    const data = prisma.stayContract.updateMany.mock.calls[0][0].data;
+    expect(data.billingCycle).toBe('MONTHLY');
+  });
+
+  it('applies an explicit MONTHLY decision to convert a legacy YEARLY draft', async () => {
+    const { svc, prisma } = makeService();
+    prisma.stayContract.findFirst
+      .mockResolvedValueOnce({ id: 'c1', status: 'DRAFT', version: 1, hostelId: 'h1', residentId: 'r1', billingCycle: 'YEARLY' })
+      .mockResolvedValueOnce(contractRow({ billingCycle: 'MONTHLY' }));
+    mockParents(prisma);
+
+    await svc.update('o1', 'c1', 1, { ...noCycleDto(), billingCycle: 'MONTHLY' } as any);
+
+    const data = prisma.stayContract.updateMany.mock.calls[0][0].data;
+    expect(data.billingCycle).toBe('MONTHLY');
+  });
+});
+
+describe('ContractsService.activate billing-cycle guard', () => {
+  function mockParents(prisma: any) {
+    prisma.hostel.findFirst.mockResolvedValueOnce({ status: 'ACTIVE' });
+    prisma.resident.findFirst.mockResolvedValueOnce({ status: 'ACTIVE' });
+  }
+
+  it('rejects activating a YEARLY contract (no silent conversion)', async () => {
+    const { svc, prisma } = makeService();
+    prisma.stayContract.findFirst
+      .mockResolvedValueOnce({ hostelId: 'h1', residentId: 'r1' })
+      .mockResolvedValueOnce({ id: 'c1', status: 'DRAFT', hostelId: 'h1', residentId: 'r1', startDate: new Date('2026-11-01T00:00:00.000Z'), endDate: null, version: 1, billingCycle: 'YEARLY' });
+
+    await expect(svc.activate('o1', 'c1', 'u-1', 'idem-1', 1)).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
+    expect(prisma.stayContract.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('activates a MONTHLY contract normally', async () => {
+    const { svc, prisma } = makeService();
+    prisma.stayContract.findFirst
+      .mockResolvedValueOnce({ hostelId: 'h1', residentId: 'r1' })
+      .mockResolvedValueOnce({ id: 'c1', status: 'DRAFT', hostelId: 'h1', residentId: 'r1', startDate: new Date('2026-11-01T00:00:00.000Z'), endDate: null, version: 1, billingCycle: 'MONTHLY' })
+      .mockResolvedValueOnce(contractRow({ status: 'ACTIVE' }));
+    prisma.stayContract.findMany.mockResolvedValue([]);
+    mockParents(prisma);
+
+    await svc.activate('o1', 'c1', 'u-1', 'idem-1', 1);
+    expect(prisma.stayContract.updateMany).toHaveBeenCalled();
   });
 });

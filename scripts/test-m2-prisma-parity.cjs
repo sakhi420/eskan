@@ -78,7 +78,7 @@ const check = (name, ok, extra = '') => results.push(`${ok ? 'PASS' : 'FAIL'} - 
   const client = new Client({ connectionString: dbUrl(name) });
   await client.connect();
   const fks = await client.query(`SELECT conname FROM pg_constraint WHERE contype='f' AND array_length(conkey, 1) >= 2 ORDER BY conname`);
-  check('[parity] live DB has 19 tenant composite FKs (multi-column)', fks.rowCount === 19, 'count=' + fks.rowCount);
+  check('[parity] live DB has 22 tenant composite FKs (multi-column)', fks.rowCount === 22, 'count=' + fks.rowCount);
   await client.end();
 
   await admin.query(`DROP DATABASE IF EXISTS "${name}" WITH (FORCE)`).catch(() => {});

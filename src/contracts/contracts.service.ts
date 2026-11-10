@@ -111,6 +111,15 @@ private async resolve(
     organizationId: string,
     dto: ContractDto,
   ): Promise<{ rentAmount: number; snapshot: ComponentSnapshot[] }> {
+    // D-02/P1: only MONTHLY billing is implemented in M3a. Accepting YEARLY
+    // while the monthly BillingRun silently ignores non-monthly cycles would
+    // either double-charge or never charge the resident. Reject YEARLY at the
+    // API boundary until a real annual billing workflow exists.
+    if (dto.billingCycle === BillingCycle.YEARLY) {
+      throw AppError.validation('YEARLY billing is not supported yet; use MONTHLY', [
+        { field: 'billingCycle', code: 'unsupported', message: 'only MONTHLY billing is supported' },
+      ]);
+    }
     if (dto.endDate && dto.endDate <= dto.startDate) {
       throw AppError.validation('endDate must be after startDate', [
         { field: 'endDate', code: 'invalid', message: 'must be after startDate' },
@@ -224,7 +233,7 @@ async update(organizationId: string, contractId: string, expectedVersion: number
       // conflict code instead of an unrelated validation error.
       const existing = await tx.stayContract.findFirst({
         where: { id: contractId, organizationId },
-        select: { id: true, status: true, version: true, hostelId: true, residentId: true },
+        select: { id: true, status: true, version: true, hostelId: true, residentId: true, billingCycle: true },
       });
       if (!existing) throw AppError.notFound('Contract not found');
       if (existing.status !== ContractStatus.DRAFT) {
@@ -255,7 +264,7 @@ async update(organizationId: string, contractId: string, expectedVersion: number
         data: {
           hostelId: existing.hostelId, residentId: existing.residentId, startDate: toDateOnly(dto.startDate),
           endDate: dto.endDate ? toDateOnly(dto.endDate) : null, rentAmount,
-          billingCycle: dto.billingCycle ?? BillingCycle.MONTHLY, depositAmount: dto.deposit?.amount ?? null,
+          billingCycle: dto.billingCycle ?? existing.billingCycle, depositAmount: dto.deposit?.amount ?? null,
           packageId: dto.packageId ?? null,
           packageSnapshot: snapshot.length ? (snapshot as unknown as Prisma.InputJsonValue) : Prisma.JsonNull,
           notes: dto.notes, version: { increment: 1 },
@@ -279,6 +288,12 @@ async update(organizationId: string, contractId: string, expectedVersion: number
     return this.idempotency.runAtomic<ReturnType<typeof toStayContractDto>>(
       { organizationId, key: idempotencyKey, endpoint, userId, requestHash, statusCode: 200, retentionClass: 'PERMANENT' },
       async (tx) => {
+        // Serialize against Billing (which also takes this advisory Organization
+        // lock first) so a contract transition and a billing run for the same
+        // organization are strictly ordered and the billable set can never be
+        // observed half-way through a lifecycle change.
+        await this.locks.lockOrganization(tx, organizationId);
+
         const contract = await tx.stayContract.findFirst({
           where: { id: contractId, organizationId },
           select: { hostelId: true, residentId: true },
@@ -296,9 +311,19 @@ async update(organizationId: string, contractId: string, expectedVersion: number
         // activation decision (status, range, parents) on the pre-lock snapshot.
         const current = await tx.stayContract.findFirst({
           where: { id: contractId, organizationId },
-          select: { status: true, hostelId: true, residentId: true, startDate: true, endDate: true, version: true },
+          select: { status: true, hostelId: true, residentId: true, startDate: true, endDate: true, version: true, billingCycle: true },
         });
         if (!current) throw AppError.notFound('Contract not found');
+
+        // A legacy YEARLY contract must not be activated: the monthly BillingRun
+        // cannot process it, and silently converting it to MONTHLY would corrupt
+        // the original billing decision. Require an explicit cycle edit first.
+        if (current.billingCycle === BillingCycle.YEARLY) {
+          throw AppError.conflict(
+            'YEARLY contracts cannot be activated; update the billing cycle to MONTHLY first',
+            ErrorCode.BUSINESS_RULE_VIOLATION,
+          );
+        }
 
         // Compare-and-swap on the client-observed version: a stale request (new
         // idempotency key, old version) must fail with a version conflict even if
@@ -404,6 +429,11 @@ async update(organizationId: string, contractId: string, expectedVersion: number
     return this.idempotency.runAtomic<ReturnType<typeof toStayContractDto>>(
       { organizationId, key: idempotencyKey, endpoint, userId, requestHash, statusCode: 200, retentionClass: 'PERMANENT' },
       async (tx) => {
+        // Serialize against Billing (same advisory Organization lock) so a
+        // checkout and a billing run for the same organization are strictly
+        // ordered; nothing is billed while a contract is mid-checkout.
+        await this.locks.lockOrganization(tx, organizationId);
+
         // Discover the parent ids so we can lock the canonical chain, then
         // re-read authoritatively before validating and closing.
         const initial = await tx.stayContract.findFirst({

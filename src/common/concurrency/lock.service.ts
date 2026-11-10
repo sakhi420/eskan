@@ -13,17 +13,27 @@ import { Prisma } from '../../generated/prisma/client';
  * so a tenant can neither lock nor block another tenant's row. Global entities
  * (Organization, User, RefreshSession) use `lockGlobal`, never an org filter.
  *
- * The locks here MUST be taken in a fixed global order to avoid deadlocks. The
- * order used across every write path is a depth-first walk of the living-hall
- * hierarchy:
+ * The locks here MUST be taken in a fixed global order to avoid deadlocks.
+ * Two orders coexist:
  *
- *   Hostel -> Room -> Bed -> Resident -> Contract
+ *   Living-hall hierarchy (master data writes):
+ *     Hostel -> Room -> Bed -> Resident -> Contract
+ *
+ *   Canonical financial order (Phase 9, all financial writes):
+ *     Organization -> Resident(s sorted by id) -> Contract(s sorted by id)
+ *     -> Charge(s sorted by id) -> Payment -> ...
+ *     (tenant-scoped records such as TemporaryAbsence are locked after their
+ *      owning Resident/Contract, in id order)
+ *
+ * The Organization lock (a global row) is taken first whenever both it and an
+ * org-scoped entity are needed, so it acts as the single serialization point
+ * for org-level financial invariants and prevents cross-entity deadlocks.
  *
  * `SELECT ... FOR UPDATE` acquires the row lock immediately and, if the row
  * does not exist, returns no row (and therefore holds no lock) which the
  * caller detects via the subsequent existence check in the same transaction.
  */
-type OrgEntity = 'hostel' | 'room' | 'bed' | 'resident' | 'contract';
+type OrgEntity = 'hostel' | 'room' | 'bed' | 'resident' | 'contract' | 'temporary_absence';
 type GlobalEntity = 'organization' | 'user' | 'refresh_session';
 
 const ORG_TABLE_SQL: Record<OrgEntity, string> = {
@@ -32,6 +42,7 @@ const ORG_TABLE_SQL: Record<OrgEntity, string> = {
   bed: '"beds"',
   resident: '"residents"',
   contract: '"stay_contracts"',
+  temporary_absence: '"temporary_absences"',
 };
 
 const GLOBAL_TABLE_SQL: Record<GlobalEntity, string> = {
@@ -85,13 +96,30 @@ export class LockService {
     await this.lockForUpdate(tx, 'contract', id, organizationId);
   }
 
+  async lockTemporaryAbsence(tx: Prisma.TransactionClient, id: string, organizationId: string): Promise<void> {
+    await this.lockForUpdate(tx, 'temporary_absence', id, organizationId);
+  }
+
   /**
-   * Row lock on the owning organisation (a global entity), used for org-level
-   * invariants such as the "never demote/deactivate the last active owner" rule.
-   * It is orthogonal to the living-hall chain (Hostel -> Room -> Bed -> Resident
-   * -> Contract), so take it first when both are needed in the same transaction.
+   * Org-scoped serialization lock for org-level invariants (all financial
+   * postings, the "never demote/deactivate the last active owner" rule, ...).
+   *
+   * Implemented as a transaction-scoped PostgreSQL advisory lock keyed on the
+   * organization id. This deliberately does NOT take a physical `FOR UPDATE`
+   * row lock on the organization: an idempotency-record FK insert already
+   * acquires a `FOR KEY SHARE` lock on the same row, and two concurrent
+   * financial postings would otherwise deadlock upgrading that to `FOR UPDATE`.
+   * Advisory locks only conflict with the same advisory lock, so they serialize
+   * org-level writers without colliding with FK row locks (Phase 9 canonical
+   * order: Organization first).
    */
   async lockOrganization(tx: Prisma.TransactionClient, id: string): Promise<void> {
-    await this.lockGlobal(tx, 'organization', id);
+    // The subquery makes the statement return a deserializable `int` (the
+    // advisory-lock function itself returns `void`, which Prisma's raw client
+    // cannot deserialize).
+    await tx.$queryRawUnsafe(
+      `SELECT count(*)::int FROM (SELECT pg_advisory_xact_lock(hashtextextended($1, 0))) AS t`,
+      id,
+    );
   }
 }

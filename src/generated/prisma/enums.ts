@@ -223,10 +223,27 @@ export const AbsenceStatus = {
   REQUESTED: 'REQUESTED',
   APPROVED: 'APPROVED',
   ADJUSTED: 'ADJUSTED',
+  RETURNED: 'RETURNED',
   CLOSED: 'CLOSED'
 } as const
 
 export type AbsenceStatus = (typeof AbsenceStatus)[keyof typeof AbsenceStatus]
+
+
+export const EntrySide = {
+  DEBIT: 'DEBIT',
+  CREDIT: 'CREDIT'
+} as const
+
+export type EntrySide = (typeof EntrySide)[keyof typeof EntrySide]
+
+
+export const BillingRunStatus = {
+  PREVIEW: 'PREVIEW',
+  POSTED: 'POSTED'
+} as const
+
+export type BillingRunStatus = (typeof BillingRunStatus)[keyof typeof BillingRunStatus]
 
 
 export const IdempotencyRetentionClass = {

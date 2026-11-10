@@ -327,6 +327,7 @@ export type TemporaryAbsenceWhereInput = {
   approvedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   creditCharge?: Prisma.XOR<Prisma.ChargeNullableScalarRelationFilter, Prisma.ChargeWhereInput> | null
   creditChargeTenant?: Prisma.XOR<Prisma.ChargeNullableScalarRelationFilter, Prisma.ChargeWhereInput> | null
+  credits?: Prisma.AbsenceCreditListRelationFilter
 }
 
 export type TemporaryAbsenceOrderByWithRelationInput = {
@@ -355,6 +356,7 @@ export type TemporaryAbsenceOrderByWithRelationInput = {
   approvedBy?: Prisma.UserOrderByWithRelationInput
   creditCharge?: Prisma.ChargeOrderByWithRelationInput
   creditChargeTenant?: Prisma.ChargeOrderByWithRelationInput
+  credits?: Prisma.AbsenceCreditOrderByRelationAggregateInput
 }
 
 export type TemporaryAbsenceWhereUniqueInput = Prisma.AtLeast<{
@@ -387,6 +389,7 @@ export type TemporaryAbsenceWhereUniqueInput = Prisma.AtLeast<{
   approvedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   creditCharge?: Prisma.XOR<Prisma.ChargeNullableScalarRelationFilter, Prisma.ChargeWhereInput> | null
   creditChargeTenant?: Prisma.XOR<Prisma.ChargeNullableScalarRelationFilter, Prisma.ChargeWhereInput> | null
+  credits?: Prisma.AbsenceCreditListRelationFilter
 }, "id" | "creditChargeId" | "organizationId_residentId_id">
 
 export type TemporaryAbsenceOrderByWithAggregationInput = {
@@ -459,6 +462,7 @@ export type TemporaryAbsenceCreateInput = {
   approvedBy?: Prisma.UserCreateNestedOneWithoutApprovedAbsencesInput
   creditCharge?: Prisma.ChargeCreateNestedOneWithoutAbsenceInput
   creditChargeTenant?: Prisma.ChargeCreateNestedOneWithoutAbsenceTenantsInput
+  credits?: Prisma.AbsenceCreditCreateNestedManyWithoutAbsenceInput
 }
 
 export type TemporaryAbsenceUncheckedCreateInput = {
@@ -480,6 +484,7 @@ export type TemporaryAbsenceUncheckedCreateInput = {
   creditChargeId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  credits?: Prisma.AbsenceCreditUncheckedCreateNestedManyWithoutAbsenceInput
 }
 
 export type TemporaryAbsenceUpdateInput = {
@@ -502,6 +507,7 @@ export type TemporaryAbsenceUpdateInput = {
   approvedBy?: Prisma.UserUpdateOneWithoutApprovedAbsencesNestedInput
   creditCharge?: Prisma.ChargeUpdateOneWithoutAbsenceNestedInput
   creditChargeTenant?: Prisma.ChargeUpdateOneWithoutAbsenceTenantsNestedInput
+  credits?: Prisma.AbsenceCreditUpdateManyWithoutAbsenceNestedInput
 }
 
 export type TemporaryAbsenceUncheckedUpdateInput = {
@@ -523,6 +529,7 @@ export type TemporaryAbsenceUncheckedUpdateInput = {
   creditChargeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  credits?: Prisma.AbsenceCreditUncheckedUpdateManyWithoutAbsenceNestedInput
 }
 
 export type TemporaryAbsenceCreateManyInput = {
@@ -672,6 +679,11 @@ export type TemporaryAbsenceSumOrderByAggregateInput = {
 export type TemporaryAbsenceNullableScalarRelationFilter = {
   is?: Prisma.TemporaryAbsenceWhereInput | null
   isNot?: Prisma.TemporaryAbsenceWhereInput | null
+}
+
+export type TemporaryAbsenceScalarRelationFilter = {
+  is?: Prisma.TemporaryAbsenceWhereInput
+  isNot?: Prisma.TemporaryAbsenceWhereInput
 }
 
 export type TemporaryAbsenceCreateNestedManyWithoutOrganizationInput = {
@@ -962,6 +974,20 @@ export type TemporaryAbsenceUncheckedUpdateManyWithoutCreditChargeTenantNestedIn
   deleteMany?: Prisma.TemporaryAbsenceScalarWhereInput | Prisma.TemporaryAbsenceScalarWhereInput[]
 }
 
+export type TemporaryAbsenceCreateNestedOneWithoutCreditsInput = {
+  create?: Prisma.XOR<Prisma.TemporaryAbsenceCreateWithoutCreditsInput, Prisma.TemporaryAbsenceUncheckedCreateWithoutCreditsInput>
+  connectOrCreate?: Prisma.TemporaryAbsenceCreateOrConnectWithoutCreditsInput
+  connect?: Prisma.TemporaryAbsenceWhereUniqueInput
+}
+
+export type TemporaryAbsenceUpdateOneRequiredWithoutCreditsNestedInput = {
+  create?: Prisma.XOR<Prisma.TemporaryAbsenceCreateWithoutCreditsInput, Prisma.TemporaryAbsenceUncheckedCreateWithoutCreditsInput>
+  connectOrCreate?: Prisma.TemporaryAbsenceCreateOrConnectWithoutCreditsInput
+  upsert?: Prisma.TemporaryAbsenceUpsertWithoutCreditsInput
+  connect?: Prisma.TemporaryAbsenceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TemporaryAbsenceUpdateToOneWithWhereWithoutCreditsInput, Prisma.TemporaryAbsenceUpdateWithoutCreditsInput>, Prisma.TemporaryAbsenceUncheckedUpdateWithoutCreditsInput>
+}
+
 export type TemporaryAbsenceCreateWithoutOrganizationInput = {
   id?: string
   version?: number
@@ -981,6 +1007,7 @@ export type TemporaryAbsenceCreateWithoutOrganizationInput = {
   approvedBy?: Prisma.UserCreateNestedOneWithoutApprovedAbsencesInput
   creditCharge?: Prisma.ChargeCreateNestedOneWithoutAbsenceInput
   creditChargeTenant?: Prisma.ChargeCreateNestedOneWithoutAbsenceTenantsInput
+  credits?: Prisma.AbsenceCreditCreateNestedManyWithoutAbsenceInput
 }
 
 export type TemporaryAbsenceUncheckedCreateWithoutOrganizationInput = {
@@ -1001,6 +1028,7 @@ export type TemporaryAbsenceUncheckedCreateWithoutOrganizationInput = {
   creditChargeId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  credits?: Prisma.AbsenceCreditUncheckedCreateNestedManyWithoutAbsenceInput
 }
 
 export type TemporaryAbsenceCreateOrConnectWithoutOrganizationInput = {
@@ -1072,6 +1100,7 @@ export type TemporaryAbsenceCreateWithoutRequestedByInput = {
   approvedBy?: Prisma.UserCreateNestedOneWithoutApprovedAbsencesInput
   creditCharge?: Prisma.ChargeCreateNestedOneWithoutAbsenceInput
   creditChargeTenant?: Prisma.ChargeCreateNestedOneWithoutAbsenceTenantsInput
+  credits?: Prisma.AbsenceCreditCreateNestedManyWithoutAbsenceInput
 }
 
 export type TemporaryAbsenceUncheckedCreateWithoutRequestedByInput = {
@@ -1092,6 +1121,7 @@ export type TemporaryAbsenceUncheckedCreateWithoutRequestedByInput = {
   creditChargeId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  credits?: Prisma.AbsenceCreditUncheckedCreateNestedManyWithoutAbsenceInput
 }
 
 export type TemporaryAbsenceCreateOrConnectWithoutRequestedByInput = {
@@ -1123,6 +1153,7 @@ export type TemporaryAbsenceCreateWithoutApprovedByInput = {
   requestedBy: Prisma.UserCreateNestedOneWithoutRequestedAbsencesInput
   creditCharge?: Prisma.ChargeCreateNestedOneWithoutAbsenceInput
   creditChargeTenant?: Prisma.ChargeCreateNestedOneWithoutAbsenceTenantsInput
+  credits?: Prisma.AbsenceCreditCreateNestedManyWithoutAbsenceInput
 }
 
 export type TemporaryAbsenceUncheckedCreateWithoutApprovedByInput = {
@@ -1143,6 +1174,7 @@ export type TemporaryAbsenceUncheckedCreateWithoutApprovedByInput = {
   creditChargeId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  credits?: Prisma.AbsenceCreditUncheckedCreateNestedManyWithoutAbsenceInput
 }
 
 export type TemporaryAbsenceCreateOrConnectWithoutApprovedByInput = {
@@ -1206,6 +1238,7 @@ export type TemporaryAbsenceCreateWithoutResidentInput = {
   approvedBy?: Prisma.UserCreateNestedOneWithoutApprovedAbsencesInput
   creditCharge?: Prisma.ChargeCreateNestedOneWithoutAbsenceInput
   creditChargeTenant?: Prisma.ChargeCreateNestedOneWithoutAbsenceTenantsInput
+  credits?: Prisma.AbsenceCreditCreateNestedManyWithoutAbsenceInput
 }
 
 export type TemporaryAbsenceUncheckedCreateWithoutResidentInput = {
@@ -1225,6 +1258,7 @@ export type TemporaryAbsenceUncheckedCreateWithoutResidentInput = {
   creditChargeId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  credits?: Prisma.AbsenceCreditUncheckedCreateNestedManyWithoutAbsenceInput
 }
 
 export type TemporaryAbsenceCreateOrConnectWithoutResidentInput = {
@@ -1272,6 +1306,7 @@ export type TemporaryAbsenceCreateWithoutContractInput = {
   approvedBy?: Prisma.UserCreateNestedOneWithoutApprovedAbsencesInput
   creditCharge?: Prisma.ChargeCreateNestedOneWithoutAbsenceInput
   creditChargeTenant?: Prisma.ChargeCreateNestedOneWithoutAbsenceTenantsInput
+  credits?: Prisma.AbsenceCreditCreateNestedManyWithoutAbsenceInput
 }
 
 export type TemporaryAbsenceUncheckedCreateWithoutContractInput = {
@@ -1290,6 +1325,7 @@ export type TemporaryAbsenceUncheckedCreateWithoutContractInput = {
   creditChargeId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  credits?: Prisma.AbsenceCreditUncheckedCreateNestedManyWithoutAbsenceInput
 }
 
 export type TemporaryAbsenceCreateOrConnectWithoutContractInput = {
@@ -1337,6 +1373,7 @@ export type TemporaryAbsenceCreateWithoutCreditChargeInput = {
   requestedBy: Prisma.UserCreateNestedOneWithoutRequestedAbsencesInput
   approvedBy?: Prisma.UserCreateNestedOneWithoutApprovedAbsencesInput
   creditChargeTenant?: Prisma.ChargeCreateNestedOneWithoutAbsenceTenantsInput
+  credits?: Prisma.AbsenceCreditCreateNestedManyWithoutAbsenceInput
 }
 
 export type TemporaryAbsenceUncheckedCreateWithoutCreditChargeInput = {
@@ -1357,6 +1394,7 @@ export type TemporaryAbsenceUncheckedCreateWithoutCreditChargeInput = {
   approvedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  credits?: Prisma.AbsenceCreditUncheckedCreateNestedManyWithoutAbsenceInput
 }
 
 export type TemporaryAbsenceCreateOrConnectWithoutCreditChargeInput = {
@@ -1383,6 +1421,7 @@ export type TemporaryAbsenceCreateWithoutCreditChargeTenantInput = {
   requestedBy: Prisma.UserCreateNestedOneWithoutRequestedAbsencesInput
   approvedBy?: Prisma.UserCreateNestedOneWithoutApprovedAbsencesInput
   creditCharge?: Prisma.ChargeCreateNestedOneWithoutAbsenceInput
+  credits?: Prisma.AbsenceCreditCreateNestedManyWithoutAbsenceInput
 }
 
 export type TemporaryAbsenceUncheckedCreateWithoutCreditChargeTenantInput = {
@@ -1401,6 +1440,7 @@ export type TemporaryAbsenceUncheckedCreateWithoutCreditChargeTenantInput = {
   approvedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  credits?: Prisma.AbsenceCreditUncheckedCreateNestedManyWithoutAbsenceInput
 }
 
 export type TemporaryAbsenceCreateOrConnectWithoutCreditChargeTenantInput = {
@@ -1443,6 +1483,7 @@ export type TemporaryAbsenceUpdateWithoutCreditChargeInput = {
   requestedBy?: Prisma.UserUpdateOneRequiredWithoutRequestedAbsencesNestedInput
   approvedBy?: Prisma.UserUpdateOneWithoutApprovedAbsencesNestedInput
   creditChargeTenant?: Prisma.ChargeUpdateOneWithoutAbsenceTenantsNestedInput
+  credits?: Prisma.AbsenceCreditUpdateManyWithoutAbsenceNestedInput
 }
 
 export type TemporaryAbsenceUncheckedUpdateWithoutCreditChargeInput = {
@@ -1463,6 +1504,7 @@ export type TemporaryAbsenceUncheckedUpdateWithoutCreditChargeInput = {
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  credits?: Prisma.AbsenceCreditUncheckedUpdateManyWithoutAbsenceNestedInput
 }
 
 export type TemporaryAbsenceUpsertWithWhereUniqueWithoutCreditChargeTenantInput = {
@@ -1479,6 +1521,108 @@ export type TemporaryAbsenceUpdateWithWhereUniqueWithoutCreditChargeTenantInput 
 export type TemporaryAbsenceUpdateManyWithWhereWithoutCreditChargeTenantInput = {
   where: Prisma.TemporaryAbsenceScalarWhereInput
   data: Prisma.XOR<Prisma.TemporaryAbsenceUpdateManyMutationInput, Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutCreditChargeTenantInput>
+}
+
+export type TemporaryAbsenceCreateWithoutCreditsInput = {
+  id?: string
+  version?: number
+  status?: $Enums.AbsenceStatus
+  plannedDepartureDate: Date | string
+  actualDepartureDate?: Date | string | null
+  expectedReturnDate: Date | string
+  actualReturnDate?: Date | string | null
+  reason?: string | null
+  notes?: string | null
+  approvedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutTemporaryAbsencesInput
+  resident: Prisma.ResidentCreateNestedOneWithoutAbsencesInput
+  contract: Prisma.StayContractCreateNestedOneWithoutAbsencesInput
+  requestedBy: Prisma.UserCreateNestedOneWithoutRequestedAbsencesInput
+  approvedBy?: Prisma.UserCreateNestedOneWithoutApprovedAbsencesInput
+  creditCharge?: Prisma.ChargeCreateNestedOneWithoutAbsenceInput
+  creditChargeTenant?: Prisma.ChargeCreateNestedOneWithoutAbsenceTenantsInput
+}
+
+export type TemporaryAbsenceUncheckedCreateWithoutCreditsInput = {
+  id?: string
+  version?: number
+  organizationId: string
+  residentId: string
+  contractId: string
+  status?: $Enums.AbsenceStatus
+  plannedDepartureDate: Date | string
+  actualDepartureDate?: Date | string | null
+  expectedReturnDate: Date | string
+  actualReturnDate?: Date | string | null
+  reason?: string | null
+  notes?: string | null
+  requestedByUserId: string
+  approvedByUserId?: string | null
+  approvedAt?: Date | string | null
+  creditChargeId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type TemporaryAbsenceCreateOrConnectWithoutCreditsInput = {
+  where: Prisma.TemporaryAbsenceWhereUniqueInput
+  create: Prisma.XOR<Prisma.TemporaryAbsenceCreateWithoutCreditsInput, Prisma.TemporaryAbsenceUncheckedCreateWithoutCreditsInput>
+}
+
+export type TemporaryAbsenceUpsertWithoutCreditsInput = {
+  update: Prisma.XOR<Prisma.TemporaryAbsenceUpdateWithoutCreditsInput, Prisma.TemporaryAbsenceUncheckedUpdateWithoutCreditsInput>
+  create: Prisma.XOR<Prisma.TemporaryAbsenceCreateWithoutCreditsInput, Prisma.TemporaryAbsenceUncheckedCreateWithoutCreditsInput>
+  where?: Prisma.TemporaryAbsenceWhereInput
+}
+
+export type TemporaryAbsenceUpdateToOneWithWhereWithoutCreditsInput = {
+  where?: Prisma.TemporaryAbsenceWhereInput
+  data: Prisma.XOR<Prisma.TemporaryAbsenceUpdateWithoutCreditsInput, Prisma.TemporaryAbsenceUncheckedUpdateWithoutCreditsInput>
+}
+
+export type TemporaryAbsenceUpdateWithoutCreditsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumAbsenceStatusFieldUpdateOperationsInput | $Enums.AbsenceStatus
+  plannedDepartureDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  actualDepartureDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedReturnDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  actualReturnDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutTemporaryAbsencesNestedInput
+  resident?: Prisma.ResidentUpdateOneRequiredWithoutAbsencesNestedInput
+  contract?: Prisma.StayContractUpdateOneRequiredWithoutAbsencesNestedInput
+  requestedBy?: Prisma.UserUpdateOneRequiredWithoutRequestedAbsencesNestedInput
+  approvedBy?: Prisma.UserUpdateOneWithoutApprovedAbsencesNestedInput
+  creditCharge?: Prisma.ChargeUpdateOneWithoutAbsenceNestedInput
+  creditChargeTenant?: Prisma.ChargeUpdateOneWithoutAbsenceTenantsNestedInput
+}
+
+export type TemporaryAbsenceUncheckedUpdateWithoutCreditsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  residentId?: Prisma.StringFieldUpdateOperationsInput | string
+  contractId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAbsenceStatusFieldUpdateOperationsInput | $Enums.AbsenceStatus
+  plannedDepartureDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  actualDepartureDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedReturnDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  actualReturnDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requestedByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  approvedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  creditChargeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type TemporaryAbsenceCreateManyOrganizationInput = {
@@ -1520,6 +1664,7 @@ export type TemporaryAbsenceUpdateWithoutOrganizationInput = {
   approvedBy?: Prisma.UserUpdateOneWithoutApprovedAbsencesNestedInput
   creditCharge?: Prisma.ChargeUpdateOneWithoutAbsenceNestedInput
   creditChargeTenant?: Prisma.ChargeUpdateOneWithoutAbsenceTenantsNestedInput
+  credits?: Prisma.AbsenceCreditUpdateManyWithoutAbsenceNestedInput
 }
 
 export type TemporaryAbsenceUncheckedUpdateWithoutOrganizationInput = {
@@ -1540,6 +1685,7 @@ export type TemporaryAbsenceUncheckedUpdateWithoutOrganizationInput = {
   creditChargeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  credits?: Prisma.AbsenceCreditUncheckedUpdateManyWithoutAbsenceNestedInput
 }
 
 export type TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationInput = {
@@ -1621,6 +1767,7 @@ export type TemporaryAbsenceUpdateWithoutRequestedByInput = {
   approvedBy?: Prisma.UserUpdateOneWithoutApprovedAbsencesNestedInput
   creditCharge?: Prisma.ChargeUpdateOneWithoutAbsenceNestedInput
   creditChargeTenant?: Prisma.ChargeUpdateOneWithoutAbsenceTenantsNestedInput
+  credits?: Prisma.AbsenceCreditUpdateManyWithoutAbsenceNestedInput
 }
 
 export type TemporaryAbsenceUncheckedUpdateWithoutRequestedByInput = {
@@ -1641,6 +1788,7 @@ export type TemporaryAbsenceUncheckedUpdateWithoutRequestedByInput = {
   creditChargeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  credits?: Prisma.AbsenceCreditUncheckedUpdateManyWithoutAbsenceNestedInput
 }
 
 export type TemporaryAbsenceUncheckedUpdateManyWithoutRequestedByInput = {
@@ -1682,6 +1830,7 @@ export type TemporaryAbsenceUpdateWithoutApprovedByInput = {
   requestedBy?: Prisma.UserUpdateOneRequiredWithoutRequestedAbsencesNestedInput
   creditCharge?: Prisma.ChargeUpdateOneWithoutAbsenceNestedInput
   creditChargeTenant?: Prisma.ChargeUpdateOneWithoutAbsenceTenantsNestedInput
+  credits?: Prisma.AbsenceCreditUpdateManyWithoutAbsenceNestedInput
 }
 
 export type TemporaryAbsenceUncheckedUpdateWithoutApprovedByInput = {
@@ -1702,6 +1851,7 @@ export type TemporaryAbsenceUncheckedUpdateWithoutApprovedByInput = {
   creditChargeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  credits?: Prisma.AbsenceCreditUncheckedUpdateManyWithoutAbsenceNestedInput
 }
 
 export type TemporaryAbsenceUncheckedUpdateManyWithoutApprovedByInput = {
@@ -1762,6 +1912,7 @@ export type TemporaryAbsenceUpdateWithoutResidentInput = {
   approvedBy?: Prisma.UserUpdateOneWithoutApprovedAbsencesNestedInput
   creditCharge?: Prisma.ChargeUpdateOneWithoutAbsenceNestedInput
   creditChargeTenant?: Prisma.ChargeUpdateOneWithoutAbsenceTenantsNestedInput
+  credits?: Prisma.AbsenceCreditUpdateManyWithoutAbsenceNestedInput
 }
 
 export type TemporaryAbsenceUncheckedUpdateWithoutResidentInput = {
@@ -1781,6 +1932,7 @@ export type TemporaryAbsenceUncheckedUpdateWithoutResidentInput = {
   creditChargeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  credits?: Prisma.AbsenceCreditUncheckedUpdateManyWithoutAbsenceNestedInput
 }
 
 export type TemporaryAbsenceUncheckedUpdateManyWithoutResidentInput = {
@@ -1839,6 +1991,7 @@ export type TemporaryAbsenceUpdateWithoutContractInput = {
   approvedBy?: Prisma.UserUpdateOneWithoutApprovedAbsencesNestedInput
   creditCharge?: Prisma.ChargeUpdateOneWithoutAbsenceNestedInput
   creditChargeTenant?: Prisma.ChargeUpdateOneWithoutAbsenceTenantsNestedInput
+  credits?: Prisma.AbsenceCreditUpdateManyWithoutAbsenceNestedInput
 }
 
 export type TemporaryAbsenceUncheckedUpdateWithoutContractInput = {
@@ -1857,6 +2010,7 @@ export type TemporaryAbsenceUncheckedUpdateWithoutContractInput = {
   creditChargeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  credits?: Prisma.AbsenceCreditUncheckedUpdateManyWithoutAbsenceNestedInput
 }
 
 export type TemporaryAbsenceUncheckedUpdateManyWithoutContractInput = {
@@ -1914,6 +2068,7 @@ export type TemporaryAbsenceUpdateWithoutCreditChargeTenantInput = {
   requestedBy?: Prisma.UserUpdateOneRequiredWithoutRequestedAbsencesNestedInput
   approvedBy?: Prisma.UserUpdateOneWithoutApprovedAbsencesNestedInput
   creditCharge?: Prisma.ChargeUpdateOneWithoutAbsenceNestedInput
+  credits?: Prisma.AbsenceCreditUpdateManyWithoutAbsenceNestedInput
 }
 
 export type TemporaryAbsenceUncheckedUpdateWithoutCreditChargeTenantInput = {
@@ -1932,6 +2087,7 @@ export type TemporaryAbsenceUncheckedUpdateWithoutCreditChargeTenantInput = {
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  credits?: Prisma.AbsenceCreditUncheckedUpdateManyWithoutAbsenceNestedInput
 }
 
 export type TemporaryAbsenceUncheckedUpdateManyWithoutCreditChargeTenantInput = {
@@ -1952,6 +2108,35 @@ export type TemporaryAbsenceUncheckedUpdateManyWithoutCreditChargeTenantInput = 
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+
+/**
+ * Count Type TemporaryAbsenceCountOutputType
+ */
+
+export type TemporaryAbsenceCountOutputType = {
+  credits: number
+}
+
+export type TemporaryAbsenceCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  credits?: boolean | TemporaryAbsenceCountOutputTypeCountCreditsArgs
+}
+
+/**
+ * TemporaryAbsenceCountOutputType without action
+ */
+export type TemporaryAbsenceCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TemporaryAbsenceCountOutputType
+   */
+  select?: Prisma.TemporaryAbsenceCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * TemporaryAbsenceCountOutputType without action
+ */
+export type TemporaryAbsenceCountOutputTypeCountCreditsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AbsenceCreditWhereInput
+}
 
 
 export type TemporaryAbsenceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1980,6 +2165,8 @@ export type TemporaryAbsenceSelect<ExtArgs extends runtime.Types.Extensions.Inte
   approvedBy?: boolean | Prisma.TemporaryAbsence$approvedByArgs<ExtArgs>
   creditCharge?: boolean | Prisma.TemporaryAbsence$creditChargeArgs<ExtArgs>
   creditChargeTenant?: boolean | Prisma.TemporaryAbsence$creditChargeTenantArgs<ExtArgs>
+  credits?: boolean | Prisma.TemporaryAbsence$creditsArgs<ExtArgs>
+  _count?: boolean | Prisma.TemporaryAbsenceCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["temporaryAbsence"]>
 
 export type TemporaryAbsenceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -2068,6 +2255,8 @@ export type TemporaryAbsenceInclude<ExtArgs extends runtime.Types.Extensions.Int
   approvedBy?: boolean | Prisma.TemporaryAbsence$approvedByArgs<ExtArgs>
   creditCharge?: boolean | Prisma.TemporaryAbsence$creditChargeArgs<ExtArgs>
   creditChargeTenant?: boolean | Prisma.TemporaryAbsence$creditChargeTenantArgs<ExtArgs>
+  credits?: boolean | Prisma.TemporaryAbsence$creditsArgs<ExtArgs>
+  _count?: boolean | Prisma.TemporaryAbsenceCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TemporaryAbsenceIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -2098,6 +2287,7 @@ export type $TemporaryAbsencePayload<ExtArgs extends runtime.Types.Extensions.In
     approvedBy: Prisma.$UserPayload<ExtArgs> | null
     creditCharge: Prisma.$ChargePayload<ExtArgs> | null
     creditChargeTenant: Prisma.$ChargePayload<ExtArgs> | null
+    credits: Prisma.$AbsenceCreditPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2519,6 +2709,7 @@ export interface Prisma__TemporaryAbsenceClient<T, Null = never, ExtArgs extends
   approvedBy<T extends Prisma.TemporaryAbsence$approvedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TemporaryAbsence$approvedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   creditCharge<T extends Prisma.TemporaryAbsence$creditChargeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TemporaryAbsence$creditChargeArgs<ExtArgs>>): Prisma.Prisma__ChargeClient<runtime.Types.Result.GetResult<Prisma.$ChargePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   creditChargeTenant<T extends Prisma.TemporaryAbsence$creditChargeTenantArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TemporaryAbsence$creditChargeTenantArgs<ExtArgs>>): Prisma.Prisma__ChargeClient<runtime.Types.Result.GetResult<Prisma.$ChargePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  credits<T extends Prisma.TemporaryAbsence$creditsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TemporaryAbsence$creditsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AbsenceCreditPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3021,6 +3212,30 @@ export type TemporaryAbsence$creditChargeTenantArgs<ExtArgs extends runtime.Type
    */
   include?: Prisma.ChargeInclude<ExtArgs> | null
   where?: Prisma.ChargeWhereInput
+}
+
+/**
+ * TemporaryAbsence.credits
+ */
+export type TemporaryAbsence$creditsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AbsenceCredit
+   */
+  select?: Prisma.AbsenceCreditSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AbsenceCredit
+   */
+  omit?: Prisma.AbsenceCreditOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AbsenceCreditInclude<ExtArgs> | null
+  where?: Prisma.AbsenceCreditWhereInput
+  orderBy?: Prisma.AbsenceCreditOrderByWithRelationInput | Prisma.AbsenceCreditOrderByWithRelationInput[]
+  cursor?: Prisma.AbsenceCreditWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AbsenceCreditScalarFieldEnum | Prisma.AbsenceCreditScalarFieldEnum[]
 }
 
 /**

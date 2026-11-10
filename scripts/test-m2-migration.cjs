@@ -113,7 +113,7 @@ async function seedBaseline(c) {
   await c.query(`INSERT INTO stay_contracts (id, organization_id, hostel_id, resident_id, contract_number, status, start_date, rent_amount, updated_at) VALUES ($1,$2,$3,$4,'CNT-M2','ACTIVE','2020-01-01',5000,now())`, [ids.contractA, ids.orgA, ids.hostelA, ids.residentA]);
   await c.query(`INSERT INTO accommodation_packages (id, organization_id, hostel_id, name, created_at, updated_at) VALUES ($1,$2,$3,'PKG',now(),now())`, [ids.pkgA, ids.orgA, ids.hostelA]);
   await c.query(`INSERT INTO payments (id, organization_id, resident_id, amount, method, received_at, receipt_number, updated_at) VALUES ($1,$2,$3,1000,'CASH','2020-01-02','RCP-M2',now())`, [ids.payA, ids.orgA, ids.residentA]);
-  await c.query(`INSERT INTO charges (id, organization_id, resident_id, type, amount, period_start, period_end, due_date, updated_at) VALUES ($1,$2,$3,'RENT',500,'2020-01-01','2020-01-31','2020-01-01',now())`, [ids.chargeA, ids.orgA, ids.residentA]);
+  await c.query(`INSERT INTO charges (id, organization_id, resident_id, contract_id, type, amount, period_start, period_end, due_date, updated_at) VALUES ($1,$2,$3,$4,'RENT',500,'2020-01-01','2020-01-31','2020-01-01',now())`, [ids.chargeA, ids.orgA, ids.residentA, ids.contractA]);
   await c.query(`INSERT INTO payment_allocations (id, payment_id, charge_id, amount) VALUES ($1,$2,$3,500)`, [ids.allocA, ids.payA, ids.chargeA]);
   return ids;
 }
@@ -124,7 +124,7 @@ async function seedNegatives(c) {
   d.hostelA = uuid(); d.hostelA2 = uuid(); d.hostelB = uuid();
   d.roomA = uuid(); d.bedA = uuid();
   d.resA = uuid(); d.resA2 = uuid(); d.resB = uuid();
-  d.cntA = uuid(); d.pkgA = uuid(); d.pkgB = uuid();
+  d.cntA = uuid(); d.cntB = uuid(); d.pkgA = uuid(); d.pkgB = uuid();
   d.payA = uuid(); d.chgA = uuid(); d.chgB = uuid();
   await c.query(`INSERT INTO organizations (id, name, updated_at) VALUES ($1,'A',now()),($2,'B',now())`, [d.orgA, d.orgB]);
   await c.query(`INSERT INTO hostels (id, organization_id, name, updated_at) VALUES ($1,$2,'HA',now()),($3,$2,'HA2',now()),($4,$5,'HB',now())`, [d.hostelA, d.orgA, d.hostelA2, d.hostelB, d.orgB]);
@@ -132,9 +132,10 @@ async function seedNegatives(c) {
   await c.query(`INSERT INTO beds (id, organization_id, room_id, code, updated_at) VALUES ($1,$2,$3,'B',now())`, [d.bedA, d.orgA, d.roomA]);
   await c.query(`INSERT INTO residents (id, organization_id, full_name, updated_at) VALUES ($1,$2,'RA',now()),($3,$2,'RA2',now()),($4,$5,'RB',now())`, [d.resA, d.orgA, d.resA2, d.resB, d.orgB]);
   await c.query(`INSERT INTO stay_contracts (id, organization_id, hostel_id, resident_id, contract_number, status, start_date, rent_amount, updated_at) VALUES ($1,$2,$3,$4,'CNT-A','ACTIVE','2020-01-01',5000,now())`, [d.cntA, d.orgA, d.hostelA, d.resA]);
+  await c.query(`INSERT INTO stay_contracts (id, organization_id, hostel_id, resident_id, contract_number, status, start_date, rent_amount, updated_at) VALUES ($1,$2,$3,$4,'CNT-B','ACTIVE','2020-01-01',5000,now())`, [d.cntB, d.orgB, d.hostelB, d.resB]);
   await c.query(`INSERT INTO accommodation_packages (id, organization_id, hostel_id, name, created_at, updated_at) VALUES ($1,$2,$3,'P',now(),now()),($4,$5,NULL,'PB',now(),now())`, [d.pkgA, d.orgA, d.hostelA, d.pkgB, d.orgB]);
   await c.query(`INSERT INTO payments (id, organization_id, resident_id, amount, method, received_at, receipt_number, updated_at) VALUES ($1,$2,$3,1000,'CASH','2020-01-02','RP',now())`, [d.payA, d.orgA, d.resA]);
-  await c.query(`INSERT INTO charges (id, organization_id, resident_id, type, amount, period_start, period_end, due_date, updated_at) VALUES ($1,$2,$3,'RENT',500,'2020-01-01','2020-01-31','2020-01-01',now()),($4,$5,$6,'RENT',500,'2020-01-01','2020-01-31','2020-01-01',now())`, [d.chgA, d.orgA, d.resA, d.chgB, d.orgB, d.resB]);
+  await c.query(`INSERT INTO charges (id, organization_id, resident_id, contract_id, type, amount, period_start, period_end, due_date, updated_at) VALUES ($1,$2,$3,$4,'RENT',500,'2020-01-01','2020-01-31','2020-01-01',now()),($5,$6,$7,$8,'RENT',500,'2020-01-01','2020-01-31','2020-01-01',now())`, [d.chgA, d.orgA, d.resA, d.cntA, d.chgB, d.orgB, d.resB, d.cntB]);
   return d;
 }
 
@@ -244,7 +245,7 @@ async function scenarioNegativeFkReject(admin) {
     check('[neg] cross-resident assignment rejected (23503)', (await expectErr(c,
       `INSERT INTO bed_assignments (id, organization_id, bed_id, resident_id, contract_id, status, start_date, updated_at) VALUES ($1,$2,$3,$4,$5,'ACTIVE','2020-02-01',now())`, [uuid(), d.orgA, d.bedA, d.resA2, d.cntA])) === '23503');
     check('[neg] cross-org charge rejected (23503)', (await expectErr(c,
-      `INSERT INTO charges (id, organization_id, resident_id, type, amount, period_start, period_end, due_date, updated_at) VALUES ($1,$2,$3,'RENT',100,'2020-01-01','2020-01-31','2020-01-01',now())`, [uuid(), d.orgA, d.resB])) === '23503');
+      `INSERT INTO charges (id, organization_id, resident_id, contract_id, type, amount, period_start, period_end, due_date, updated_at) VALUES ($1,$2,$3,$4,'RENT',100,'2020-01-01','2020-01-31','2020-01-01',now())`, [uuid(), d.orgA, d.resB, d.cntB])) === '23503');
     check('[neg] cross-org package rejected (23503)', (await expectErr(c,
       `INSERT INTO stay_contracts (id, organization_id, hostel_id, resident_id, contract_number, package_id, status, start_date, rent_amount, updated_at) VALUES ($1,$2,$3,$4,'CNT-PKG',$5,'DRAFT','2020-02-01',5000,now())`, [uuid(), d.orgA, d.hostelA, d.resA, d.pkgB])) === '23503');
     check('[neg] package-hostel mismatch rejected (23514)', (await expectErr(c,
@@ -323,9 +324,18 @@ async function scenarioOnDeleteBehavior(admin) {
     const cnt2 = uuid();
     await c.query(`INSERT INTO stay_contracts (id, organization_id, hostel_id, resident_id, contract_number, status, start_date, rent_amount, updated_at) VALUES ($1,$2,$3,$4,'C2','ACTIVE','2020-01-01',100,now())`, [cnt2, o, h2, res2]);
     const chg = uuid();
-    await c.query(`INSERT INTO charges (id, organization_id, resident_id, contract_id, type, amount, period_start, period_end, due_date, updated_at) VALUES ($1,$2,$3,$4,'RENT',100,'2020-01-01','2020-01-31','2020-01-01',now())`, [chg, o, res2, cnt2]);
+    await c.query(`INSERT INTO charges (id, organization_id, resident_id, contract_id, type, amount, period_start, period_end, due_date, updated_at) VALUES ($1,$2,$3,$4,'ADJUSTMENT',100,'2020-01-01','2020-01-31','2020-01-01',now())`, [chg, o, res2, cnt2]);
     await c.query(`DELETE FROM stay_contracts WHERE id=$1`, [cnt2]);
     check('[ondelete] charge.contract SET NULL', (await c.query(`SELECT contract_id FROM charges WHERE id=$1`, [chg])).rows[0].contract_id === null);
+
+    // New M3a invariant: a RENT charge is anchored to its contract (business
+    // key). Deleting that contract would SET NULL the RENT's contract_id and
+    // violate charges_rent_requires_contract, so the delete is rejected.
+    const cntRent = uuid();
+    await c.query(`INSERT INTO stay_contracts (id, organization_id, hostel_id, resident_id, contract_number, status, start_date, rent_amount, updated_at) VALUES ($1,$2,$3,$4,'C-RENT','ACTIVE','2020-01-01',100,now())`, [cntRent, o, h2, res2]);
+    const rentChg = uuid();
+    await c.query(`INSERT INTO charges (id, organization_id, resident_id, contract_id, type, amount, period_start, period_end, due_date, updated_at) VALUES ($1,$2,$3,$4,'RENT',100,'2020-02-01','2020-02-28','2020-02-01',now())`, [rentChg, o, res2, cntRent]);
+    check('[ondelete] RENT charge blocks contract delete (23514)', (await expectErr(c, `DELETE FROM stay_contracts WHERE id=$1`, [cntRent])) === '23514');
 
     // SET NULL — TemporaryAbsence -> Charge (creditCharge, nullable).
     const usr = uuid();
@@ -341,7 +351,7 @@ async function scenarioOnDeleteBehavior(admin) {
     const pay = uuid();
     await c.query(`INSERT INTO payments (id, organization_id, resident_id, amount, method, received_at, receipt_number, updated_at) VALUES ($1,$2,$3,100,'CASH','2020-01-02','R1',now())`, [pay, o, res]);
     const target = uuid();
-    await c.query(`INSERT INTO charges (id, organization_id, resident_id, type, amount, period_start, period_end, due_date, updated_at) VALUES ($1,$2,$3,'RENT',100,'2020-02-01','2020-02-28','2020-02-01',now())`, [target, o, res]);
+    await c.query(`INSERT INTO charges (id, organization_id, resident_id, contract_id, type, amount, period_start, period_end, due_date, updated_at) VALUES ($1,$2,$3,$4,'RENT',100,'2020-02-01','2020-02-28','2020-02-01',now())`, [target, o, res, cnt]);
     const alloc = uuid();
     await c.query(`INSERT INTO payment_allocations (id, organization_id, resident_id, payment_id, charge_id, amount) VALUES ($1,$2,$3,$4,$5,100)`, [alloc, o, res, pay, target]);
     await c.query(`DELETE FROM payments WHERE id=$1`, [pay]);

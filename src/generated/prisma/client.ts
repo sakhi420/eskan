@@ -115,6 +115,21 @@ export type BedAssignment = Prisma.BedAssignmentModel
  */
 export type Charge = Prisma.ChargeModel
 /**
+ * Model ChargePackageComponent
+ * 
+ */
+export type ChargePackageComponent = Prisma.ChargePackageComponentModel
+/**
+ * Model AbsenceCredit
+ * 
+ */
+export type AbsenceCredit = Prisma.AbsenceCreditModel
+/**
+ * Model BillingRun
+ * 
+ */
+export type BillingRun = Prisma.BillingRunModel
+/**
  * Model Payment
  * 
  */

@@ -677,3 +677,32 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 - **M3 (سرویس‌های مالی) در زمان این checkpoint شروع نشده بود.**
 - **Staging و Production دست‌نخورده باقی مانده‌اند.**
 - **قرارداد OpenAPI:** نسخهٔ فعلی **`0.5.0`**.
+
+
+## M3a — Charge / Billing / Credit Engine — 2026-11-08
+
+### وضعیت
+- **M3a (Charge / Billing / Credit) پیاده‌سازی و تست شد** (شاخهٔ `feat/phase-9-m3a-charge-credit` از `417092d`).
+- Migration افزودنی `20261108220000_m3a_charge_billing_credit` (سیزدهمین) اعمال و تست شد.
+
+### دامنهٔ اجراشده
+- **Charge Engine:** ثبت Charge مثبت AFN (int، سقف int32)، `entrySide` DEBIT/CREDIT، `RENT` الزاماً `contractId`، business key یکتای کرایه (`organization + contract + RENT + period`) به‌صورت partial unique index، posted سند تغییرناپذیر.
+- **Billing Preview/Post:** Preview بدون side effect؛ Post صدور idempotent با `Idempotency-Key` دائمی + business key `(organization, periodStart, periodEnd)`؛ snapshot اجزای Package؛ بازهٔ نیمه‌باز `[periodStart, periodEnd)`؛ `dueDayOfMonth` (پیش‌فرض `hostel.rentDueDayOfMonth`).
+- **Proration:** فرمول `amount × occupiedDays / calendarDays` با `decimal.js` و گردکردن `HALF_UP`، محاسبهٔ جداگانهٔ هر Component، ماه‌های ۲۸/۲۹/۳۰/۳۱.
+- **Credit / Absence:** مدل canonical `Charge.entrySide=CREDIT` (بدون مدل مستقل Credit)؛ دلیل + actor؛ نقش OWNER/ADMIN برای ثبت Credit؛ تولید Credit غیابت پس از بازگشت تأییدشده، آستانهٔ `hostel.absenceMinDays` (پیش‌فرض ۳)، عدم کسر Accommodation، فقط `deductibleOnAbsence=true`، `[actualDepartureDate, actualReturnDate)` (روز بازگشت محاسبه نمی‌شود)، تقسیم چندماهه به دوره‌های تقویمی، `absence_credits` با کلید `(organization, absence, period)`.
+- **Idempotency/JCS:** fingerprint شش‌فیلدی (`method/route/pathParams/query/semanticHeaders/body`) با JCS (RFC 8785) و SHA-256 (`src/common/idempotency/jcs.ts`)؛ عملیات مالی `retentionClass=PERMANENT`.
+- **Audit/Sync اتمیک:** هر Posting (Charge/BillingRun/AbsenceCredit) در یک transaction با `AuditEvent` + `SyncChange` ثبت می‌شود (`src/common/finance/posting.service.ts`؛ cursor سازمانی monotone).
+
+### تست‌ها
+- Unit: **۷۱/۷۱** (شامل ۶ JCS + ۶ proration جدید).
+- Migration M3a: **۱۱/۱۱** (`scripts/test-m3a-migration.cjs` — parity خالی، partial index، CHECKها، business key).
+- Integration: **۱۸/۱۸** (`test/integration/m3a-charges-billing.integration-spec.ts`) + Concurrency: **۲/۲** (`test/integration/m3a-concurrency.integration-spec.ts` — race با barrier واقعی PostgreSQL).
+- Composite FKهای tenant از ۱۹ به **۲۲** افزایش یافت (تست parity به‌روزرسانی شد).
+
+### خارج از محدودهٔ M3a (Backlog)
+- **M3b** (Payment/Receipt/Allocation)، **M3c** (Deposit/Refund/Void/Expense)، **M3d** (Statement/Account/Pull Sync/Tombstone/Audit read API).
+- **AUTH-ORG-PLATFORM-ADMIN** (بازبینی `PlatformAdminGuard`، `GET /organizations`، invitation token flow، `/admin/**`، idempotency ثبت‌نام، 404/403).
+- Branch protection، ۱۵ Sourcery باز، هشدارهای OpenAPI، بازنویسی کل Idempotency برای همهٔ endpointها، Flutter/UI، استقرار Production.
+
+### جزئیات محیطی (بدون افشای secret)
+- Migrationهای M3a روی **دیتابیس توسعهٔ محلی `eskan_dev` هنوز اعمال نشده‌اند** (تست روی DBهای throwaway انجام شد)؛ Staging/Production دست‌نخورده.

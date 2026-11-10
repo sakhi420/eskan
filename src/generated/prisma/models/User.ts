@@ -211,6 +211,7 @@ export type UserWhereInput = {
   auditEvents?: Prisma.AuditEventListRelationFilter
   requestedAbsences?: Prisma.TemporaryAbsenceListRelationFilter
   approvedAbsences?: Prisma.TemporaryAbsenceListRelationFilter
+  billingRunsCreated?: Prisma.BillingRunListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -234,6 +235,7 @@ export type UserOrderByWithRelationInput = {
   auditEvents?: Prisma.AuditEventOrderByRelationAggregateInput
   requestedAbsences?: Prisma.TemporaryAbsenceOrderByRelationAggregateInput
   approvedAbsences?: Prisma.TemporaryAbsenceOrderByRelationAggregateInput
+  billingRunsCreated?: Prisma.BillingRunOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -260,6 +262,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   auditEvents?: Prisma.AuditEventListRelationFilter
   requestedAbsences?: Prisma.TemporaryAbsenceListRelationFilter
   approvedAbsences?: Prisma.TemporaryAbsenceListRelationFilter
+  billingRunsCreated?: Prisma.BillingRunListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -309,6 +312,7 @@ export type UserCreateInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   requestedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutRequestedByInput
   approvedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -332,6 +336,7 @@ export type UserUncheckedCreateInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   requestedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutRequestedByInput
   approvedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUpdateInput = {
@@ -355,6 +360,7 @@ export type UserUpdateInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   requestedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutRequestedByNestedInput
   approvedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -378,6 +384,7 @@ export type UserUncheckedUpdateInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   requestedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutRequestedByNestedInput
   approvedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -558,6 +565,20 @@ export type UserUpdateOneWithoutReversedChargesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReversedChargesInput, Prisma.UserUpdateWithoutReversedChargesInput>, Prisma.UserUncheckedUpdateWithoutReversedChargesInput>
 }
 
+export type UserCreateNestedOneWithoutBillingRunsCreatedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBillingRunsCreatedInput, Prisma.UserUncheckedCreateWithoutBillingRunsCreatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBillingRunsCreatedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutBillingRunsCreatedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBillingRunsCreatedInput, Prisma.UserUncheckedCreateWithoutBillingRunsCreatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBillingRunsCreatedInput
+  upsert?: Prisma.UserUpsertWithoutBillingRunsCreatedInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutBillingRunsCreatedInput, Prisma.UserUpdateWithoutBillingRunsCreatedInput>, Prisma.UserUncheckedUpdateWithoutBillingRunsCreatedInput>
+}
+
 export type UserCreateNestedOneWithoutReversedPaymentsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutReversedPaymentsInput, Prisma.UserUncheckedCreateWithoutReversedPaymentsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutReversedPaymentsInput
@@ -672,6 +693,7 @@ export type UserCreateWithoutMembershipsInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   requestedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutRequestedByInput
   approvedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutMembershipsInput = {
@@ -694,6 +716,7 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   requestedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutRequestedByInput
   approvedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutMembershipsInput = {
@@ -732,6 +755,7 @@ export type UserUpdateWithoutMembershipsInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   requestedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutRequestedByNestedInput
   approvedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMembershipsInput = {
@@ -754,6 +778,7 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   requestedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutRequestedByNestedInput
   approvedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateWithoutInvitationsInvitedInput = {
@@ -776,6 +801,7 @@ export type UserCreateWithoutInvitationsInvitedInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   requestedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutRequestedByInput
   approvedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutInvitationsInvitedInput = {
@@ -798,6 +824,7 @@ export type UserUncheckedCreateWithoutInvitationsInvitedInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   requestedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutRequestedByInput
   approvedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutInvitationsInvitedInput = {
@@ -825,6 +852,7 @@ export type UserCreateWithoutInvitationsAcceptedInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   requestedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutRequestedByInput
   approvedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutInvitationsAcceptedInput = {
@@ -847,6 +875,7 @@ export type UserUncheckedCreateWithoutInvitationsAcceptedInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   requestedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutRequestedByInput
   approvedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutInvitationsAcceptedInput = {
@@ -885,6 +914,7 @@ export type UserUpdateWithoutInvitationsInvitedInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   requestedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutRequestedByNestedInput
   approvedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInvitationsInvitedInput = {
@@ -907,6 +937,7 @@ export type UserUncheckedUpdateWithoutInvitationsInvitedInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   requestedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutRequestedByNestedInput
   approvedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUpsertWithoutInvitationsAcceptedInput = {
@@ -940,6 +971,7 @@ export type UserUpdateWithoutInvitationsAcceptedInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   requestedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutRequestedByNestedInput
   approvedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInvitationsAcceptedInput = {
@@ -962,6 +994,7 @@ export type UserUncheckedUpdateWithoutInvitationsAcceptedInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   requestedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutRequestedByNestedInput
   approvedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateWithoutRefreshSessionsInput = {
@@ -984,6 +1017,7 @@ export type UserCreateWithoutRefreshSessionsInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   requestedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutRequestedByInput
   approvedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutRefreshSessionsInput = {
@@ -1006,6 +1040,7 @@ export type UserUncheckedCreateWithoutRefreshSessionsInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   requestedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutRequestedByInput
   approvedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutRefreshSessionsInput = {
@@ -1044,6 +1079,7 @@ export type UserUpdateWithoutRefreshSessionsInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   requestedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutRequestedByNestedInput
   approvedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRefreshSessionsInput = {
@@ -1066,6 +1102,7 @@ export type UserUncheckedUpdateWithoutRefreshSessionsInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   requestedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutRequestedByNestedInput
   approvedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateWithoutRequestedAbsencesInput = {
@@ -1088,6 +1125,7 @@ export type UserCreateWithoutRequestedAbsencesInput = {
   verifiedManualPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutVerifiedByInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   approvedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutRequestedAbsencesInput = {
@@ -1110,6 +1148,7 @@ export type UserUncheckedCreateWithoutRequestedAbsencesInput = {
   verifiedManualPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutVerifiedByInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   approvedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutRequestedAbsencesInput = {
@@ -1137,6 +1176,7 @@ export type UserCreateWithoutApprovedAbsencesInput = {
   verifiedManualPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutVerifiedByInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   requestedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutRequestedByInput
+  billingRunsCreated?: Prisma.BillingRunCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutApprovedAbsencesInput = {
@@ -1159,6 +1199,7 @@ export type UserUncheckedCreateWithoutApprovedAbsencesInput = {
   verifiedManualPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutVerifiedByInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   requestedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutRequestedByInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutApprovedAbsencesInput = {
@@ -1197,6 +1238,7 @@ export type UserUpdateWithoutRequestedAbsencesInput = {
   verifiedManualPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutVerifiedByNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   approvedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRequestedAbsencesInput = {
@@ -1219,6 +1261,7 @@ export type UserUncheckedUpdateWithoutRequestedAbsencesInput = {
   verifiedManualPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutVerifiedByNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   approvedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUpsertWithoutApprovedAbsencesInput = {
@@ -1252,6 +1295,7 @@ export type UserUpdateWithoutApprovedAbsencesInput = {
   verifiedManualPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutVerifiedByNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   requestedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutRequestedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutApprovedAbsencesInput = {
@@ -1274,6 +1318,7 @@ export type UserUncheckedUpdateWithoutApprovedAbsencesInput = {
   verifiedManualPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutVerifiedByNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   requestedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutRequestedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateWithoutReversedChargesInput = {
@@ -1296,6 +1341,7 @@ export type UserCreateWithoutReversedChargesInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   requestedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutRequestedByInput
   approvedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutReversedChargesInput = {
@@ -1318,6 +1364,7 @@ export type UserUncheckedCreateWithoutReversedChargesInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   requestedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutRequestedByInput
   approvedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutReversedChargesInput = {
@@ -1356,6 +1403,7 @@ export type UserUpdateWithoutReversedChargesInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   requestedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutRequestedByNestedInput
   approvedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReversedChargesInput = {
@@ -1370,6 +1418,115 @@ export type UserUncheckedUpdateWithoutReversedChargesInput = {
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
   invitationsInvited?: Prisma.InvitationUncheckedUpdateManyWithoutInviterNestedInput
   invitationsAccepted?: Prisma.InvitationUncheckedUpdateManyWithoutAcceptedByNestedInput
+  reversedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutReversedByNestedInput
+  reversedDeposits?: Prisma.DepositTransactionUncheckedUpdateManyWithoutReversedByNestedInput
+  reversedExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutReversedByNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutActorNestedInput
+  verifiedManualPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutVerifiedByNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  requestedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutRequestedByNestedInput
+  approvedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedUpdateManyWithoutCreatedByNestedInput
+}
+
+export type UserCreateWithoutBillingRunsCreatedInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  fullName: string
+  isPlatformAdmin?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
+  refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
+  invitationsInvited?: Prisma.InvitationCreateNestedManyWithoutInviterInput
+  invitationsAccepted?: Prisma.InvitationCreateNestedManyWithoutAcceptedByInput
+  reversedCharges?: Prisma.ChargeCreateNestedManyWithoutReversedByInput
+  reversedPayments?: Prisma.PaymentCreateNestedManyWithoutReversedByInput
+  reversedDeposits?: Prisma.DepositTransactionCreateNestedManyWithoutReversedByInput
+  reversedExpenses?: Prisma.ExpenseCreateNestedManyWithoutReversedByInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutActorInput
+  verifiedManualPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutVerifiedByInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  requestedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutRequestedByInput
+  approvedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutApprovedByInput
+}
+
+export type UserUncheckedCreateWithoutBillingRunsCreatedInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  fullName: string
+  isPlatformAdmin?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
+  invitationsInvited?: Prisma.InvitationUncheckedCreateNestedManyWithoutInviterInput
+  invitationsAccepted?: Prisma.InvitationUncheckedCreateNestedManyWithoutAcceptedByInput
+  reversedCharges?: Prisma.ChargeUncheckedCreateNestedManyWithoutReversedByInput
+  reversedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutReversedByInput
+  reversedDeposits?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutReversedByInput
+  reversedExpenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutReversedByInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutActorInput
+  verifiedManualPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutVerifiedByInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  requestedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutRequestedByInput
+  approvedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutApprovedByInput
+}
+
+export type UserCreateOrConnectWithoutBillingRunsCreatedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutBillingRunsCreatedInput, Prisma.UserUncheckedCreateWithoutBillingRunsCreatedInput>
+}
+
+export type UserUpsertWithoutBillingRunsCreatedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutBillingRunsCreatedInput, Prisma.UserUncheckedUpdateWithoutBillingRunsCreatedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutBillingRunsCreatedInput, Prisma.UserUncheckedCreateWithoutBillingRunsCreatedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutBillingRunsCreatedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutBillingRunsCreatedInput, Prisma.UserUncheckedUpdateWithoutBillingRunsCreatedInput>
+}
+
+export type UserUpdateWithoutBillingRunsCreatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  isPlatformAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
+  invitationsInvited?: Prisma.InvitationUpdateManyWithoutInviterNestedInput
+  invitationsAccepted?: Prisma.InvitationUpdateManyWithoutAcceptedByNestedInput
+  reversedCharges?: Prisma.ChargeUpdateManyWithoutReversedByNestedInput
+  reversedPayments?: Prisma.PaymentUpdateManyWithoutReversedByNestedInput
+  reversedDeposits?: Prisma.DepositTransactionUpdateManyWithoutReversedByNestedInput
+  reversedExpenses?: Prisma.ExpenseUpdateManyWithoutReversedByNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutActorNestedInput
+  verifiedManualPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutVerifiedByNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  requestedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutRequestedByNestedInput
+  approvedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutApprovedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutBillingRunsCreatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  isPlatformAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
+  invitationsInvited?: Prisma.InvitationUncheckedUpdateManyWithoutInviterNestedInput
+  invitationsAccepted?: Prisma.InvitationUncheckedUpdateManyWithoutAcceptedByNestedInput
+  reversedCharges?: Prisma.ChargeUncheckedUpdateManyWithoutReversedByNestedInput
   reversedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutReversedByNestedInput
   reversedDeposits?: Prisma.DepositTransactionUncheckedUpdateManyWithoutReversedByNestedInput
   reversedExpenses?: Prisma.ExpenseUncheckedUpdateManyWithoutReversedByNestedInput
@@ -1400,6 +1557,7 @@ export type UserCreateWithoutReversedPaymentsInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   requestedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutRequestedByInput
   approvedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutReversedPaymentsInput = {
@@ -1422,6 +1580,7 @@ export type UserUncheckedCreateWithoutReversedPaymentsInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   requestedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutRequestedByInput
   approvedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutReversedPaymentsInput = {
@@ -1460,6 +1619,7 @@ export type UserUpdateWithoutReversedPaymentsInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   requestedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutRequestedByNestedInput
   approvedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReversedPaymentsInput = {
@@ -1482,6 +1642,7 @@ export type UserUncheckedUpdateWithoutReversedPaymentsInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   requestedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutRequestedByNestedInput
   approvedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateWithoutReversedDepositsInput = {
@@ -1504,6 +1665,7 @@ export type UserCreateWithoutReversedDepositsInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   requestedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutRequestedByInput
   approvedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutReversedDepositsInput = {
@@ -1526,6 +1688,7 @@ export type UserUncheckedCreateWithoutReversedDepositsInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   requestedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutRequestedByInput
   approvedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutReversedDepositsInput = {
@@ -1564,6 +1727,7 @@ export type UserUpdateWithoutReversedDepositsInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   requestedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutRequestedByNestedInput
   approvedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReversedDepositsInput = {
@@ -1586,6 +1750,7 @@ export type UserUncheckedUpdateWithoutReversedDepositsInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   requestedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutRequestedByNestedInput
   approvedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateWithoutReversedExpensesInput = {
@@ -1608,6 +1773,7 @@ export type UserCreateWithoutReversedExpensesInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   requestedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutRequestedByInput
   approvedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutReversedExpensesInput = {
@@ -1630,6 +1796,7 @@ export type UserUncheckedCreateWithoutReversedExpensesInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   requestedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutRequestedByInput
   approvedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutReversedExpensesInput = {
@@ -1668,6 +1835,7 @@ export type UserUpdateWithoutReversedExpensesInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   requestedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutRequestedByNestedInput
   approvedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReversedExpensesInput = {
@@ -1690,6 +1858,7 @@ export type UserUncheckedUpdateWithoutReversedExpensesInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   requestedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutRequestedByNestedInput
   approvedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateWithoutSubscriptionEventsInput = {
@@ -1712,6 +1881,7 @@ export type UserCreateWithoutSubscriptionEventsInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   requestedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutRequestedByInput
   approvedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutSubscriptionEventsInput = {
@@ -1734,6 +1904,7 @@ export type UserUncheckedCreateWithoutSubscriptionEventsInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   requestedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutRequestedByInput
   approvedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutSubscriptionEventsInput = {
@@ -1772,6 +1943,7 @@ export type UserUpdateWithoutSubscriptionEventsInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   requestedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutRequestedByNestedInput
   approvedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSubscriptionEventsInput = {
@@ -1794,6 +1966,7 @@ export type UserUncheckedUpdateWithoutSubscriptionEventsInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   requestedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutRequestedByNestedInput
   approvedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateWithoutVerifiedManualPaymentsInput = {
@@ -1816,6 +1989,7 @@ export type UserCreateWithoutVerifiedManualPaymentsInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   requestedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutRequestedByInput
   approvedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutVerifiedManualPaymentsInput = {
@@ -1838,6 +2012,7 @@ export type UserUncheckedCreateWithoutVerifiedManualPaymentsInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   requestedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutRequestedByInput
   approvedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutVerifiedManualPaymentsInput = {
@@ -1876,6 +2051,7 @@ export type UserUpdateWithoutVerifiedManualPaymentsInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   requestedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutRequestedByNestedInput
   approvedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutVerifiedManualPaymentsInput = {
@@ -1898,6 +2074,7 @@ export type UserUncheckedUpdateWithoutVerifiedManualPaymentsInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   requestedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutRequestedByNestedInput
   approvedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateWithoutAuditEventsInput = {
@@ -1920,6 +2097,7 @@ export type UserCreateWithoutAuditEventsInput = {
   verifiedManualPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutVerifiedByInput
   requestedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutRequestedByInput
   approvedAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutAuditEventsInput = {
@@ -1942,6 +2120,7 @@ export type UserUncheckedCreateWithoutAuditEventsInput = {
   verifiedManualPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutVerifiedByInput
   requestedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutRequestedByInput
   approvedAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutApprovedByInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutAuditEventsInput = {
@@ -1980,6 +2159,7 @@ export type UserUpdateWithoutAuditEventsInput = {
   verifiedManualPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutVerifiedByNestedInput
   requestedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutRequestedByNestedInput
   approvedAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAuditEventsInput = {
@@ -2002,6 +2182,7 @@ export type UserUncheckedUpdateWithoutAuditEventsInput = {
   verifiedManualPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutVerifiedByNestedInput
   requestedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutRequestedByNestedInput
   approvedAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutApprovedByNestedInput
+  billingRunsCreated?: Prisma.BillingRunUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 
@@ -2023,6 +2204,7 @@ export type UserCountOutputType = {
   auditEvents: number
   requestedAbsences: number
   approvedAbsences: number
+  billingRunsCreated: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2039,6 +2221,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   auditEvents?: boolean | UserCountOutputTypeCountAuditEventsArgs
   requestedAbsences?: boolean | UserCountOutputTypeCountRequestedAbsencesArgs
   approvedAbsences?: boolean | UserCountOutputTypeCountApprovedAbsencesArgs
+  billingRunsCreated?: boolean | UserCountOutputTypeCountBillingRunsCreatedArgs
 }
 
 /**
@@ -2142,6 +2325,13 @@ export type UserCountOutputTypeCountApprovedAbsencesArgs<ExtArgs extends runtime
   where?: Prisma.TemporaryAbsenceWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountBillingRunsCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BillingRunWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2164,6 +2354,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   auditEvents?: boolean | Prisma.User$auditEventsArgs<ExtArgs>
   requestedAbsences?: boolean | Prisma.User$requestedAbsencesArgs<ExtArgs>
   approvedAbsences?: boolean | Prisma.User$approvedAbsencesArgs<ExtArgs>
+  billingRunsCreated?: boolean | Prisma.User$billingRunsCreatedArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -2212,6 +2403,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   auditEvents?: boolean | Prisma.User$auditEventsArgs<ExtArgs>
   requestedAbsences?: boolean | Prisma.User$requestedAbsencesArgs<ExtArgs>
   approvedAbsences?: boolean | Prisma.User$approvedAbsencesArgs<ExtArgs>
+  billingRunsCreated?: boolean | Prisma.User$billingRunsCreatedArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -2233,6 +2425,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     auditEvents: Prisma.$AuditEventPayload<ExtArgs>[]
     requestedAbsences: Prisma.$TemporaryAbsencePayload<ExtArgs>[]
     approvedAbsences: Prisma.$TemporaryAbsencePayload<ExtArgs>[]
+    billingRunsCreated: Prisma.$BillingRunPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2649,6 +2842,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   auditEvents<T extends Prisma.User$auditEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$auditEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   requestedAbsences<T extends Prisma.User$requestedAbsencesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$requestedAbsencesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TemporaryAbsencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   approvedAbsences<T extends Prisma.User$approvedAbsencesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$approvedAbsencesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TemporaryAbsencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  billingRunsCreated<T extends Prisma.User$billingRunsCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$billingRunsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BillingRunPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3387,6 +3581,30 @@ export type User$approvedAbsencesArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.TemporaryAbsenceScalarFieldEnum | Prisma.TemporaryAbsenceScalarFieldEnum[]
+}
+
+/**
+ * User.billingRunsCreated
+ */
+export type User$billingRunsCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BillingRun
+   */
+  select?: Prisma.BillingRunSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BillingRun
+   */
+  omit?: Prisma.BillingRunOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BillingRunInclude<ExtArgs> | null
+  where?: Prisma.BillingRunWhereInput
+  orderBy?: Prisma.BillingRunOrderByWithRelationInput | Prisma.BillingRunOrderByWithRelationInput[]
+  cursor?: Prisma.BillingRunWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BillingRunScalarFieldEnum | Prisma.BillingRunScalarFieldEnum[]
 }
 
 /**
