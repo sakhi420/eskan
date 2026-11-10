@@ -116,7 +116,7 @@ describe('M3b Payment / Receipt / Allocation / Release (real PostgreSQL + real s
       expect(r.money.amount).toBe(10000);
       expect(r.status).toBe('POSTED');
       expect(r.allocations).toBeUndefined();
-      expect(r.provisionalReceipt).toBeNull();
+      expect(r.provisionalReceipt).toBeUndefined();
       const alloc = await db.query('SELECT count(*)::int n FROM payment_allocations WHERE payment_id=$1', [r.id]);
       expect(alloc.rows[0].n).toBe(0);
     });

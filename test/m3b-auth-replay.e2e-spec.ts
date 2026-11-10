@@ -18,6 +18,19 @@ function withDatabase(dbName: string): string {
   return u.toString();
 }
 
+function assertLocalTestHost(): void {
+  let host = '';
+  let db = '';
+  try {
+    const u = new URL(BASE_URL);
+    host = u.hostname;
+    db = decodeURIComponent(u.pathname.replace(/^\//, ''));
+  } catch {}
+  if (!['localhost', '127.0.0.1', '::1'].includes(host) || !['eskan_dev', 'eskan_test', 'eskan_testing'].includes(db)) {
+    if (process.env.ESKAN_TEST_DB_ALLOW !== '1') throw new Error(`REFUSED: host="${host}" db="${db}" is not local`);
+  }
+}
+
 describe('M3b authorization before idempotency replay (HTTP)', () => {
   let app: INestApplication;
   let admin: Client;
@@ -35,6 +48,7 @@ describe('M3b authorization before idempotency replay (HTTP)', () => {
   let allocationId: string;
 
   beforeAll(async () => {
+    assertLocalTestHost();
     jest.setTimeout(120000);
     dbName = `eskan_m3bh_${process.pid}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
     admin = new Client({ connectionString: withDatabase('postgres') });
@@ -229,6 +243,11 @@ describe('M3b authorization before idempotency replay (HTTP)', () => {
       .post('/api/v1/payments').set('Authorization', `Bearer ${t}`).set('Idempotency-Key', randomUUID())
       .send({ ...base, money: { amount: -5, currency: 'AFN' }, method: 'CASH' });
     expect(negative.status).toBe(422);
+
+    const missingMoney = await request(app.getHttpServer())
+      .post('/api/v1/payments').set('Authorization', `Bearer ${t}`).set('Idempotency-Key', randomUUID())
+      .send({ residentId: resident, receivedAt: '2026-11-02', method: 'CASH' });
+    expect(missingMoney.status).toBe(422);
   });
 
   it('rejects a client-supplied official receiptNumber (whitelist, 422)', async () => {

@@ -17,6 +17,19 @@ function withDatabase(dbName: string): string {
   return u.toString();
 }
 
+function assertLocalTestHost(): void {
+  let host = '';
+  let db = '';
+  try {
+    const u = new URL(BASE_URL);
+    host = u.hostname;
+    db = decodeURIComponent(u.pathname.replace(/^\//, ''));
+  } catch {}
+  if (!['localhost', '127.0.0.1', '::1'].includes(host) || !['eskan_dev', 'eskan_test', 'eskan_testing'].includes(db)) {
+    if (process.env.ESKAN_TEST_DB_ALLOW !== '1') throw new Error(`REFUSED: host="${host}" db="${db}" is not local`);
+  }
+}
+
 /** Controllable arrival barrier: all `n` workers block until every one has arrived. */
 function barrier(n: number): () => Promise<void> {
   let count = 0;
@@ -46,6 +59,7 @@ describe('M3b concurrency (real PostgreSQL + barrier)', () => {
   let payments: PaymentsService;
 
   beforeAll(async () => {
+    assertLocalTestHost();
     jest.setTimeout(60000);
     dbName = `eskan_m3bc_${process.pid}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
     admin = new Client({ connectionString: withDatabase('postgres') });

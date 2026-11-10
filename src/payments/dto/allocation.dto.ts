@@ -1,4 +1,4 @@
-import { IsString, IsUUID, MaxLength, MinLength, ValidateNested } from 'class-validator';
+import { IsDefined, IsString, IsUUID, MaxLength, MinLength, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { MoneyDto } from '../../common/money/money.dto';
 
@@ -6,12 +6,14 @@ export class PaymentAllocationDto {
   @IsUUID()
   chargeId!: string;
 
+  @IsDefined()
   @ValidateNested()
   @Type(() => MoneyDto)
   money!: MoneyDto;
 }
 
 export class AllocationReleaseDto {
+  @IsDefined()
   @ValidateNested()
   @Type(() => MoneyDto)
   money!: MoneyDto;

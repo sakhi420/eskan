@@ -117,15 +117,15 @@ function toPaymentDto(row: PaymentRow) {
     method: row.method,
     receivedAt: toISODate(row.receivedAt),
     receiptNumber: row.receiptNumber,
-    provisionalReceiptId: row.provisionalReceiptId,
+    provisionalReceiptId: row.provisionalReceiptId ?? undefined,
     provisionalReceipt: row.provisionalReceiptId
       ? { provisionalReceiptId: row.provisionalReceiptId, officialReceiptNumber: row.receiptNumber, status: 'ISSUED' }
-      : null,
-    notes: row.notes,
-    payerName: row.payerName,
-    payerPhone: row.payerPhone,
-    payerRelation: row.payerRelation,
-    reversedBy: row.reversedById,
+      : undefined,
+    notes: row.notes ?? undefined,
+    payerName: row.payerName ?? undefined,
+    payerPhone: row.payerPhone ?? undefined,
+    payerRelation: row.payerRelation ?? undefined,
+    reversedBy: row.reversedById ?? undefined,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };

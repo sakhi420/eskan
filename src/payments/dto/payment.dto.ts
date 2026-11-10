@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional, IsString, IsUUID, MaxLength, ValidateNested } from 'class-validator';
+import { IsDefined, IsEnum, IsOptional, IsString, IsUUID, MaxLength, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PaymentMethod } from '../../generated/prisma/enums';
 import { MoneyDto } from '../../common/money/money.dto';
@@ -8,6 +8,7 @@ export class PaymentDto {
   @IsUUID()
   residentId!: string;
 
+  @IsDefined()
   @ValidateNested()
   @Type(() => MoneyDto)
   money!: MoneyDto;
