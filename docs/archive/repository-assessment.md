@@ -1,3 +1,5 @@
+> **سند تاریخی (آرشیو 2026-11-10) — برای اجرای فعلی پروژه مرجع نیست.** مرجع اجرایی فاز ۹: `ESKAN_PHASE9_EXECUTION_DIRECTIVE_v1_FA.md` · مرجع محصول: `docs/product/mvp-scope.md` · مرجع وضعیت: `docs/project/progress.md`.
+
 # ارزیابی مخزن و خط پایه — ESKAN Backend
 
 **تاریخ:** 2026-10-25

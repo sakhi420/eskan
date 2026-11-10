@@ -5,9 +5,12 @@
 
 ## زمینه
 
-بک‌اند ESKAN باید روی Node.js با NestJS + TypeScript + Prisma + PostgreSQL
-ساخته شود. مسترپرامپت استفاده از Kotlin/Spring Boot را ممنوع کرده و Flutter/Dart
-را به مخزن موبایل محدود کرده است.
+بک‌اند ESKAN روی Node.js با NestJS + TypeScript + Prisma + PostgreSQL ساخته می‌شود.
+کلاینت Flutter/Dart یک codebase مشترک برای Android و Windows Desktop است (نه محدود به مخزن جدا).
+
+> **اصلاحیهٔ 2026-11-10:** ادعای قدیمی «محدودبودن Flutter به مخزن موبایل» باطل است؛
+> Flutter کلاینت مشترک Android + Windows است. نسخه‌های قطعی در `package.json` pin شده‌اند و
+> همان‌ها مبنای انطباق‌اند (نه «آخرین نسخه»).
 
 ## تصمیم
 

@@ -1,8 +1,6 @@
 # قواعد اشتراک، Trial و Entitlements
 
-- **نسخه مدل:** آینهٔ `contracts/openapi.yaml` v0.3.0 (schemas: `SubscriptionPlan`,
-  `SubscriptionStatus`, `PlanLimits`, `OrganizationSubscription`, `SubscriptionAuditEvent`,
-  `ManualSubscriptionPayment`).
+- **نسخه مدل:** آینهٔ `contracts/openapi.yaml` v0.5.0 (نقطهٔ مرجع قطعی). این سند خلاصهٔ قواعد است؛ خود OpenAPI منبع حقیقت طرح/اشتراک است.
 
 ## چرخهٔ حیات
 

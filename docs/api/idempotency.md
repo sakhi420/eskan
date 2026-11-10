@@ -27,11 +27,10 @@
 - **concurrent request (same key هم‌زمان)** → یکی commit و بقیه همان نتیجه را می‌گیرند
   (store-then-execute داخل همان transaction).
 - **retry پس از timeout+commit** → بازیابی همان نتیجه، نه اجرای مجدد.
-- **retention دائمی مالی (طرح هدف آینده):** برای mutationهای مالی، `IdempotencyRecord`
-  باید `retentionClass = PERMANENT` و `expiresAt = NULL` داشته باشد و هرگز lazy-delete نشود
-  تا retry چندماهه هم به همان سند اشاره کند. **این هنوز در Prisma/سرویس فعلی پیاده نشده**
-  (فعلاً `expiresAt` غیر nullable و بدون `retentionClass` است)؛ به‌عنوان نیازمندی Migration
-  آینده ثبت می‌شود، نه وضعیت فعلی سیستم.
+- **retention دائمی مالی (پیاده‌شده در 4c/M3a):** `IdempotencyRecord.retentionClass`
+  (`TRANSIENT | PERMANENT`) با migrationهای 4c پیاده شده است. رکورد `PERMANENT` با
+  `expiresAt = NULL` ذخیره می‌شود و در `getReplay` هرگز lazy-delete نمی‌شود (retry چندماههٔ
+  مالی به همان سند اشاره می‌کند). رکوردهای `TRANSIENT` پس از `expiresAt` (۳۰ روز) lazily منقضی می‌شوند.
 - **authorization قبل از replay:** نتیجهٔ replay فقط پس از بررسی دوبارهٔ عضویت/مجوز کاربرِ
   فعلی برمی‌گردد. کلید در سطح Organization + Endpoint یکتاست (نه User)، پس replay نباید راه
   دورزدن RBAC باشد.
@@ -123,7 +122,8 @@ same key + same hash = replay همان نتیجه؛ same key + different hash = 
 
 > این بخش برای جلوگیری از گزارش «هدف آینده» به‌عنوان «قابلیت پیاده‌سازی‌شده» است.
 
-1. fingerprint شش‌فیلدی مبتنی بر RFC 8785/JCS در بالا، **مشخصات هدفِ قرارداد** است؛ نه چیزی که runtime فعلی اجرا می‌کند.
-2. `IdempotencyService` فعلی (`src/common/idempotency/idempotency.service.ts`) هنوز `stableStringify(payload)` را هش می‌کند و `method`/`route`/`pathParams`/`query`/`semanticHeaders` را نمی‌پوشاند.
-3. `authRegister` در Controller، وجود و UUID بودن `Idempotency-Key` را اعتبارسنجی می‌کند اما مقدار را به `AuthService.register` منتقل نمی‌کند؛ بازیابی/تکرار ثبت‌نام فعلی بر پایهٔ email + تأیید رمز است، نه تطبیق key + fingerprint.
-4. idempotency ثبت‌نام باید **جداگانه** طراحی و تست شود: ثبت‌نام پیش از ایجاد organization اتفاق می‌افتد ولی scope فعلی رکورد Idempotency بر `organizationId` بنا شده است.
+1. **JCS شش‌فیلدی (`canonicalRequestHash`):** در `src/common/idempotency/jcs.ts` پیاده و با `jcs.spec.ts` تست شده. مسیرهای مالی M3a (`POST /charges`، `POST /billing-runs`، `POST /absences/{id}/credits`) از آن استفاده می‌کنند.
+2. **مسیرهای قدیمی (gap شناخته‌شده):** `IdempotencyService.hash()` همچنان مبتنی بر `stableStringify(payload)` است و `method`/`route`/`pathParams`/`query`/`semanticHeaders` را نمی‌پوشاند. **ادعای JCS کامل و سراسری بدون اثبات ممنوع است**؛ هم‌گرایی مابقی endpointها به JCS کار مرحلهٔ پیاده‌سازی است، نه وضعیت فعلی.
+3. **retention دائمی:** `retentionClass` (`TRANSIENT|PERMANENT`) با migrationهای 4c پیاده شده؛ مسیر مالی `PERMANENT` است (بدون انقضای lazy) — وضعیت فعلی، نه طرح آینده.
+4. `authRegister` در Controller، وجود و UUID بودن `Idempotency-Key` را اعتبارسنجی می‌کند اما مقدار را به `AuthService.register` منتقل نمی‌کند؛ بازیابی/تکرار ثبت‌نام فعلی بر پایهٔ email + رمز است، نه تطبیق key + fingerprint. idempotency ثبت‌نام باید جداگانه طراحی و تست شود (ثبت‌نام پیش از organization و scope فعلی organization-based است).
+5. authorization پیش از replay: replay فقط پس از بررسی دوبارهٔ عضویت/مجوز کاربر فعلی برمی‌گردد (کلید در سطح Organization + Endpoint یکتاست، نه User).

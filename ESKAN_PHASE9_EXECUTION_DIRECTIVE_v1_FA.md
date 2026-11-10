@@ -1,9 +1,9 @@
 # دستور اجرایی قطعی فاز ۹ اسکان — نسخهٔ ۱.۰
 
 **مخزن:** `sakhi420/eskan`  
-**خط مبنا (اصلاحیهٔ 2026-11-08):** ادامهٔ کار از آخرین `origin/main` — commit `6e8d0f8971036a103b225e4369e47dbcc4959d8a` — انجام شود؛ **نه** از commit تاریخی `a1374eb4906f1be0d0ae4306c4acec60bdfbb28e`. هیچ reset به commit قدیمی انجام نشود.
-**مالک تصمیم‌های محصول و معماری:** ChatGPT بر اساس اختیار صریح مالک پروژه  
-**نقش عامل کدنویس:** اجرا، تست، اصلاح و تحویل کد؛ نه بازگشایی تصمیم‌های این سند و نه تحویل صرفاً مستندات.
+**خط مبنا (به‌روز 2026-11-10):** ادامهٔ کار از آخرین `origin/main` — commit `41af931e8be5ef194670989cae603c6cb1c51eca` (Merge PR #2) انجام شود؛ هیچ reset یا rebase به commitهای قبلی انجام نشود.
+**مالک محصول و تصمیم نهایی:** Nisar (مالک پروژه). ایجنت/دستیار نقش تحلیل، مشاوره، بررسی و اجرای مأموریت تأییدشده را دارد؛ پیشنهادِ بدون تأیید مالک به تصمیم قطعی تبدیل نمی‌شود.  
+**نقش ایجنت/دستیار:** اجرا، بررسی و تحویل مأموریت تأییدشده؛ بازگشایی تصمیم‌های D-01 تا D-18 این سند و تحویل صرفاً مستندات به‌جای کد قابل قبول نیست.
 
 ---
 
@@ -14,6 +14,22 @@
 **خروجی قابل قبول، کد اجرایی است.** تحویل صرفاً سند، جدول پیشنهاد، اسکلت خالی، DTO بدون سرویس، endpoint بدون منطق، migration بدون تست یا گزارش «این طراحی خوب است» مردود است.
 
 عامل باید Gateها را به ترتیب اجرا کند، در هر Gate کد و تست واقعی تحویل دهد و سپس به Gate بعد برود. فقط در صورت مانع فنی اثبات‌شده‌ای که امکان اجرای امن را واقعاً متوقف می‌کند، متوقف شود؛ در آن صورت شواهد، فرمان شکست‌خورده و گزینهٔ فنی پیشنهادی را ارائه کند. ابهام‌های عادی را با همین تصمیم‌های قطعی حل کند.
+
+## وضعیت اجرای M-gates (به‌روز 2026-11-10)
+
+این سند **تنها دستور اجرایی فعال فاز ۹** است. وضعیت زیر از واقعیت GitHub / Migration / کد / CI روی `origin/main` (commit `41af931e8be5ef194670989cae603c6cb1c51eca`) استخراج شده است:
+
+| Gate | وضعیت | شواهد |
+|---|---|---|
+| M-1 (تاریخ/مبلغ/Checkout) | ✅ تکمیل و ادغام‌شده | `test-m1-migration.cjs` سبز در CI؛ D-01 / D-04 |
+| M-2 (Composite Tenant/Resident Integrity) | ✅ تکمیل و ادغام‌شده | migration `20261107120000_...`، preflight روی clone واقعی، `test-m2-migration.cjs` |
+| 4c (Lifecycle Versioning + Idempotency Retention) | ✅ تکمیل و ادغام‌شده | migrations `20261108180000_...` و `20261108190000_...`؛ `IdempotencyService.retentionClass` |
+| M3a (Charge/Billing/Absence-Credit) | ✅ تکمیل و ادغام‌شده (PR #2) | `src/charges`، `contracts/openapi.yaml` v0.5.0، `test-m3a-migration.cjs` + integration سبز |
+| **M3b (Payment/Receipt/Allocation/Release)** | 🔜 **نقطهٔ بعدی اجرا** | گپ واقعی: مدل Prisma `ReceiptCounter`/`AllocationRelease` و قفل مالی در `LockService` هنوز ساخته نشده |
+| M3c (Deposit/Refund/Expense/Reversal) | بعد از M3b | — |
+| M3d (Account/Statement/Audit/Sync Pull) | بعد از M3c | Write-side Audit/Sync (M3a) ≠ تکمیل Pull/Tombstone/Resync |
+
+**ادامهٔ کار:** از همین `origin/main` شروع کن؛ M3b نخستین گام بعدی است. هیچ تصمیم D-01 تا D-18 باز نمی‌شود و سؤال تکراری از مالک مطرح نمی‌شود.
 
 ## 2. محدوده و اصول ثابت محصول
 
@@ -147,7 +163,7 @@ ESKAN در MVP **Resident Receivables Subledger** است، نه حسابداری
 
 ### Gate 0 — Baseline و آماده‌سازی تست (بدون schema mutation)
 
-1. شاخه، commit و working tree را ثبت کن؛ مبنا آخرین `origin/main` است (پس از ادغام PR #1؛ commit `6e8d0f8`)، **نه** `a1374eb`. یک branch اجرایی مستقل بساز؛ force push ممنوع.
+1. شاخه، commit و working tree را ثبت کن؛ مبنا آخرین `origin/main` است (پس از ادغام PR #2؛ commit `41af931e8be5ef194670989cae603c6cb1c51eca`). یک branch اجرایی مستقل بساز؛ force push ممنوع.
 2. `npm ci`, `npm run build`, `npm run openapi:validate`, `npx prisma validate`, `npx prisma generate` و تست‌های موجود را اجرا و خروجی واقعی را ثبت کن.
 3. وضعیت migration دیتابیس dev/test را بررسی کن؛ روی دیتابیس production یا دادهٔ واقعی migration آزمایشی اجرا نکن.
 4. Jest ESM مشکل‌دار را در همین Gate حل کن یا test runner سازگار تثبیت کن؛ suite را skip/delete نکن. اگر CI وجود ندارد، workflow واقعی build + OpenAPI + Prisma + PostgreSQL integration ایجاد کن.
@@ -257,7 +273,7 @@ ESKAN در MVP **Resident Receivables Subledger** است، نه حسابداری
 
 ## 9. قرارداد قفل و رفتار عامل کدنویس
 
-- مستقیم از آخرین `origin/main` (commit `6e8d0f8`) شروع کن و به commit تاریخی `a1374eb` reset یا overwrite نکن.
+- مستقیم از آخرین `origin/main` (commit `41af931e8be5ef194670989cae603c6cb1c51eca`) شروع کن و به commitهای تاریخی reset یا overwrite نکن.
 - branch جدا بساز و تغییرات را در commitهای کوچک Gate-based تحویل بده؛ force push ممنوع.
 - برای هر Gate، اول کد و تست را پیاده کن؛ فقط فایل‌های ضروری مثل `progress.md` را به‌روزرسانی کن. فایل تحلیل جدید یا نسخهٔ تازهٔ طرح نساز، مگر واقعاً برای اجرای کد ضرورت داشته باشد.
 - از ایجاد معماری اضافه، event bus، CQRS کامل، Redis، Kafka، microservices یا abstraction غیرضروری خودداری کن.

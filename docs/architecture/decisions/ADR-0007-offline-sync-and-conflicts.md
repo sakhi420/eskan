@@ -5,7 +5,13 @@
 
 ## زمینه
 
-اپ موبایل باید بخشی از گردش کار را آفلاین ادامه دهد و بعداً همگام شود.
+کلاینت‌های Android و Windows Desktop (Flutter) باید بخشی از گردش کار را آفلاین ادامه دهند و بعداً همگام شوند.
+
+> **اصلاحیهٔ 2026-11-10 — وضعیت اجرا:** این ADR معماری **هدف** را تعریف می‌کند، نه قابلیتِ اجراشده.
+> سه مفهوم جدا هستند: (۱) Mutation Queue با `Idempotency-Key`ٔ پایدار، (۲) Idempotency دائمی مالی،
+> (۳) Sync Pull با cursor/tombstone/Full Resync. در وضعیت فعلی فقط write-side
+> (SyncChange/PostingService) در Postingهای M3a وجود دارد؛ Pull API / Tombstone / Full Resync
+> هنوز پیاده‌سازی نشده‌اند (M3d).
 
 ## تصمیم
 

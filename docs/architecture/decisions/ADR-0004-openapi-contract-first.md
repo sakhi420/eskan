@@ -14,7 +14,7 @@
 - همهٔ routeهای محصول زیر `/api/v1`؛ health probes مسیر عملیاتی جدا.
 - JSON UTF-8، `camelCase`، enumها uppercase.
 - خطاها RFC 9457 Problem Details با `code` پایدار و `traceId`.
-- مبلغ به‌صورت string ده‌دهی + `currency`.
+- مبلغ عدد صحیح AFN در ساختار `Money { amount: integer, currency: "AFN" }` (A-016)؛ هرگز دقت اعشاری/string ده‌دهی.
 - timestamp RFC 3339 UTC؛ تاریخ کاری `YYYY-MM-DD`.
 - موجودیت mutable دارای `version`؛ update با `expectedVersion`/`If-Match` و 409.
 

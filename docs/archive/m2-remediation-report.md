@@ -1,3 +1,5 @@
+> **سند تاریخی (آرشیو 2026-11-10) — برای اجرای فعلی پروژه مرجع نیست.** مرجع اجرایی فاز ۹: `ESKAN_PHASE9_EXECUTION_DIRECTIVE_v1_FA.md` · مرجع محصول: `docs/product/mvp-scope.md` · مرجع وضعیت: `docs/project/progress.md`.
+
 # گزارش Remediation نهایی M-2 — Parity / Concurrency / Index
 
 تاریخ: 2026-11-08 — مبنا: commit `6632bcf` — وضعیت: اصلاح سه نقص بازبینی مستقل (بدون تغییر `eskan_dev`/Staging/Production، بدون Merge).

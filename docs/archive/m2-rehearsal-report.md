@@ -1,3 +1,5 @@
+> **سند تاریخی (آرشیو 2026-11-10) — برای اجرای فعلی پروژه مرجع نیست.** مرجع اجرایی فاز ۹: `ESKAN_PHASE9_EXECUTION_DIRECTIVE_v1_FA.md` · مرجع محصول: `docs/product/mvp-scope.md` · مرجع وضعیت: `docs/project/progress.md`.
+
 # گزارش Rehearsal و پیاده‌سازی M-2 — یکپارچگی Tenant/Resident
 
 تاریخ: 2026-11-07 — وضعیت: **پیاده‌سازی + Rehearsal روی دیتابیس‌های ایزوله** (هیچ تغییری روی `eskan_dev`، Staging یا Production انجام نشده).
