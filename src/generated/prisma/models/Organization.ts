@@ -255,6 +255,8 @@ export type OrganizationWhereInput = {
   packages?: Prisma.AccommodationPackageListRelationFilter
   temporaryAbsences?: Prisma.TemporaryAbsenceListRelationFilter
   billingRuns?: Prisma.BillingRunListRelationFilter
+  receiptCounters?: Prisma.ReceiptCounterListRelationFilter
+  allocationReleases?: Prisma.AllocationReleaseListRelationFilter
 }
 
 export type OrganizationOrderByWithRelationInput = {
@@ -288,6 +290,8 @@ export type OrganizationOrderByWithRelationInput = {
   packages?: Prisma.AccommodationPackageOrderByRelationAggregateInput
   temporaryAbsences?: Prisma.TemporaryAbsenceOrderByRelationAggregateInput
   billingRuns?: Prisma.BillingRunOrderByRelationAggregateInput
+  receiptCounters?: Prisma.ReceiptCounterOrderByRelationAggregateInput
+  allocationReleases?: Prisma.AllocationReleaseOrderByRelationAggregateInput
 }
 
 export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
@@ -324,6 +328,8 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   packages?: Prisma.AccommodationPackageListRelationFilter
   temporaryAbsences?: Prisma.TemporaryAbsenceListRelationFilter
   billingRuns?: Prisma.BillingRunListRelationFilter
+  receiptCounters?: Prisma.ReceiptCounterListRelationFilter
+  allocationReleases?: Prisma.AllocationReleaseListRelationFilter
 }, "id">
 
 export type OrganizationOrderByWithAggregationInput = {
@@ -385,6 +391,8 @@ export type OrganizationCreateInput = {
   packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateInput = {
@@ -418,6 +426,8 @@ export type OrganizationUncheckedCreateInput = {
   packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUpdateInput = {
@@ -451,6 +461,8 @@ export type OrganizationUpdateInput = {
   packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateInput = {
@@ -484,6 +496,8 @@ export type OrganizationUncheckedUpdateInput = {
   packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateManyInput = {
@@ -757,6 +771,34 @@ export type OrganizationUpdateOneRequiredWithoutPaymentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutPaymentsInput, Prisma.OrganizationUpdateWithoutPaymentsInput>, Prisma.OrganizationUncheckedUpdateWithoutPaymentsInput>
 }
 
+export type OrganizationCreateNestedOneWithoutReceiptCountersInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutReceiptCountersInput, Prisma.OrganizationUncheckedCreateWithoutReceiptCountersInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutReceiptCountersInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutReceiptCountersNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutReceiptCountersInput, Prisma.OrganizationUncheckedCreateWithoutReceiptCountersInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutReceiptCountersInput
+  upsert?: Prisma.OrganizationUpsertWithoutReceiptCountersInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutReceiptCountersInput, Prisma.OrganizationUpdateWithoutReceiptCountersInput>, Prisma.OrganizationUncheckedUpdateWithoutReceiptCountersInput>
+}
+
+export type OrganizationCreateNestedOneWithoutAllocationReleasesInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutAllocationReleasesInput, Prisma.OrganizationUncheckedCreateWithoutAllocationReleasesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutAllocationReleasesInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutAllocationReleasesNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutAllocationReleasesInput, Prisma.OrganizationUncheckedCreateWithoutAllocationReleasesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutAllocationReleasesInput
+  upsert?: Prisma.OrganizationUpsertWithoutAllocationReleasesInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutAllocationReleasesInput, Prisma.OrganizationUpdateWithoutAllocationReleasesInput>, Prisma.OrganizationUncheckedUpdateWithoutAllocationReleasesInput>
+}
+
 export type OrganizationCreateNestedOneWithoutDepositTransactionsInput = {
   create?: Prisma.XOR<Prisma.OrganizationCreateWithoutDepositTransactionsInput, Prisma.OrganizationUncheckedCreateWithoutDepositTransactionsInput>
   connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutDepositTransactionsInput
@@ -927,6 +969,8 @@ export type OrganizationCreateWithoutMembershipsInput = {
   packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutMembershipsInput = {
@@ -959,6 +1003,8 @@ export type OrganizationUncheckedCreateWithoutMembershipsInput = {
   packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutMembershipsInput = {
@@ -1007,6 +1053,8 @@ export type OrganizationUpdateWithoutMembershipsInput = {
   packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutMembershipsInput = {
@@ -1039,6 +1087,8 @@ export type OrganizationUncheckedUpdateWithoutMembershipsInput = {
   packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutInvitationsInput = {
@@ -1071,6 +1121,8 @@ export type OrganizationCreateWithoutInvitationsInput = {
   packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutInvitationsInput = {
@@ -1103,6 +1155,8 @@ export type OrganizationUncheckedCreateWithoutInvitationsInput = {
   packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutInvitationsInput = {
@@ -1151,6 +1205,8 @@ export type OrganizationUpdateWithoutInvitationsInput = {
   packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutInvitationsInput = {
@@ -1183,6 +1239,8 @@ export type OrganizationUncheckedUpdateWithoutInvitationsInput = {
   packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutHostelsInput = {
@@ -1215,6 +1273,8 @@ export type OrganizationCreateWithoutHostelsInput = {
   packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutHostelsInput = {
@@ -1247,6 +1307,8 @@ export type OrganizationUncheckedCreateWithoutHostelsInput = {
   packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutHostelsInput = {
@@ -1295,6 +1357,8 @@ export type OrganizationUpdateWithoutHostelsInput = {
   packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutHostelsInput = {
@@ -1327,6 +1391,8 @@ export type OrganizationUncheckedUpdateWithoutHostelsInput = {
   packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutRoomsInput = {
@@ -1359,6 +1425,8 @@ export type OrganizationCreateWithoutRoomsInput = {
   packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutRoomsInput = {
@@ -1391,6 +1459,8 @@ export type OrganizationUncheckedCreateWithoutRoomsInput = {
   packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutRoomsInput = {
@@ -1439,6 +1509,8 @@ export type OrganizationUpdateWithoutRoomsInput = {
   packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutRoomsInput = {
@@ -1471,6 +1543,8 @@ export type OrganizationUncheckedUpdateWithoutRoomsInput = {
   packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutBedsInput = {
@@ -1503,6 +1577,8 @@ export type OrganizationCreateWithoutBedsInput = {
   packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutBedsInput = {
@@ -1535,6 +1611,8 @@ export type OrganizationUncheckedCreateWithoutBedsInput = {
   packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutBedsInput = {
@@ -1583,6 +1661,8 @@ export type OrganizationUpdateWithoutBedsInput = {
   packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutBedsInput = {
@@ -1615,6 +1695,8 @@ export type OrganizationUncheckedUpdateWithoutBedsInput = {
   packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutPackagesInput = {
@@ -1647,6 +1729,8 @@ export type OrganizationCreateWithoutPackagesInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutPackagesInput = {
@@ -1679,6 +1763,8 @@ export type OrganizationUncheckedCreateWithoutPackagesInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutPackagesInput = {
@@ -1727,6 +1813,8 @@ export type OrganizationUpdateWithoutPackagesInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutPackagesInput = {
@@ -1759,6 +1847,8 @@ export type OrganizationUncheckedUpdateWithoutPackagesInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutTemporaryAbsencesInput = {
@@ -1791,6 +1881,8 @@ export type OrganizationCreateWithoutTemporaryAbsencesInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
   packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutTemporaryAbsencesInput = {
@@ -1823,6 +1915,8 @@ export type OrganizationUncheckedCreateWithoutTemporaryAbsencesInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
   packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutTemporaryAbsencesInput = {
@@ -1871,6 +1965,8 @@ export type OrganizationUpdateWithoutTemporaryAbsencesInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
   packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutTemporaryAbsencesInput = {
@@ -1903,6 +1999,8 @@ export type OrganizationUncheckedUpdateWithoutTemporaryAbsencesInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
   packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutResidentsInput = {
@@ -1935,6 +2033,8 @@ export type OrganizationCreateWithoutResidentsInput = {
   packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutResidentsInput = {
@@ -1967,6 +2067,8 @@ export type OrganizationUncheckedCreateWithoutResidentsInput = {
   packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutResidentsInput = {
@@ -2015,6 +2117,8 @@ export type OrganizationUpdateWithoutResidentsInput = {
   packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutResidentsInput = {
@@ -2047,6 +2151,8 @@ export type OrganizationUncheckedUpdateWithoutResidentsInput = {
   packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutStayContractsInput = {
@@ -2079,6 +2185,8 @@ export type OrganizationCreateWithoutStayContractsInput = {
   packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutStayContractsInput = {
@@ -2111,6 +2219,8 @@ export type OrganizationUncheckedCreateWithoutStayContractsInput = {
   packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutStayContractsInput = {
@@ -2159,6 +2269,8 @@ export type OrganizationUpdateWithoutStayContractsInput = {
   packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutStayContractsInput = {
@@ -2191,6 +2303,8 @@ export type OrganizationUncheckedUpdateWithoutStayContractsInput = {
   packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutBedAssignmentsInput = {
@@ -2223,6 +2337,8 @@ export type OrganizationCreateWithoutBedAssignmentsInput = {
   packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutBedAssignmentsInput = {
@@ -2255,6 +2371,8 @@ export type OrganizationUncheckedCreateWithoutBedAssignmentsInput = {
   packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutBedAssignmentsInput = {
@@ -2303,6 +2421,8 @@ export type OrganizationUpdateWithoutBedAssignmentsInput = {
   packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutBedAssignmentsInput = {
@@ -2335,6 +2455,8 @@ export type OrganizationUncheckedUpdateWithoutBedAssignmentsInput = {
   packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutChargesInput = {
@@ -2367,6 +2489,8 @@ export type OrganizationCreateWithoutChargesInput = {
   packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutChargesInput = {
@@ -2399,6 +2523,8 @@ export type OrganizationUncheckedCreateWithoutChargesInput = {
   packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutChargesInput = {
@@ -2447,6 +2573,8 @@ export type OrganizationUpdateWithoutChargesInput = {
   packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutChargesInput = {
@@ -2479,6 +2607,8 @@ export type OrganizationUncheckedUpdateWithoutChargesInput = {
   packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutBillingRunsInput = {
@@ -2511,6 +2641,8 @@ export type OrganizationCreateWithoutBillingRunsInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
   packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutBillingRunsInput = {
@@ -2543,6 +2675,8 @@ export type OrganizationUncheckedCreateWithoutBillingRunsInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
   packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutBillingRunsInput = {
@@ -2591,6 +2725,8 @@ export type OrganizationUpdateWithoutBillingRunsInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
   packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutBillingRunsInput = {
@@ -2623,6 +2759,8 @@ export type OrganizationUncheckedUpdateWithoutBillingRunsInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
   packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutPaymentsInput = {
@@ -2655,6 +2793,8 @@ export type OrganizationCreateWithoutPaymentsInput = {
   packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutPaymentsInput = {
@@ -2687,6 +2827,8 @@ export type OrganizationUncheckedCreateWithoutPaymentsInput = {
   packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutPaymentsInput = {
@@ -2735,6 +2877,8 @@ export type OrganizationUpdateWithoutPaymentsInput = {
   packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutPaymentsInput = {
@@ -2767,6 +2911,312 @@ export type OrganizationUncheckedUpdateWithoutPaymentsInput = {
   packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutReceiptCountersInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
+  billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutReceiptCountersInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
+  billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutReceiptCountersInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutReceiptCountersInput, Prisma.OrganizationUncheckedCreateWithoutReceiptCountersInput>
+}
+
+export type OrganizationUpsertWithoutReceiptCountersInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutReceiptCountersInput, Prisma.OrganizationUncheckedUpdateWithoutReceiptCountersInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutReceiptCountersInput, Prisma.OrganizationUncheckedCreateWithoutReceiptCountersInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutReceiptCountersInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutReceiptCountersInput, Prisma.OrganizationUncheckedUpdateWithoutReceiptCountersInput>
+}
+
+export type OrganizationUpdateWithoutReceiptCountersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
+  billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutReceiptCountersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
+  billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutAllocationReleasesInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
+  billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutAllocationReleasesInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
+  billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutAllocationReleasesInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutAllocationReleasesInput, Prisma.OrganizationUncheckedCreateWithoutAllocationReleasesInput>
+}
+
+export type OrganizationUpsertWithoutAllocationReleasesInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutAllocationReleasesInput, Prisma.OrganizationUncheckedUpdateWithoutAllocationReleasesInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutAllocationReleasesInput, Prisma.OrganizationUncheckedCreateWithoutAllocationReleasesInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutAllocationReleasesInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutAllocationReleasesInput, Prisma.OrganizationUncheckedUpdateWithoutAllocationReleasesInput>
+}
+
+export type OrganizationUpdateWithoutAllocationReleasesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
+  billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutAllocationReleasesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
+  billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutDepositTransactionsInput = {
@@ -2799,6 +3249,8 @@ export type OrganizationCreateWithoutDepositTransactionsInput = {
   packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutDepositTransactionsInput = {
@@ -2831,6 +3283,8 @@ export type OrganizationUncheckedCreateWithoutDepositTransactionsInput = {
   packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutDepositTransactionsInput = {
@@ -2879,6 +3333,8 @@ export type OrganizationUpdateWithoutDepositTransactionsInput = {
   packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutDepositTransactionsInput = {
@@ -2911,6 +3367,8 @@ export type OrganizationUncheckedUpdateWithoutDepositTransactionsInput = {
   packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutExpensesInput = {
@@ -2943,6 +3401,8 @@ export type OrganizationCreateWithoutExpensesInput = {
   packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutExpensesInput = {
@@ -2975,6 +3435,8 @@ export type OrganizationUncheckedCreateWithoutExpensesInput = {
   packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutExpensesInput = {
@@ -3023,6 +3485,8 @@ export type OrganizationUpdateWithoutExpensesInput = {
   packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutExpensesInput = {
@@ -3055,6 +3519,8 @@ export type OrganizationUncheckedUpdateWithoutExpensesInput = {
   packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutSubscriptionInput = {
@@ -3087,6 +3553,8 @@ export type OrganizationCreateWithoutSubscriptionInput = {
   packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutSubscriptionInput = {
@@ -3119,6 +3587,8 @@ export type OrganizationUncheckedCreateWithoutSubscriptionInput = {
   packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutSubscriptionInput = {
@@ -3167,6 +3637,8 @@ export type OrganizationUpdateWithoutSubscriptionInput = {
   packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutSubscriptionInput = {
@@ -3199,6 +3671,8 @@ export type OrganizationUncheckedUpdateWithoutSubscriptionInput = {
   packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutSubscriptionEventsInput = {
@@ -3231,6 +3705,8 @@ export type OrganizationCreateWithoutSubscriptionEventsInput = {
   packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutSubscriptionEventsInput = {
@@ -3263,6 +3739,8 @@ export type OrganizationUncheckedCreateWithoutSubscriptionEventsInput = {
   packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutSubscriptionEventsInput = {
@@ -3311,6 +3789,8 @@ export type OrganizationUpdateWithoutSubscriptionEventsInput = {
   packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutSubscriptionEventsInput = {
@@ -3343,6 +3823,8 @@ export type OrganizationUncheckedUpdateWithoutSubscriptionEventsInput = {
   packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutManualSubscriptionPaymentsInput = {
@@ -3375,6 +3857,8 @@ export type OrganizationCreateWithoutManualSubscriptionPaymentsInput = {
   packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutManualSubscriptionPaymentsInput = {
@@ -3407,6 +3891,8 @@ export type OrganizationUncheckedCreateWithoutManualSubscriptionPaymentsInput = 
   packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutManualSubscriptionPaymentsInput = {
@@ -3455,6 +3941,8 @@ export type OrganizationUpdateWithoutManualSubscriptionPaymentsInput = {
   packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutManualSubscriptionPaymentsInput = {
@@ -3487,6 +3975,8 @@ export type OrganizationUncheckedUpdateWithoutManualSubscriptionPaymentsInput = 
   packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutSyncDevicesInput = {
@@ -3519,6 +4009,8 @@ export type OrganizationCreateWithoutSyncDevicesInput = {
   packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutSyncDevicesInput = {
@@ -3551,6 +4043,8 @@ export type OrganizationUncheckedCreateWithoutSyncDevicesInput = {
   packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutSyncDevicesInput = {
@@ -3599,6 +4093,8 @@ export type OrganizationUpdateWithoutSyncDevicesInput = {
   packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutSyncDevicesInput = {
@@ -3631,6 +4127,8 @@ export type OrganizationUncheckedUpdateWithoutSyncDevicesInput = {
   packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutSyncChangesInput = {
@@ -3663,6 +4161,8 @@ export type OrganizationCreateWithoutSyncChangesInput = {
   packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutSyncChangesInput = {
@@ -3695,6 +4195,8 @@ export type OrganizationUncheckedCreateWithoutSyncChangesInput = {
   packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutSyncChangesInput = {
@@ -3743,6 +4245,8 @@ export type OrganizationUpdateWithoutSyncChangesInput = {
   packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutSyncChangesInput = {
@@ -3775,6 +4279,8 @@ export type OrganizationUncheckedUpdateWithoutSyncChangesInput = {
   packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutSyncStateInput = {
@@ -3807,6 +4313,8 @@ export type OrganizationCreateWithoutSyncStateInput = {
   packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutSyncStateInput = {
@@ -3839,6 +4347,8 @@ export type OrganizationUncheckedCreateWithoutSyncStateInput = {
   packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutSyncStateInput = {
@@ -3887,6 +4397,8 @@ export type OrganizationUpdateWithoutSyncStateInput = {
   packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutSyncStateInput = {
@@ -3919,6 +4431,8 @@ export type OrganizationUncheckedUpdateWithoutSyncStateInput = {
   packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutIdempotencyRecordsInput = {
@@ -3951,6 +4465,8 @@ export type OrganizationCreateWithoutIdempotencyRecordsInput = {
   packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutIdempotencyRecordsInput = {
@@ -3983,6 +4499,8 @@ export type OrganizationUncheckedCreateWithoutIdempotencyRecordsInput = {
   packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutIdempotencyRecordsInput = {
@@ -4031,6 +4549,8 @@ export type OrganizationUpdateWithoutIdempotencyRecordsInput = {
   packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutIdempotencyRecordsInput = {
@@ -4063,6 +4583,8 @@ export type OrganizationUncheckedUpdateWithoutIdempotencyRecordsInput = {
   packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutAuditEventsInput = {
@@ -4095,6 +4617,8 @@ export type OrganizationCreateWithoutAuditEventsInput = {
   packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutAuditEventsInput = {
@@ -4127,6 +4651,8 @@ export type OrganizationUncheckedCreateWithoutAuditEventsInput = {
   packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
   billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutAuditEventsInput = {
@@ -4175,6 +4701,8 @@ export type OrganizationUpdateWithoutAuditEventsInput = {
   packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutAuditEventsInput = {
@@ -4207,6 +4735,8 @@ export type OrganizationUncheckedUpdateWithoutAuditEventsInput = {
   packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
   temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
   billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 
@@ -4236,6 +4766,8 @@ export type OrganizationCountOutputType = {
   packages: number
   temporaryAbsences: number
   billingRuns: number
+  receiptCounters: number
+  allocationReleases: number
 }
 
 export type OrganizationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4260,6 +4792,8 @@ export type OrganizationCountOutputTypeSelect<ExtArgs extends runtime.Types.Exte
   packages?: boolean | OrganizationCountOutputTypeCountPackagesArgs
   temporaryAbsences?: boolean | OrganizationCountOutputTypeCountTemporaryAbsencesArgs
   billingRuns?: boolean | OrganizationCountOutputTypeCountBillingRunsArgs
+  receiptCounters?: boolean | OrganizationCountOutputTypeCountReceiptCountersArgs
+  allocationReleases?: boolean | OrganizationCountOutputTypeCountAllocationReleasesArgs
 }
 
 /**
@@ -4419,6 +4953,20 @@ export type OrganizationCountOutputTypeCountBillingRunsArgs<ExtArgs extends runt
   where?: Prisma.BillingRunWhereInput
 }
 
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountReceiptCountersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ReceiptCounterWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountAllocationReleasesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AllocationReleaseWhereInput
+}
+
 
 export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -4451,6 +4999,8 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   packages?: boolean | Prisma.Organization$packagesArgs<ExtArgs>
   temporaryAbsences?: boolean | Prisma.Organization$temporaryAbsencesArgs<ExtArgs>
   billingRuns?: boolean | Prisma.Organization$billingRunsArgs<ExtArgs>
+  receiptCounters?: boolean | Prisma.Organization$receiptCountersArgs<ExtArgs>
+  allocationReleases?: boolean | Prisma.Organization$allocationReleasesArgs<ExtArgs>
   _count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["organization"]>
 
@@ -4509,6 +5059,8 @@ export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.Interna
   packages?: boolean | Prisma.Organization$packagesArgs<ExtArgs>
   temporaryAbsences?: boolean | Prisma.Organization$temporaryAbsencesArgs<ExtArgs>
   billingRuns?: boolean | Prisma.Organization$billingRunsArgs<ExtArgs>
+  receiptCounters?: boolean | Prisma.Organization$receiptCountersArgs<ExtArgs>
+  allocationReleases?: boolean | Prisma.Organization$allocationReleasesArgs<ExtArgs>
   _count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type OrganizationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -4540,6 +5092,8 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     packages: Prisma.$AccommodationPackagePayload<ExtArgs>[]
     temporaryAbsences: Prisma.$TemporaryAbsencePayload<ExtArgs>[]
     billingRuns: Prisma.$BillingRunPayload<ExtArgs>[]
+    receiptCounters: Prisma.$ReceiptCounterPayload<ExtArgs>[]
+    allocationReleases: Prisma.$AllocationReleasePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -4966,6 +5520,8 @@ export interface Prisma__OrganizationClient<T, Null = never, ExtArgs extends run
   packages<T extends Prisma.Organization$packagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$packagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccommodationPackagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   temporaryAbsences<T extends Prisma.Organization$temporaryAbsencesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$temporaryAbsencesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TemporaryAbsencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   billingRuns<T extends Prisma.Organization$billingRunsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$billingRunsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BillingRunPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  receiptCounters<T extends Prisma.Organization$receiptCountersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$receiptCountersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReceiptCounterPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  allocationReleases<T extends Prisma.Organization$allocationReleasesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$allocationReleasesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AllocationReleasePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5934,6 +6490,54 @@ export type Organization$billingRunsArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.BillingRunScalarFieldEnum | Prisma.BillingRunScalarFieldEnum[]
+}
+
+/**
+ * Organization.receiptCounters
+ */
+export type Organization$receiptCountersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ReceiptCounter
+   */
+  select?: Prisma.ReceiptCounterSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ReceiptCounter
+   */
+  omit?: Prisma.ReceiptCounterOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReceiptCounterInclude<ExtArgs> | null
+  where?: Prisma.ReceiptCounterWhereInput
+  orderBy?: Prisma.ReceiptCounterOrderByWithRelationInput | Prisma.ReceiptCounterOrderByWithRelationInput[]
+  cursor?: Prisma.ReceiptCounterWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ReceiptCounterScalarFieldEnum | Prisma.ReceiptCounterScalarFieldEnum[]
+}
+
+/**
+ * Organization.allocationReleases
+ */
+export type Organization$allocationReleasesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AllocationRelease
+   */
+  select?: Prisma.AllocationReleaseSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AllocationRelease
+   */
+  omit?: Prisma.AllocationReleaseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AllocationReleaseInclude<ExtArgs> | null
+  where?: Prisma.AllocationReleaseWhereInput
+  orderBy?: Prisma.AllocationReleaseOrderByWithRelationInput | Prisma.AllocationReleaseOrderByWithRelationInput[]
+  cursor?: Prisma.AllocationReleaseWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AllocationReleaseScalarFieldEnum | Prisma.AllocationReleaseScalarFieldEnum[]
 }
 
 /**

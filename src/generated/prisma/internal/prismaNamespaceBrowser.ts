@@ -71,6 +71,8 @@ export const ModelName = {
   BillingRun: 'BillingRun',
   Payment: 'Payment',
   PaymentAllocation: 'PaymentAllocation',
+  ReceiptCounter: 'ReceiptCounter',
+  AllocationRelease: 'AllocationRelease',
   DepositTransaction: 'DepositTransaction',
   Expense: 'Expense',
   SubscriptionPlan: 'SubscriptionPlan',
@@ -419,6 +421,7 @@ export const PaymentScalarFieldEnum = {
   payerName: 'payerName',
   payerPhone: 'payerPhone',
   payerRelation: 'payerRelation',
+  provisionalReceiptId: 'provisionalReceiptId',
   reversedById: 'reversedById',
   reversalReason: 'reversalReason',
   reversedAt: 'reversedAt',
@@ -440,6 +443,29 @@ export const PaymentAllocationScalarFieldEnum = {
 } as const
 
 export type PaymentAllocationScalarFieldEnum = (typeof PaymentAllocationScalarFieldEnum)[keyof typeof PaymentAllocationScalarFieldEnum]
+
+
+export const ReceiptCounterScalarFieldEnum = {
+  organizationId: 'organizationId',
+  counter: 'counter',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReceiptCounterScalarFieldEnum = (typeof ReceiptCounterScalarFieldEnum)[keyof typeof ReceiptCounterScalarFieldEnum]
+
+
+export const AllocationReleaseScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  residentId: 'residentId',
+  allocationId: 'allocationId',
+  amount: 'amount',
+  reason: 'reason',
+  actorUserId: 'actorUserId',
+  createdAt: 'createdAt'
+} as const
+
+export type AllocationReleaseScalarFieldEnum = (typeof AllocationReleaseScalarFieldEnum)[keyof typeof AllocationReleaseScalarFieldEnum]
 
 
 export const DepositTransactionScalarFieldEnum = {

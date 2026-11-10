@@ -287,6 +287,7 @@ export type ResidentWhereInput = {
   payments?: Prisma.PaymentListRelationFilter
   deposits?: Prisma.DepositTransactionListRelationFilter
   absences?: Prisma.TemporaryAbsenceListRelationFilter
+  allocationReleases?: Prisma.AllocationReleaseListRelationFilter
 }
 
 export type ResidentOrderByWithRelationInput = {
@@ -310,6 +311,7 @@ export type ResidentOrderByWithRelationInput = {
   payments?: Prisma.PaymentOrderByRelationAggregateInput
   deposits?: Prisma.DepositTransactionOrderByRelationAggregateInput
   absences?: Prisma.TemporaryAbsenceOrderByRelationAggregateInput
+  allocationReleases?: Prisma.AllocationReleaseOrderByRelationAggregateInput
 }
 
 export type ResidentWhereUniqueInput = Prisma.AtLeast<{
@@ -337,6 +339,7 @@ export type ResidentWhereUniqueInput = Prisma.AtLeast<{
   payments?: Prisma.PaymentListRelationFilter
   deposits?: Prisma.DepositTransactionListRelationFilter
   absences?: Prisma.TemporaryAbsenceListRelationFilter
+  allocationReleases?: Prisma.AllocationReleaseListRelationFilter
 }, "id" | "organizationId_id">
 
 export type ResidentOrderByWithAggregationInput = {
@@ -399,6 +402,7 @@ export type ResidentCreateInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutResidentInput
   deposits?: Prisma.DepositTransactionCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutResidentInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentUncheckedCreateInput = {
@@ -421,6 +425,7 @@ export type ResidentUncheckedCreateInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutResidentInput
   deposits?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutResidentInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentUpdateInput = {
@@ -443,6 +448,7 @@ export type ResidentUpdateInput = {
   payments?: Prisma.PaymentUpdateManyWithoutResidentNestedInput
   deposits?: Prisma.DepositTransactionUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUpdateManyWithoutResidentNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentUncheckedUpdateInput = {
@@ -465,6 +471,7 @@ export type ResidentUncheckedUpdateInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutResidentNestedInput
   deposits?: Prisma.DepositTransactionUncheckedUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutResidentNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentCreateManyInput = {
@@ -710,6 +717,20 @@ export type ResidentUpdateOneRequiredWithoutPaymentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ResidentUpdateToOneWithWhereWithoutPaymentsInput, Prisma.ResidentUpdateWithoutPaymentsInput>, Prisma.ResidentUncheckedUpdateWithoutPaymentsInput>
 }
 
+export type ResidentCreateNestedOneWithoutAllocationReleasesInput = {
+  create?: Prisma.XOR<Prisma.ResidentCreateWithoutAllocationReleasesInput, Prisma.ResidentUncheckedCreateWithoutAllocationReleasesInput>
+  connectOrCreate?: Prisma.ResidentCreateOrConnectWithoutAllocationReleasesInput
+  connect?: Prisma.ResidentWhereUniqueInput
+}
+
+export type ResidentUpdateOneRequiredWithoutAllocationReleasesNestedInput = {
+  create?: Prisma.XOR<Prisma.ResidentCreateWithoutAllocationReleasesInput, Prisma.ResidentUncheckedCreateWithoutAllocationReleasesInput>
+  connectOrCreate?: Prisma.ResidentCreateOrConnectWithoutAllocationReleasesInput
+  upsert?: Prisma.ResidentUpsertWithoutAllocationReleasesInput
+  connect?: Prisma.ResidentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ResidentUpdateToOneWithWhereWithoutAllocationReleasesInput, Prisma.ResidentUpdateWithoutAllocationReleasesInput>, Prisma.ResidentUncheckedUpdateWithoutAllocationReleasesInput>
+}
+
 export type ResidentCreateNestedOneWithoutDepositsInput = {
   create?: Prisma.XOR<Prisma.ResidentCreateWithoutDepositsInput, Prisma.ResidentUncheckedCreateWithoutDepositsInput>
   connectOrCreate?: Prisma.ResidentCreateOrConnectWithoutDepositsInput
@@ -743,6 +764,7 @@ export type ResidentCreateWithoutOrganizationInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutResidentInput
   deposits?: Prisma.DepositTransactionCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutResidentInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentUncheckedCreateWithoutOrganizationInput = {
@@ -764,6 +786,7 @@ export type ResidentUncheckedCreateWithoutOrganizationInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutResidentInput
   deposits?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutResidentInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentCreateOrConnectWithoutOrganizationInput = {
@@ -830,6 +853,7 @@ export type ResidentCreateWithoutAbsencesInput = {
   charges?: Prisma.ChargeCreateNestedManyWithoutResidentInput
   payments?: Prisma.PaymentCreateNestedManyWithoutResidentInput
   deposits?: Prisma.DepositTransactionCreateNestedManyWithoutResidentInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentUncheckedCreateWithoutAbsencesInput = {
@@ -851,6 +875,7 @@ export type ResidentUncheckedCreateWithoutAbsencesInput = {
   charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutResidentInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutResidentInput
   deposits?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutResidentInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentCreateOrConnectWithoutAbsencesInput = {
@@ -888,6 +913,7 @@ export type ResidentUpdateWithoutAbsencesInput = {
   charges?: Prisma.ChargeUpdateManyWithoutResidentNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutResidentNestedInput
   deposits?: Prisma.DepositTransactionUpdateManyWithoutResidentNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentUncheckedUpdateWithoutAbsencesInput = {
@@ -909,6 +935,7 @@ export type ResidentUncheckedUpdateWithoutAbsencesInput = {
   charges?: Prisma.ChargeUncheckedUpdateManyWithoutResidentNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutResidentNestedInput
   deposits?: Prisma.DepositTransactionUncheckedUpdateManyWithoutResidentNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentCreateWithoutStayContractsInput = {
@@ -930,6 +957,7 @@ export type ResidentCreateWithoutStayContractsInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutResidentInput
   deposits?: Prisma.DepositTransactionCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutResidentInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentUncheckedCreateWithoutStayContractsInput = {
@@ -951,6 +979,7 @@ export type ResidentUncheckedCreateWithoutStayContractsInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutResidentInput
   deposits?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutResidentInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentCreateOrConnectWithoutStayContractsInput = {
@@ -988,6 +1017,7 @@ export type ResidentUpdateWithoutStayContractsInput = {
   payments?: Prisma.PaymentUpdateManyWithoutResidentNestedInput
   deposits?: Prisma.DepositTransactionUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUpdateManyWithoutResidentNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentUncheckedUpdateWithoutStayContractsInput = {
@@ -1009,6 +1039,7 @@ export type ResidentUncheckedUpdateWithoutStayContractsInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutResidentNestedInput
   deposits?: Prisma.DepositTransactionUncheckedUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutResidentNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentCreateWithoutAssignmentsInput = {
@@ -1030,6 +1061,7 @@ export type ResidentCreateWithoutAssignmentsInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutResidentInput
   deposits?: Prisma.DepositTransactionCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutResidentInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentUncheckedCreateWithoutAssignmentsInput = {
@@ -1051,6 +1083,7 @@ export type ResidentUncheckedCreateWithoutAssignmentsInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutResidentInput
   deposits?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutResidentInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentCreateOrConnectWithoutAssignmentsInput = {
@@ -1088,6 +1121,7 @@ export type ResidentUpdateWithoutAssignmentsInput = {
   payments?: Prisma.PaymentUpdateManyWithoutResidentNestedInput
   deposits?: Prisma.DepositTransactionUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUpdateManyWithoutResidentNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentUncheckedUpdateWithoutAssignmentsInput = {
@@ -1109,6 +1143,7 @@ export type ResidentUncheckedUpdateWithoutAssignmentsInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutResidentNestedInput
   deposits?: Prisma.DepositTransactionUncheckedUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutResidentNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentCreateWithoutChargesInput = {
@@ -1130,6 +1165,7 @@ export type ResidentCreateWithoutChargesInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutResidentInput
   deposits?: Prisma.DepositTransactionCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutResidentInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentUncheckedCreateWithoutChargesInput = {
@@ -1151,6 +1187,7 @@ export type ResidentUncheckedCreateWithoutChargesInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutResidentInput
   deposits?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutResidentInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentCreateOrConnectWithoutChargesInput = {
@@ -1188,6 +1225,7 @@ export type ResidentUpdateWithoutChargesInput = {
   payments?: Prisma.PaymentUpdateManyWithoutResidentNestedInput
   deposits?: Prisma.DepositTransactionUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUpdateManyWithoutResidentNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentUncheckedUpdateWithoutChargesInput = {
@@ -1209,6 +1247,7 @@ export type ResidentUncheckedUpdateWithoutChargesInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutResidentNestedInput
   deposits?: Prisma.DepositTransactionUncheckedUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutResidentNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentCreateWithoutPaymentsInput = {
@@ -1230,6 +1269,7 @@ export type ResidentCreateWithoutPaymentsInput = {
   charges?: Prisma.ChargeCreateNestedManyWithoutResidentInput
   deposits?: Prisma.DepositTransactionCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutResidentInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentUncheckedCreateWithoutPaymentsInput = {
@@ -1251,6 +1291,7 @@ export type ResidentUncheckedCreateWithoutPaymentsInput = {
   charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutResidentInput
   deposits?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutResidentInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentCreateOrConnectWithoutPaymentsInput = {
@@ -1288,6 +1329,7 @@ export type ResidentUpdateWithoutPaymentsInput = {
   charges?: Prisma.ChargeUpdateManyWithoutResidentNestedInput
   deposits?: Prisma.DepositTransactionUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUpdateManyWithoutResidentNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentUncheckedUpdateWithoutPaymentsInput = {
@@ -1307,6 +1349,111 @@ export type ResidentUncheckedUpdateWithoutPaymentsInput = {
   stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutResidentNestedInput
   assignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutResidentNestedInput
   charges?: Prisma.ChargeUncheckedUpdateManyWithoutResidentNestedInput
+  deposits?: Prisma.DepositTransactionUncheckedUpdateManyWithoutResidentNestedInput
+  absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutResidentNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutResidentNestedInput
+}
+
+export type ResidentCreateWithoutAllocationReleasesInput = {
+  id?: string
+  version?: number
+  fullName: string
+  type?: $Enums.ResidentType
+  phone?: string | null
+  emergencyContactName?: string | null
+  emergencyContactPhone?: string | null
+  emergencyContactRelation?: string | null
+  notes?: string | null
+  status?: $Enums.ResidentStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutResidentsInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutResidentInput
+  assignments?: Prisma.BedAssignmentCreateNestedManyWithoutResidentInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutResidentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutResidentInput
+  deposits?: Prisma.DepositTransactionCreateNestedManyWithoutResidentInput
+  absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutResidentInput
+}
+
+export type ResidentUncheckedCreateWithoutAllocationReleasesInput = {
+  id?: string
+  version?: number
+  organizationId: string
+  fullName: string
+  type?: $Enums.ResidentType
+  phone?: string | null
+  emergencyContactName?: string | null
+  emergencyContactPhone?: string | null
+  emergencyContactRelation?: string | null
+  notes?: string | null
+  status?: $Enums.ResidentStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutResidentInput
+  assignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutResidentInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutResidentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutResidentInput
+  deposits?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutResidentInput
+  absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutResidentInput
+}
+
+export type ResidentCreateOrConnectWithoutAllocationReleasesInput = {
+  where: Prisma.ResidentWhereUniqueInput
+  create: Prisma.XOR<Prisma.ResidentCreateWithoutAllocationReleasesInput, Prisma.ResidentUncheckedCreateWithoutAllocationReleasesInput>
+}
+
+export type ResidentUpsertWithoutAllocationReleasesInput = {
+  update: Prisma.XOR<Prisma.ResidentUpdateWithoutAllocationReleasesInput, Prisma.ResidentUncheckedUpdateWithoutAllocationReleasesInput>
+  create: Prisma.XOR<Prisma.ResidentCreateWithoutAllocationReleasesInput, Prisma.ResidentUncheckedCreateWithoutAllocationReleasesInput>
+  where?: Prisma.ResidentWhereInput
+}
+
+export type ResidentUpdateToOneWithWhereWithoutAllocationReleasesInput = {
+  where?: Prisma.ResidentWhereInput
+  data: Prisma.XOR<Prisma.ResidentUpdateWithoutAllocationReleasesInput, Prisma.ResidentUncheckedUpdateWithoutAllocationReleasesInput>
+}
+
+export type ResidentUpdateWithoutAllocationReleasesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumResidentTypeFieldUpdateOperationsInput | $Enums.ResidentType
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emergencyContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emergencyContactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emergencyContactRelation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumResidentStatusFieldUpdateOperationsInput | $Enums.ResidentStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutResidentsNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutResidentNestedInput
+  assignments?: Prisma.BedAssignmentUpdateManyWithoutResidentNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutResidentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutResidentNestedInput
+  deposits?: Prisma.DepositTransactionUpdateManyWithoutResidentNestedInput
+  absences?: Prisma.TemporaryAbsenceUpdateManyWithoutResidentNestedInput
+}
+
+export type ResidentUncheckedUpdateWithoutAllocationReleasesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumResidentTypeFieldUpdateOperationsInput | $Enums.ResidentType
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emergencyContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emergencyContactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emergencyContactRelation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumResidentStatusFieldUpdateOperationsInput | $Enums.ResidentStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutResidentNestedInput
+  assignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutResidentNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutResidentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutResidentNestedInput
   deposits?: Prisma.DepositTransactionUncheckedUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutResidentNestedInput
 }
@@ -1330,6 +1477,7 @@ export type ResidentCreateWithoutDepositsInput = {
   charges?: Prisma.ChargeCreateNestedManyWithoutResidentInput
   payments?: Prisma.PaymentCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutResidentInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentUncheckedCreateWithoutDepositsInput = {
@@ -1351,6 +1499,7 @@ export type ResidentUncheckedCreateWithoutDepositsInput = {
   charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutResidentInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutResidentInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentCreateOrConnectWithoutDepositsInput = {
@@ -1388,6 +1537,7 @@ export type ResidentUpdateWithoutDepositsInput = {
   charges?: Prisma.ChargeUpdateManyWithoutResidentNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUpdateManyWithoutResidentNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentUncheckedUpdateWithoutDepositsInput = {
@@ -1409,6 +1559,7 @@ export type ResidentUncheckedUpdateWithoutDepositsInput = {
   charges?: Prisma.ChargeUncheckedUpdateManyWithoutResidentNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutResidentNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentCreateManyOrganizationInput = {
@@ -1445,6 +1596,7 @@ export type ResidentUpdateWithoutOrganizationInput = {
   payments?: Prisma.PaymentUpdateManyWithoutResidentNestedInput
   deposits?: Prisma.DepositTransactionUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUpdateManyWithoutResidentNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentUncheckedUpdateWithoutOrganizationInput = {
@@ -1466,6 +1618,7 @@ export type ResidentUncheckedUpdateWithoutOrganizationInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutResidentNestedInput
   deposits?: Prisma.DepositTransactionUncheckedUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutResidentNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentUncheckedUpdateManyWithoutOrganizationInput = {
@@ -1495,6 +1648,7 @@ export type ResidentCountOutputType = {
   payments: number
   deposits: number
   absences: number
+  allocationReleases: number
 }
 
 export type ResidentCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1504,6 +1658,7 @@ export type ResidentCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensio
   payments?: boolean | ResidentCountOutputTypeCountPaymentsArgs
   deposits?: boolean | ResidentCountOutputTypeCountDepositsArgs
   absences?: boolean | ResidentCountOutputTypeCountAbsencesArgs
+  allocationReleases?: boolean | ResidentCountOutputTypeCountAllocationReleasesArgs
 }
 
 /**
@@ -1558,6 +1713,13 @@ export type ResidentCountOutputTypeCountAbsencesArgs<ExtArgs extends runtime.Typ
   where?: Prisma.TemporaryAbsenceWhereInput
 }
 
+/**
+ * ResidentCountOutputType without action
+ */
+export type ResidentCountOutputTypeCountAllocationReleasesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AllocationReleaseWhereInput
+}
+
 
 export type ResidentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1580,6 +1742,7 @@ export type ResidentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   payments?: boolean | Prisma.Resident$paymentsArgs<ExtArgs>
   deposits?: boolean | Prisma.Resident$depositsArgs<ExtArgs>
   absences?: boolean | Prisma.Resident$absencesArgs<ExtArgs>
+  allocationReleases?: boolean | Prisma.Resident$allocationReleasesArgs<ExtArgs>
   _count?: boolean | Prisma.ResidentCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["resident"]>
 
@@ -1642,6 +1805,7 @@ export type ResidentInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   payments?: boolean | Prisma.Resident$paymentsArgs<ExtArgs>
   deposits?: boolean | Prisma.Resident$depositsArgs<ExtArgs>
   absences?: boolean | Prisma.Resident$absencesArgs<ExtArgs>
+  allocationReleases?: boolean | Prisma.Resident$allocationReleasesArgs<ExtArgs>
   _count?: boolean | Prisma.ResidentCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ResidentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1661,6 +1825,7 @@ export type $ResidentPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     payments: Prisma.$PaymentPayload<ExtArgs>[]
     deposits: Prisma.$DepositTransactionPayload<ExtArgs>[]
     absences: Prisma.$TemporaryAbsencePayload<ExtArgs>[]
+    allocationReleases: Prisma.$AllocationReleasePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2077,6 +2242,7 @@ export interface Prisma__ResidentClient<T, Null = never, ExtArgs extends runtime
   payments<T extends Prisma.Resident$paymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Resident$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   deposits<T extends Prisma.Resident$depositsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Resident$depositsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DepositTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   absences<T extends Prisma.Resident$absencesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Resident$absencesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TemporaryAbsencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  allocationReleases<T extends Prisma.Resident$allocationReleasesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Resident$allocationReleasesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AllocationReleasePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2661,6 +2827,30 @@ export type Resident$absencesArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.TemporaryAbsenceScalarFieldEnum | Prisma.TemporaryAbsenceScalarFieldEnum[]
+}
+
+/**
+ * Resident.allocationReleases
+ */
+export type Resident$allocationReleasesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AllocationRelease
+   */
+  select?: Prisma.AllocationReleaseSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AllocationRelease
+   */
+  omit?: Prisma.AllocationReleaseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AllocationReleaseInclude<ExtArgs> | null
+  where?: Prisma.AllocationReleaseWhereInput
+  orderBy?: Prisma.AllocationReleaseOrderByWithRelationInput | Prisma.AllocationReleaseOrderByWithRelationInput[]
+  cursor?: Prisma.AllocationReleaseWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AllocationReleaseScalarFieldEnum | Prisma.AllocationReleaseScalarFieldEnum[]
 }
 
 /**

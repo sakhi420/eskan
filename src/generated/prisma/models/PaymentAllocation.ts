@@ -234,6 +234,7 @@ export type PaymentAllocationWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"PaymentAllocation"> | Date | string
   payment?: Prisma.XOR<Prisma.PaymentScalarRelationFilter, Prisma.PaymentWhereInput>
   charge?: Prisma.XOR<Prisma.ChargeScalarRelationFilter, Prisma.ChargeWhereInput>
+  releases?: Prisma.AllocationReleaseListRelationFilter
 }
 
 export type PaymentAllocationOrderByWithRelationInput = {
@@ -246,10 +247,12 @@ export type PaymentAllocationOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   payment?: Prisma.PaymentOrderByWithRelationInput
   charge?: Prisma.ChargeOrderByWithRelationInput
+  releases?: Prisma.AllocationReleaseOrderByRelationAggregateInput
 }
 
 export type PaymentAllocationWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  organizationId_residentId_id?: Prisma.PaymentAllocationOrganizationIdResidentIdIdCompoundUniqueInput
   AND?: Prisma.PaymentAllocationWhereInput | Prisma.PaymentAllocationWhereInput[]
   OR?: Prisma.PaymentAllocationWhereInput[]
   NOT?: Prisma.PaymentAllocationWhereInput | Prisma.PaymentAllocationWhereInput[]
@@ -261,7 +264,8 @@ export type PaymentAllocationWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"PaymentAllocation"> | Date | string
   payment?: Prisma.XOR<Prisma.PaymentScalarRelationFilter, Prisma.PaymentWhereInput>
   charge?: Prisma.XOR<Prisma.ChargeScalarRelationFilter, Prisma.ChargeWhereInput>
-}, "id">
+  releases?: Prisma.AllocationReleaseListRelationFilter
+}, "id" | "organizationId_residentId_id">
 
 export type PaymentAllocationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -297,6 +301,7 @@ export type PaymentAllocationCreateInput = {
   createdAt?: Date | string
   payment: Prisma.PaymentCreateNestedOneWithoutAllocationsInput
   charge: Prisma.ChargeCreateNestedOneWithoutAllocationsInput
+  releases?: Prisma.AllocationReleaseCreateNestedManyWithoutAllocationInput
 }
 
 export type PaymentAllocationUncheckedCreateInput = {
@@ -307,6 +312,7 @@ export type PaymentAllocationUncheckedCreateInput = {
   chargeId: string
   amount: number
   createdAt?: Date | string
+  releases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutAllocationInput
 }
 
 export type PaymentAllocationUpdateInput = {
@@ -315,6 +321,7 @@ export type PaymentAllocationUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   payment?: Prisma.PaymentUpdateOneRequiredWithoutAllocationsNestedInput
   charge?: Prisma.ChargeUpdateOneRequiredWithoutAllocationsNestedInput
+  releases?: Prisma.AllocationReleaseUpdateManyWithoutAllocationNestedInput
 }
 
 export type PaymentAllocationUncheckedUpdateInput = {
@@ -325,6 +332,7 @@ export type PaymentAllocationUncheckedUpdateInput = {
   chargeId?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  releases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutAllocationNestedInput
 }
 
 export type PaymentAllocationCreateManyInput = {
@@ -363,6 +371,12 @@ export type PaymentAllocationOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type PaymentAllocationOrganizationIdResidentIdIdCompoundUniqueInput = {
+  organizationId: string
+  residentId: string
+  id: string
+}
+
 export type PaymentAllocationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
@@ -399,6 +413,11 @@ export type PaymentAllocationMinOrderByAggregateInput = {
 
 export type PaymentAllocationSumOrderByAggregateInput = {
   amount?: Prisma.SortOrder
+}
+
+export type PaymentAllocationScalarRelationFilter = {
+  is?: Prisma.PaymentAllocationWhereInput
+  isNot?: Prisma.PaymentAllocationWhereInput
 }
 
 export type PaymentAllocationCreateNestedManyWithoutChargeInput = {
@@ -485,11 +504,26 @@ export type PaymentAllocationUncheckedUpdateManyWithoutPaymentNestedInput = {
   deleteMany?: Prisma.PaymentAllocationScalarWhereInput | Prisma.PaymentAllocationScalarWhereInput[]
 }
 
+export type PaymentAllocationCreateNestedOneWithoutReleasesInput = {
+  create?: Prisma.XOR<Prisma.PaymentAllocationCreateWithoutReleasesInput, Prisma.PaymentAllocationUncheckedCreateWithoutReleasesInput>
+  connectOrCreate?: Prisma.PaymentAllocationCreateOrConnectWithoutReleasesInput
+  connect?: Prisma.PaymentAllocationWhereUniqueInput
+}
+
+export type PaymentAllocationUpdateOneRequiredWithoutReleasesNestedInput = {
+  create?: Prisma.XOR<Prisma.PaymentAllocationCreateWithoutReleasesInput, Prisma.PaymentAllocationUncheckedCreateWithoutReleasesInput>
+  connectOrCreate?: Prisma.PaymentAllocationCreateOrConnectWithoutReleasesInput
+  upsert?: Prisma.PaymentAllocationUpsertWithoutReleasesInput
+  connect?: Prisma.PaymentAllocationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PaymentAllocationUpdateToOneWithWhereWithoutReleasesInput, Prisma.PaymentAllocationUpdateWithoutReleasesInput>, Prisma.PaymentAllocationUncheckedUpdateWithoutReleasesInput>
+}
+
 export type PaymentAllocationCreateWithoutChargeInput = {
   id?: string
   amount: number
   createdAt?: Date | string
   payment: Prisma.PaymentCreateNestedOneWithoutAllocationsInput
+  releases?: Prisma.AllocationReleaseCreateNestedManyWithoutAllocationInput
 }
 
 export type PaymentAllocationUncheckedCreateWithoutChargeInput = {
@@ -497,6 +531,7 @@ export type PaymentAllocationUncheckedCreateWithoutChargeInput = {
   paymentId: string
   amount: number
   createdAt?: Date | string
+  releases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutAllocationInput
 }
 
 export type PaymentAllocationCreateOrConnectWithoutChargeInput = {
@@ -543,6 +578,7 @@ export type PaymentAllocationCreateWithoutPaymentInput = {
   amount: number
   createdAt?: Date | string
   charge: Prisma.ChargeCreateNestedOneWithoutAllocationsInput
+  releases?: Prisma.AllocationReleaseCreateNestedManyWithoutAllocationInput
 }
 
 export type PaymentAllocationUncheckedCreateWithoutPaymentInput = {
@@ -550,6 +586,7 @@ export type PaymentAllocationUncheckedCreateWithoutPaymentInput = {
   chargeId: string
   amount: number
   createdAt?: Date | string
+  releases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutAllocationInput
 }
 
 export type PaymentAllocationCreateOrConnectWithoutPaymentInput = {
@@ -578,6 +615,58 @@ export type PaymentAllocationUpdateManyWithWhereWithoutPaymentInput = {
   data: Prisma.XOR<Prisma.PaymentAllocationUpdateManyMutationInput, Prisma.PaymentAllocationUncheckedUpdateManyWithoutPaymentInput>
 }
 
+export type PaymentAllocationCreateWithoutReleasesInput = {
+  id?: string
+  amount: number
+  createdAt?: Date | string
+  payment: Prisma.PaymentCreateNestedOneWithoutAllocationsInput
+  charge: Prisma.ChargeCreateNestedOneWithoutAllocationsInput
+}
+
+export type PaymentAllocationUncheckedCreateWithoutReleasesInput = {
+  id?: string
+  organizationId: string
+  residentId: string
+  paymentId: string
+  chargeId: string
+  amount: number
+  createdAt?: Date | string
+}
+
+export type PaymentAllocationCreateOrConnectWithoutReleasesInput = {
+  where: Prisma.PaymentAllocationWhereUniqueInput
+  create: Prisma.XOR<Prisma.PaymentAllocationCreateWithoutReleasesInput, Prisma.PaymentAllocationUncheckedCreateWithoutReleasesInput>
+}
+
+export type PaymentAllocationUpsertWithoutReleasesInput = {
+  update: Prisma.XOR<Prisma.PaymentAllocationUpdateWithoutReleasesInput, Prisma.PaymentAllocationUncheckedUpdateWithoutReleasesInput>
+  create: Prisma.XOR<Prisma.PaymentAllocationCreateWithoutReleasesInput, Prisma.PaymentAllocationUncheckedCreateWithoutReleasesInput>
+  where?: Prisma.PaymentAllocationWhereInput
+}
+
+export type PaymentAllocationUpdateToOneWithWhereWithoutReleasesInput = {
+  where?: Prisma.PaymentAllocationWhereInput
+  data: Prisma.XOR<Prisma.PaymentAllocationUpdateWithoutReleasesInput, Prisma.PaymentAllocationUncheckedUpdateWithoutReleasesInput>
+}
+
+export type PaymentAllocationUpdateWithoutReleasesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payment?: Prisma.PaymentUpdateOneRequiredWithoutAllocationsNestedInput
+  charge?: Prisma.ChargeUpdateOneRequiredWithoutAllocationsNestedInput
+}
+
+export type PaymentAllocationUncheckedUpdateWithoutReleasesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  residentId?: Prisma.StringFieldUpdateOperationsInput | string
+  paymentId?: Prisma.StringFieldUpdateOperationsInput | string
+  chargeId?: Prisma.StringFieldUpdateOperationsInput | string
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type PaymentAllocationCreateManyChargeInput = {
   id?: string
   paymentId: string
@@ -590,6 +679,7 @@ export type PaymentAllocationUpdateWithoutChargeInput = {
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   payment?: Prisma.PaymentUpdateOneRequiredWithoutAllocationsNestedInput
+  releases?: Prisma.AllocationReleaseUpdateManyWithoutAllocationNestedInput
 }
 
 export type PaymentAllocationUncheckedUpdateWithoutChargeInput = {
@@ -597,6 +687,7 @@ export type PaymentAllocationUncheckedUpdateWithoutChargeInput = {
   paymentId?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  releases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutAllocationNestedInput
 }
 
 export type PaymentAllocationUncheckedUpdateManyWithoutChargeInput = {
@@ -618,6 +709,7 @@ export type PaymentAllocationUpdateWithoutPaymentInput = {
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   charge?: Prisma.ChargeUpdateOneRequiredWithoutAllocationsNestedInput
+  releases?: Prisma.AllocationReleaseUpdateManyWithoutAllocationNestedInput
 }
 
 export type PaymentAllocationUncheckedUpdateWithoutPaymentInput = {
@@ -625,6 +717,7 @@ export type PaymentAllocationUncheckedUpdateWithoutPaymentInput = {
   chargeId?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  releases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutAllocationNestedInput
 }
 
 export type PaymentAllocationUncheckedUpdateManyWithoutPaymentInput = {
@@ -634,6 +727,35 @@ export type PaymentAllocationUncheckedUpdateManyWithoutPaymentInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+
+/**
+ * Count Type PaymentAllocationCountOutputType
+ */
+
+export type PaymentAllocationCountOutputType = {
+  releases: number
+}
+
+export type PaymentAllocationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  releases?: boolean | PaymentAllocationCountOutputTypeCountReleasesArgs
+}
+
+/**
+ * PaymentAllocationCountOutputType without action
+ */
+export type PaymentAllocationCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PaymentAllocationCountOutputType
+   */
+  select?: Prisma.PaymentAllocationCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * PaymentAllocationCountOutputType without action
+ */
+export type PaymentAllocationCountOutputTypeCountReleasesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AllocationReleaseWhereInput
+}
 
 
 export type PaymentAllocationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -646,6 +768,8 @@ export type PaymentAllocationSelect<ExtArgs extends runtime.Types.Extensions.Int
   createdAt?: boolean
   payment?: boolean | Prisma.PaymentDefaultArgs<ExtArgs>
   charge?: boolean | Prisma.ChargeDefaultArgs<ExtArgs>
+  releases?: boolean | Prisma.PaymentAllocation$releasesArgs<ExtArgs>
+  _count?: boolean | Prisma.PaymentAllocationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["paymentAllocation"]>
 
 export type PaymentAllocationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -686,6 +810,8 @@ export type PaymentAllocationOmit<ExtArgs extends runtime.Types.Extensions.Inter
 export type PaymentAllocationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   payment?: boolean | Prisma.PaymentDefaultArgs<ExtArgs>
   charge?: boolean | Prisma.ChargeDefaultArgs<ExtArgs>
+  releases?: boolean | Prisma.PaymentAllocation$releasesArgs<ExtArgs>
+  _count?: boolean | Prisma.PaymentAllocationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type PaymentAllocationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   payment?: boolean | Prisma.PaymentDefaultArgs<ExtArgs>
@@ -701,6 +827,7 @@ export type $PaymentAllocationPayload<ExtArgs extends runtime.Types.Extensions.I
   objects: {
     payment: Prisma.$PaymentPayload<ExtArgs>
     charge: Prisma.$ChargePayload<ExtArgs>
+    releases: Prisma.$AllocationReleasePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1106,6 +1233,7 @@ export interface Prisma__PaymentAllocationClient<T, Null = never, ExtArgs extend
   readonly [Symbol.toStringTag]: "PrismaPromise"
   payment<T extends Prisma.PaymentDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PaymentDefaultArgs<ExtArgs>>): Prisma.Prisma__PaymentClient<runtime.Types.Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   charge<T extends Prisma.ChargeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ChargeDefaultArgs<ExtArgs>>): Prisma.Prisma__ChargeClient<runtime.Types.Result.GetResult<Prisma.$ChargePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  releases<T extends Prisma.PaymentAllocation$releasesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PaymentAllocation$releasesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AllocationReleasePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1540,6 +1668,30 @@ export type PaymentAllocationDeleteManyArgs<ExtArgs extends runtime.Types.Extens
    * Limit how many PaymentAllocations to delete.
    */
   limit?: number
+}
+
+/**
+ * PaymentAllocation.releases
+ */
+export type PaymentAllocation$releasesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AllocationRelease
+   */
+  select?: Prisma.AllocationReleaseSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AllocationRelease
+   */
+  omit?: Prisma.AllocationReleaseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AllocationReleaseInclude<ExtArgs> | null
+  where?: Prisma.AllocationReleaseWhereInput
+  orderBy?: Prisma.AllocationReleaseOrderByWithRelationInput | Prisma.AllocationReleaseOrderByWithRelationInput[]
+  cursor?: Prisma.AllocationReleaseWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AllocationReleaseScalarFieldEnum | Prisma.AllocationReleaseScalarFieldEnum[]
 }
 
 /**

@@ -417,6 +417,8 @@ export const ModelName = {
   BillingRun: 'BillingRun',
   Payment: 'Payment',
   PaymentAllocation: 'PaymentAllocation',
+  ReceiptCounter: 'ReceiptCounter',
+  AllocationRelease: 'AllocationRelease',
   DepositTransaction: 'DepositTransaction',
   Expense: 'Expense',
   SubscriptionPlan: 'SubscriptionPlan',
@@ -443,7 +445,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "organization" | "user" | "organizationMembership" | "invitation" | "refreshSession" | "hostel" | "room" | "bed" | "accommodationPackage" | "accommodationPackageComponent" | "temporaryAbsence" | "resident" | "stayContract" | "bedAssignment" | "charge" | "chargePackageComponent" | "absenceCredit" | "billingRun" | "payment" | "paymentAllocation" | "depositTransaction" | "expense" | "subscriptionPlan" | "organizationSubscription" | "subscriptionEvent" | "manualSubscriptionPayment" | "syncDevice" | "syncChange" | "organizationSyncState" | "idempotencyRecord" | "auditEvent"
+    modelProps: "organization" | "user" | "organizationMembership" | "invitation" | "refreshSession" | "hostel" | "room" | "bed" | "accommodationPackage" | "accommodationPackageComponent" | "temporaryAbsence" | "resident" | "stayContract" | "bedAssignment" | "charge" | "chargePackageComponent" | "absenceCredit" | "billingRun" | "payment" | "paymentAllocation" | "receiptCounter" | "allocationRelease" | "depositTransaction" | "expense" | "subscriptionPlan" | "organizationSubscription" | "subscriptionEvent" | "manualSubscriptionPayment" | "syncDevice" | "syncChange" | "organizationSyncState" | "idempotencyRecord" | "auditEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1927,6 +1929,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ReceiptCounter: {
+      payload: Prisma.$ReceiptCounterPayload<ExtArgs>
+      fields: Prisma.ReceiptCounterFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReceiptCounterFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReceiptCounterPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReceiptCounterFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReceiptCounterPayload>
+        }
+        findFirst: {
+          args: Prisma.ReceiptCounterFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReceiptCounterPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReceiptCounterFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReceiptCounterPayload>
+        }
+        findMany: {
+          args: Prisma.ReceiptCounterFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReceiptCounterPayload>[]
+        }
+        create: {
+          args: Prisma.ReceiptCounterCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReceiptCounterPayload>
+        }
+        createMany: {
+          args: Prisma.ReceiptCounterCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ReceiptCounterCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReceiptCounterPayload>[]
+        }
+        delete: {
+          args: Prisma.ReceiptCounterDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReceiptCounterPayload>
+        }
+        update: {
+          args: Prisma.ReceiptCounterUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReceiptCounterPayload>
+        }
+        deleteMany: {
+          args: Prisma.ReceiptCounterDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReceiptCounterUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ReceiptCounterUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReceiptCounterPayload>[]
+        }
+        upsert: {
+          args: Prisma.ReceiptCounterUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReceiptCounterPayload>
+        }
+        aggregate: {
+          args: Prisma.ReceiptCounterAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReceiptCounter>
+        }
+        groupBy: {
+          args: Prisma.ReceiptCounterGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReceiptCounterGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReceiptCounterCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReceiptCounterCountAggregateOutputType> | number
+        }
+      }
+    }
+    AllocationRelease: {
+      payload: Prisma.$AllocationReleasePayload<ExtArgs>
+      fields: Prisma.AllocationReleaseFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AllocationReleaseFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllocationReleasePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AllocationReleaseFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllocationReleasePayload>
+        }
+        findFirst: {
+          args: Prisma.AllocationReleaseFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllocationReleasePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AllocationReleaseFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllocationReleasePayload>
+        }
+        findMany: {
+          args: Prisma.AllocationReleaseFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllocationReleasePayload>[]
+        }
+        create: {
+          args: Prisma.AllocationReleaseCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllocationReleasePayload>
+        }
+        createMany: {
+          args: Prisma.AllocationReleaseCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AllocationReleaseCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllocationReleasePayload>[]
+        }
+        delete: {
+          args: Prisma.AllocationReleaseDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllocationReleasePayload>
+        }
+        update: {
+          args: Prisma.AllocationReleaseUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllocationReleasePayload>
+        }
+        deleteMany: {
+          args: Prisma.AllocationReleaseDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AllocationReleaseUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AllocationReleaseUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllocationReleasePayload>[]
+        }
+        upsert: {
+          args: Prisma.AllocationReleaseUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllocationReleasePayload>
+        }
+        aggregate: {
+          args: Prisma.AllocationReleaseAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAllocationRelease>
+        }
+        groupBy: {
+          args: Prisma.AllocationReleaseGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AllocationReleaseGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AllocationReleaseCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AllocationReleaseCountAggregateOutputType> | number
+        }
+      }
+    }
     DepositTransaction: {
       payload: Prisma.$DepositTransactionPayload<ExtArgs>
       fields: Prisma.DepositTransactionFieldRefs
@@ -3099,6 +3249,7 @@ export const PaymentScalarFieldEnum = {
   payerName: 'payerName',
   payerPhone: 'payerPhone',
   payerRelation: 'payerRelation',
+  provisionalReceiptId: 'provisionalReceiptId',
   reversedById: 'reversedById',
   reversalReason: 'reversalReason',
   reversedAt: 'reversedAt',
@@ -3120,6 +3271,29 @@ export const PaymentAllocationScalarFieldEnum = {
 } as const
 
 export type PaymentAllocationScalarFieldEnum = (typeof PaymentAllocationScalarFieldEnum)[keyof typeof PaymentAllocationScalarFieldEnum]
+
+
+export const ReceiptCounterScalarFieldEnum = {
+  organizationId: 'organizationId',
+  counter: 'counter',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReceiptCounterScalarFieldEnum = (typeof ReceiptCounterScalarFieldEnum)[keyof typeof ReceiptCounterScalarFieldEnum]
+
+
+export const AllocationReleaseScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  residentId: 'residentId',
+  allocationId: 'allocationId',
+  amount: 'amount',
+  reason: 'reason',
+  actorUserId: 'actorUserId',
+  createdAt: 'createdAt'
+} as const
+
+export type AllocationReleaseScalarFieldEnum = (typeof AllocationReleaseScalarFieldEnum)[keyof typeof AllocationReleaseScalarFieldEnum]
 
 
 export const DepositTransactionScalarFieldEnum = {
@@ -3985,6 +4159,8 @@ export type GlobalOmitConfig = {
   billingRun?: Prisma.BillingRunOmit
   payment?: Prisma.PaymentOmit
   paymentAllocation?: Prisma.PaymentAllocationOmit
+  receiptCounter?: Prisma.ReceiptCounterOmit
+  allocationRelease?: Prisma.AllocationReleaseOmit
   depositTransaction?: Prisma.DepositTransactionOmit
   expense?: Prisma.ExpenseOmit
   subscriptionPlan?: Prisma.SubscriptionPlanOmit

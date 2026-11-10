@@ -118,6 +118,16 @@ export type Payment = Prisma.PaymentModel
  */
 export type PaymentAllocation = Prisma.PaymentAllocationModel
 /**
+ * Model ReceiptCounter
+ * 
+ */
+export type ReceiptCounter = Prisma.ReceiptCounterModel
+/**
+ * Model AllocationRelease
+ * 
+ */
+export type AllocationRelease = Prisma.AllocationReleaseModel
+/**
  * Model DepositTransaction
  * 
  */
