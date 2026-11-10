@@ -148,9 +148,24 @@ describe('M3a authorization before idempotency replay (HTTP)', () => {
     expect(res.body.code).toBe('FORBIDDEN');
   });
 
+  it('operator cannot post an organization-wide billing run', async () => {
+    const t = await tokenFor(operatorA, 'op@example.com', 'Operator A');
+    const res = await request(app.getHttpServer())
+      .post('/api/v1/billing-runs')
+      .set('Authorization', `Bearer ${t}`)
+      .set('X-Organization-Id', orgA)
+      .set('Idempotency-Key', randomUUID())
+      .send({ periodStart: '2026-11-01', periodEnd: '2026-12-01' });
+
+    expect(res.status).toBe(403);
+    expect(res.body.code).toBe('FORBIDDEN');
+  });
+
   it('no extra charge or idempotency record was created by the unauthorized replays', async () => {
     const chargesN = await db.query('SELECT count(*)::int n FROM charges');
     expect(chargesN.rows[0].n).toBe(1);
+    const billingRunsN = await db.query('SELECT count(*)::int n FROM billing_runs');
+    expect(billingRunsN.rows[0].n).toBe(0);
     const idemN = await db.query('SELECT count(*)::int n FROM idempotency_records');
     expect(idemN.rows[0].n).toBe(1);
   });
