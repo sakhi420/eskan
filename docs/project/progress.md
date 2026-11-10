@@ -18,7 +18,7 @@
 | 8   | ساکن/قرارداد/تخصیص | ✅ انجام شد (کد + smoke واقعی ۴۸/۴۸) | overlap, concurrency |
 | 8.1 | سخت‌سازی صحت/سازگاری (بازبینی) | ✅ انجام شد (P0 fixes + smoke ۱۴۴/۱۴۴ = 42+16+48+14+24) | atomic idempotency, CAS locking, resident overlap, transfer/checkout, fail-fast migration |
 | 8.2 | چرخه‌حیات هم‌روندی و یکپارچگی داده | ✅ انجام شد (LockService + business date + overlap contract + smoke ۱۵۷/۱۵۷ = 42+16+48+14+24+13) | resident contract overlap, row locks, business date, idempotency expiry |
-| 9   | مالی (charge/payment/deposit) | ⏳ در انتظار — فقط سرویس‌های مالی M3 (قرارداد Gate 1، M-2 و 4c چرخه‌حیات/Idempotency ✅ انجام شد) | decimal, reversal |
+| 9   | مالی (charge/payment/deposit) | 🔄 در حال اجرا — M-1 ✅، M-2 ✅، 4c ✅، M3a ✅ (ادغام PR #2)؛ M3b نقطهٔ بعدی | integer AFN (A-016), reversal |
 | 10  | مصارف و گزارش | ⏳ در انتظار | reports |
 | 11  | idempotency/audit/sync | ⏳ در انتظار | cursor, tombstone |
 | 12  | امنیت و سخت‌سازی | ⏳ در انتظار | OWASP, validation |
@@ -26,6 +26,17 @@
 | 14  | عملیات/backup | ⏳ در انتظار | pg_dump, restore |
 | 15  | مستندات و تحویل | ⏳ در انتظار | — |
 | 16  | گزارش نهایی | ⏳ در انتظار | — |
+
+## وضعیت جاری فاز ۹ (M-gates) — به‌روز 2026-11-10
+
+- **Merge:** M3a (Charge/Billing/Absence-Credit) از طریق **PR #2** در `main` ادغام شد (commit `41af931e8be5ef194670989cae603c6cb1c51eca`)؛ CI روی این commit موفق بود.
+- **وضعیت M-gates:** M-1 ✅، M-2 ✅، 4c ✅، M3a ✅. **M3b نقطهٔ بعدی اجراست**؛ M3c و M3d پس از آن.
+- **وضعیت Migration در محیط‌ها (تفکیک دقیق):** تست‌ها روی دیتابیس‌های throwaway/CI اجرا شده‌اند؛ migrationهای M-1/M-2 روی `eskan_dev` اعمال شده‌اند. **Staging و Production هیچ migration اعمال نشده است.** «تست‌شده در CI» ≠ «اعمال‌شده روی دیتابیس توسعه/Staging/Production».
+- **Absence Credit ≠ Absence Lifecycle:** M3a فقط تولید Credit را برای غیابتی که قبلاً به `RETURNED` رسیده پشتیبانی می‌کند. چرخهٔ کامل غیابت (درخواست/تأیید/ثبت خروج/تأیید بازگشت) هنوز کار مستقل و پیاده‌نشده است.
+- **Backend (از `src/` و OpenAPI):** ماژول‌های `auth`، `organizations`، `hostels/rooms/beds`، `residents`، `contracts`، `assignments`، `packages`، `charges` (M3a) پیاده‌شده‌اند. ماژول‌های `payments`، `deposits`، `expenses`، `reports`، `sync`، `admin/**` هنوز **ماژول اجرایی ندارند** (فقط در قرارداد/Schema وجود دارند).
+- **Frontend:** پروژهٔ Flutter **هنوز در مخزن ساخته نشده** است (فقط Backend در ریشهٔ مخزن).
+- **Next step:** شروع **M3b** (Payment Create، Receipt Number، Allocation، Allocation Release، قفل/سازگاری، race tests) از `origin/main`.
+- **بایگانی اسناد تاریخی:** گزارش‌ها/طرح‌ها/تحلیل‌های قدیمی (phase-9-engineering-plan، m2-*، mvp-prioritization، hostel-domain-requirements-v1، open-questions، current-workflows، api-gap-analysis، repository-assessment، commands، master-prompt-v3-gap-analysis) به `docs/archive/` منتقل شدند و برای اجرای جاری مرجع نیستند.
 
 ## فاز 0 — بررسی مخزن و خط پایه (انجام شد)
 
@@ -98,7 +109,7 @@
 - Prisma 7 setup جدید: `prisma.config.ts` + generator `prisma-client` +
   driver adapter `@prisma/adapter-pg`.
 - auth: JWT access کوتاه‌عمر + refresh opaque rotation (hash در DB).
-- tenant isolation از security context؛ پول NUMERIC(19,2) + decimal.js.
+- tenant isolation از security context؛ پول مطابق A-016 (عدد صحیح AFN) + decimal.js (گردکردن proration).
 
 ### برنامهٔ Spike (اجرا در فاز 4/5)
 اثبات زنجیرهٔ NestJS → Prisma → PostgreSQL (migrate + generate + client با
@@ -648,7 +659,7 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 - JCS/RFC 8785 هنوز پیاده‌نشده؛ تست اختصاصی Authorization قبل از Replay باقی مانده است.
 
 ### وضعیت Merge
-- PR #1 باز است و **Merge نشده**؛ M-3 شروع نشده است.
+- PR #1 باز است و **Merge نشده** (یادداشت تاریخی این مقطع)؛ M-3 در این مقطع شروع نشده بود — وضعیت نهایی در بلوک «وضعیت جاری فاز ۹» بالای همین فایل است.
 ## Post-Merge Checkpoint — 2026-11-08
 
 - **PR #1 با موفقیت ادغام شد.**
@@ -656,7 +667,7 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 - Post-merge CI `42507580953` روی همان merge SHA — **موفق**.
 - نتایج تست: Unit 56/56؛ Integration 26/26؛ Retention CHECK 11/11؛ M-1 40/40؛ M-2 92/92؛ M-2 concurrency 6/6؛ M-2 parity 5/5.
 - OpenAPI validation موفق بود (با ۶ هشدار از پیش موجود).
-- M-3 سرویس‌های مالی **شروع نشده** است.
+- M-3 سرویس‌های مالی در این مقطع **شروع نشده** بود (M3a بعداً با PR #2 ادغام شد).
 - هر دو Migration 4c (`20261108180000_idempotency_retention_class` و `20261108190000_idempotency_retention_consistency_check`) در زمان این checkpoint همچنان روی `eskan_dev` اعمال‌نشده بودند؛ **اعمال واقعی روی `eskan_dev` در checkpoint بعدی («اعمال 4c روی eskan_dev») ثبت شده است.** Staging/Production همچنان اعمال‌نشده‌اند.
 - ⚠️ بند «PR #1 باز است و Merge نشده» در بخش 4c بالاتر، وضعیت همان مقطع تاریخی را ثبت کرده و پس از این ادغام دیگر معتبر نیست.
 

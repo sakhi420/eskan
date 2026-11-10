@@ -1,3 +1,4 @@
+> ⚠️ **سابقهٔ تجمعی تغییرات قرارداد (تاریخی).** منبع حقیقتِ جاری قرارداد همچنان `contracts/openapi.yaml` (فعلی v0.5.0) است. بخش‌های قدیمی با برچسب «تاریخی/باطل‌شده» مشخص‌اند؛ «تصمیمات نهایی مالک 2026-10-25» حاکم بر قرارداد است. این فایل را به‌عنوان وضعیت جاری API مبنا قرار نده.
 # M-1 (2026-11-07) — additive change to BedAssignment (documented, post Gate-1 lock)
 
 1. Added `AssignmentEndReason` (`CHECKOUT | TRANSFER | TERMINATE | MANUAL_END`) and a nullable `endReason` field on the `BedAssignment` response schema. This is an explicit additive change, not a hidden edit: legacy rows keep `endReason: null` (treated as LEGACY_UNKNOWN per D-04); new service code always sets it.

@@ -62,11 +62,17 @@ flowchart LR
 | `residents` | ساکنان و جست‌وجو |
 | `stay-contracts` | قرارداد اقامت و state machine |
 | `assignments` | تخصیص بستر و جلوگیری از overlap |
-| `charges`/`payments`/`deposits`/`expenses` | هستهٔ مالی با reversal |
+| `charges` | هستهٔ مالی M3a (Charge، BillingRun، AbsenceCredit) — پیاده‌شده |
+| `payments`/`deposits`/`expenses` | مالی M3b/M3c — فقط در قرارداد/Schema؛ ماژول اجرایی هنوز ساخته نشده |
 | `reports` | گزارش‌های پایه |
 | `audit` | ثبت audit برای عملیات حساس |
 | `sync` | تغییرات pull بر اساس cursor |
 | `common` | config/errors/filters/validation/tenancy/logging/security |
+
+> **وضعیت اجرای ماژول‌ها (2026-11-10):** پیاده‌شده: `auth`، `organizations`، `hostels`/`rooms`/`beds`،
+> `residents`، `contracts`، `assignments`، `packages`، `charges` (M3a). مالی بعدی
+> (`payments`/`deposits`/`expenses`)، `reports`، `sync` و `audit` فعلاً در قرارداد/Schema تعریف شده‌اند
+> ولی ماژول اجرایی ندارند.
 
 ## جریان درخواست (request pipeline)
 

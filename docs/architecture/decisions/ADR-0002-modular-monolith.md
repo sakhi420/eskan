@@ -23,7 +23,7 @@ NestJS moduleهای feature-based؛ بدون circular dependency یا `forwardRe
 
 ## گزینه‌های ردشده
 
-- Microservices/Kafka/Redis/Kubernetes: خارج از MVP (مسترپرامپت).
+- Microservices/Kafka/Redis/Kubernetes: خارج از MVP.
 - CQRS/event bus کامل: سربار بدون نیاز.
 - Generic repository برای هر کلاس: تشریفاتی.
 

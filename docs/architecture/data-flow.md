@@ -16,21 +16,23 @@ sequenceDiagram
   A-->>C: new access + new refresh
 ```
 
-## 2. جریان مالی (payment + allocation)
+## 2. جریان مالی (payment و allocation جدا)
 
 ```mermaid
 sequenceDiagram
   participant C as Client
   participant P as Payments Service
   participant D as PostgreSQL
-  C->>P: POST /payments {amount, allocations[], Idempotency-Key}
-  P->>D: begin tx
-  P->>D: lock idempotency key; insert payment; insert allocations
-  P->>D: sync change + audit
+  C->>P: POST /payments {amount, method, Idempotency-Key}  (unapplied)
+  P->>D: begin tx; lock (organization→resident→payment); insert payment (unapplied)
+  P->>D: صدور Receipt رسمی + sync change + audit
   P->>D: commit
-  P-->>C: payment + version
+  P-->>C: payment (unapplied) + receipt رسمی
+  C->>P: POST /payments/{id}/allocations {chargeId, amount}
+  P-->>C: allocation (append-only)
 ```
 
+Payment ابتدا **unapplied** است؛ Allocation و Release عملیات مستقل و صریح‌اند (D-02).
 مانده هر ساکن = Σ charges − Σ allocations (معتبر) − تعدیلات رسمی.
 
 ## 3. جریان همگام‌سازی (pull)

@@ -13,8 +13,9 @@ Platform Admin هویت/مجوز **سطح سیستم** است (system-level role
 
 ## مجوزها (در OpenAPI + enforce سمت سرور)
 
-همهٔ مسیرهای `/api/v1/admin/**` نیازمند `PLATFORM_ADMIN` در JWT هستند. نقش در authentication
-context قرار می‌گیرد و در هر درخواست بررسی می‌شود (نه فقط در ورود).
+همهٔ مسیرهای `/api/v1/admin/**` نیازمند `PLATFORM_ADMIN` هستند. منبع authority قطعی
+`User.isPlatformAdmin` (سمت سرور) است و در هر درخواست بررسی می‌شود (نه فقط در ورود)؛
+هیچ مسیر عمومی برای ارتقا به Platform Admin وجود ندارد.
 
 | مسیر | اقدام |
 |------|-------|

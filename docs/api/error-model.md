@@ -27,16 +27,19 @@ All errors follow RFC 9457 Problem Details with stable extensions.
 | 429 | rate limiting |
 | 500 | خطای غیرمنتظره + traceId، بدون جزئیات |
 
-## code های پایدار (خلاصه)
+## code های پایدار (خلاصه — منطبق با `src/common/errors/error-codes.ts`)
 
 `VALIDATION_ERROR`, `UNAUTHENTICATED`, `FORBIDDEN`, `RESOURCE_NOT_FOUND`,
 `RESOURCE_VERSION_CONFLICT`, `IDEMPOTENCY_KEY_REUSED`,
 `DUPLICATE_RECEIPT_NUMBER`, `BED_ASSIGNMENT_OVERLAP`, `RESIDENT_CONTRACT_OVERLAP`,
 `CONTRACT_NOT_ACTIVE`, `CHARGE_ALREADY_REVERSED`, `PAYMENT_ALREADY_REVERSED`,
-`ALLOCATION_EXCEEDS_PAYMENT`, `DEPOSIT_BALANCE_INSUFFICIENT`,
+`ALLOCATION_EXCEEDS_PAYMENT`, `PLAN_LIMIT_EXCEEDED`, `DEPOSIT_BALANCE_INSUFFICIENT`,
 `SYNC_RESYNC_REQUIRED`, `SYNC_CURSOR_INVALID`, `BUSINESS_RULE_VIOLATION`,
-`RATE_LIMITED`, `REGISTRATION_DISABLED`, `DUPLICATE_CODE`,
+`ORGANIZATION_CONTEXT_REQUIRED`, `RATE_LIMITED`, `REGISTRATION_DISABLED`, `DUPLICATE_CODE`,
 `RESOURCE_HAS_ACTIVE_ASSIGNMENT`, `REFRESH_TOKEN_REUSED`, `REFRESH_TOKEN_ROTATION_CONFLICT`, `INTERNAL_ERROR`.
+
+> فهرست بالا ثابت‌های enum واقعی است (نه کپی از گزارش تاریخی). کدهای مالی/sync در enum تعریف
+> شده‌اند؛ enforcement آن‌ها در endpoint مربوطه هنگام پیاده‌سازی آن endpoint فعال می‌شود.
 
 ## خطای validation
 

@@ -23,6 +23,13 @@
 | اپراتور | ثبت عملیات روزمره | `OPERATOR` |
 | مشاهده‌گر | فقط خواندن | `VIEWER` |
 
+| بستهٔ اقامت | تعریف خدمات/هزینهٔ اقامت با اجزای مالی قابل‌کسر/ثابت | `AccommodationPackage` |
+| صورت‌حساب ماهانه | اجرای idempotent کرایهٔ ماهانه (Preview→Posted) | `BillingRun` |
+| غیابت موقت | دوری موقت ساکن با حفظ تخت و قرارداد فعال | `TemporaryAbsence` |
+| اعتبار غیابت | Credit صادره پس از تأیید بازگشت واقعی (بعد از `RETURNED`) | `AbsenceCredit` |
+| آزادسازی تخصیص | لغو تخصیص ثبت‌شدهٔ پرداخت (append-only) | `AllocationRelease` |
+| شمارندهٔ رسید | شمارهٔ رسمی یکتای افزایشی در سطح سازمان | `ReceiptCounter` |
+
 ## انواع ساکن
 
 | Enum | معنای دری | توضیح |
@@ -37,10 +44,12 @@
 
 ## وضعیت اسناد مالی
 
-- Charge: `POSTED` → `REVERSED`
-- Payment: `POSTED` → `REVERSED`
-- Expense: `POSTED` → `REVERSED`
-- DepositTransaction: رویداد مستقل `RECEIVED` / `REFUNDED` / `FORFEITED` (اصلاح اشتباه با reverse)
+- Charge: `POSTED` → `REVERSED` (دوبدهی/دوبستان = وجه با `entrySide` / `ChargeType` متناظر).
+- Payment: `POSTED` → `REVERSED`؛ Payment در ابتدا **وجه تخصیص‌نیافته (unapplied)** است و Allocation عملیات مستقل است.
+- PaymentAllocation: append-only؛ آزادسازی با رویداد `AllocationRelease`، نه حذف/بازنویسی.
+- Expense: `POSTED` → `REVERSED`.
+- DepositTransaction: رویداد مستقل `RECEIVED` / `REFUNDED` / `FORFEITED` (اصلاح اشتباه با reverse).
+- Refund واقعی (خروج وجه) از Void (ابطال سند اشتباه) جداست (D-02). مبلغ منفی هیچ‌جا مجاز نیست (A-016).
 
 ## وضعیت ساکن
 
@@ -52,7 +61,8 @@
 
 ## چرخهٔ کرایه
 
-`MONTHLY` در MVP (کرایهٔ ماهانه). سیاست proration تا تأیید مالک محصول خودکار نمی‌شود.
+`BillingCycle` معادل `MONTHLY` در MVP (کرایهٔ ماهانه). proration **قطعی است** (A-015):
+`monthlyRent × occupiedDays / calendarDaysInMonth`، شمول دوطرفهٔ روزها، گردکردن HALF_UP با decimal.js.
 
 ## واحد پول
 
