@@ -2069,7 +2069,7 @@ paths:
     post:
       tags: [charges]
       summary: post a monthly billing run
-      description: "Final, idempotent issuance. The (organization, periodStart, periodEnd) business key forbids re-issuing the same rent period."
+      description: "Final, idempotent issuance; requires OWNER or ADMIN membership (OPERATOR and VIEWER receive 403). The (organization, periodStart, periodEnd) business key forbids re-issuing the same rent period."
       operationId: billingRunPost
       parameters:
         - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
