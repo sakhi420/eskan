@@ -85,7 +85,7 @@ const check = (name, ok, extra = '') => results.push(`${ok ? 'PASS' : 'FAIL'} - 
     'allocation_releases_organization_id_resident_id_allocation_fkey',
   ];
   check('[parity] live DB has 24 tenant composite FKs (M-2 + M3b)', fks.rowCount === 24, 'count=' + fks.rowCount);
-  check('[parity] both M3b AllocationRelease tenant FKs are present', m3bReleaseFks.every((name) => fkNames.has(name));
+  check('[parity] both M3b AllocationRelease tenant FKs are present', m3bReleaseFks.every((name) => fkNames.has(name)));
   await client.end();
 
   await admin.query(`DROP DATABASE IF EXISTS "${name}" WITH (FORCE)`).catch(() => {});
@@ -93,7 +93,7 @@ const check = (name, ok, extra = '') => results.push(`${ok ? 'PASS' : 'FAIL'} - 
 
   console.log('\n' + results.join('\n'));
   const failed = results.filter((x) => x.startsWith('FAIL')).length;
-  console.log(`\n${results.length - failed}/${results.length} M-2 Prisma parity checks passed`);
+  console.log(`\n${results.length - failed}/${results.length} tenant composite-FK parity checks passed`);
   if (failed || diff.trim() !== '' && !/This is an empty migration/.test(diff)) {
     console.log('\n--- migrate diff output (if any) ---\n' + diff);
   }
