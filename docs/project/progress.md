@@ -36,6 +36,7 @@
 - **Backend (از `src/` و OpenAPI):** ماژول‌های `auth`، `organizations`، `hostels/rooms/beds`، `residents`، `contracts`، `assignments`، `packages`، `charges` (M3a) پیاده‌شده‌اند. ماژول‌های `payments`، `deposits`، `expenses`، `reports`، `sync`، `admin/**` هنوز **ماژول اجرایی ندارند** (فقط در قرارداد/Schema وجود دارند).
 - **Frontend:** پروژهٔ Flutter **هنوز در مخزن ساخته نشده** است (فقط Backend در ریشهٔ مخزن).
 - **Next step:** شروع **M3b** (Payment Create، Receipt Number، Allocation، Allocation Release، قفل/سازگاری، race tests) از `origin/main`.
+- **بایگانی اسناد تاریخی:** گزارش‌ها/طرح‌ها/تحلیل‌های قدیمی (phase-9-engineering-plan، m2-*، mvp-prioritization، hostel-domain-requirements-v1، open-questions، current-workflows، api-gap-analysis، repository-assessment، commands، master-prompt-v3-gap-analysis) به `docs/archive/` منتقل شدند و برای اجرای جاری مرجع نیستند.
 
 ## فاز 0 — بررسی مخزن و خط پایه (انجام شد)
 
