@@ -68,7 +68,7 @@ export class ChargesController {
   }
 
   @Post('billing-runs')
-  @Roles(Role.OWNER, Role.ADMIN, Role.OPERATOR)
+  @Roles(Role.OWNER, Role.ADMIN)
   async postBilling(
     @CurrentMembership() m: MembershipContext,
     @CurrentUser() user: AuthUser,
