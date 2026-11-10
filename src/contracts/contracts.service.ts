@@ -233,7 +233,7 @@ async update(organizationId: string, contractId: string, expectedVersion: number
       // conflict code instead of an unrelated validation error.
       const existing = await tx.stayContract.findFirst({
         where: { id: contractId, organizationId },
-        select: { id: true, status: true, version: true, hostelId: true, residentId: true },
+        select: { id: true, status: true, version: true, hostelId: true, residentId: true, billingCycle: true },
       });
       if (!existing) throw AppError.notFound('Contract not found');
       if (existing.status !== ContractStatus.DRAFT) {
@@ -264,7 +264,7 @@ async update(organizationId: string, contractId: string, expectedVersion: number
         data: {
           hostelId: existing.hostelId, residentId: existing.residentId, startDate: toDateOnly(dto.startDate),
           endDate: dto.endDate ? toDateOnly(dto.endDate) : null, rentAmount,
-          billingCycle: dto.billingCycle ?? BillingCycle.MONTHLY, depositAmount: dto.deposit?.amount ?? null,
+          billingCycle: dto.billingCycle ?? existing.billingCycle, depositAmount: dto.deposit?.amount ?? null,
           packageId: dto.packageId ?? null,
           packageSnapshot: snapshot.length ? (snapshot as unknown as Prisma.InputJsonValue) : Prisma.JsonNull,
           notes: dto.notes, version: { increment: 1 },
@@ -311,9 +311,19 @@ async update(organizationId: string, contractId: string, expectedVersion: number
         // activation decision (status, range, parents) on the pre-lock snapshot.
         const current = await tx.stayContract.findFirst({
           where: { id: contractId, organizationId },
-          select: { status: true, hostelId: true, residentId: true, startDate: true, endDate: true, version: true },
+          select: { status: true, hostelId: true, residentId: true, startDate: true, endDate: true, version: true, billingCycle: true },
         });
         if (!current) throw AppError.notFound('Contract not found');
+
+        // A legacy YEARLY contract must not be activated: the monthly BillingRun
+        // cannot process it, and silently converting it to MONTHLY would corrupt
+        // the original billing decision. Require an explicit cycle edit first.
+        if (current.billingCycle === BillingCycle.YEARLY) {
+          throw AppError.conflict(
+            'YEARLY contracts cannot be activated; update the billing cycle to MONTHLY first',
+            ErrorCode.BUSINESS_RULE_VIOLATION,
+          );
+        }
 
         // Compare-and-swap on the client-observed version: a stale request (new
         // idempotency key, old version) must fail with a version conflict even if
