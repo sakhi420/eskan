@@ -681,7 +681,7 @@ model PaymentAllocation {
   amount         Int
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
-  payment Payment @relation(fields: [organizationId, residentId, paymentId], references: [organizationId, residentId, id], onDelete: Cascade)
+  payment Payment @relation(fields: [organizationId, residentId, paymentId], references: [organizationId, residentId, id], onDelete: Restrict)
   charge  Charge  @relation(fields: [organizationId, residentId, chargeId], references: [organizationId, residentId, id], onDelete: Restrict)
   releases AllocationRelease[]
 
