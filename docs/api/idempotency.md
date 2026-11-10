@@ -22,6 +22,10 @@
 
 - **payment create** replay → همان `Payment` اصلی (ایجادشده به‌صورت **وجه تخصیص‌نیافته**) را
   برمی‌گرداند؛ Allocation بعداً با endpoint مستقل انجام می‌شود و در پاسخ create نیست.
+- **payment create idempotency record** فقط یک reference غیرحساس (`resourceType` + `resourceId`)
+  ذخیره می‌کند؛ دادهٔ حساس پرداخت‌کننده (`payerName`/`payerPhone`/`payerRelation`/`notes`)
+  هرگز در `idempotency_records.response_body` کپی دائمی نمی‌شود و replay پاسخ را از منبع اصلی
+  (`payments`) بازسازی می‌کند.
 - **replay (same key + same payload)** → 200/201 با همان نتیجهٔ قبلی.
 - **same key + different payload** → 409 `IDEMPOTENCY_KEY_REUSED`.
 - **concurrent request (same key هم‌زمان)** → یکی commit و بقیه همان نتیجه را می‌گیرند

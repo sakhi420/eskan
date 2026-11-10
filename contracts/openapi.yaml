@@ -3655,9 +3655,6 @@ components:
         reversedBy: { type: string, format: uuid }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
-        allocations:
-          type: array
-          items: { $ref: '#/components/schemas/PaymentAllocation' }
     DepositTransaction:
       type: object
       description: "Append-only deposit ledger event: RECEIVED, REFUNDED, FORFEITED, or a correction void. Deposit-to-charge application is a separate DepositApplication entity (never a DepositTransaction)."

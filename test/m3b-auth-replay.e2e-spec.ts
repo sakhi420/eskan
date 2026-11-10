@@ -145,6 +145,27 @@ describe('M3b authorization before idempotency replay (HTTP)', () => {
     expect(res.body.code).toBe('FORBIDDEN');
   });
 
+  it('viewer cannot replay an owner payment with the same key (403 before replay)', async () => {
+    const key = randomUUID();
+    const ownerT = await tokenFor(ownerA, 'a@example.com', 'Owner A');
+    const ok = await request(app.getHttpServer())
+      .post('/api/v1/payments')
+      .set('Authorization', `Bearer ${ownerT}`)
+      .set('Idempotency-Key', key)
+      .send({ residentId: resident, money: { amount: 2500, currency: 'AFN' }, method: 'CASH', receivedAt: '2026-11-02', payerName: 'Alice', payerPhone: '0700000000' });
+    expect(ok.status).toBe(201);
+    expect(ok.body.data.payerName).toBe('Alice');
+
+    const viewerT = await tokenFor(viewerA, 'v@example.com', 'Viewer A');
+    const forbidden = await request(app.getHttpServer())
+      .post('/api/v1/payments')
+      .set('Authorization', `Bearer ${viewerT}`)
+      .set('Idempotency-Key', key)
+      .send({ residentId: resident, money: { amount: 2500, currency: 'AFN' }, method: 'CASH', receivedAt: '2026-11-02', payerName: 'Alice', payerPhone: '0700000000' });
+    expect(forbidden.status).toBe(403);
+    expect(forbidden.body).not.toHaveProperty('payerName');
+  });
+
   it('operator cannot release an allocation (403); owner can (200)', async () => {
     const opT = await tokenFor(operatorA, 'op@example.com', 'Op A');
     const forbidden = await request(app.getHttpServer())

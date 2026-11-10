@@ -115,7 +115,7 @@ describe('M3b Payment / Receipt / Allocation / Release (real PostgreSQL + real s
       expect(r.receiptNumber).toBe('0000000001');
       expect(r.money.amount).toBe(10000);
       expect(r.status).toBe('POSTED');
-      expect(r.allocations).toEqual([]);
+      expect(r.allocations).toBeUndefined();
       expect(r.provisionalReceipt).toBeNull();
       const alloc = await db.query('SELECT count(*)::int n FROM payment_allocations WHERE payment_id=$1', [r.id]);
       expect(alloc.rows[0].n).toBe(0);
@@ -133,6 +133,30 @@ describe('M3b Payment / Receipt / Allocation / Release (real PostgreSQL + real s
       const r: any = await payments.createPayment(f.org, f.user, paymentDto(f, { provisionalReceiptId: 'ofl-123' }) as any, randomUUID(), 'trace');
       expect(r.provisionalReceiptId).toBe('ofl-123');
       expect(r.provisionalReceipt).toMatchObject({ provisionalReceiptId: 'ofl-123', status: 'ISSUED', officialReceiptNumber: r.receiptNumber });
+    });
+
+    it('does not persist payer PII or notes in the idempotency record (replay rebuilt from source)', async () => {
+      const f = await seedOrg(db);
+      const key = randomUUID();
+      const body = paymentDto(f, { payerName: 'Alice', payerPhone: '0701234567', payerRelation: 'Sister', notes: 'secret note' }) as any;
+      const r: any = await payments.createPayment(f.org, f.user, body, key, 'trace');
+
+      const rec = await db.query(`SELECT response_body FROM idempotency_records WHERE organization_id=$1 AND idempotency_key=$2`, [f.org, key]);
+      expect(rec.rowCount).toBe(1);
+      const stored = JSON.stringify(rec.rows[0].response_body);
+      expect(stored).toBeDefined();
+      expect(stored).not.toContain('Alice');
+      expect(stored).not.toContain('0701234567');
+      expect(stored).not.toContain('Sister');
+      expect(stored).not.toContain('secret note');
+      expect(stored).toContain('resourceId');
+      expect(stored).toContain(r.id);
+
+      // Replay returns the same payment and official receipt, rebuilt from the source.
+      const replay: any = await payments.createPayment(f.org, f.user, body, key, 'trace');
+      expect(replay.id).toBe(r.id);
+      expect(replay.receiptNumber).toBe(r.receiptNumber);
+      expect(replay.payerName).toBe('Alice');
     });
 
     it('issues unique, monotonic receipt numbers per organization (no yearly reset)', async () => {

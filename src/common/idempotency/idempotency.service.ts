@@ -44,6 +44,18 @@ interface RunAtomicArgs extends ClaimArgs {
   statusCode: number;
 }
 
+/**
+ * Replay-from-reference for idempotent mutations whose full response contains
+ * sensitive data (e.g. a payer's name/phone). When supplied to `runAtomic`,
+ * only the minimal, non-sensitive `toRecord(result)` is persisted in the
+ * IdempotencyRecord, and the full response is rebuilt from the primary source on
+ * replay via `fromRecord` — so PII is never duplicated permanently in idempotency.
+ */
+export interface IdempotencyReplay<T> {
+  toRecord: (result: T) => Prisma.InputJsonValue;
+  fromRecord: (record: Prisma.JsonValue) => Promise<T>;
+}
+
 @Injectable()
 export class IdempotencyService {
   constructor(private readonly prisma: PrismaService) {}
@@ -88,6 +100,41 @@ export class IdempotencyService {
       throw AppError.internal('Idempotency record is missing its stored response');
     }
     return existing.responseBody as unknown as T;
+  }
+
+  /**
+   * Returns the raw stored body for an idempotency key (enforcing retention and
+   * request-hash match), or null when the key is unseen/expired. Unlike
+   * `getReplay`, this does NOT assume the stored body is the full domain
+   * response — it may be a minimal resource reference persisted by
+   * `runAtomic(..., replay)`.
+   */
+  private async lookupStored(
+    organizationId: string,
+    key: string,
+    endpoint: string,
+    requestHash: string,
+  ): Promise<Prisma.JsonValue | null> {
+    const existing = await this.prisma.idempotencyRecord.findUnique({
+      where: {
+        organizationId_idempotencyKey_endpoint: { organizationId, idempotencyKey: key, endpoint },
+      },
+    });
+
+    if (!existing) return null;
+
+    if (existing.retentionClass !== 'PERMANENT' && existing.expiresAt != null && existing.expiresAt.getTime() <= Date.now()) {
+      await this.prisma.idempotencyRecord.deleteMany({ where: { id: existing.id } });
+      return null;
+    }
+
+    if (existing.requestHash !== requestHash) {
+      throw AppError.conflict(
+        'Idempotency-Key was reused with a different request body',
+        ErrorCode.IDEMPOTENCY_KEY_REUSED,
+      );
+    }
+    return existing.responseBody;
   }
 
   expiresAt(): Date {
@@ -147,32 +194,31 @@ export class IdempotencyService {
   async runAtomic<T>(
     args: RunAtomicArgs,
     mutate: (tx: Prisma.TransactionClient) => Promise<T>,
+    replay?: IdempotencyReplay<T>,
   ): Promise<T> {
-    const replay = await this.getReplay<T>(
-      args.organizationId,
-      args.key,
-      args.endpoint,
-      args.requestHash,
-    );
-    if (replay) return replay;
+    const stored = replay
+      ? await this.lookupStored(args.organizationId, args.key, args.endpoint, args.requestHash)
+      : await this.getReplay<T>(args.organizationId, args.key, args.endpoint, args.requestHash);
+    if (stored !== null) {
+      return replay ? await replay.fromRecord(stored as Prisma.JsonValue) : (stored as T);
+    }
 
     try {
       return await this.prisma.$transaction(async (tx) => {
         await this.claim(tx, args);
         const result = await mutate(tx);
-        await this.complete(tx, { ...args, responseBody: result });
+        await this.complete(tx, { ...args, responseBody: replay ? replay.toRecord(result) : result });
         return result;
       });
     } catch (err) {
       if (isUniqueViolation(err)) {
         // Lost the claim to a concurrent request that has now committed.
-        const stored = await this.getReplay<T>(
-          args.organizationId,
-          args.key,
-          args.endpoint,
-          args.requestHash,
-        );
-        if (stored) return stored;
+        const stored = replay
+          ? await this.lookupStored(args.organizationId, args.key, args.endpoint, args.requestHash)
+          : await this.getReplay<T>(args.organizationId, args.key, args.endpoint, args.requestHash);
+        if (stored !== null) {
+          return replay ? await replay.fromRecord(stored as Prisma.JsonValue) : (stored as T);
+        }
         throw AppError.conflict(
           'Idempotency-Key is being processed concurrently; retry with the same key',
           ErrorCode.IDEMPOTENCY_KEY_REUSED,

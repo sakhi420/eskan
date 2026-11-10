@@ -126,7 +126,6 @@ function toPaymentDto(row: PaymentRow) {
     payerPhone: row.payerPhone,
     payerRelation: row.payerRelation,
     reversedBy: row.reversedById,
-    allocations: [],
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
@@ -318,6 +317,16 @@ export class PaymentsService {
         await this.emitSync(tx, organizationId, 'PAYMENT', payment.id, payment.version);
 
         return toPaymentDto(payment);
+      },
+      {
+        toRecord: (result) => ({ resourceType: 'PAYMENT', resourceId: result.id }),
+        fromRecord: async (record) => {
+          const ref = record as { resourceId?: string };
+          if (!ref.resourceId) {
+            throw AppError.internal('Idempotency record is missing its payment reference');
+          }
+          return this.getPayment(organizationId, ref.resourceId);
+        },
       },
     );
   }
