@@ -100,7 +100,7 @@ async function errCode(promise) { try { await promise; return null; } catch (e) 
   const chk = await c2.query(`SELECT conname FROM pg_constraint WHERE contype='c' AND conname IN ('charges_period_consistent','absence_credits_amount_positive','billing_runs_due_day_of_month_range') ORDER BY conname`);
   check('[check] M3a CHECK constraints present', chk.rowCount === 3, chk.rows.map(x => x.conname).join(','));
   const fks = await c2.query(`SELECT count(*)::int n FROM pg_constraint WHERE contype='f' AND array_length(conkey,1) >= 2`);
-  check('[composite-fk] tenant composite FKs = 22', fks.rows[0].n === 22, 'count=' + fks.rows[0].n);
+  check('[composite-fk] tenant composite FKs = 24', fks.rows[0].n === 24, 'count=' + fks.rows[0].n);
   await c2.end().catch(() => {});
 
   await admin.query(`DROP DATABASE IF EXISTS "${name}" WITH (FORCE)`).catch(() => {});

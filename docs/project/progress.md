@@ -585,6 +585,14 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 - وضعیت: **M-2 در فاز پیش‌بررسی خواندنی**؛ فقط SELECT، فقط روی clone/دیتابیس آزمایشی throwaway.
 - ابزار: `scripts/preflight-m2.cjs` (guard fail-closed + `BEGIN TRANSACTION READ ONLY`).
 - گزارش کامل: `docs/project/m2-preflight-report.md`.
+## M3b — Payment / Receipt / Allocation / Release — 2026-11-10
+- **خط مبنا:** `e386892a5a0dc17f27e74fde33cc70a3c3f80dcd` (Merge PR #3)؛ شاخهٔ کاری `feat/m3b-payment-allocation-receipt`.
+- **Schema:** `ReceiptCounter` (سطح Organization، بدون reset سالانه)، `AllocationRelease` (append-only)، ستون `payments.provisional_receipt_id`، و یکتایی `payment_allocations(organization_id, resident_id, id)` برای FK مرکب Release؛ هیچ قید یکتای مادام‌العمر روی `(payment_id, charge_id)` اضافه نشد (تخصیص مجدد پس از Release مجاز).
+- **Migration:** `20261110120000_m3b_payment_allocation_receipt` — additive/non-destructive؛ CHECK مثبت‌بودن مبلغ Release و non-negative شمارنده؛ شمارندهٔ رسید فقط از شماره‌های عددی قدیمی backfill می‌شود و شماره‌های قدیمی غیرعددی/legacy بازنویسی یا حدس زده نمی‌شوند.
+- **LockService:** قفل‌های مالی `lockCharge`/`lockPayment`/`lockAllocation` (tenant-scoped) به ترتیب canonical اضافه شد.
+- **سرویس:** `src/payments` — ثبت Payment (رسید رسمی سرور با قالب عددی صفر-padding)، Allocation صریح (غیرخودکار) و Release تحت Lock + بازمحاسبهٔ مانده؛ Idempotency-Key اجباری (PERMANENT) با fingerprint `canonicalRequestHash`؛ Audit + Sync اتمیک همراه سند؛ bump نسخهٔ Payment/Charge در Allocation/Release.
+- **تست‌ها:** `scripts/test-m3b-migration.cjs`، `test/integration/m3b-payments.integration-spec.ts`، `test/integration/m3b-concurrency.integration-spec.ts`، `test/m3b-auth-replay.e2e-spec.ts`؛ به CI اضافه شد.
+- **تأثیر بر M3a:** شمارندهٔ FK مرکب در `test-m3a-migration.cjs` از ۲۲ به ۲۴ به‌روزرسانی شد (دو FK مرکب جدید Release).
 - نتیجهٔ کلیدی (demo مصنوعی — نه دیتابیس واقعی): cross-org=۸، cross-resident=۳ (شامل TemporaryAbsence)، orphan=۰ (FK-enforced)، و **۱۱/۱۱ کلید UNIQUE موردنیاز** (۲ و ۳ ستونه) غایب‌اند.
 - تکمیل پوشش پس از بازبینی مالک: رابطهٔ **Absence→Charge (creditChargeId)** در هر سه جهت (org / resident / orphan)؛ کلیدهای سه‌ستونی `(organization_id, resident_id, id)` روی stay_contracts/charges/payments/temporary_absences (و حذف کلید دوستونی غیرلازمِ temporary_absences)؛ تشخیص دقیق UNIQUE با تطبیق مجموعه/ترتیب ستون‌ها + حذف index ناvalid/ناready (`indisvalid`/`indisready`).
 - CI سه مرحلهٔ M-2: (۱) `preflight-m2.cjs --strict` baseline پاک، (۲) `test-m2-preflight-detection.cjs` (کارش cross-tenant incl. creditCharge و اثبات تشخیص با exit 1)، (۳) `preflight guard fail-closed` روی نام دیتابیس غیرآزمایشی (exit 2).
