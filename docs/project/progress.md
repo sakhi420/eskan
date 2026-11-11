@@ -18,7 +18,7 @@
 | 8   | ساکن/قرارداد/تخصیص | ✅ انجام شد (کد + smoke واقعی ۴۸/۴۸) | overlap, concurrency |
 | 8.1 | سخت‌سازی صحت/سازگاری (بازبینی) | ✅ انجام شد (P0 fixes + smoke ۱۴۴/۱۴۴ = 42+16+48+14+24) | atomic idempotency, CAS locking, resident overlap, transfer/checkout, fail-fast migration |
 | 8.2 | چرخه‌حیات هم‌روندی و یکپارچگی داده | ✅ انجام شد (LockService + business date + overlap contract + smoke ۱۵۷/۱۵۷ = 42+16+48+14+24+13) | resident contract overlap, row locks, business date, idempotency expiry |
-| 9   | مالی (charge/payment/deposit) | 🔄 در حال اجرا — M-1 ✅، M-2 ✅، 4c ✅، M3a ✅ (ادغام PR #2)، M3b ✅ (PR #4 در بازبینی، Merge نشده)؛ M3c بعدی | integer AFN (A-016), reversal, immutability |
+| 9   | مالی (charge/payment/deposit) | 🔄 در حال اجرا — M-1 ✅، M-2 ✅، 4c ✅، M3a ✅ (PR #2)، M3b ✅ (PR #4)؛ M3c بعدی | integer AFN (A-016), reversal, immutability |
 | 10  | مصارف و گزارش | ⏳ در انتظار | reports |
 | 11  | idempotency/audit/sync | ⏳ در انتظار | cursor, tombstone |
 | 12  | امنیت و سخت‌سازی | ⏳ در انتظار | OWASP, validation |
@@ -29,13 +29,13 @@
 
 ## وضعیت جاری فاز ۹ (M-gates) — به‌روز 2026-11-10
 
-- **Merge:** M3a (Charge/Billing/Absence-Credit) از طریق **PR #2** در `main` ادغام شد (commit `41af931e8be5ef194670989cae603c6cb1c51eca`)؛ CI روی این commit موفق بود.
-- **وضعیت M-gates:** M-1 ✅، M-2 ✅، 4c ✅، M3a ✅، **M3b ✅ (PR #4 — آمادهٔ بازبینی نهایی، Merge نشده)**. M3c و M3d پس از پذیرش/ادغام M3b.
+- **Merge:** M3a (Charge/Billing/Absence-Credit) از طریق **PR #2** ادغام شد (commit `41af931e8be5ef194670989cae603c6cb1c51eca`)؛ **M3b (Payment/Receipt/Allocation/Release) از طریق PR #4 ادغام شد** (merge commit `198423c6459dd385e1dc905bdd9314de3a29f746`). CI روی هر دو موفق بود.
+- **وضعیت M-gates:** M-1 ✅، M-2 ✅، 4c ✅، M3a ✅، **M3b ✅ (ادغام PR #4)**. M3c بعد، M3d پس از آن.
 - **وضعیت Migration در محیط‌ها (تفکیک دقیق):** تست‌ها روی دیتابیس‌های throwaway/CI اجرا شده‌اند؛ migrationهای M-1/M-2 روی `eskan_dev` اعمال شده‌اند. **Staging و Production هیچ migration اعمال نشده است.** «تست‌شده در CI» ≠ «اعمال‌شده روی دیتابیس توسعه/Staging/Production».
 - **Absence Credit ≠ Absence Lifecycle:** M3a فقط تولید Credit را برای غیابتی که قبلاً به `RETURNED` رسیده پشتیبانی می‌کند. چرخهٔ کامل غیابت (درخواست/تأیید/ثبت خروج/تأیید بازگشت) هنوز کار مستقل و پیاده‌نشده است.
 - **Backend (از `src/` و OpenAPI):** ماژول‌های `auth`، `organizations`، `hostels/rooms/beds`، `residents`، `contracts`، `assignments`، `packages`، `charges` (M3a) و `payments` (M3b) پیاده‌شده‌اند. ماژول‌های `deposits`، `expenses`، `reports`، `sync`، `admin/**` هنوز **ماژول اجرایی ندارند** (فقط در قرارداد/Schema وجود دارند).
 - **Frontend:** پروژهٔ Flutter **هنوز در مخزن ساخته نشده** است (فقط Backend در ریشهٔ مخزن).
-- **Next step:** پذیرش نهایی و Merge **M3b** (PR #4)، سپس شروع **M3c** (Deposit / Refund / Expense / Reversal). چرخهٔ Absence و Sync Pull مربوط به Gateهای بعدی است.
+- **Next step:** شروع **M3c** (Deposit / Refund / Expense / Reversal). چرخهٔ Absence و Sync Pull مربوط به Gateهای بعدی است.
 - **بایگانی اسناد تاریخی:** گزارش‌ها/طرح‌ها/تحلیل‌های قدیمی (phase-9-engineering-plan، m2-*، mvp-prioritization، hostel-domain-requirements-v1، open-questions، current-workflows، api-gap-analysis، repository-assessment، commands، master-prompt-v3-gap-analysis) به `docs/archive/` منتقل شدند و برای اجرای جاری مرجع نیستند.
 
 ## فاز 0 — بررسی مخزن و خط پایه (انجام شد)
