@@ -33,7 +33,7 @@ import { Prisma } from '../../generated/prisma/client';
  * does not exist, returns no row (and therefore holds no lock) which the
  * caller detects via the subsequent existence check in the same transaction.
  */
-type OrgEntity = 'hostel' | 'room' | 'bed' | 'resident' | 'contract' | 'temporary_absence';
+type OrgEntity = 'hostel' | 'room' | 'bed' | 'resident' | 'contract' | 'temporary_absence' | 'charge' | 'payment' | 'allocation';
 type GlobalEntity = 'organization' | 'user' | 'refresh_session';
 
 const ORG_TABLE_SQL: Record<OrgEntity, string> = {
@@ -43,6 +43,9 @@ const ORG_TABLE_SQL: Record<OrgEntity, string> = {
   resident: '"residents"',
   contract: '"stay_contracts"',
   temporary_absence: '"temporary_absences"',
+  charge: '"charges"',
+  payment: '"payments"',
+  allocation: '"payment_allocations"',
 };
 
 const GLOBAL_TABLE_SQL: Record<GlobalEntity, string> = {
@@ -98,6 +101,21 @@ export class LockService {
 
   async lockTemporaryAbsence(tx: Prisma.TransactionClient, id: string, organizationId: string): Promise<void> {
     await this.lockForUpdate(tx, 'temporary_absence', id, organizationId);
+  }
+
+  /** Financial-workflow lock for a Charge row (canonical financial order, tenant-scoped). */
+  async lockCharge(tx: Prisma.TransactionClient, id: string, organizationId: string): Promise<void> {
+    await this.lockForUpdate(tx, 'charge', id, organizationId);
+  }
+
+  /** Financial-workflow lock for a Payment row (canonical financial order, tenant-scoped). */
+  async lockPayment(tx: Prisma.TransactionClient, id: string, organizationId: string): Promise<void> {
+    await this.lockForUpdate(tx, 'payment', id, organizationId);
+  }
+
+  /** Financial-workflow lock for a PaymentAllocation row (canonical financial order, tenant-scoped). */
+  async lockAllocation(tx: Prisma.TransactionClient, id: string, organizationId: string): Promise<void> {
+    await this.lockForUpdate(tx, 'allocation', id, organizationId);
   }
 
   /**

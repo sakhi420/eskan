@@ -50,6 +50,7 @@ export type PaymentMinAggregateOutputType = {
   payerName: string | null
   payerPhone: string | null
   payerRelation: string | null
+  provisionalReceiptId: string | null
   reversedById: string | null
   reversalReason: string | null
   reversedAt: Date | null
@@ -71,6 +72,7 @@ export type PaymentMaxAggregateOutputType = {
   payerName: string | null
   payerPhone: string | null
   payerRelation: string | null
+  provisionalReceiptId: string | null
   reversedById: string | null
   reversalReason: string | null
   reversedAt: Date | null
@@ -92,6 +94,7 @@ export type PaymentCountAggregateOutputType = {
   payerName: number
   payerPhone: number
   payerRelation: number
+  provisionalReceiptId: number
   reversedById: number
   reversalReason: number
   reversedAt: number
@@ -125,6 +128,7 @@ export type PaymentMinAggregateInputType = {
   payerName?: true
   payerPhone?: true
   payerRelation?: true
+  provisionalReceiptId?: true
   reversedById?: true
   reversalReason?: true
   reversedAt?: true
@@ -146,6 +150,7 @@ export type PaymentMaxAggregateInputType = {
   payerName?: true
   payerPhone?: true
   payerRelation?: true
+  provisionalReceiptId?: true
   reversedById?: true
   reversalReason?: true
   reversedAt?: true
@@ -167,6 +172,7 @@ export type PaymentCountAggregateInputType = {
   payerName?: true
   payerPhone?: true
   payerRelation?: true
+  provisionalReceiptId?: true
   reversedById?: true
   reversalReason?: true
   reversedAt?: true
@@ -275,6 +281,7 @@ export type PaymentGroupByOutputType = {
   payerName: string | null
   payerPhone: string | null
   payerRelation: string | null
+  provisionalReceiptId: string | null
   reversedById: string | null
   reversalReason: string | null
   reversedAt: Date | null
@@ -319,6 +326,7 @@ export type PaymentWhereInput = {
   payerName?: Prisma.StringNullableFilter<"Payment"> | string | null
   payerPhone?: Prisma.StringNullableFilter<"Payment"> | string | null
   payerRelation?: Prisma.StringNullableFilter<"Payment"> | string | null
+  provisionalReceiptId?: Prisma.StringNullableFilter<"Payment"> | string | null
   reversedById?: Prisma.UuidNullableFilter<"Payment"> | string | null
   reversalReason?: Prisma.StringNullableFilter<"Payment"> | string | null
   reversedAt?: Prisma.DateTimeNullableFilter<"Payment"> | Date | string | null
@@ -344,6 +352,7 @@ export type PaymentOrderByWithRelationInput = {
   payerName?: Prisma.SortOrderInput | Prisma.SortOrder
   payerPhone?: Prisma.SortOrderInput | Prisma.SortOrder
   payerRelation?: Prisma.SortOrderInput | Prisma.SortOrder
+  provisionalReceiptId?: Prisma.SortOrderInput | Prisma.SortOrder
   reversedById?: Prisma.SortOrderInput | Prisma.SortOrder
   reversalReason?: Prisma.SortOrderInput | Prisma.SortOrder
   reversedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -375,6 +384,7 @@ export type PaymentWhereUniqueInput = Prisma.AtLeast<{
   payerName?: Prisma.StringNullableFilter<"Payment"> | string | null
   payerPhone?: Prisma.StringNullableFilter<"Payment"> | string | null
   payerRelation?: Prisma.StringNullableFilter<"Payment"> | string | null
+  provisionalReceiptId?: Prisma.StringNullableFilter<"Payment"> | string | null
   reversedById?: Prisma.UuidNullableFilter<"Payment"> | string | null
   reversalReason?: Prisma.StringNullableFilter<"Payment"> | string | null
   reversedAt?: Prisma.DateTimeNullableFilter<"Payment"> | Date | string | null
@@ -400,6 +410,7 @@ export type PaymentOrderByWithAggregationInput = {
   payerName?: Prisma.SortOrderInput | Prisma.SortOrder
   payerPhone?: Prisma.SortOrderInput | Prisma.SortOrder
   payerRelation?: Prisma.SortOrderInput | Prisma.SortOrder
+  provisionalReceiptId?: Prisma.SortOrderInput | Prisma.SortOrder
   reversedById?: Prisma.SortOrderInput | Prisma.SortOrder
   reversalReason?: Prisma.SortOrderInput | Prisma.SortOrder
   reversedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -429,6 +440,7 @@ export type PaymentScalarWhereWithAggregatesInput = {
   payerName?: Prisma.StringNullableWithAggregatesFilter<"Payment"> | string | null
   payerPhone?: Prisma.StringNullableWithAggregatesFilter<"Payment"> | string | null
   payerRelation?: Prisma.StringNullableWithAggregatesFilter<"Payment"> | string | null
+  provisionalReceiptId?: Prisma.StringNullableWithAggregatesFilter<"Payment"> | string | null
   reversedById?: Prisma.UuidNullableWithAggregatesFilter<"Payment"> | string | null
   reversalReason?: Prisma.StringNullableWithAggregatesFilter<"Payment"> | string | null
   reversedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Payment"> | Date | string | null
@@ -448,6 +460,7 @@ export type PaymentCreateInput = {
   payerName?: string | null
   payerPhone?: string | null
   payerRelation?: string | null
+  provisionalReceiptId?: string | null
   reversalReason?: string | null
   reversedAt?: Date | string | null
   createdAt?: Date | string
@@ -472,6 +485,7 @@ export type PaymentUncheckedCreateInput = {
   payerName?: string | null
   payerPhone?: string | null
   payerRelation?: string | null
+  provisionalReceiptId?: string | null
   reversedById?: string | null
   reversalReason?: string | null
   reversedAt?: Date | string | null
@@ -492,6 +506,7 @@ export type PaymentUpdateInput = {
   payerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerRelation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionalReceiptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -516,6 +531,7 @@ export type PaymentUncheckedUpdateInput = {
   payerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerRelation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionalReceiptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -538,6 +554,7 @@ export type PaymentCreateManyInput = {
   payerName?: string | null
   payerPhone?: string | null
   payerRelation?: string | null
+  provisionalReceiptId?: string | null
   reversedById?: string | null
   reversalReason?: string | null
   reversedAt?: Date | string | null
@@ -557,6 +574,7 @@ export type PaymentUpdateManyMutationInput = {
   payerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerRelation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionalReceiptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -577,6 +595,7 @@ export type PaymentUncheckedUpdateManyInput = {
   payerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerRelation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionalReceiptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -624,6 +643,7 @@ export type PaymentCountOrderByAggregateInput = {
   payerName?: Prisma.SortOrder
   payerPhone?: Prisma.SortOrder
   payerRelation?: Prisma.SortOrder
+  provisionalReceiptId?: Prisma.SortOrder
   reversedById?: Prisma.SortOrder
   reversalReason?: Prisma.SortOrder
   reversedAt?: Prisma.SortOrder
@@ -650,6 +670,7 @@ export type PaymentMaxOrderByAggregateInput = {
   payerName?: Prisma.SortOrder
   payerPhone?: Prisma.SortOrder
   payerRelation?: Prisma.SortOrder
+  provisionalReceiptId?: Prisma.SortOrder
   reversedById?: Prisma.SortOrder
   reversalReason?: Prisma.SortOrder
   reversedAt?: Prisma.SortOrder
@@ -671,6 +692,7 @@ export type PaymentMinOrderByAggregateInput = {
   payerName?: Prisma.SortOrder
   payerPhone?: Prisma.SortOrder
   payerRelation?: Prisma.SortOrder
+  provisionalReceiptId?: Prisma.SortOrder
   reversedById?: Prisma.SortOrder
   reversalReason?: Prisma.SortOrder
   reversedAt?: Prisma.SortOrder
@@ -844,6 +866,7 @@ export type PaymentCreateWithoutOrganizationInput = {
   payerName?: string | null
   payerPhone?: string | null
   payerRelation?: string | null
+  provisionalReceiptId?: string | null
   reversalReason?: string | null
   reversedAt?: Date | string | null
   createdAt?: Date | string
@@ -866,6 +889,7 @@ export type PaymentUncheckedCreateWithoutOrganizationInput = {
   payerName?: string | null
   payerPhone?: string | null
   payerRelation?: string | null
+  provisionalReceiptId?: string | null
   reversedById?: string | null
   reversalReason?: string | null
   reversedAt?: Date | string | null
@@ -917,6 +941,7 @@ export type PaymentScalarWhereInput = {
   payerName?: Prisma.StringNullableFilter<"Payment"> | string | null
   payerPhone?: Prisma.StringNullableFilter<"Payment"> | string | null
   payerRelation?: Prisma.StringNullableFilter<"Payment"> | string | null
+  provisionalReceiptId?: Prisma.StringNullableFilter<"Payment"> | string | null
   reversedById?: Prisma.UuidNullableFilter<"Payment"> | string | null
   reversalReason?: Prisma.StringNullableFilter<"Payment"> | string | null
   reversedAt?: Prisma.DateTimeNullableFilter<"Payment"> | Date | string | null
@@ -936,6 +961,7 @@ export type PaymentCreateWithoutReversedByInput = {
   payerName?: string | null
   payerPhone?: string | null
   payerRelation?: string | null
+  provisionalReceiptId?: string | null
   reversalReason?: string | null
   reversedAt?: Date | string | null
   createdAt?: Date | string
@@ -959,6 +985,7 @@ export type PaymentUncheckedCreateWithoutReversedByInput = {
   payerName?: string | null
   payerPhone?: string | null
   payerRelation?: string | null
+  provisionalReceiptId?: string | null
   reversalReason?: string | null
   reversedAt?: Date | string | null
   createdAt?: Date | string
@@ -1004,6 +1031,7 @@ export type PaymentCreateWithoutResidentInput = {
   payerName?: string | null
   payerPhone?: string | null
   payerRelation?: string | null
+  provisionalReceiptId?: string | null
   reversalReason?: string | null
   reversedAt?: Date | string | null
   createdAt?: Date | string
@@ -1025,6 +1053,7 @@ export type PaymentUncheckedCreateWithoutResidentInput = {
   payerName?: string | null
   payerPhone?: string | null
   payerRelation?: string | null
+  provisionalReceiptId?: string | null
   reversedById?: string | null
   reversalReason?: string | null
   reversedAt?: Date | string | null
@@ -1071,6 +1100,7 @@ export type PaymentCreateWithoutAllocationsInput = {
   payerName?: string | null
   payerPhone?: string | null
   payerRelation?: string | null
+  provisionalReceiptId?: string | null
   reversalReason?: string | null
   reversedAt?: Date | string | null
   createdAt?: Date | string
@@ -1094,6 +1124,7 @@ export type PaymentUncheckedCreateWithoutAllocationsInput = {
   payerName?: string | null
   payerPhone?: string | null
   payerRelation?: string | null
+  provisionalReceiptId?: string | null
   reversedById?: string | null
   reversalReason?: string | null
   reversedAt?: Date | string | null
@@ -1129,6 +1160,7 @@ export type PaymentUpdateWithoutAllocationsInput = {
   payerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerRelation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionalReceiptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1152,6 +1184,7 @@ export type PaymentUncheckedUpdateWithoutAllocationsInput = {
   payerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerRelation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionalReceiptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1172,6 +1205,7 @@ export type PaymentCreateManyOrganizationInput = {
   payerName?: string | null
   payerPhone?: string | null
   payerRelation?: string | null
+  provisionalReceiptId?: string | null
   reversedById?: string | null
   reversalReason?: string | null
   reversedAt?: Date | string | null
@@ -1191,6 +1225,7 @@ export type PaymentUpdateWithoutOrganizationInput = {
   payerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerRelation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionalReceiptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1213,6 +1248,7 @@ export type PaymentUncheckedUpdateWithoutOrganizationInput = {
   payerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerRelation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionalReceiptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1234,6 +1270,7 @@ export type PaymentUncheckedUpdateManyWithoutOrganizationInput = {
   payerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerRelation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionalReceiptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1255,6 +1292,7 @@ export type PaymentCreateManyReversedByInput = {
   payerName?: string | null
   payerPhone?: string | null
   payerRelation?: string | null
+  provisionalReceiptId?: string | null
   reversalReason?: string | null
   reversedAt?: Date | string | null
   createdAt?: Date | string
@@ -1273,6 +1311,7 @@ export type PaymentUpdateWithoutReversedByInput = {
   payerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerRelation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionalReceiptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1296,6 +1335,7 @@ export type PaymentUncheckedUpdateWithoutReversedByInput = {
   payerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerRelation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionalReceiptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1317,6 +1357,7 @@ export type PaymentUncheckedUpdateManyWithoutReversedByInput = {
   payerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerRelation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionalReceiptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1335,6 +1376,7 @@ export type PaymentCreateManyResidentInput = {
   payerName?: string | null
   payerPhone?: string | null
   payerRelation?: string | null
+  provisionalReceiptId?: string | null
   reversedById?: string | null
   reversalReason?: string | null
   reversedAt?: Date | string | null
@@ -1354,6 +1396,7 @@ export type PaymentUpdateWithoutResidentInput = {
   payerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerRelation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionalReceiptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1375,6 +1418,7 @@ export type PaymentUncheckedUpdateWithoutResidentInput = {
   payerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerRelation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionalReceiptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1395,6 +1439,7 @@ export type PaymentUncheckedUpdateManyWithoutResidentInput = {
   payerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   payerRelation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionalReceiptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1447,6 +1492,7 @@ export type PaymentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   payerName?: boolean
   payerPhone?: boolean
   payerRelation?: boolean
+  provisionalReceiptId?: boolean
   reversedById?: boolean
   reversalReason?: boolean
   reversedAt?: boolean
@@ -1473,6 +1519,7 @@ export type PaymentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   payerName?: boolean
   payerPhone?: boolean
   payerRelation?: boolean
+  provisionalReceiptId?: boolean
   reversedById?: boolean
   reversalReason?: boolean
   reversedAt?: boolean
@@ -1497,6 +1544,7 @@ export type PaymentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   payerName?: boolean
   payerPhone?: boolean
   payerRelation?: boolean
+  provisionalReceiptId?: boolean
   reversedById?: boolean
   reversalReason?: boolean
   reversedAt?: boolean
@@ -1521,6 +1569,7 @@ export type PaymentSelectScalar = {
   payerName?: boolean
   payerPhone?: boolean
   payerRelation?: boolean
+  provisionalReceiptId?: boolean
   reversedById?: boolean
   reversalReason?: boolean
   reversedAt?: boolean
@@ -1528,7 +1577,7 @@ export type PaymentSelectScalar = {
   updatedAt?: boolean
 }
 
-export type PaymentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "version" | "organizationId" | "residentId" | "status" | "amount" | "method" | "receivedAt" | "receiptNumber" | "notes" | "payerName" | "payerPhone" | "payerRelation" | "reversedById" | "reversalReason" | "reversedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["payment"]>
+export type PaymentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "version" | "organizationId" | "residentId" | "status" | "amount" | "method" | "receivedAt" | "receiptNumber" | "notes" | "payerName" | "payerPhone" | "payerRelation" | "provisionalReceiptId" | "reversedById" | "reversalReason" | "reversedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["payment"]>
 export type PaymentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   resident?: boolean | Prisma.ResidentDefaultArgs<ExtArgs>
@@ -1569,6 +1618,7 @@ export type $PaymentPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     payerName: string | null
     payerPhone: string | null
     payerRelation: string | null
+    provisionalReceiptId: string | null
     reversedById: string | null
     reversalReason: string | null
     reversedAt: Date | null
@@ -2014,6 +2064,7 @@ export interface PaymentFieldRefs {
   readonly payerName: Prisma.FieldRef<"Payment", 'String'>
   readonly payerPhone: Prisma.FieldRef<"Payment", 'String'>
   readonly payerRelation: Prisma.FieldRef<"Payment", 'String'>
+  readonly provisionalReceiptId: Prisma.FieldRef<"Payment", 'String'>
   readonly reversedById: Prisma.FieldRef<"Payment", 'String'>
   readonly reversalReason: Prisma.FieldRef<"Payment", 'String'>
   readonly reversedAt: Prisma.FieldRef<"Payment", 'DateTime'>

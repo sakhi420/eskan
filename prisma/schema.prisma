@@ -201,6 +201,8 @@ model Organization {
   packages                   AccommodationPackage[]
   temporaryAbsences          TemporaryAbsence[]
   billingRuns                BillingRun[]
+  receiptCounters            ReceiptCounter[]
+  allocationReleases         AllocationRelease[]
 
   @@map("organizations")
 }
@@ -228,6 +230,7 @@ model User {
   requestedAbsences      TemporaryAbsence[]          @relation("AbsenceRequestedBy")
   approvedAbsences       TemporaryAbsence[]          @relation("AbsenceApprovedBy")
   billingRunsCreated     BillingRun[]                 @relation("BillingRunCreatedBy")
+  releasedAllocations    AllocationRelease[]          @relation("AllocationReleaseActor")
 
   @@map("users")
 }
@@ -460,10 +463,11 @@ model Resident {
   organization  Organization         @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   stayContracts StayContract[]
   assignments   BedAssignment[]
-  charges       Charge[]
-  payments      Payment[]
-  deposits      DepositTransaction[]
-  absences      TemporaryAbsence[]
+  charges             Charge[]
+  payments            Payment[]
+  deposits            DepositTransaction[]
+  absences            TemporaryAbsence[]
+  allocationReleases  AllocationRelease[]
 
   @@unique([organizationId, id])
   @@index([organizationId])
@@ -648,6 +652,7 @@ model Payment {
   payerName      String?           @map("payer_name")
   payerPhone     String?           @map("payer_phone")
   payerRelation  String?           @map("payer_relation")
+  provisionalReceiptId String?     @map("provisional_receipt_id")
   reversedById   String?           @map("reversed_by_id") @db.Uuid
   reversalReason String?           @map("reversal_reason")
   reversedAt     DateTime?         @map("reversed_at") @db.Timestamptz(3)
@@ -676,13 +681,46 @@ model PaymentAllocation {
   amount         Int
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
-  payment Payment @relation(fields: [organizationId, residentId, paymentId], references: [organizationId, residentId, id], onDelete: Cascade)
+  payment Payment @relation(fields: [organizationId, residentId, paymentId], references: [organizationId, residentId, id], onDelete: Restrict)
   charge  Charge  @relation(fields: [organizationId, residentId, chargeId], references: [organizationId, residentId, id], onDelete: Restrict)
+  releases AllocationRelease[]
 
+  @@unique([organizationId, residentId, id])
   @@index([chargeId])
   @@index([organizationId, residentId, paymentId])
   @@index([organizationId, residentId, chargeId])
   @@map("payment_allocations")
+}
+
+model ReceiptCounter {
+  organizationId String   @id @map("organization_id") @db.Uuid
+  counter        Int      @default(0)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("receipt_counters")
+}
+
+model AllocationRelease {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String           @map("organization_id") @db.Uuid
+  residentId     String           @map("resident_id") @db.Uuid
+  allocationId   String           @map("allocation_id") @db.Uuid
+  amount         Int
+  reason         String
+  actorUserId    String           @map("actor_user_id") @db.Uuid
+  createdAt      DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  resident     Resident          @relation(fields: [organizationId, residentId], references: [organizationId, id], onDelete: Restrict)
+  allocation   PaymentAllocation @relation(fields: [organizationId, residentId, allocationId], references: [organizationId, residentId, id], onDelete: Restrict)
+  actor        User              @relation("AllocationReleaseActor", fields: [actorUserId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, allocationId])
+  @@index([organizationId, residentId, allocationId])
+  @@index([actorUserId])
+  @@map("allocation_releases")
 }
 
 model DepositTransaction {

@@ -18,7 +18,7 @@
 | 8   | ساکن/قرارداد/تخصیص | ✅ انجام شد (کد + smoke واقعی ۴۸/۴۸) | overlap, concurrency |
 | 8.1 | سخت‌سازی صحت/سازگاری (بازبینی) | ✅ انجام شد (P0 fixes + smoke ۱۴۴/۱۴۴ = 42+16+48+14+24) | atomic idempotency, CAS locking, resident overlap, transfer/checkout, fail-fast migration |
 | 8.2 | چرخه‌حیات هم‌روندی و یکپارچگی داده | ✅ انجام شد (LockService + business date + overlap contract + smoke ۱۵۷/۱۵۷ = 42+16+48+14+24+13) | resident contract overlap, row locks, business date, idempotency expiry |
-| 9   | مالی (charge/payment/deposit) | 🔄 در حال اجرا — M-1 ✅، M-2 ✅، 4c ✅، M3a ✅ (ادغام PR #2)؛ M3b نقطهٔ بعدی | integer AFN (A-016), reversal |
+| 9   | مالی (charge/payment/deposit) | 🔄 در حال اجرا — M-1 ✅، M-2 ✅، 4c ✅، M3a ✅ (ادغام PR #2)، M3b ✅ (PR #4 در بازبینی، Merge نشده)؛ M3c بعدی | integer AFN (A-016), reversal, immutability |
 | 10  | مصارف و گزارش | ⏳ در انتظار | reports |
 | 11  | idempotency/audit/sync | ⏳ در انتظار | cursor, tombstone |
 | 12  | امنیت و سخت‌سازی | ⏳ در انتظار | OWASP, validation |
@@ -30,12 +30,12 @@
 ## وضعیت جاری فاز ۹ (M-gates) — به‌روز 2026-11-10
 
 - **Merge:** M3a (Charge/Billing/Absence-Credit) از طریق **PR #2** در `main` ادغام شد (commit `41af931e8be5ef194670989cae603c6cb1c51eca`)؛ CI روی این commit موفق بود.
-- **وضعیت M-gates:** M-1 ✅، M-2 ✅، 4c ✅، M3a ✅. **M3b نقطهٔ بعدی اجراست**؛ M3c و M3d پس از آن.
+- **وضعیت M-gates:** M-1 ✅، M-2 ✅، 4c ✅، M3a ✅، **M3b ✅ (PR #4 — آمادهٔ بازبینی نهایی، Merge نشده)**. M3c و M3d پس از پذیرش/ادغام M3b.
 - **وضعیت Migration در محیط‌ها (تفکیک دقیق):** تست‌ها روی دیتابیس‌های throwaway/CI اجرا شده‌اند؛ migrationهای M-1/M-2 روی `eskan_dev` اعمال شده‌اند. **Staging و Production هیچ migration اعمال نشده است.** «تست‌شده در CI» ≠ «اعمال‌شده روی دیتابیس توسعه/Staging/Production».
 - **Absence Credit ≠ Absence Lifecycle:** M3a فقط تولید Credit را برای غیابتی که قبلاً به `RETURNED` رسیده پشتیبانی می‌کند. چرخهٔ کامل غیابت (درخواست/تأیید/ثبت خروج/تأیید بازگشت) هنوز کار مستقل و پیاده‌نشده است.
-- **Backend (از `src/` و OpenAPI):** ماژول‌های `auth`، `organizations`، `hostels/rooms/beds`، `residents`، `contracts`، `assignments`، `packages`، `charges` (M3a) پیاده‌شده‌اند. ماژول‌های `payments`، `deposits`، `expenses`، `reports`، `sync`، `admin/**` هنوز **ماژول اجرایی ندارند** (فقط در قرارداد/Schema وجود دارند).
+- **Backend (از `src/` و OpenAPI):** ماژول‌های `auth`، `organizations`، `hostels/rooms/beds`، `residents`، `contracts`، `assignments`، `packages`، `charges` (M3a) و `payments` (M3b) پیاده‌شده‌اند. ماژول‌های `deposits`، `expenses`، `reports`، `sync`، `admin/**` هنوز **ماژول اجرایی ندارند** (فقط در قرارداد/Schema وجود دارند).
 - **Frontend:** پروژهٔ Flutter **هنوز در مخزن ساخته نشده** است (فقط Backend در ریشهٔ مخزن).
-- **Next step:** شروع **M3b** (Payment Create، Receipt Number، Allocation، Allocation Release، قفل/سازگاری، race tests) از `origin/main`.
+- **Next step:** پذیرش نهایی و Merge **M3b** (PR #4)، سپس شروع **M3c** (Deposit / Refund / Expense / Reversal). چرخهٔ Absence و Sync Pull مربوط به Gateهای بعدی است.
 - **بایگانی اسناد تاریخی:** گزارش‌ها/طرح‌ها/تحلیل‌های قدیمی (phase-9-engineering-plan، m2-*، mvp-prioritization، hostel-domain-requirements-v1، open-questions، current-workflows، api-gap-analysis، repository-assessment، commands، master-prompt-v3-gap-analysis) به `docs/archive/` منتقل شدند و برای اجرای جاری مرجع نیستند.
 
 ## فاز 0 — بررسی مخزن و خط پایه (انجام شد)
@@ -585,6 +585,21 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 - وضعیت: **M-2 در فاز پیش‌بررسی خواندنی**؛ فقط SELECT، فقط روی clone/دیتابیس آزمایشی throwaway.
 - ابزار: `scripts/preflight-m2.cjs` (guard fail-closed + `BEGIN TRANSACTION READ ONLY`).
 - گزارش کامل: `docs/project/m2-preflight-report.md`.
+## M3b — Payment / Receipt / Allocation / Release — 2026-11-10
+- **خط مبنا:** `e386892a5a0dc17f27e74fde33cc70a3c3f80dcd` (Merge PR #3)؛ شاخهٔ کاری `feat/m3b-payment-allocation-receipt`.
+- **Schema:** `ReceiptCounter` (سطح Organization، بدون reset سالانه)، `AllocationRelease` (append-only)، ستون `payments.provisional_receipt_id`، و یکتایی `payment_allocations(organization_id, resident_id, id)` برای FK مرکب Release؛ هیچ قید یکتای مادام‌العمر روی `(payment_id, charge_id)` اضافه نشد (تخصیص مجدد پس از Release مجاز).
+- **Migration:** `20261110120000_m3b_payment_allocation_receipt` — additive/non-destructive؛ CHECK مثبت‌بودن مبلغ Release و non-negative شمارنده؛ شمارندهٔ رسید فقط از شماره‌های عددی قدیمی backfill می‌شود و شماره‌های قدیمی غیرعددی/legacy بازنویسی یا حدس زده نمی‌شوند.
+- **LockService:** قفل‌های مالی `lockCharge`/`lockPayment`/`lockAllocation` (tenant-scoped) به ترتیب canonical اضافه شد.
+- **سرویس:** `src/payments` — ثبت Payment (رسید رسمی سرور با قالب عددی صفر-padding)، Allocation صریح (غیرخودکار) و Release تحت Lock + بازمحاسبهٔ مانده؛ Idempotency-Key اجباری (PERMANENT) با fingerprint `canonicalRequestHash`؛ Audit + Sync اتمیک همراه سند؛ bump نسخهٔ Payment/Charge در Allocation/Release.
+- **تست‌ها:** `scripts/test-m3b-migration.cjs`، `test/integration/m3b-payments.integration-spec.ts`، `test/integration/m3b-concurrency.integration-spec.ts`، `test/m3b-auth-replay.e2e-spec.ts`؛ به CI اضافه شد.
+- **تأثیر بر M3a:** شمارندهٔ FK مرکب در `test-m3a-migration.cjs` از ۲۲ به ۲۴ به‌روزرسانی شد (دو FK مرکب جدید Release).
+## M3b Acceptance Remediation — 2026-11-10
+- **Idempotency Privacy:** `IdempotencyService.runAtomic` گزینهٔ `IdempotencyReplay` گرفت؛ `createPayment` اکنون فقط `{resourceType, resourceId}` را در `response_body` ذخیره می‌کند و replay پاسخ را از `payments` بازسازی می‌کند (بدون کپی دائمی PII پرداخت‌کننده). M3a/lifecycle از مسیر قبلی استفاده می‌کنند (backward compatible).
+- **Payment.allocations:** فیلد `allocations` از پاسخ `Payment` حذف شد (خدمت + OpenAPI)؛ Allocation از `GET /payments/{paymentId}/allocations` خوانده می‌شود — دیگر آرایهٔ ساختگی خالی وجود ندارد.
+- **Financial immutability (D-18):** `payment_allocations → payments` از `CASCADE` به `RESTRICT` تغییر کرد + Triggerهای `BEFORE DELETE` روی `payments`/`payment_allocations`/`allocation_releases` (migration `20261111000000_m3b_financial_immutability`). اسناد مالی append-only‌اند و حذف فیزیکی مستقیم از PostgreSQL هم مسدود است.
+- **Receipt backfill test:** `test-m3b-migration.cjs` به سناریوهای A/B (numeric)، C (legacy غیرعددی + lazy init) و D (overflow fail-closed 22003) گسترش یافت؛ parity/immutability/counter هم پوشش داده شد.
+- **محدودیت عملیاتی شمارندهٔ رسید:** `ReceiptCounter.counter` از نوع `INTEGER` (int32، سقف ۲٬۱۴۷٬۴۸۳٬۶۴۷) است. اگر دادهٔ تاریخی شمارهٔ رسید عددی بزرگ‌تر داشته باشد، Migration با 22003 fail-closed می‌شود (بدون truncate/rewrite). پیش از اعمال Migration روی دیتابیس واقعی باید شماره‌های تاریخی رسید بررسی شوند؛ سبز بودن آزمون throwaway به‌تنهایی کافی نیست (تصمیم ثبت‌شده).
+- **دامنهٔ تغییرناپذیری (D-18):** Triggerهای جدید فقط `DELETE` فیزیکی را مسدود می‌کنند. مسیر ویرایش عمومی (UPDATE مستقیم) برای اسناد مالی وجود ندارد و Payment صرفاً هنگام Allocation/Release مقدار `version` را افزایش می‌دهد؛ بنابراین ممنوع‌کردن کورکورانهٔ همهٔ UPDATEها لازم/ایمن نیست. اگر D-18 نیازمند جلوگیری از تغییر فیلدهای مالی با SQL مستقیم باشد، باید در تصمیم مستقل، فیلدهای «مالی» از «فنی» (مانند `version`) تفکیک و Trigger هدفمند ساخته شود.
 - نتیجهٔ کلیدی (demo مصنوعی — نه دیتابیس واقعی): cross-org=۸، cross-resident=۳ (شامل TemporaryAbsence)، orphan=۰ (FK-enforced)، و **۱۱/۱۱ کلید UNIQUE موردنیاز** (۲ و ۳ ستونه) غایب‌اند.
 - تکمیل پوشش پس از بازبینی مالک: رابطهٔ **Absence→Charge (creditChargeId)** در هر سه جهت (org / resident / orphan)؛ کلیدهای سه‌ستونی `(organization_id, resident_id, id)` روی stay_contracts/charges/payments/temporary_absences (و حذف کلید دوستونی غیرلازمِ temporary_absences)؛ تشخیص دقیق UNIQUE با تطبیق مجموعه/ترتیب ستون‌ها + حذف index ناvalid/ناready (`indisvalid`/`indisready`).
 - CI سه مرحلهٔ M-2: (۱) `preflight-m2.cjs --strict` baseline پاک، (۲) `test-m2-preflight-detection.cjs` (کارش cross-tenant incl. creditCharge و اثبات تشخیص با exit 1)، (۳) `preflight guard fail-closed` روی نام دیتابیس غیرآزمایشی (exit 2).

@@ -14,6 +14,7 @@ import { ResidentsModule } from './residents/residents.module';
 import { ContractsModule } from './contracts/contracts.module';
 import { AssignmentsModule } from './assignments/assignments.module';
 import { ChargesModule } from './charges/charges.module';
+import { PaymentsModule } from './payments/payments.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { TraceIdMiddleware } from './common/middleware/trace-id.middleware';
 
@@ -36,6 +37,7 @@ import { TraceIdMiddleware } from './common/middleware/trace-id.middleware';
     ContractsModule,
     AssignmentsModule,
     ChargesModule,
+    PaymentsModule,
   ],
   providers: [{ provide: APP_FILTER, useClass: HttpExceptionFilter }],
 })

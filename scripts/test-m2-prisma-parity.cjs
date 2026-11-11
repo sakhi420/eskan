@@ -1,12 +1,11 @@
 'use strict';
 /**
- * M-2 Prisma schema/database parity test (issue #1).
+ * Tenant-scoped Prisma schema/database parity test (M-2 + subsequent gates).
  *
- * Reproducibly proves that `prisma migrate diff` between the M-2-migrated database
+ * Reproducibly proves that `prisma migrate diff` between the fully migrated database
  * and `prisma/schema.prisma` is EMPTY — i.e. a future `prisma migrate dev` will NOT
- * drop the M-2 composite FKs / unique keys / child indexes, because the Prisma schema
- * models them all (nullable-parent relations are modeled as an optional relation plus
- * a named tenant relation).
+ * drop tenant composite FKs / unique keys / child indexes. M3b adds two further
+ * composite FKs for AllocationRelease; those are included in the FK-count assertion.
  *
  * Safety: creates a throwaway database and drops it; never touches eskan_dev.
  */
@@ -72,13 +71,21 @@ const check = (name, ok, extra = '') => results.push(`${ok ? 'PASS' : 'FAIL'} - 
   const empty = diff.replace(/^\s*-- This is an empty migration\.\s*$/m, '').trim() === '';
   check('[parity] migrate diff is empty (no drift)', empty, 'diffBytes=' + diff.length);
   check('[parity] no DROP statements would be emitted', !/DROP (FOREIGN KEY|INDEX|CONSTRAINT|TABLE)/i.test(diff));
-  check('[parity] no M-2 composite FK would be dropped', !/organization_id.*_fkey".*DROP|\bDROP CONSTRAINT "(rooms|beds|charges|payments|stay_contracts|bed_assignments|temporary_absences|expenses|deposit_transactions|payment_allocations|accommodation_packages)_organization_id/i.test(diff));
+  check('[parity] no tenant composite FK would be dropped', !/organization_id.*_fkey".*DROP|\bDROP CONSTRAINT "(rooms|beds|charges|payments|stay_contracts|bed_assignments|temporary_absences|expenses|deposit_transactions|payment_allocations|accommodation_packages|allocation_releases)_organization_id/i.test(diff));
 
-  // Also assert the live DB actually contains every M-2 composite FK (scope guard).
+  // Assert the tenant composite-FK inventory across M-2 and M3b.
+  // M3b adds two AllocationRelease FKs: (organization_id, resident_id) and
+  // (organization_id, resident_id, allocation_id).
   const client = new Client({ connectionString: dbUrl(name) });
   await client.connect();
   const fks = await client.query(`SELECT conname FROM pg_constraint WHERE contype='f' AND array_length(conkey, 1) >= 2 ORDER BY conname`);
-  check('[parity] live DB has 22 tenant composite FKs (multi-column)', fks.rowCount === 22, 'count=' + fks.rowCount);
+  const fkNames = new Set(fks.rows.map((row) => row.conname));
+  const m3bReleaseFks = [
+    'allocation_releases_organization_id_resident_id_fkey',
+    'allocation_releases_organization_id_resident_id_allocation_fkey',
+  ];
+  check('[parity] live DB has 24 tenant composite FKs (M-2 + M3b)', fks.rowCount === 24, 'count=' + fks.rowCount);
+  check('[parity] both M3b AllocationRelease tenant FKs are present', m3bReleaseFks.every((name) => fkNames.has(name)));
   await client.end();
 
   await admin.query(`DROP DATABASE IF EXISTS "${name}" WITH (FORCE)`).catch(() => {});
@@ -86,7 +93,7 @@ const check = (name, ok, extra = '') => results.push(`${ok ? 'PASS' : 'FAIL'} - 
 
   console.log('\n' + results.join('\n'));
   const failed = results.filter((x) => x.startsWith('FAIL')).length;
-  console.log(`\n${results.length - failed}/${results.length} M-2 Prisma parity checks passed`);
+  console.log(`\n${results.length - failed}/${results.length} tenant composite-FK parity checks passed`);
   if (failed || diff.trim() !== '' && !/This is an empty migration/.test(diff)) {
     console.log('\n--- migrate diff output (if any) ---\n' + diff);
   }

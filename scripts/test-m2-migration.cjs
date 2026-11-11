@@ -347,15 +347,18 @@ async function scenarioOnDeleteBehavior(admin) {
     await c.query(`DELETE FROM charges WHERE id=$1`, [credit]);
     check('[ondelete] temporary_absence.creditCharge SET NULL', (await c.query(`SELECT credit_charge_id FROM temporary_absences WHERE id=$1`, [abs])).rows[0].credit_charge_id === null);
 
-    // CASCADE — Payment -> PaymentAllocation.
+    // D-18 immutability — Payment -> PaymentAllocation is RESTRICT (and a BEFORE
+    // DELETE trigger hardens payments): deleting a payment that has an allocation
+    // is blocked and the allocation is preserved.
     const pay = uuid();
     await c.query(`INSERT INTO payments (id, organization_id, resident_id, amount, method, received_at, receipt_number, updated_at) VALUES ($1,$2,$3,100,'CASH','2020-01-02','R1',now())`, [pay, o, res]);
     const target = uuid();
     await c.query(`INSERT INTO charges (id, organization_id, resident_id, contract_id, type, amount, period_start, period_end, due_date, updated_at) VALUES ($1,$2,$3,$4,'RENT',100,'2020-02-01','2020-02-28','2020-02-01',now())`, [target, o, res, cnt]);
     const alloc = uuid();
     await c.query(`INSERT INTO payment_allocations (id, organization_id, resident_id, payment_id, charge_id, amount) VALUES ($1,$2,$3,$4,$5,100)`, [alloc, o, res, pay, target]);
-    await c.query(`DELETE FROM payments WHERE id=$1`, [pay]);
-    check('[ondelete] payment_allocations CASCADE on payment delete', (await c.query(`SELECT 1 FROM payment_allocations WHERE id=$1`, [alloc])).rowCount === 0);
+    const errPayDelete = await expectErr(c, `DELETE FROM payments WHERE id=$1`, [pay]);
+    check('[ondelete] payment delete blocked (immutable)', ['P0001', '23503'].includes(errPayDelete), 'code=' + errPayDelete);
+    check('[ondelete] payment_allocations preserved on blocked payment delete', (await c.query(`SELECT 1 FROM payment_allocations WHERE id=$1`, [alloc])).rowCount === 1);
 
     // RESTRICT — Resident with a charge cannot be deleted.
     const errRes = await expectErr(c, `DELETE FROM residents WHERE id=$1`, [res]);
