@@ -31,7 +31,7 @@
 
 - **Merge:** M3a (Charge/Billing/Absence-Credit) از طریق **PR #2** ادغام شد (commit `41af931e8be5ef194670989cae603c6cb1c51eca`)؛ **M3b (Payment/Receipt/Allocation/Release) از طریق PR #4 ادغام شد** (merge commit `198423c6459dd385e1dc905bdd9314de3a29f746`). CI روی هر دو موفق بود.
 - **وضعیت M-gates:** M-1 ✅، M-2 ✅، 4c ✅، M3a ✅، **M3b ✅ (ادغام PR #4)**. M3c بعد، M3d پس از آن.
-- **وضعیت Migration در محیط‌ها (تفکیک دقیق):** تست‌ها روی دیتابیس‌های throwaway/CI اجرا شده‌اند؛ migrationهای M-1/M-2 روی `eskan_dev` اعمال شده‌اند. **Staging و Production هیچ migration اعمال نشده است.** «تست‌شده در CI» ≠ «اعمال‌شده روی دیتابیس توسعه/Staging/Production».
+- **وضعیت Migration در محیط‌ها (تفکیک دقیق):** migrationهای M-1/M-2/4c/M3a/M3b روی `eskan_dev` اعمال شده‌اند (M3a+M3b در 2026-11-11 با Backup + Rehearsal روی clone اعمال شد). **Staging و Production هیچ migration اعمال نشده است.** «تست‌شده در CI» ≠ «اعمال‌شده روی دیتابیس توسعه/Staging/Production».
 - **Absence Credit ≠ Absence Lifecycle:** M3a فقط تولید Credit را برای غیابتی که قبلاً به `RETURNED` رسیده پشتیبانی می‌کند. چرخهٔ کامل غیابت (درخواست/تأیید/ثبت خروج/تأیید بازگشت) هنوز کار مستقل و پیاده‌نشده است.
 - **Backend (از `src/` و OpenAPI):** ماژول‌های `auth`، `organizations`، `hostels/rooms/beds`، `residents`، `contracts`، `assignments`، `packages`، `charges` (M3a) و `payments` (M3b) پیاده‌شده‌اند. ماژول‌های `deposits`، `expenses`، `reports`، `sync`، `admin/**` هنوز **ماژول اجرایی ندارند** (فقط در قرارداد/Schema وجود دارند).
 - **Frontend:** پروژهٔ Flutter **هنوز در مخزن ساخته نشده** است (فقط Backend در ریشهٔ مخزن).
@@ -600,6 +600,15 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 - **Receipt backfill test:** `test-m3b-migration.cjs` به سناریوهای A/B (numeric)، C (legacy غیرعددی + lazy init) و D (overflow fail-closed 22003) گسترش یافت؛ parity/immutability/counter هم پوشش داده شد.
 - **محدودیت عملیاتی شمارندهٔ رسید:** `ReceiptCounter.counter` از نوع `INTEGER` (int32، سقف ۲٬۱۴۷٬۴۸۳٬۶۴۷) است. اگر دادهٔ تاریخی شمارهٔ رسید عددی بزرگ‌تر داشته باشد، Migration با 22003 fail-closed می‌شود (بدون truncate/rewrite). پیش از اعمال Migration روی دیتابیس واقعی باید شماره‌های تاریخی رسید بررسی شوند؛ سبز بودن آزمون throwaway به‌تنهایی کافی نیست (تصمیم ثبت‌شده).
 - **دامنهٔ تغییرناپذیری (D-18):** Triggerهای جدید فقط `DELETE` فیزیکی را مسدود می‌کنند. مسیر ویرایش عمومی (UPDATE مستقیم) برای اسناد مالی وجود ندارد و Payment صرفاً هنگام Allocation/Release مقدار `version` را افزایش می‌دهد؛ بنابراین ممنوع‌کردن کورکورانهٔ همهٔ UPDATEها لازم/ایمن نیست. اگر D-18 نیازمند جلوگیری از تغییر فیلدهای مالی با SQL مستقیم باشد، باید در تصمیم مستقل، فیلدهای «مالی» از «فنی» (مانند `version`) تفکیک و Trigger هدفمند ساخته شود.
+## M3b Migration Rollout روی `eskan_dev` — 2026-11-11
+- **وضعیت:** PASS — Migrationها روی `eskan_dev` اجرا و Postflight موفق.
+- **Pending پیش از اجرا:** ۵ migration (۳ تای M3a + دو تای M3b) روی `eskan_dev` معطل بودند؛ همه از زنجیرهٔ معتبر `main` (commit `8d9ef398a0af08f1e866ff36fb00935093a0162d`) و با `prisma migrate deploy` به ترتیب اعمال شدند.
+- **Preflight رسید:** `payments = 0` رکورد (عدد/غیرعددی/Overflow = ۰) → Backfill رسید بدون داده (no-op) و امن؛ هیچ رکورد تاریخی تغییر/حدس زده نشد.
+- **Backup:** دو نسخهٔ Custom-Archive (`pg_dump -Fc`) گرفته شد (یکی قبل از Rehearsal و یکی بلافاصله پیش از اجرای واقعی)؛ SHA-256 ثبت شد (جزئیات در `docs/operations/m3b-eskan-dev-migration-report.md`).
+- **Rehearsal:** روی clone واقعی `eskan_dev_m3b_rehearsal_20261111_113355` (restore از backup واقعی؛ شمارش ۱۰ جدول + `_prisma_migrations` پیش/پس از restore یکسان) اجرا شد؛ `migrate deploy` موفق؛ Postflight 13/13 و parity خالی (بدون drift).
+- **اجرای واقعی:** `prisma migrate deploy` روی `eskan_dev` موفق؛ `prisma migrate status` = «Database schema is up to date!».
+- **Postflight واقعی:** 13/13 (ستون/جدول/CHECK/unique index/FK RESTRICT/۳ Trigger فعال/تابع `prevent_financial_document_delete`/backfill خالی/M3a constraints) + `migrate diff` خالی.
+- **محیط‌ها:** CI/throwaway = تست‌شده · Rehearsal clone = انجام‌شده · `eskan_dev` = اعمال‌شده · **Staging = Not Applied · Production = Not Applied.**
 - نتیجهٔ کلیدی (demo مصنوعی — نه دیتابیس واقعی): cross-org=۸، cross-resident=۳ (شامل TemporaryAbsence)، orphan=۰ (FK-enforced)، و **۱۱/۱۱ کلید UNIQUE موردنیاز** (۲ و ۳ ستونه) غایب‌اند.
 - تکمیل پوشش پس از بازبینی مالک: رابطهٔ **Absence→Charge (creditChargeId)** در هر سه جهت (org / resident / orphan)؛ کلیدهای سه‌ستونی `(organization_id, resident_id, id)` روی stay_contracts/charges/payments/temporary_absences (و حذف کلید دوستونی غیرلازمِ temporary_absences)؛ تشخیص دقیق UNIQUE با تطبیق مجموعه/ترتیب ستون‌ها + حذف index ناvalid/ناready (`indisvalid`/`indisready`).
 - CI سه مرحلهٔ M-2: (۱) `preflight-m2.cjs --strict` baseline پاک، (۲) `test-m2-preflight-detection.cjs` (کارش cross-tenant incl. creditCharge و اثبات تشخیص با exit 1)، (۳) `preflight guard fail-closed` روی نام دیتابیس غیرآزمایشی (exit 2).
