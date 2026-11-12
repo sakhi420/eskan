@@ -1079,36 +1079,15 @@ export class DepositsService {
             })
           )._sum.amount ?? 0;
         const toRelease = application.amount - already;
-        if (toRelease > 0) {
-          const release = await tx.allocationRelease.create({
-            data: {
-              organizationId,
-              residentId: application.residentId,
-              allocationId: application.allocationId,
-              amount: toRelease,
-              reason: dto.reason,
-              actorUserId: userId,
-            },
-            select: { id: true },
-          });
-          const chargeUpdated = await tx.charge.update({
-            where: { id: application.chargeId },
-            data: { version: { increment: 1 } },
-            select: { version: true },
-          });
-          await this.emitSync(tx, organizationId, 'ALLOCATION_RELEASE', release.id, 1);
-          await this.emitSync(
-            tx,
-            organizationId,
-            'CHARGE',
-            application.chargeId,
-            chargeUpdated.version,
+        if (toRelease < 0) {
+          throw AppError.conflict(
+            'Existing allocation releases exceed the DepositApplication amount',
+            ErrorCode.BUSINESS_RULE_VIOLATION,
           );
         }
 
-        // Persist the compensating ledger event and the complete allocation release
-        // before changing either status. PostgreSQL's application/payment guards
-        // verify these artifacts before allowing the DAPP to stop consuming Held.
+        // The database accepts a DAPP AllocationRelease only after its matching
+        // LedgerReversal exists and its internal Payment is already REVERSED.
         const reversal = await tx.ledgerReversal.create({
           data: {
             organizationId,
@@ -1136,6 +1115,36 @@ export class DepositsService {
           select: { id: true, version: true },
         });
 
+        if (toRelease > 0) {
+          const release = await tx.allocationRelease.create({
+            data: {
+              organizationId,
+              residentId: application.residentId,
+              allocationId: application.allocationId,
+              amount: toRelease,
+              reason: dto.reason,
+              actorUserId: userId,
+            },
+            select: { id: true },
+          });
+          const chargeUpdated = await tx.charge.update({
+            where: { id: application.chargeId },
+            data: { version: { increment: 1 } },
+            select: { version: true },
+          });
+          await this.emitSync(tx, organizationId, 'ALLOCATION_RELEASE', release.id, 1);
+          await this.emitSync(
+            tx,
+            organizationId,
+            'CHARGE',
+            application.chargeId,
+            chargeUpdated.version,
+          );
+        }
+
+        // The Application status is the final transition. Its trigger verifies
+        // the matching reversed Payment, complete Release, LedgerReversal and
+        // still-POSTED Charge before reducing Deposit Held.
         const updatedApp = (await tx.depositApplication.update({
           where: { id: application.id },
           data: {
