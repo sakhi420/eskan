@@ -4,7 +4,7 @@ describe('LockService', () => {
   let svc: LockService;
   let q: jest.Mock;
 
-  const tx = { $queryRawUnsafe: (...args: unknown[]) => {} } as never;
+  const tx = { $queryRawUnsafe: () => undefined } as never;
 
   beforeEach(() => {
     svc = new LockService();
