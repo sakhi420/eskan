@@ -9,7 +9,6 @@ import { PostingService } from '../../src/common/finance/posting.service';
 import { DepositsService } from '../../src/deposits/deposits.service';
 import { ExpensesService } from '../../src/expenses/expenses.service';
 import { PaymentsService } from '../../src/payments/payments.service';
-import { ChargesService } from '../../src/charges/charges.service';
 
 const BASE_URL = process.env.DATABASE_URL || 'postgresql://postgres@127.0.0.1:5432/eskan_dev';
 const prismaCli = resolve(process.cwd(), 'node_modules', 'prisma', 'build', 'index.js');
@@ -41,7 +40,7 @@ async function seedCharge(db: Client, org: string, res: string, amount: number):
 
 describe('M3c remediation (real PostgreSQL + real services)', () => {
   let admin: Client, db: Client, dbName: string, prisma: PrismaService;
-  let deposits: DepositsService, expenses: ExpensesService, payments: PaymentsService, charges: ChargesService;
+  let deposits: DepositsService, expenses: ExpensesService, payments: PaymentsService;
 
   beforeAll(async () => {
     assertLocalTestHost();
@@ -59,7 +58,6 @@ describe('M3c remediation (real PostgreSQL + real services)', () => {
     deposits = new DepositsService(prisma, idem(), posting, locks);
     expenses = new ExpensesService(prisma, idem(), posting, locks);
     payments = new PaymentsService(prisma, idem(), posting, locks);
-    charges = new ChargesService(prisma, idem(), posting, locks);
     db = new Client({ connectionString: url });
     await db.connect();
   }, 120000);
