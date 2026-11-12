@@ -303,16 +303,16 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
   it(
     'restricts allocations to OWNER/ADMIN/OPERATOR and allocation release to OWNER/ADMIN',
     async () => {
-    await expectRoleGate(
-      `/api/v1/payments/${randomUUID()}/allocations`,
-      { chargeId: randomUUID(), money },
-      ['OWNER', 'ADMIN', 'OPERATOR'],
-    );
-    await expectRoleGate(
-      `/api/v1/allocations/${randomUUID()}/release`,
-      refundBody,
-      ['OWNER', 'ADMIN'],
-    );
+      await expectRoleGate(
+        `/api/v1/payments/${randomUUID()}/allocations`,
+        { chargeId: randomUUID(), money },
+        ['OWNER', 'ADMIN', 'OPERATOR'],
+      );
+      await expectRoleGate(
+        `/api/v1/allocations/${randomUUID()}/release`,
+        refundBody,
+        ['OWNER', 'ADMIN'],
+      );
     },
   );
 
@@ -381,16 +381,16 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
   it(
     'restricts CREDIT charge posting to OWNER/ADMIN even though OPERATOR can post DEBIT',
     async () => {
-    const body = {
-      residentId: randomUUID(),
-      type: 'OTHER',
-      entrySide: 'CREDIT',
-      money,
-      periodStart: '2026-11-01',
-      periodEnd: '2026-12-01',
-      dueDate: '2026-11-01',
-    };
-    await expectRoleGate('/api/v1/charges', body, ['OWNER', 'ADMIN']);
+      const body = {
+        residentId: randomUUID(),
+        type: 'OTHER',
+        entrySide: 'CREDIT',
+        money,
+        periodStart: '2026-11-01',
+        periodEnd: '2026-12-01',
+        dueDate: '2026-11-01',
+      };
+      await expectRoleGate('/api/v1/charges', body, ['OWNER', 'ADMIN']);
     },
   );
 
