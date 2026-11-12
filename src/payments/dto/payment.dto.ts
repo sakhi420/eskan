@@ -1,4 +1,4 @@
-import { IsDefined, IsEnum, IsOptional, IsString, IsUUID, MaxLength, ValidateNested } from 'class-validator';
+import { IsDefined, IsEnum, IsOptional, IsString, IsUUID, MaxLength, MinLength, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PaymentMethod } from '../../generated/prisma/enums';
 import { MoneyDto } from '../../common/money/money.dto';
@@ -43,4 +43,17 @@ export class PaymentDto {
   @IsString()
   @MaxLength(200)
   provisionalReceiptId?: string;
+}
+
+/** PaymentRefundRequest — actual cash return of an unallocated payment amount. */
+export class PaymentRefundDto {
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => MoneyDto)
+  money!: MoneyDto;
+
+  @IsString()
+  @MinLength(1)
+  @MaxLength(500)
+  reason!: string;
 }

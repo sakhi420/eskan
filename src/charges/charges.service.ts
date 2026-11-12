@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client';
-import { AbsenceStatus, BillingCycle, ChargeType, ContractStatus, EntrySide, LedgerEntryStatus, ResidentStatus, SyncAction } from '../generated/prisma/enums';
+import { AbsenceStatus, BillingCycle, ChargeType, ContractStatus, EntrySide, LedgerEntryStatus, ResidentStatus, ReversalSourceType, SyncAction } from '../generated/prisma/enums';
 import { PrismaService } from '../database/prisma.service';
 import { AppError } from '../common/errors/app-error';
 import { ErrorCode } from '../common/errors/error-codes';
@@ -12,6 +12,7 @@ import { canonicalRequestHash } from '../common/idempotency/jcs';
 import { isUniqueViolation } from '../common/prisma/unique-violation';
 import { ChargeDto } from './dto/charge.dto';
 import { BillingPreviewRequestDto, BillingPostRequestDto } from './dto/billing.dto';
+import { ReversalDto } from '../deposits/dto/deposit.dto';
 import {
   daysBetweenExclusive, daysInMonth, isCanonicalBillingMonth, parseDateOnly,
   prorateComponents, splitIntoMonths, toISO, type ProratableComponent,
@@ -20,7 +21,7 @@ import {
 const CHARGE_SELECT = {
   id: true, version: true, organizationId: true, residentId: true, contractId: true,
   type: true, entrySide: true, status: true, amount: true, periodStart: true, periodEnd: true,
-  dueDate: true, description: true, postedAt: true, createdAt: true, updatedAt: true,
+  dueDate: true, description: true, postedAt: true, reversedById: true, createdAt: true, updatedAt: true,
 } as const;
 
 function toISODate(d: Date | string): string {
@@ -32,7 +33,7 @@ interface ChargeRow {
   id: string; version: number; organizationId: string; residentId: string; contractId: string | null;
   type: ChargeType; entrySide: EntrySide; status: LedgerEntryStatus; amount: number;
   periodStart: Date; periodEnd: Date; dueDate: Date; description: string | null;
-  postedAt: Date; createdAt: Date; updatedAt: Date;
+  postedAt: Date; reversedById: string | null; createdAt: Date; updatedAt: Date;
 }
 
 function toChargeDto(row: ChargeRow) {
@@ -42,7 +43,7 @@ function toChargeDto(row: ChargeRow) {
     money: { amount: row.amount, currency: 'AFN' },
     periodStart: toISODate(row.periodStart), periodEnd: toISODate(row.periodEnd),
     dueDate: toISODate(row.dueDate), description: row.description,
-    reversedBy: null, postedAt: row.postedAt.toISOString(),
+    reversedBy: row.reversedById ?? null, postedAt: row.postedAt.toISOString(),
     createdAt: row.createdAt.toISOString(), updatedAt: row.updatedAt.toISOString(),
   };
 }
@@ -603,6 +604,87 @@ export class ChargesService {
         await tx.temporaryAbsence.update({ where: { id: absenceId }, data: { status: 'CLOSED', version: { increment: 1 } } });
 
         return { credits, totalCredit: String(totalCredit) };
+      },
+    );
+  }
+
+  async reverseCharge(organizationId: string, userId: string, chargeId: string, dto: ReversalDto, idempotencyKey: string, traceId: string) {
+    const endpoint = `/api/v1/charges/${chargeId}/reverse`;
+    const requestHash = canonicalRequestHash({ method: 'POST', route: '/api/v1/charges/{chargeId}/reverse', pathParams: { chargeId }, body: dto });
+
+    return this.idempotency.runAtomic<ReturnType<typeof toChargeDto>>(
+      { organizationId, key: idempotencyKey, endpoint, userId, requestHash, statusCode: 200, retentionClass: 'PERMANENT' },
+      async (tx) => {
+        await this.locks.lockOrganization(tx, organizationId);
+        const pre = await tx.charge.findFirst({ where: { id: chargeId, organizationId }, select: { id: true, residentId: true } });
+        if (!pre) throw AppError.notFound('Charge not found');
+        await this.locks.lockResident(tx, pre.residentId, organizationId);
+        await this.locks.lockCharge(tx, pre.id, organizationId);
+
+        const charge = (await tx.charge.findFirst({ where: { id: chargeId, organizationId }, select: CHARGE_SELECT })) as unknown as ChargeRow | null;
+        if (!charge) throw AppError.notFound('Charge not found');
+        if (charge.status === LedgerEntryStatus.REVERSED) throw AppError.conflict('Charge is already reversed', ErrorCode.CHARGE_ALREADY_REVERSED);
+
+        const businessDate = await businessTodayForOrg(tx, organizationId);
+
+        // D-02: a charge with valid allocations must release them all first so they
+        // are never left orphaned; the freed payment becomes unapplied again.
+        const allocations = await tx.paymentAllocation.findMany({
+          where: { organizationId, chargeId },
+          select: { id: true, paymentId: true, residentId: true, amount: true },
+          orderBy: { paymentId: 'asc' },
+        });
+        for (const alloc of allocations) {
+          await this.locks.lockPayment(tx, alloc.paymentId, organizationId);
+          const already = (await tx.allocationRelease.aggregate({ where: { organizationId, allocationId: alloc.id }, _sum: { amount: true } }))._sum.amount ?? 0;
+          const toRelease = alloc.amount - already;
+          if (toRelease <= 0) continue;
+          const release = await tx.allocationRelease.create({
+            data: { organizationId, residentId: alloc.residentId, allocationId: alloc.id, amount: toRelease, reason: dto.reason, actorUserId: userId },
+            select: { id: true },
+          });
+          const payUpdated = await tx.payment.update({ where: { id: alloc.paymentId }, data: { version: { increment: 1 } }, select: { version: true } });
+          await this.posting.syncChange(tx, { organizationId, entityType: 'ALLOCATION_RELEASE', entityId: release.id, action: SyncAction.UPSERT, entityVersion: 1 });
+          await this.posting.syncChange(tx, { organizationId, entityType: 'PAYMENT', entityId: alloc.paymentId, action: SyncAction.UPSERT, entityVersion: payUpdated.version });
+        }
+
+        const updated = (await tx.charge.update({
+          where: { id: chargeId },
+          data: { status: LedgerEntryStatus.REVERSED, reversedById: userId, reversalReason: dto.reason, reversedAt: new Date(), version: { increment: 1 } },
+          select: CHARGE_SELECT,
+        })) as unknown as ChargeRow;
+
+        const side = charge.entrySide === EntrySide.DEBIT ? EntrySide.CREDIT : EntrySide.DEBIT;
+        const reversal = await tx.ledgerReversal.create({
+          data: {
+            organizationId, residentId: charge.residentId, sourceType: ReversalSourceType.CHARGE, sourceId: chargeId,
+            side, amount: charge.amount, reason: dto.reason, actorUserId: userId, idempotencyKey,
+          },
+          select: { id: true },
+        });
+
+        await this.reportPosting(tx, {
+          organizationId, actorUserId: userId, traceId, businessDate,
+          entityType: 'CHARGE', entityId: chargeId, entityVersion: updated.version, action: 'CHARGE_REVERSED',
+          after: { businessDate, reversalId: reversal.id, reason: dto.reason, releasedAllocations: allocations.length } as unknown as Prisma.InputJsonValue,
+        });
+        await this.reportPosting(tx, {
+          organizationId, actorUserId: userId, traceId, businessDate,
+          entityType: 'LEDGER_REVERSAL', entityId: reversal.id, entityVersion: 1, action: 'LEDGER_REVERSAL_POSTED',
+          after: { businessDate, sourceType: ReversalSourceType.CHARGE, sourceId: chargeId, side, amount: charge.amount } as unknown as Prisma.InputJsonValue,
+        });
+
+        return toChargeDto(updated);
+      },
+      {
+        toRecord: (result) => ({ resourceType: 'CHARGE', resourceId: result.id }),
+        fromRecord: async (record) => {
+          const ref = record as { resourceId?: string };
+          if (!ref.resourceId) throw AppError.internal('Idempotency record is missing its charge reference');
+          const row = await this.prisma.charge.findFirst({ where: { id: ref.resourceId, organizationId }, select: CHARGE_SELECT });
+          if (!row) throw AppError.internal('Charge referenced by idempotency record no longer exists');
+          return toChargeDto(row as unknown as ChargeRow);
+        },
       },
     );
   }

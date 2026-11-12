@@ -288,6 +288,9 @@ export type ResidentWhereInput = {
   deposits?: Prisma.DepositTransactionListRelationFilter
   absences?: Prisma.TemporaryAbsenceListRelationFilter
   allocationReleases?: Prisma.AllocationReleaseListRelationFilter
+  paymentRefunds?: Prisma.PaymentRefundListRelationFilter
+  depositApplications?: Prisma.DepositApplicationListRelationFilter
+  reversals?: Prisma.LedgerReversalListRelationFilter
 }
 
 export type ResidentOrderByWithRelationInput = {
@@ -312,6 +315,9 @@ export type ResidentOrderByWithRelationInput = {
   deposits?: Prisma.DepositTransactionOrderByRelationAggregateInput
   absences?: Prisma.TemporaryAbsenceOrderByRelationAggregateInput
   allocationReleases?: Prisma.AllocationReleaseOrderByRelationAggregateInput
+  paymentRefunds?: Prisma.PaymentRefundOrderByRelationAggregateInput
+  depositApplications?: Prisma.DepositApplicationOrderByRelationAggregateInput
+  reversals?: Prisma.LedgerReversalOrderByRelationAggregateInput
 }
 
 export type ResidentWhereUniqueInput = Prisma.AtLeast<{
@@ -340,6 +346,9 @@ export type ResidentWhereUniqueInput = Prisma.AtLeast<{
   deposits?: Prisma.DepositTransactionListRelationFilter
   absences?: Prisma.TemporaryAbsenceListRelationFilter
   allocationReleases?: Prisma.AllocationReleaseListRelationFilter
+  paymentRefunds?: Prisma.PaymentRefundListRelationFilter
+  depositApplications?: Prisma.DepositApplicationListRelationFilter
+  reversals?: Prisma.LedgerReversalListRelationFilter
 }, "id" | "organizationId_id">
 
 export type ResidentOrderByWithAggregationInput = {
@@ -403,6 +412,9 @@ export type ResidentCreateInput = {
   deposits?: Prisma.DepositTransactionCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutResidentInput
   allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutResidentInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutResidentInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutResidentInput
+  reversals?: Prisma.LedgerReversalCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentUncheckedCreateInput = {
@@ -426,6 +438,9 @@ export type ResidentUncheckedCreateInput = {
   deposits?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutResidentInput
   allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutResidentInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutResidentInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutResidentInput
+  reversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentUpdateInput = {
@@ -449,6 +464,9 @@ export type ResidentUpdateInput = {
   deposits?: Prisma.DepositTransactionUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUpdateManyWithoutResidentNestedInput
   allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutResidentNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutResidentNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutResidentNestedInput
+  reversals?: Prisma.LedgerReversalUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentUncheckedUpdateInput = {
@@ -472,6 +490,9 @@ export type ResidentUncheckedUpdateInput = {
   deposits?: Prisma.DepositTransactionUncheckedUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutResidentNestedInput
   allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutResidentNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutResidentNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutResidentNestedInput
+  reversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentCreateManyInput = {
@@ -595,6 +616,11 @@ export type ResidentMinOrderByAggregateInput = {
 
 export type ResidentSumOrderByAggregateInput = {
   version?: Prisma.SortOrder
+}
+
+export type ResidentNullableScalarRelationFilter = {
+  is?: Prisma.ResidentWhereInput | null
+  isNot?: Prisma.ResidentWhereInput | null
 }
 
 export type ResidentCreateNestedManyWithoutOrganizationInput = {
@@ -745,6 +771,50 @@ export type ResidentUpdateOneRequiredWithoutDepositsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ResidentUpdateToOneWithWhereWithoutDepositsInput, Prisma.ResidentUpdateWithoutDepositsInput>, Prisma.ResidentUncheckedUpdateWithoutDepositsInput>
 }
 
+export type ResidentCreateNestedOneWithoutReversalsInput = {
+  create?: Prisma.XOR<Prisma.ResidentCreateWithoutReversalsInput, Prisma.ResidentUncheckedCreateWithoutReversalsInput>
+  connectOrCreate?: Prisma.ResidentCreateOrConnectWithoutReversalsInput
+  connect?: Prisma.ResidentWhereUniqueInput
+}
+
+export type ResidentUpdateOneWithoutReversalsNestedInput = {
+  create?: Prisma.XOR<Prisma.ResidentCreateWithoutReversalsInput, Prisma.ResidentUncheckedCreateWithoutReversalsInput>
+  connectOrCreate?: Prisma.ResidentCreateOrConnectWithoutReversalsInput
+  upsert?: Prisma.ResidentUpsertWithoutReversalsInput
+  disconnect?: Prisma.ResidentWhereInput | boolean
+  delete?: Prisma.ResidentWhereInput | boolean
+  connect?: Prisma.ResidentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ResidentUpdateToOneWithWhereWithoutReversalsInput, Prisma.ResidentUpdateWithoutReversalsInput>, Prisma.ResidentUncheckedUpdateWithoutReversalsInput>
+}
+
+export type ResidentCreateNestedOneWithoutPaymentRefundsInput = {
+  create?: Prisma.XOR<Prisma.ResidentCreateWithoutPaymentRefundsInput, Prisma.ResidentUncheckedCreateWithoutPaymentRefundsInput>
+  connectOrCreate?: Prisma.ResidentCreateOrConnectWithoutPaymentRefundsInput
+  connect?: Prisma.ResidentWhereUniqueInput
+}
+
+export type ResidentUpdateOneRequiredWithoutPaymentRefundsNestedInput = {
+  create?: Prisma.XOR<Prisma.ResidentCreateWithoutPaymentRefundsInput, Prisma.ResidentUncheckedCreateWithoutPaymentRefundsInput>
+  connectOrCreate?: Prisma.ResidentCreateOrConnectWithoutPaymentRefundsInput
+  upsert?: Prisma.ResidentUpsertWithoutPaymentRefundsInput
+  connect?: Prisma.ResidentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ResidentUpdateToOneWithWhereWithoutPaymentRefundsInput, Prisma.ResidentUpdateWithoutPaymentRefundsInput>, Prisma.ResidentUncheckedUpdateWithoutPaymentRefundsInput>
+}
+
+export type ResidentCreateNestedOneWithoutDepositApplicationsInput = {
+  create?: Prisma.XOR<Prisma.ResidentCreateWithoutDepositApplicationsInput, Prisma.ResidentUncheckedCreateWithoutDepositApplicationsInput>
+  connectOrCreate?: Prisma.ResidentCreateOrConnectWithoutDepositApplicationsInput
+  connect?: Prisma.ResidentWhereUniqueInput
+}
+
+export type ResidentUpdateOneRequiredWithoutDepositApplicationsNestedInput = {
+  create?: Prisma.XOR<Prisma.ResidentCreateWithoutDepositApplicationsInput, Prisma.ResidentUncheckedCreateWithoutDepositApplicationsInput>
+  connectOrCreate?: Prisma.ResidentCreateOrConnectWithoutDepositApplicationsInput
+  upsert?: Prisma.ResidentUpsertWithoutDepositApplicationsInput
+  connect?: Prisma.ResidentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ResidentUpdateToOneWithWhereWithoutDepositApplicationsInput, Prisma.ResidentUpdateWithoutDepositApplicationsInput>, Prisma.ResidentUncheckedUpdateWithoutDepositApplicationsInput>
+}
+
 export type ResidentCreateWithoutOrganizationInput = {
   id?: string
   version?: number
@@ -765,6 +835,9 @@ export type ResidentCreateWithoutOrganizationInput = {
   deposits?: Prisma.DepositTransactionCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutResidentInput
   allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutResidentInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutResidentInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutResidentInput
+  reversals?: Prisma.LedgerReversalCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentUncheckedCreateWithoutOrganizationInput = {
@@ -787,6 +860,9 @@ export type ResidentUncheckedCreateWithoutOrganizationInput = {
   deposits?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutResidentInput
   allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutResidentInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutResidentInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutResidentInput
+  reversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentCreateOrConnectWithoutOrganizationInput = {
@@ -854,6 +930,9 @@ export type ResidentCreateWithoutAbsencesInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutResidentInput
   deposits?: Prisma.DepositTransactionCreateNestedManyWithoutResidentInput
   allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutResidentInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutResidentInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutResidentInput
+  reversals?: Prisma.LedgerReversalCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentUncheckedCreateWithoutAbsencesInput = {
@@ -876,6 +955,9 @@ export type ResidentUncheckedCreateWithoutAbsencesInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutResidentInput
   deposits?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutResidentInput
   allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutResidentInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutResidentInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutResidentInput
+  reversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentCreateOrConnectWithoutAbsencesInput = {
@@ -914,6 +996,9 @@ export type ResidentUpdateWithoutAbsencesInput = {
   payments?: Prisma.PaymentUpdateManyWithoutResidentNestedInput
   deposits?: Prisma.DepositTransactionUpdateManyWithoutResidentNestedInput
   allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutResidentNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutResidentNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutResidentNestedInput
+  reversals?: Prisma.LedgerReversalUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentUncheckedUpdateWithoutAbsencesInput = {
@@ -936,6 +1021,9 @@ export type ResidentUncheckedUpdateWithoutAbsencesInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutResidentNestedInput
   deposits?: Prisma.DepositTransactionUncheckedUpdateManyWithoutResidentNestedInput
   allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutResidentNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutResidentNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutResidentNestedInput
+  reversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentCreateWithoutStayContractsInput = {
@@ -958,6 +1046,9 @@ export type ResidentCreateWithoutStayContractsInput = {
   deposits?: Prisma.DepositTransactionCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutResidentInput
   allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutResidentInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutResidentInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutResidentInput
+  reversals?: Prisma.LedgerReversalCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentUncheckedCreateWithoutStayContractsInput = {
@@ -980,6 +1071,9 @@ export type ResidentUncheckedCreateWithoutStayContractsInput = {
   deposits?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutResidentInput
   allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutResidentInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutResidentInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutResidentInput
+  reversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentCreateOrConnectWithoutStayContractsInput = {
@@ -1018,6 +1112,9 @@ export type ResidentUpdateWithoutStayContractsInput = {
   deposits?: Prisma.DepositTransactionUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUpdateManyWithoutResidentNestedInput
   allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutResidentNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutResidentNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutResidentNestedInput
+  reversals?: Prisma.LedgerReversalUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentUncheckedUpdateWithoutStayContractsInput = {
@@ -1040,6 +1137,9 @@ export type ResidentUncheckedUpdateWithoutStayContractsInput = {
   deposits?: Prisma.DepositTransactionUncheckedUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutResidentNestedInput
   allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutResidentNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutResidentNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutResidentNestedInput
+  reversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentCreateWithoutAssignmentsInput = {
@@ -1062,6 +1162,9 @@ export type ResidentCreateWithoutAssignmentsInput = {
   deposits?: Prisma.DepositTransactionCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutResidentInput
   allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutResidentInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutResidentInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutResidentInput
+  reversals?: Prisma.LedgerReversalCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentUncheckedCreateWithoutAssignmentsInput = {
@@ -1084,6 +1187,9 @@ export type ResidentUncheckedCreateWithoutAssignmentsInput = {
   deposits?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutResidentInput
   allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutResidentInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutResidentInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutResidentInput
+  reversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentCreateOrConnectWithoutAssignmentsInput = {
@@ -1122,6 +1228,9 @@ export type ResidentUpdateWithoutAssignmentsInput = {
   deposits?: Prisma.DepositTransactionUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUpdateManyWithoutResidentNestedInput
   allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutResidentNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutResidentNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutResidentNestedInput
+  reversals?: Prisma.LedgerReversalUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentUncheckedUpdateWithoutAssignmentsInput = {
@@ -1144,6 +1253,9 @@ export type ResidentUncheckedUpdateWithoutAssignmentsInput = {
   deposits?: Prisma.DepositTransactionUncheckedUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutResidentNestedInput
   allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutResidentNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutResidentNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutResidentNestedInput
+  reversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentCreateWithoutChargesInput = {
@@ -1166,6 +1278,9 @@ export type ResidentCreateWithoutChargesInput = {
   deposits?: Prisma.DepositTransactionCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutResidentInput
   allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutResidentInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutResidentInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutResidentInput
+  reversals?: Prisma.LedgerReversalCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentUncheckedCreateWithoutChargesInput = {
@@ -1188,6 +1303,9 @@ export type ResidentUncheckedCreateWithoutChargesInput = {
   deposits?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutResidentInput
   allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutResidentInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutResidentInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutResidentInput
+  reversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentCreateOrConnectWithoutChargesInput = {
@@ -1226,6 +1344,9 @@ export type ResidentUpdateWithoutChargesInput = {
   deposits?: Prisma.DepositTransactionUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUpdateManyWithoutResidentNestedInput
   allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutResidentNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutResidentNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutResidentNestedInput
+  reversals?: Prisma.LedgerReversalUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentUncheckedUpdateWithoutChargesInput = {
@@ -1248,6 +1369,9 @@ export type ResidentUncheckedUpdateWithoutChargesInput = {
   deposits?: Prisma.DepositTransactionUncheckedUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutResidentNestedInput
   allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutResidentNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutResidentNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutResidentNestedInput
+  reversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentCreateWithoutPaymentsInput = {
@@ -1270,6 +1394,9 @@ export type ResidentCreateWithoutPaymentsInput = {
   deposits?: Prisma.DepositTransactionCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutResidentInput
   allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutResidentInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutResidentInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutResidentInput
+  reversals?: Prisma.LedgerReversalCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentUncheckedCreateWithoutPaymentsInput = {
@@ -1292,6 +1419,9 @@ export type ResidentUncheckedCreateWithoutPaymentsInput = {
   deposits?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutResidentInput
   allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutResidentInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutResidentInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutResidentInput
+  reversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentCreateOrConnectWithoutPaymentsInput = {
@@ -1330,6 +1460,9 @@ export type ResidentUpdateWithoutPaymentsInput = {
   deposits?: Prisma.DepositTransactionUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUpdateManyWithoutResidentNestedInput
   allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutResidentNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutResidentNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutResidentNestedInput
+  reversals?: Prisma.LedgerReversalUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentUncheckedUpdateWithoutPaymentsInput = {
@@ -1352,6 +1485,9 @@ export type ResidentUncheckedUpdateWithoutPaymentsInput = {
   deposits?: Prisma.DepositTransactionUncheckedUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutResidentNestedInput
   allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutResidentNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutResidentNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutResidentNestedInput
+  reversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentCreateWithoutAllocationReleasesInput = {
@@ -1374,6 +1510,9 @@ export type ResidentCreateWithoutAllocationReleasesInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutResidentInput
   deposits?: Prisma.DepositTransactionCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutResidentInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutResidentInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutResidentInput
+  reversals?: Prisma.LedgerReversalCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentUncheckedCreateWithoutAllocationReleasesInput = {
@@ -1396,6 +1535,9 @@ export type ResidentUncheckedCreateWithoutAllocationReleasesInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutResidentInput
   deposits?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutResidentInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutResidentInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutResidentInput
+  reversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentCreateOrConnectWithoutAllocationReleasesInput = {
@@ -1434,6 +1576,9 @@ export type ResidentUpdateWithoutAllocationReleasesInput = {
   payments?: Prisma.PaymentUpdateManyWithoutResidentNestedInput
   deposits?: Prisma.DepositTransactionUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUpdateManyWithoutResidentNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutResidentNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutResidentNestedInput
+  reversals?: Prisma.LedgerReversalUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentUncheckedUpdateWithoutAllocationReleasesInput = {
@@ -1456,6 +1601,9 @@ export type ResidentUncheckedUpdateWithoutAllocationReleasesInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutResidentNestedInput
   deposits?: Prisma.DepositTransactionUncheckedUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutResidentNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutResidentNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutResidentNestedInput
+  reversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentCreateWithoutDepositsInput = {
@@ -1478,6 +1626,9 @@ export type ResidentCreateWithoutDepositsInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutResidentInput
   allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutResidentInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutResidentInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutResidentInput
+  reversals?: Prisma.LedgerReversalCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentUncheckedCreateWithoutDepositsInput = {
@@ -1500,6 +1651,9 @@ export type ResidentUncheckedCreateWithoutDepositsInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutResidentInput
   absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutResidentInput
   allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutResidentInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutResidentInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutResidentInput
+  reversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentCreateOrConnectWithoutDepositsInput = {
@@ -1538,6 +1692,9 @@ export type ResidentUpdateWithoutDepositsInput = {
   payments?: Prisma.PaymentUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUpdateManyWithoutResidentNestedInput
   allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutResidentNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutResidentNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutResidentNestedInput
+  reversals?: Prisma.LedgerReversalUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentUncheckedUpdateWithoutDepositsInput = {
@@ -1560,6 +1717,357 @@ export type ResidentUncheckedUpdateWithoutDepositsInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutResidentNestedInput
   allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutResidentNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutResidentNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutResidentNestedInput
+  reversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutResidentNestedInput
+}
+
+export type ResidentCreateWithoutReversalsInput = {
+  id?: string
+  version?: number
+  fullName: string
+  type?: $Enums.ResidentType
+  phone?: string | null
+  emergencyContactName?: string | null
+  emergencyContactPhone?: string | null
+  emergencyContactRelation?: string | null
+  notes?: string | null
+  status?: $Enums.ResidentStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutResidentsInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutResidentInput
+  assignments?: Prisma.BedAssignmentCreateNestedManyWithoutResidentInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutResidentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutResidentInput
+  deposits?: Prisma.DepositTransactionCreateNestedManyWithoutResidentInput
+  absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutResidentInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutResidentInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutResidentInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutResidentInput
+}
+
+export type ResidentUncheckedCreateWithoutReversalsInput = {
+  id?: string
+  version?: number
+  organizationId: string
+  fullName: string
+  type?: $Enums.ResidentType
+  phone?: string | null
+  emergencyContactName?: string | null
+  emergencyContactPhone?: string | null
+  emergencyContactRelation?: string | null
+  notes?: string | null
+  status?: $Enums.ResidentStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutResidentInput
+  assignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutResidentInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutResidentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutResidentInput
+  deposits?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutResidentInput
+  absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutResidentInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutResidentInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutResidentInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutResidentInput
+}
+
+export type ResidentCreateOrConnectWithoutReversalsInput = {
+  where: Prisma.ResidentWhereUniqueInput
+  create: Prisma.XOR<Prisma.ResidentCreateWithoutReversalsInput, Prisma.ResidentUncheckedCreateWithoutReversalsInput>
+}
+
+export type ResidentUpsertWithoutReversalsInput = {
+  update: Prisma.XOR<Prisma.ResidentUpdateWithoutReversalsInput, Prisma.ResidentUncheckedUpdateWithoutReversalsInput>
+  create: Prisma.XOR<Prisma.ResidentCreateWithoutReversalsInput, Prisma.ResidentUncheckedCreateWithoutReversalsInput>
+  where?: Prisma.ResidentWhereInput
+}
+
+export type ResidentUpdateToOneWithWhereWithoutReversalsInput = {
+  where?: Prisma.ResidentWhereInput
+  data: Prisma.XOR<Prisma.ResidentUpdateWithoutReversalsInput, Prisma.ResidentUncheckedUpdateWithoutReversalsInput>
+}
+
+export type ResidentUpdateWithoutReversalsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumResidentTypeFieldUpdateOperationsInput | $Enums.ResidentType
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emergencyContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emergencyContactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emergencyContactRelation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumResidentStatusFieldUpdateOperationsInput | $Enums.ResidentStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutResidentsNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutResidentNestedInput
+  assignments?: Prisma.BedAssignmentUpdateManyWithoutResidentNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutResidentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutResidentNestedInput
+  deposits?: Prisma.DepositTransactionUpdateManyWithoutResidentNestedInput
+  absences?: Prisma.TemporaryAbsenceUpdateManyWithoutResidentNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutResidentNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutResidentNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutResidentNestedInput
+}
+
+export type ResidentUncheckedUpdateWithoutReversalsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumResidentTypeFieldUpdateOperationsInput | $Enums.ResidentType
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emergencyContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emergencyContactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emergencyContactRelation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumResidentStatusFieldUpdateOperationsInput | $Enums.ResidentStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutResidentNestedInput
+  assignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutResidentNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutResidentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutResidentNestedInput
+  deposits?: Prisma.DepositTransactionUncheckedUpdateManyWithoutResidentNestedInput
+  absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutResidentNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutResidentNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutResidentNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutResidentNestedInput
+}
+
+export type ResidentCreateWithoutPaymentRefundsInput = {
+  id?: string
+  version?: number
+  fullName: string
+  type?: $Enums.ResidentType
+  phone?: string | null
+  emergencyContactName?: string | null
+  emergencyContactPhone?: string | null
+  emergencyContactRelation?: string | null
+  notes?: string | null
+  status?: $Enums.ResidentStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutResidentsInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutResidentInput
+  assignments?: Prisma.BedAssignmentCreateNestedManyWithoutResidentInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutResidentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutResidentInput
+  deposits?: Prisma.DepositTransactionCreateNestedManyWithoutResidentInput
+  absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutResidentInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutResidentInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutResidentInput
+  reversals?: Prisma.LedgerReversalCreateNestedManyWithoutResidentInput
+}
+
+export type ResidentUncheckedCreateWithoutPaymentRefundsInput = {
+  id?: string
+  version?: number
+  organizationId: string
+  fullName: string
+  type?: $Enums.ResidentType
+  phone?: string | null
+  emergencyContactName?: string | null
+  emergencyContactPhone?: string | null
+  emergencyContactRelation?: string | null
+  notes?: string | null
+  status?: $Enums.ResidentStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutResidentInput
+  assignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutResidentInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutResidentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutResidentInput
+  deposits?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutResidentInput
+  absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutResidentInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutResidentInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutResidentInput
+  reversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutResidentInput
+}
+
+export type ResidentCreateOrConnectWithoutPaymentRefundsInput = {
+  where: Prisma.ResidentWhereUniqueInput
+  create: Prisma.XOR<Prisma.ResidentCreateWithoutPaymentRefundsInput, Prisma.ResidentUncheckedCreateWithoutPaymentRefundsInput>
+}
+
+export type ResidentUpsertWithoutPaymentRefundsInput = {
+  update: Prisma.XOR<Prisma.ResidentUpdateWithoutPaymentRefundsInput, Prisma.ResidentUncheckedUpdateWithoutPaymentRefundsInput>
+  create: Prisma.XOR<Prisma.ResidentCreateWithoutPaymentRefundsInput, Prisma.ResidentUncheckedCreateWithoutPaymentRefundsInput>
+  where?: Prisma.ResidentWhereInput
+}
+
+export type ResidentUpdateToOneWithWhereWithoutPaymentRefundsInput = {
+  where?: Prisma.ResidentWhereInput
+  data: Prisma.XOR<Prisma.ResidentUpdateWithoutPaymentRefundsInput, Prisma.ResidentUncheckedUpdateWithoutPaymentRefundsInput>
+}
+
+export type ResidentUpdateWithoutPaymentRefundsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumResidentTypeFieldUpdateOperationsInput | $Enums.ResidentType
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emergencyContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emergencyContactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emergencyContactRelation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumResidentStatusFieldUpdateOperationsInput | $Enums.ResidentStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutResidentsNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutResidentNestedInput
+  assignments?: Prisma.BedAssignmentUpdateManyWithoutResidentNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutResidentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutResidentNestedInput
+  deposits?: Prisma.DepositTransactionUpdateManyWithoutResidentNestedInput
+  absences?: Prisma.TemporaryAbsenceUpdateManyWithoutResidentNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutResidentNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutResidentNestedInput
+  reversals?: Prisma.LedgerReversalUpdateManyWithoutResidentNestedInput
+}
+
+export type ResidentUncheckedUpdateWithoutPaymentRefundsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumResidentTypeFieldUpdateOperationsInput | $Enums.ResidentType
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emergencyContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emergencyContactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emergencyContactRelation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumResidentStatusFieldUpdateOperationsInput | $Enums.ResidentStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutResidentNestedInput
+  assignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutResidentNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutResidentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutResidentNestedInput
+  deposits?: Prisma.DepositTransactionUncheckedUpdateManyWithoutResidentNestedInput
+  absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutResidentNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutResidentNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutResidentNestedInput
+  reversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutResidentNestedInput
+}
+
+export type ResidentCreateWithoutDepositApplicationsInput = {
+  id?: string
+  version?: number
+  fullName: string
+  type?: $Enums.ResidentType
+  phone?: string | null
+  emergencyContactName?: string | null
+  emergencyContactPhone?: string | null
+  emergencyContactRelation?: string | null
+  notes?: string | null
+  status?: $Enums.ResidentStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutResidentsInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutResidentInput
+  assignments?: Prisma.BedAssignmentCreateNestedManyWithoutResidentInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutResidentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutResidentInput
+  deposits?: Prisma.DepositTransactionCreateNestedManyWithoutResidentInput
+  absences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutResidentInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutResidentInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutResidentInput
+  reversals?: Prisma.LedgerReversalCreateNestedManyWithoutResidentInput
+}
+
+export type ResidentUncheckedCreateWithoutDepositApplicationsInput = {
+  id?: string
+  version?: number
+  organizationId: string
+  fullName: string
+  type?: $Enums.ResidentType
+  phone?: string | null
+  emergencyContactName?: string | null
+  emergencyContactPhone?: string | null
+  emergencyContactRelation?: string | null
+  notes?: string | null
+  status?: $Enums.ResidentStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutResidentInput
+  assignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutResidentInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutResidentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutResidentInput
+  deposits?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutResidentInput
+  absences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutResidentInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutResidentInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutResidentInput
+  reversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutResidentInput
+}
+
+export type ResidentCreateOrConnectWithoutDepositApplicationsInput = {
+  where: Prisma.ResidentWhereUniqueInput
+  create: Prisma.XOR<Prisma.ResidentCreateWithoutDepositApplicationsInput, Prisma.ResidentUncheckedCreateWithoutDepositApplicationsInput>
+}
+
+export type ResidentUpsertWithoutDepositApplicationsInput = {
+  update: Prisma.XOR<Prisma.ResidentUpdateWithoutDepositApplicationsInput, Prisma.ResidentUncheckedUpdateWithoutDepositApplicationsInput>
+  create: Prisma.XOR<Prisma.ResidentCreateWithoutDepositApplicationsInput, Prisma.ResidentUncheckedCreateWithoutDepositApplicationsInput>
+  where?: Prisma.ResidentWhereInput
+}
+
+export type ResidentUpdateToOneWithWhereWithoutDepositApplicationsInput = {
+  where?: Prisma.ResidentWhereInput
+  data: Prisma.XOR<Prisma.ResidentUpdateWithoutDepositApplicationsInput, Prisma.ResidentUncheckedUpdateWithoutDepositApplicationsInput>
+}
+
+export type ResidentUpdateWithoutDepositApplicationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumResidentTypeFieldUpdateOperationsInput | $Enums.ResidentType
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emergencyContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emergencyContactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emergencyContactRelation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumResidentStatusFieldUpdateOperationsInput | $Enums.ResidentStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutResidentsNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutResidentNestedInput
+  assignments?: Prisma.BedAssignmentUpdateManyWithoutResidentNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutResidentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutResidentNestedInput
+  deposits?: Prisma.DepositTransactionUpdateManyWithoutResidentNestedInput
+  absences?: Prisma.TemporaryAbsenceUpdateManyWithoutResidentNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutResidentNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutResidentNestedInput
+  reversals?: Prisma.LedgerReversalUpdateManyWithoutResidentNestedInput
+}
+
+export type ResidentUncheckedUpdateWithoutDepositApplicationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumResidentTypeFieldUpdateOperationsInput | $Enums.ResidentType
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emergencyContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emergencyContactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emergencyContactRelation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumResidentStatusFieldUpdateOperationsInput | $Enums.ResidentStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutResidentNestedInput
+  assignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutResidentNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutResidentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutResidentNestedInput
+  deposits?: Prisma.DepositTransactionUncheckedUpdateManyWithoutResidentNestedInput
+  absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutResidentNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutResidentNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutResidentNestedInput
+  reversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentCreateManyOrganizationInput = {
@@ -1597,6 +2105,9 @@ export type ResidentUpdateWithoutOrganizationInput = {
   deposits?: Prisma.DepositTransactionUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUpdateManyWithoutResidentNestedInput
   allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutResidentNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutResidentNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutResidentNestedInput
+  reversals?: Prisma.LedgerReversalUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentUncheckedUpdateWithoutOrganizationInput = {
@@ -1619,6 +2130,9 @@ export type ResidentUncheckedUpdateWithoutOrganizationInput = {
   deposits?: Prisma.DepositTransactionUncheckedUpdateManyWithoutResidentNestedInput
   absences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutResidentNestedInput
   allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutResidentNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutResidentNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutResidentNestedInput
+  reversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentUncheckedUpdateManyWithoutOrganizationInput = {
@@ -1649,6 +2163,9 @@ export type ResidentCountOutputType = {
   deposits: number
   absences: number
   allocationReleases: number
+  paymentRefunds: number
+  depositApplications: number
+  reversals: number
 }
 
 export type ResidentCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1659,6 +2176,9 @@ export type ResidentCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensio
   deposits?: boolean | ResidentCountOutputTypeCountDepositsArgs
   absences?: boolean | ResidentCountOutputTypeCountAbsencesArgs
   allocationReleases?: boolean | ResidentCountOutputTypeCountAllocationReleasesArgs
+  paymentRefunds?: boolean | ResidentCountOutputTypeCountPaymentRefundsArgs
+  depositApplications?: boolean | ResidentCountOutputTypeCountDepositApplicationsArgs
+  reversals?: boolean | ResidentCountOutputTypeCountReversalsArgs
 }
 
 /**
@@ -1720,6 +2240,27 @@ export type ResidentCountOutputTypeCountAllocationReleasesArgs<ExtArgs extends r
   where?: Prisma.AllocationReleaseWhereInput
 }
 
+/**
+ * ResidentCountOutputType without action
+ */
+export type ResidentCountOutputTypeCountPaymentRefundsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PaymentRefundWhereInput
+}
+
+/**
+ * ResidentCountOutputType without action
+ */
+export type ResidentCountOutputTypeCountDepositApplicationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DepositApplicationWhereInput
+}
+
+/**
+ * ResidentCountOutputType without action
+ */
+export type ResidentCountOutputTypeCountReversalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LedgerReversalWhereInput
+}
+
 
 export type ResidentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1743,6 +2284,9 @@ export type ResidentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   deposits?: boolean | Prisma.Resident$depositsArgs<ExtArgs>
   absences?: boolean | Prisma.Resident$absencesArgs<ExtArgs>
   allocationReleases?: boolean | Prisma.Resident$allocationReleasesArgs<ExtArgs>
+  paymentRefunds?: boolean | Prisma.Resident$paymentRefundsArgs<ExtArgs>
+  depositApplications?: boolean | Prisma.Resident$depositApplicationsArgs<ExtArgs>
+  reversals?: boolean | Prisma.Resident$reversalsArgs<ExtArgs>
   _count?: boolean | Prisma.ResidentCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["resident"]>
 
@@ -1806,6 +2350,9 @@ export type ResidentInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   deposits?: boolean | Prisma.Resident$depositsArgs<ExtArgs>
   absences?: boolean | Prisma.Resident$absencesArgs<ExtArgs>
   allocationReleases?: boolean | Prisma.Resident$allocationReleasesArgs<ExtArgs>
+  paymentRefunds?: boolean | Prisma.Resident$paymentRefundsArgs<ExtArgs>
+  depositApplications?: boolean | Prisma.Resident$depositApplicationsArgs<ExtArgs>
+  reversals?: boolean | Prisma.Resident$reversalsArgs<ExtArgs>
   _count?: boolean | Prisma.ResidentCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ResidentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1826,6 +2373,9 @@ export type $ResidentPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     deposits: Prisma.$DepositTransactionPayload<ExtArgs>[]
     absences: Prisma.$TemporaryAbsencePayload<ExtArgs>[]
     allocationReleases: Prisma.$AllocationReleasePayload<ExtArgs>[]
+    paymentRefunds: Prisma.$PaymentRefundPayload<ExtArgs>[]
+    depositApplications: Prisma.$DepositApplicationPayload<ExtArgs>[]
+    reversals: Prisma.$LedgerReversalPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2243,6 +2793,9 @@ export interface Prisma__ResidentClient<T, Null = never, ExtArgs extends runtime
   deposits<T extends Prisma.Resident$depositsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Resident$depositsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DepositTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   absences<T extends Prisma.Resident$absencesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Resident$absencesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TemporaryAbsencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   allocationReleases<T extends Prisma.Resident$allocationReleasesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Resident$allocationReleasesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AllocationReleasePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  paymentRefunds<T extends Prisma.Resident$paymentRefundsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Resident$paymentRefundsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentRefundPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  depositApplications<T extends Prisma.Resident$depositApplicationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Resident$depositApplicationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DepositApplicationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reversals<T extends Prisma.Resident$reversalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Resident$reversalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LedgerReversalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2851,6 +3404,78 @@ export type Resident$allocationReleasesArgs<ExtArgs extends runtime.Types.Extens
   take?: number
   skip?: number
   distinct?: Prisma.AllocationReleaseScalarFieldEnum | Prisma.AllocationReleaseScalarFieldEnum[]
+}
+
+/**
+ * Resident.paymentRefunds
+ */
+export type Resident$paymentRefundsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PaymentRefund
+   */
+  select?: Prisma.PaymentRefundSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PaymentRefund
+   */
+  omit?: Prisma.PaymentRefundOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentRefundInclude<ExtArgs> | null
+  where?: Prisma.PaymentRefundWhereInput
+  orderBy?: Prisma.PaymentRefundOrderByWithRelationInput | Prisma.PaymentRefundOrderByWithRelationInput[]
+  cursor?: Prisma.PaymentRefundWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PaymentRefundScalarFieldEnum | Prisma.PaymentRefundScalarFieldEnum[]
+}
+
+/**
+ * Resident.depositApplications
+ */
+export type Resident$depositApplicationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DepositApplication
+   */
+  select?: Prisma.DepositApplicationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DepositApplication
+   */
+  omit?: Prisma.DepositApplicationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DepositApplicationInclude<ExtArgs> | null
+  where?: Prisma.DepositApplicationWhereInput
+  orderBy?: Prisma.DepositApplicationOrderByWithRelationInput | Prisma.DepositApplicationOrderByWithRelationInput[]
+  cursor?: Prisma.DepositApplicationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DepositApplicationScalarFieldEnum | Prisma.DepositApplicationScalarFieldEnum[]
+}
+
+/**
+ * Resident.reversals
+ */
+export type Resident$reversalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LedgerReversal
+   */
+  select?: Prisma.LedgerReversalSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LedgerReversal
+   */
+  omit?: Prisma.LedgerReversalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LedgerReversalInclude<ExtArgs> | null
+  where?: Prisma.LedgerReversalWhereInput
+  orderBy?: Prisma.LedgerReversalOrderByWithRelationInput | Prisma.LedgerReversalOrderByWithRelationInput[]
+  cursor?: Prisma.LedgerReversalWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LedgerReversalScalarFieldEnum | Prisma.LedgerReversalScalarFieldEnum[]
 }
 
 /**

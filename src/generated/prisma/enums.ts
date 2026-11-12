@@ -114,7 +114,8 @@ export const PaymentMethod = {
   CASH: 'CASH',
   BANK_TRANSFER: 'BANK_TRANSFER',
   MOBILE_MONEY: 'MOBILE_MONEY',
-  OTHER: 'OTHER'
+  OTHER: 'OTHER',
+  DEPOSIT_APPLICATION: 'DEPOSIT_APPLICATION'
 } as const
 
 export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod]
@@ -244,6 +245,16 @@ export const BillingRunStatus = {
 } as const
 
 export type BillingRunStatus = (typeof BillingRunStatus)[keyof typeof BillingRunStatus]
+
+
+export const ReversalSourceType = {
+  CHARGE: 'CHARGE',
+  PAYMENT: 'PAYMENT',
+  DEPOSIT: 'DEPOSIT',
+  EXPENSE: 'EXPENSE'
+} as const
+
+export type ReversalSourceType = (typeof ReversalSourceType)[keyof typeof ReversalSourceType]
 
 
 export const IdempotencyRetentionClass = {

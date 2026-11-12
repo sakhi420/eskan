@@ -674,6 +674,23 @@ export type EnumPaymentMethodNullableWithAggregatesFilter<$PrismaModel = never> 
   _max?: Prisma.NestedEnumPaymentMethodNullableFilter<$PrismaModel>
 }
 
+export type EnumReversalSourceTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.ReversalSourceType | Prisma.EnumReversalSourceTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.ReversalSourceType[] | Prisma.ListEnumReversalSourceTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ReversalSourceType[] | Prisma.ListEnumReversalSourceTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumReversalSourceTypeFilter<$PrismaModel> | $Enums.ReversalSourceType
+}
+
+export type EnumReversalSourceTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ReversalSourceType | Prisma.EnumReversalSourceTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.ReversalSourceType[] | Prisma.ListEnumReversalSourceTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ReversalSourceType[] | Prisma.ListEnumReversalSourceTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumReversalSourceTypeWithAggregatesFilter<$PrismaModel> | $Enums.ReversalSourceType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumReversalSourceTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumReversalSourceTypeFilter<$PrismaModel>
+}
+
 export type EnumPlanCodeFilter<$PrismaModel = never> = {
   equals?: $Enums.PlanCode | Prisma.EnumPlanCodeFieldRefInput<$PrismaModel>
   in?: $Enums.PlanCode[] | Prisma.ListEnumPlanCodeFieldRefInput<$PrismaModel>
@@ -1433,6 +1450,23 @@ export type NestedEnumPaymentMethodNullableWithAggregatesFilter<$PrismaModel = n
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedEnumPaymentMethodNullableFilter<$PrismaModel>
   _max?: Prisma.NestedEnumPaymentMethodNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumReversalSourceTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.ReversalSourceType | Prisma.EnumReversalSourceTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.ReversalSourceType[] | Prisma.ListEnumReversalSourceTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ReversalSourceType[] | Prisma.ListEnumReversalSourceTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumReversalSourceTypeFilter<$PrismaModel> | $Enums.ReversalSourceType
+}
+
+export type NestedEnumReversalSourceTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ReversalSourceType | Prisma.EnumReversalSourceTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.ReversalSourceType[] | Prisma.ListEnumReversalSourceTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ReversalSourceType[] | Prisma.ListEnumReversalSourceTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumReversalSourceTypeWithAggregatesFilter<$PrismaModel> | $Enums.ReversalSourceType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumReversalSourceTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumReversalSourceTypeFilter<$PrismaModel>
 }
 
 export type NestedEnumPlanCodeFilter<$PrismaModel = never> = {

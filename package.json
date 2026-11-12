@@ -19,6 +19,8 @@
     "test:m2-parity": "node scripts/test-m2-prisma-parity.cjs",
     "test:retention-check": "node scripts/test-idempotency-retention-check.cjs",
     "test:m3a-migration": "node scripts/test-m3a-migration.cjs",
+    "test:m3b-migration": "node scripts/test-m3b-migration.cjs",
+    "test:m3c-migration": "node scripts/test-m3c-migration.cjs",
     "lint": "eslint \"{src,test}/**/*.ts\"",
     "format:check": "prettier --check \"{src,test,prisma}/**/*.{ts,json,prisma}\"",
     "openapi:validate": "npx @redocly/cli@1.25.15 lint contracts/openapi.yaml",

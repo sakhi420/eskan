@@ -80,6 +80,7 @@ enum PaymentMethod {
   BANK_TRANSFER
   MOBILE_MONEY
   OTHER
+  DEPOSIT_APPLICATION
 }
 
 enum DepositType {
@@ -169,6 +170,13 @@ enum BillingRunStatus {
   POSTED
 }
 
+enum ReversalSourceType {
+  CHARGE
+  PAYMENT
+  DEPOSIT
+  EXPENSE
+}
+
 model Organization {
   id              String   @id @default(uuid()) @db.Uuid
   version         Int      @default(1)
@@ -190,6 +198,9 @@ model Organization {
   payments                   Payment[]
   depositTransactions        DepositTransaction[]
   expenses                   Expense[]
+  paymentRefunds             PaymentRefund[]
+  depositApplications        DepositApplication[]
+  ledgerReversals            LedgerReversal[]
   subscription               OrganizationSubscription?
   subscriptionEvents         SubscriptionEvent[]
   manualSubscriptionPayments ManualSubscriptionPayment[]
@@ -231,6 +242,11 @@ model User {
   approvedAbsences       TemporaryAbsence[]          @relation("AbsenceApprovedBy")
   billingRunsCreated     BillingRun[]                 @relation("BillingRunCreatedBy")
   releasedAllocations    AllocationRelease[]          @relation("AllocationReleaseActor")
+  paymentRefunds         PaymentRefund[]              @relation("PaymentRefundActor")
+  depositApplications    DepositApplication[]         @relation("DepositApplicationActor")
+  ledgerReversals        LedgerReversal[]             @relation("LedgerReversalActor")
+  depositActors          DepositTransaction[]         @relation("DepositActor")
+  expenseActors          Expense[]                    @relation("ExpenseActor")
 
   @@map("users")
 }
@@ -468,6 +484,9 @@ model Resident {
   deposits            DepositTransaction[]
   absences            TemporaryAbsence[]
   allocationReleases  AllocationRelease[]
+  paymentRefunds      PaymentRefund[]
+  depositApplications DepositApplication[]
+  reversals           LedgerReversal[]
 
   @@unique([organizationId, id])
   @@index([organizationId])
@@ -571,6 +590,7 @@ model Charge {
   absenceTenants TemporaryAbsence[] @relation("AbsenceCreditChargeTenant")
   components     ChargePackageComponent[]
   absenceCredits AbsenceCredit[]
+  depositApplications DepositApplication[]
 
   @@unique([organizationId, id])
   @@unique([organizationId, residentId, id])
@@ -647,7 +667,7 @@ model Payment {
   amount         Int
   method         PaymentMethod
   receivedAt     DateTime          @map("received_at") @db.Date
-  receiptNumber  String            @map("receipt_number")
+  receiptNumber  String?           @map("receipt_number")
   notes          String?
   payerName      String?           @map("payer_name")
   payerPhone     String?           @map("payer_phone")
@@ -663,6 +683,7 @@ model Payment {
   resident     Resident            @relation(fields: [organizationId, residentId], references: [organizationId, id], onDelete: Restrict)
   reversedBy   User?               @relation("PaymentReversedBy", fields: [reversedById], references: [id], onDelete: SetNull)
   allocations  PaymentAllocation[]
+  refunds      PaymentRefund[]
 
   @@unique([organizationId, receiptNumber])
   @@unique([organizationId, id])
@@ -733,6 +754,7 @@ model DepositTransaction {
   amount         Int
   receivedAt     DateTime?         @map("received_at") @db.Date
   reason         String?
+  actorUserId    String?           @map("actor_user_id") @db.Uuid
   reversedById   String?           @map("reversed_by_id") @db.Uuid
   reversalReason String?           @map("reversal_reason")
   reversedAt     DateTime?         @map("reversed_at") @db.Timestamptz(3)
@@ -741,8 +763,12 @@ model DepositTransaction {
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   resident     Resident     @relation(fields: [organizationId, residentId], references: [organizationId, id], onDelete: Restrict)
+  actor        User?        @relation("DepositActor", fields: [actorUserId], references: [id], onDelete: SetNull)
   reversedBy   User?        @relation("DepositReversedBy", fields: [reversedById], references: [id], onDelete: SetNull)
+  applications DepositApplication[]
 
+  @@unique([organizationId, id])
+  @@unique([organizationId, residentId, id])
   @@index([organizationId, residentId])
   @@index([organizationId, type])
   @@map("deposit_transactions")
@@ -759,6 +785,7 @@ model Expense {
   spentAt        DateTime          @map("spent_at") @db.Date
   paymentMethod  PaymentMethod?    @map("payment_method")
   description    String?
+  actorUserId    String?           @map("actor_user_id") @db.Uuid
   reversedById   String?           @map("reversed_by_id") @db.Uuid
   reversalReason String?           @map("reversal_reason")
   reversedAt     DateTime?         @map("reversed_at") @db.Timestamptz(3)
@@ -768,12 +795,81 @@ model Expense {
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   hostel       Hostel?      @relation("ExpenseHostel", fields: [hostelId], references: [id], onDelete: SetNull)
   hostelTenant Hostel?      @relation("ExpenseHostelTenant", fields: [organizationId, hostelId], references: [organizationId, id], onDelete: NoAction)
+  actor        User?        @relation("ExpenseActor", fields: [actorUserId], references: [id], onDelete: SetNull)
   reversedBy   User?        @relation("ExpenseReversedBy", fields: [reversedById], references: [id], onDelete: SetNull)
 
   @@index([organizationId, spentAt])
   @@index([organizationId, category])
   @@index([organizationId, hostelId])
   @@map("expenses")
+}
+
+model LedgerReversal {
+  id             String             @id @default(uuid()) @db.Uuid
+  organizationId String             @map("organization_id") @db.Uuid
+  residentId     String?            @map("resident_id") @db.Uuid
+  sourceType     ReversalSourceType @map("source_type")
+  sourceId       String             @map("source_id") @db.Uuid
+  side           EntrySide
+  amount         Int
+  reason         String
+  actorUserId    String             @map("actor_user_id") @db.Uuid
+  idempotencyKey String             @map("idempotency_key") @db.Uuid
+  createdAt      DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  resident     Resident?    @relation(fields: [organizationId, residentId], references: [organizationId, id], onDelete: Restrict)
+  actor        User         @relation("LedgerReversalActor", fields: [actorUserId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, sourceType, sourceId])
+  @@index([organizationId, residentId])
+  @@index([actorUserId])
+  @@map("ledger_reversals")
+}
+
+model PaymentRefund {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  residentId     String   @map("resident_id") @db.Uuid
+  paymentId      String   @map("payment_id") @db.Uuid
+  amount         Int
+  reason         String
+  actorUserId    String   @map("actor_user_id") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  resident     Resident     @relation(fields: [organizationId, residentId], references: [organizationId, id], onDelete: Restrict)
+  payment      Payment      @relation(fields: [organizationId, residentId, paymentId], references: [organizationId, residentId, id], onDelete: Restrict)
+  actor        User         @relation("PaymentRefundActor", fields: [actorUserId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, paymentId])
+  @@index([organizationId, residentId, paymentId])
+  @@index([actorUserId])
+  @@map("payment_refunds")
+}
+
+model DepositApplication {
+  id                   String             @id @default(uuid()) @db.Uuid
+  organizationId       String             @map("organization_id") @db.Uuid
+  residentId           String             @map("resident_id") @db.Uuid
+  depositTransactionId String             @map("deposit_transaction_id") @db.Uuid
+  chargeId             String             @map("charge_id") @db.Uuid
+  amount               Int
+  reason               String
+  actorUserId          String             @map("actor_user_id") @db.Uuid
+  createdAt            DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  organization       Organization       @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  resident           Resident           @relation(fields: [organizationId, residentId], references: [organizationId, id], onDelete: Restrict)
+  depositTransaction DepositTransaction @relation(fields: [organizationId, residentId, depositTransactionId], references: [organizationId, residentId, id], onDelete: Restrict)
+  charge             Charge             @relation(fields: [organizationId, residentId, chargeId], references: [organizationId, residentId, id], onDelete: Restrict)
+  actor              User               @relation("DepositApplicationActor", fields: [actorUserId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, depositTransactionId])
+  @@index([organizationId, residentId, depositTransactionId])
+  @@index([organizationId, residentId, chargeId])
+  @@index([actorUserId])
+  @@map("deposit_applications")
 }
 
 model SubscriptionPlan {

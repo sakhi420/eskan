@@ -84,8 +84,17 @@ const check = (name, ok, extra = '') => results.push(`${ok ? 'PASS' : 'FAIL'} - 
     'allocation_releases_organization_id_resident_id_fkey',
     'allocation_releases_organization_id_resident_id_allocation_fkey',
   ];
-  check('[parity] live DB has 24 tenant composite FKs (M-2 + M3b)', fks.rowCount === 24, 'count=' + fks.rowCount);
+  check('[parity] live DB has 30 tenant composite FKs (M-2 + M3b + M3c)', fks.rowCount === 30, 'count=' + fks.rowCount);
   check('[parity] both M3b AllocationRelease tenant FKs are present', m3bReleaseFks.every((name) => fkNames.has(name)));
+  const m3cCompositeFks = [
+    'ledger_reversals_organization_id_resident_id_fkey',
+    'payment_refunds_organization_id_resident_id_fkey',
+    'payment_refunds_organization_id_resident_id_payment_id_fkey',
+    'deposit_applications_organization_id_resident_id_fkey',
+    'deposit_applications_organization_id_resident_id_deposit_t_fkey',
+    'deposit_applications_organization_id_resident_id_charge_id_fkey',
+  ];
+  check('[parity] all 6 M3c tenant FKs are present', m3cCompositeFks.every((name) => fkNames.has(name)));
   await client.end();
 
   await admin.query(`DROP DATABASE IF EXISTS "${name}" WITH (FORCE)`).catch(() => {});

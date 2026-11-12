@@ -18,7 +18,7 @@
 | 8   | ساکن/قرارداد/تخصیص | ✅ انجام شد (کد + smoke واقعی ۴۸/۴۸) | overlap, concurrency |
 | 8.1 | سخت‌سازی صحت/سازگاری (بازبینی) | ✅ انجام شد (P0 fixes + smoke ۱۴۴/۱۴۴ = 42+16+48+14+24) | atomic idempotency, CAS locking, resident overlap, transfer/checkout, fail-fast migration |
 | 8.2 | چرخه‌حیات هم‌روندی و یکپارچگی داده | ✅ انجام شد (LockService + business date + overlap contract + smoke ۱۵۷/۱۵۷ = 42+16+48+14+24+13) | resident contract overlap, row locks, business date, idempotency expiry |
-| 9   | مالی (charge/payment/deposit) | 🔄 در حال اجرا — M-1 ✅، M-2 ✅، 4c ✅، M3a ✅ (PR #2)، M3b ✅ (PR #4)؛ M3c بعدی | integer AFN (A-016), reversal, immutability |
+| 9   | مالی (charge/payment/deposit) | 🔄 در حال اجرا — M-1 ✅، M-2 ✅، 4c ✅، M3a ✅ (PR #2)، M3b ✅ (PR #4)، M3c ✅ (PR در انتظار)؛ M3d بعدی | integer AFN (A-016), reversal, immutability |
 | 10  | مصارف و گزارش | ⏳ در انتظار | reports |
 | 11  | idempotency/audit/sync | ⏳ در انتظار | cursor, tombstone |
 | 12  | امنیت و سخت‌سازی | ⏳ در انتظار | OWASP, validation |
@@ -33,9 +33,9 @@
 - **وضعیت M-gates:** M-1 ✅، M-2 ✅، 4c ✅، M3a ✅، **M3b ✅ (ادغام PR #4)**. M3c بعد، M3d پس از آن.
 - **وضعیت Migration در محیط‌ها (تفکیک دقیق):** migrationهای M-1/M-2/4c/M3a/M3b روی `eskan_dev` اعمال شده‌اند (M3a+M3b در 2026-11-11 با Backup + Rehearsal روی clone اعمال شد). **Staging و Production هیچ migration اعمال نشده است.** «تست‌شده در CI» ≠ «اعمال‌شده روی دیتابیس توسعه/Staging/Production».
 - **Absence Credit ≠ Absence Lifecycle:** M3a فقط تولید Credit را برای غیابتی که قبلاً به `RETURNED` رسیده پشتیبانی می‌کند. چرخهٔ کامل غیابت (درخواست/تأیید/ثبت خروج/تأیید بازگشت) هنوز کار مستقل و پیاده‌نشده است.
-- **Backend (از `src/` و OpenAPI):** ماژول‌های `auth`، `organizations`، `hostels/rooms/beds`، `residents`، `contracts`، `assignments`، `packages`، `charges` (M3a) و `payments` (M3b) پیاده‌شده‌اند. ماژول‌های `deposits`، `expenses`، `reports`، `sync`، `admin/**` هنوز **ماژول اجرایی ندارند** (فقط در قرارداد/Schema وجود دارند).
+- **Backend (از `src/` و OpenAPI):** ماژول‌های `auth`، `organizations`، `hostels/rooms/beds`، `residents`، `contracts`، `assignments`، `packages`، `charges` (M3a)، `payments` (M3b) و `deposits`/`expenses` (M3c) پیاده‌شده‌اند. ماژول‌های `reports`، `sync` (pull)، `admin/**` هنوز **ماژول اجرایی ندارند** (فقط در قرارداد/Schema وجود دارند).
 - **Frontend:** پروژهٔ Flutter **هنوز در مخزن ساخته نشده** است (فقط Backend در ریشهٔ مخزن).
-- **Next step:** شروع **M3c** (Deposit / Refund / Expense / Reversal). چرخهٔ Absence و Sync Pull مربوط به Gateهای بعدی است.
+- **Next step:** شروع **M3d** (Account / Statement / Audit / Sync Pull). چرخهٔ Absence و Sync Pull مربوط به Gateهای بعدی است.
 - **بایگانی اسناد تاریخی:** گزارش‌ها/طرح‌ها/تحلیل‌های قدیمی (phase-9-engineering-plan، m2-*، mvp-prioritization، hostel-domain-requirements-v1، open-questions، current-workflows، api-gap-analysis، repository-assessment، commands، master-prompt-v3-gap-analysis) به `docs/archive/` منتقل شدند و برای اجرای جاری مرجع نیستند.
 
 ## فاز 0 — بررسی مخزن و خط پایه (انجام شد)
@@ -741,3 +741,18 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 
 ### جزئیات محیطی (بدون افشای secret)
 - Migrationهای M3a روی **دیتابیس توسعهٔ محلی `eskan_dev` هنوز اعمال نشده‌اند** (تست روی DBهای throwaway انجام شد)؛ Staging/Production دست‌نخورده.
+## M3c — Deposit / Refund / Expense / Reversal — 2026-11-12
+
+- **شاخه:** `feat/m3c-deposit-expense-refund-reversal` از خط مبنا `506947b`.
+- **پیاده‌شده در Runtime:** ماژول `deposits` (دریافت/refund/forfeit/apply/reverse + list)، ماژول `expenses`
+  (create/get/list/reverse)، `paymentRefund`/`paymentReverse` در `payments`، `chargeReverse` در `charges`.
+- **Schema/Migration (افزودنی):** مدل‌های `LedgerReversal`، `PaymentRefund`، `DepositApplication`؛
+  `PaymentMethod.DEPOSIT_APPLICATION`؛ `ReversalSourceType`؛ `actor_user_id` روی deposit/expense؛
+  `payments.receipt_number` nullable (برای Payment داخلی D-10). Migration `20261112000000_m3c_...`.
+- **یکپارچگی مالی:** ماندهٔ ودیعه از رویدادها محاسبه می‌شود (`Held = Received − Refunded − Forfeited − Applied`)؛
+  Application ودیعه یک `Payment` غیرنقدی `DEPOSIT_APPLICATION` + `PaymentAllocation` + `DepositApplication` در یک transaction؛
+  بدون صدور Cash Receipt و بدون افزایش شمارنده.
+- **تفکیک Void/Refund:** Full void (D-02) با `LedgerReversal` مخالف؛ Refund نقدی جدا؛ Partial reversal در MVP نیست.
+- **Audit/Sync/Idempotency:** هر mutation مالی `AuditEvent` + `SyncChange` اتمیک و idempotency `PERMANENT` با replay از resource reference.
+- **تست‌ها:** Migration **۲۹/۲۹** (`scripts/test-m3c-migration.cjs`)؛ Integration **۲۰/۲۰** (deposit/refund/reversal + concurrency barrier + reconciliation با SQL مستقل)؛ Build سبز؛ OpenAPI lint exit 0.
+- **وضعیت Migration محیط‌ها:** CI/Throwaway فقط. `eskan_dev`/Staging/Production **هیچ migration اعمال نشده**.

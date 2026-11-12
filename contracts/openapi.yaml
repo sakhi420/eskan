@@ -2871,8 +2871,10 @@ components:
         - ALLOCATION_ALREADY_RELEASED
         - RELEASE_EXCEEDS_ALLOCATION
         - DEPOSIT_ALREADY_REVERSED
+        - EXPENSE_ALREADY_REVERSED
         - PAYMENT_REFUND_EXCEEDS_UNALLOCATED
         - REFUND_EXCEEDS_DEPOSIT_BALANCE
+        - CHECKOUT_REQUIRED
         - BILLING_RUN_DUPLICATE
         - RESIDENT_MISMATCH
         - ABSENCE_ALREADY_CREDITED
@@ -3408,7 +3410,8 @@ components:
       enum: [POSTED, REVERSED]
     PaymentMethod:
       type: string
-      enum: [CASH, BANK_TRANSFER, MOBILE_MONEY, OTHER]
+      description: "Manual receipt methods (D-16) plus the internal DEPOSIT_APPLICATION settlement (D-10). DEPOSIT_APPLICATION is issued only by deposit application, is never a cash receipt, and is never accepted as an Expense payment method."
+      enum: [CASH, BANK_TRANSFER, MOBILE_MONEY, OTHER, DEPOSIT_APPLICATION]
     DepositType:
       type: string
       description: "Deposit ledger event kind. Application to charges is NOT a DepositTransaction type; it is the independent DepositApplication entity."
@@ -3635,7 +3638,7 @@ components:
     Payment:
       type: object
       description: "Received funds (unallocated on creation). `receiptNumber` is the official, organization-unique, server-issued number; it is never supplied by the client (D-03/D-17). `provisionalReceiptId` echoes the offline client's local id when present."
-      required: [id, version, organizationId, residentId, status, money, method, receivedAt, receiptNumber, createdAt, updatedAt]
+      required: [id, version, organizationId, residentId, status, money, method, receivedAt, createdAt, updatedAt]
       properties:
         id: { type: string, format: uuid }
         version: { type: integer }

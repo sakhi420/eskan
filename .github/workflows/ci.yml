@@ -99,5 +99,8 @@ jobs:
       - name: M3b migrations & DB constraint tests
         run: node scripts/test-m3b-migration.cjs
 
+      - name: M3c migrations & DB constraint tests
+        run: node scripts/test-m3c-migration.cjs
+
       - name: PostgreSQL integration tests (lifecycle + concurrency + tenant isolation)
         run: npm run test:integration

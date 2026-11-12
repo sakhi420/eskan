@@ -10,8 +10,9 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuthUser, MembershipContext, RequestWithAuth } from '../auth/auth.types';
 import { Role } from '../generated/prisma/enums';
 import { envelope, parsePage, parseSize, requireIdempotencyKey } from '../common/http/http-utils';
-import { PaymentDto } from './dto/payment.dto';
+import { PaymentDto, PaymentRefundDto } from './dto/payment.dto';
 import { AllocationReleaseDto, PaymentAllocationDto } from './dto/allocation.dto';
+import { ReversalDto } from '../deposits/dto/deposit.dto';
 
 @Controller()
 @UseGuards(TenantGuard, RolesGuard)
@@ -110,6 +111,53 @@ export class PaymentsController {
         m.organizationId,
         user.id,
         allocationId,
+        dto,
+        requireIdempotencyKey(idempotencyKey),
+        req.traceId ?? 'unknown',
+      ),
+    );
+  }
+
+  @Post('payments/:paymentId/refund')
+  @Roles(Role.OWNER, Role.ADMIN)
+  async refundPayment(
+    @CurrentMembership() m: MembershipContext,
+    @CurrentUser() user: AuthUser,
+    @Param('paymentId') paymentId: string,
+    @Headers('Idempotency-Key') idempotencyKey: string | undefined,
+    @Body() dto: PaymentRefundDto,
+    @Req() req: RequestWithAuth,
+  ) {
+    return envelope(
+      req,
+      await this.payments.refundPayment(
+        m.organizationId,
+        user.id,
+        paymentId,
+        dto,
+        requireIdempotencyKey(idempotencyKey),
+        req.traceId ?? 'unknown',
+      ),
+    );
+  }
+
+  @Post('payments/:paymentId/reverse')
+  @HttpCode(HttpStatus.OK)
+  @Roles(Role.OWNER, Role.ADMIN)
+  async reversePayment(
+    @CurrentMembership() m: MembershipContext,
+    @CurrentUser() user: AuthUser,
+    @Param('paymentId') paymentId: string,
+    @Headers('Idempotency-Key') idempotencyKey: string | undefined,
+    @Body() dto: ReversalDto,
+    @Req() req: RequestWithAuth,
+  ) {
+    return envelope(
+      req,
+      await this.payments.reversePayment(
+        m.organizationId,
+        user.id,
+        paymentId,
         dto,
         requireIdempotencyKey(idempotencyKey),
         req.traceId ?? 'unknown',

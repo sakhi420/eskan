@@ -13,6 +13,7 @@ import { AppError } from '../common/errors/app-error';
 import { envelope, parseEnum, parsePage, parseSize, requireIdempotencyKey } from '../common/http/http-utils';
 import { ChargeDto } from './dto/charge.dto';
 import { BillingPostRequestDto, BillingPreviewRequestDto } from './dto/billing.dto';
+import { ReversalDto } from '../deposits/dto/deposit.dto';
 
 @Controller()
 @UseGuards(TenantGuard, RolesGuard)
@@ -56,6 +57,23 @@ export class ChargesController {
   @Get('charges/:chargeId')
   async get(@CurrentMembership() m: MembershipContext, @Param('chargeId') chargeId: string, @Req() req: RequestWithAuth) {
     return envelope(req, await this.charges.getCharge(m.organizationId, chargeId));
+  }
+
+  @Post('charges/:chargeId/reverse')
+  @HttpCode(HttpStatus.OK)
+  @Roles(Role.OWNER, Role.ADMIN)
+  async reverse(
+    @CurrentMembership() m: MembershipContext,
+    @CurrentUser() user: AuthUser,
+    @Param('chargeId') chargeId: string,
+    @Headers('Idempotency-Key') idempotencyKey: string | undefined,
+    @Body() dto: ReversalDto,
+    @Req() req: RequestWithAuth,
+  ) {
+    return envelope(
+      req,
+      await this.charges.reverseCharge(m.organizationId, user.id, chargeId, dto, requireIdempotencyKey(idempotencyKey), req.traceId ?? 'unknown'),
+    );
   }
 
   @Post('billing-runs/preview')
