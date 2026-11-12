@@ -1,10 +1,10 @@
 # M3c Remediation & Acceptance Report
 
-**Status:** CI VERIFIED — LOCKFILE SECURITY UPDATE TESTED; HIGH/CRITICAL AUDIT GATE PASSES; HUMAN REVIEW AND OWNER APPROVAL STILL REQUIRED  
+**Status:** CURRENT-HEAD CI VERIFIED — P1-7 HTTP ACCEPTANCE AND DAPP/CHARGE REVERSAL ORDERING PASS; HIGH/CRITICAL AUDIT GATE PASSES; HUMAN REVIEW AND OWNER APPROVAL STILL REQUIRED  
 **Base SHA:** `506947b2ac6f475f5c9418dfb640af5c9719bb10`  
-**Verified head SHA:** `24b990014d9aa87d8e5d2deb7a4298d794196ad2`  
+**Verified implementation head SHA:** `06b4ff3b7d1a6aadf7766b897b79f87e89d70286`  
 **PR:** [#5 — M3c financial domain](https://github.com/sakhi420/eskan/pull/5) (Draft, not merged)  
-**CI:** [Run #75 — success](https://github.com/sakhi420/eskan/actions/runs/43270826104) — 2026-11-12
+**CI:** [Run #81 — success](https://github.com/sakhi420/eskan/actions/runs/43272644798) — 2026-11-12
 
 ## Remediation table
 
@@ -24,7 +24,7 @@
 
 ## Current-head verification evidence
 
-All items below refer to the same verified PR head SHA `24b990014d9aa87d8e5d2deb7a4298d794196ad2`, not an earlier branch revision.
+All items below refer to the same verified implementation PR head SHA `06b4ff3b7d1a6aadf7766b897b79f87e89d70286`, not an earlier branch revision.
 
 | CI gate | Result |
 |---|---:|
