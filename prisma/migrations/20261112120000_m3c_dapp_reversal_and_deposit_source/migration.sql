@@ -344,26 +344,146 @@ CREATE TRIGGER payment_allocations_enforce_dapp_single_allocation
   BEFORE INSERT ON payment_allocations
   FOR EACH ROW EXECUTE FUNCTION enforce_dapp_single_allocation();
 
--- The linked DAPP Payment's financial identity cannot be rewritten after posting.
--- Status/version/reversal metadata remain mutable for the dedicated reverse flow.
-CREATE OR REPLACE FUNCTION prevent_dapp_payment_identity_update()
-RETURNS trigger AS $$
+-- Internal DAPP Payments must begin life as ordinary POSTED settlements.
+CREATE OR REPLACE FUNCTION enforce_dapp_payment_initial_state()
+RETURNS trigger AS $m3c_dapp_insert$
 BEGIN
-  IF (OLD.method = 'DEPOSIT_APPLICATION' OR NEW.method = 'DEPOSIT_APPLICATION') AND ROW(
-    NEW.organization_id, NEW.resident_id, NEW.amount, NEW.method, NEW.receipt_number
-  ) IS DISTINCT FROM ROW(
-    OLD.organization_id, OLD.resident_id, OLD.amount, OLD.method, OLD.receipt_number
-  ) THEN
-    RAISE EXCEPTION 'DEPOSIT_APPLICATION payment identity is immutable'
-      USING ERRCODE = 'P0001';
+  IF NEW.method = 'DEPOSIT_APPLICATION'
+     AND (
+       NEW.status <> 'POSTED'
+       OR NEW.reversed_by_id IS NOT NULL
+       OR NEW.reversal_reason IS NOT NULL
+       OR NEW.reversed_at IS NOT NULL
+     ) THEN
+    RAISE EXCEPTION 'A DEPOSIT_APPLICATION Payment must be inserted POSTED without reversal metadata'
+      USING ERRCODE = '23514';
   END IF;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$m3c_dapp_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER payments_enforce_dapp_initial_state
+  BEFORE INSERT ON payments
+  FOR EACH ROW EXECUTE FUNCTION enforce_dapp_payment_initial_state();
+
+-- DAPP Payments are immutable except for the one dedicated POSTED -> REVERSED
+-- transition. A deferred constraint trigger below verifies that the matching
+-- DepositApplication is also reversed by transaction commit.
+CREATE OR REPLACE FUNCTION prevent_dapp_payment_identity_update()
+RETURNS trigger AS $m3c_dapp_payment_update$
+BEGIN
+  IF OLD.method = 'DEPOSIT_APPLICATION' OR NEW.method = 'DEPOSIT_APPLICATION' THEN
+    IF ROW(
+         NEW.organization_id, NEW.resident_id, NEW.amount, NEW.method, NEW.receipt_number
+       ) IS DISTINCT FROM ROW(
+         OLD.organization_id, OLD.resident_id, OLD.amount, OLD.method, OLD.receipt_number
+       ) THEN
+      RAISE EXCEPTION 'DEPOSIT_APPLICATION payment identity is immutable'
+        USING ERRCODE = 'P0001';
+    END IF;
+
+    IF OLD.method <> 'DEPOSIT_APPLICATION'
+       OR NEW.method <> 'DEPOSIT_APPLICATION'
+       OR OLD.status <> 'POSTED'
+       OR NEW.status <> 'REVERSED'
+       OR NEW.reversed_by_id IS NULL
+       OR NULLIF(BTRIM(NEW.reversal_reason), '') IS NULL
+       OR NEW.reversed_at IS NULL
+       OR NEW.version <> OLD.version + 1 THEN
+      RAISE EXCEPTION 'A DEPOSIT_APPLICATION Payment permits only one complete POSTED -> REVERSED transition'
+        USING ERRCODE = '23514';
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$m3c_dapp_payment_update$ LANGUAGE plpgsql;
 
 CREATE TRIGGER payments_prevent_dapp_identity_update
   BEFORE UPDATE ON payments
   FOR EACH ROW EXECUTE FUNCTION prevent_dapp_payment_identity_update();
+
+-- A DAPP Payment cannot be reversed on its own. The transaction must also
+-- reverse its exact DepositApplication, fully release its Allocation, and add
+-- the matching DEBIT LedgerReversal before commit.
+CREATE OR REPLACE FUNCTION enforce_dapp_payment_reversal_completion()
+RETURNS trigger AS $m3c_dapp_payment_deferred$
+DECLARE
+  app_status "LedgerEntryStatus";
+  app_amount INTEGER;
+  app_reversed_by UUID;
+  app_reversal_reason TEXT;
+  app_reversed_at TIMESTAMPTZ(3);
+  release_total BIGINT;
+  reversal_count BIGINT;
+  matching_reversal BOOLEAN;
+BEGIN
+  IF OLD.method <> 'DEPOSIT_APPLICATION'
+     OR NEW.method <> 'DEPOSIT_APPLICATION'
+     OR OLD.status <> 'POSTED'
+     OR NEW.status <> 'REVERSED' THEN
+    RETURN NULL;
+  END IF;
+
+  SELECT status, amount, reversed_by_id, reversal_reason, reversed_at
+    INTO app_status, app_amount, app_reversed_by, app_reversal_reason, app_reversed_at
+    FROM deposit_applications
+   WHERE organization_id = NEW.organization_id
+     AND resident_id = NEW.resident_id
+     AND payment_id = NEW.id;
+
+  IF NOT FOUND
+     OR app_status <> 'REVERSED'
+     OR app_amount <> NEW.amount
+     OR app_reversed_by IS DISTINCT FROM NEW.reversed_by_id
+     OR app_reversal_reason IS DISTINCT FROM NEW.reversal_reason
+     OR app_reversed_at IS DISTINCT FROM NEW.reversed_at THEN
+    RAISE EXCEPTION 'A reversed DEPOSIT_APPLICATION Payment requires its matching reversed DepositApplication'
+      USING ERRCODE = '23514';
+  END IF;
+
+  SELECT COALESCE(SUM(amount)::BIGINT, 0)
+    INTO release_total
+    FROM allocation_releases
+   WHERE organization_id = NEW.organization_id
+     AND resident_id = NEW.resident_id
+     AND allocation_id = (SELECT allocation_id
+                            FROM deposit_applications
+                           WHERE organization_id = NEW.organization_id
+                             AND resident_id = NEW.resident_id
+                             AND payment_id = NEW.id);
+
+  IF release_total <> app_amount::BIGINT THEN
+    RAISE EXCEPTION 'A reversed DEPOSIT_APPLICATION Payment requires a full AllocationRelease'
+      USING ERRCODE = '23514';
+  END IF;
+
+  SELECT COUNT(*)::BIGINT,
+         COALESCE(BOOL_OR(
+           side = 'DEBIT'
+           AND amount = app_amount
+           AND reason = NEW.reversal_reason
+           AND actor_user_id = NEW.reversed_by_id
+         ), false)
+    INTO reversal_count, matching_reversal
+    FROM ledger_reversals
+   WHERE organization_id = NEW.organization_id
+     AND source_type = 'PAYMENT'
+     AND source_id = NEW.id;
+
+  IF reversal_count <> 1 OR NOT matching_reversal THEN
+    RAISE EXCEPTION 'A reversed DEPOSIT_APPLICATION Payment requires exactly one matching DEBIT LedgerReversal'
+      USING ERRCODE = '23514';
+  END IF;
+
+  RETURN NULL;
+END;
+$m3c_dapp_payment_deferred$ LANGUAGE plpgsql;
+
+CREATE CONSTRAINT TRIGGER payments_dapp_reversal_requires_application
+  AFTER UPDATE ON payments
+  DEFERRABLE INITIALLY DEFERRED
+  FOR EACH ROW EXECUTE FUNCTION enforce_dapp_payment_reversal_completion();
 
 -- A linked PaymentAllocation is the financial identity of one DepositApplication.
 CREATE OR REPLACE FUNCTION prevent_dapp_allocation_update()
@@ -386,10 +506,23 @@ CREATE TRIGGER payment_allocations_prevent_dapp_update
   BEFORE UPDATE ON payment_allocations
   FOR EACH ROW EXECUTE FUNCTION prevent_dapp_allocation_update();
 
--- A DepositApplication's financial identity is immutable; only status/reversal
--- metadata may change through reverseApplication().
+-- DepositApplication identity is immutable. Its only allowed UPDATE is
+-- POSTED -> REVERSED after the linked Payment, full AllocationRelease, and
+-- compensating LedgerReversal have all been written in the same transaction.
 CREATE OR REPLACE FUNCTION prevent_deposit_application_link_mutation()
-RETURNS trigger AS $$
+RETURNS trigger AS $m3c_dapp_application_update$
+DECLARE
+  source_status "LedgerEntryStatus";
+  payment_status "LedgerEntryStatus";
+  payment_method "PaymentMethod";
+  payment_amount INTEGER;
+  payment_reversed_by UUID;
+  payment_reversal_reason TEXT;
+  payment_reversed_at TIMESTAMPTZ(3);
+  charge_status "LedgerEntryStatus";
+  release_total BIGINT;
+  reversal_count BIGINT;
+  matching_reversal BOOLEAN;
 BEGIN
   IF ROW(
        NEW.organization_id, NEW.resident_id, NEW.deposit_transaction_id,
@@ -403,9 +536,101 @@ BEGIN
     RAISE EXCEPTION 'deposit_application financial identity is immutable'
       USING ERRCODE = 'P0001';
   END IF;
+
+  IF OLD.status <> 'POSTED'
+     OR NEW.status <> 'REVERSED'
+     OR NEW.version <> OLD.version + 1
+     OR NEW.reversed_by_id IS NULL
+     OR NULLIF(BTRIM(NEW.reversal_reason), '') IS NULL
+     OR NEW.reversed_at IS NULL THEN
+    RAISE EXCEPTION 'A DepositApplication permits only one complete POSTED -> REVERSED transition'
+      USING ERRCODE = '23514';
+  END IF;
+
+  -- Serialize this source transition with concurrent direct-SQL refunds,
+  -- forfeitures, and applications that also lock the RECEIVED source row.
+  PERFORM 1
+    FROM deposit_transactions
+   WHERE id = NEW.deposit_transaction_id
+     AND organization_id = NEW.organization_id
+     AND resident_id = NEW.resident_id
+     AND type = 'RECEIVED'
+     AND status = 'POSTED'
+   FOR UPDATE;
+  IF NOT FOUND OR EXISTS (
+    SELECT 1 FROM ledger_reversals
+     WHERE organization_id = NEW.organization_id
+       AND source_type = 'DEPOSIT'
+       AND source_id = NEW.deposit_transaction_id
+  ) THEN
+    RAISE EXCEPTION 'DepositApplication source must remain an unreversed POSTED RECEIVED deposit during reversal'
+      USING ERRCODE = '23514';
+  END IF;
+
+  SELECT status, method, amount, reversed_by_id, reversal_reason, reversed_at
+    INTO payment_status, payment_method, payment_amount,
+         payment_reversed_by, payment_reversal_reason, payment_reversed_at
+    FROM payments
+   WHERE id = NEW.payment_id
+     AND organization_id = NEW.organization_id
+     AND resident_id = NEW.resident_id
+   FOR UPDATE;
+
+  IF NOT FOUND
+     OR payment_status <> 'REVERSED'
+     OR payment_method <> 'DEPOSIT_APPLICATION'
+     OR payment_amount <> NEW.amount
+     OR payment_reversed_by IS DISTINCT FROM NEW.reversed_by_id
+     OR payment_reversal_reason IS DISTINCT FROM NEW.reversal_reason
+     OR payment_reversed_at IS DISTINCT FROM NEW.reversed_at THEN
+    RAISE EXCEPTION 'DepositApplication can be reversed only with its matching reversed DAPP Payment'
+      USING ERRCODE = '23514';
+  END IF;
+
+  SELECT status
+    INTO charge_status
+    FROM charges
+   WHERE id = NEW.charge_id
+     AND organization_id = NEW.organization_id
+     AND resident_id = NEW.resident_id
+   FOR UPDATE;
+  IF NOT FOUND OR charge_status <> 'POSTED' THEN
+    RAISE EXCEPTION 'DepositApplication must be reversed before its Charge'
+      USING ERRCODE = '23514';
+  END IF;
+
+  SELECT COALESCE(SUM(amount)::BIGINT, 0)
+    INTO release_total
+    FROM allocation_releases
+   WHERE organization_id = NEW.organization_id
+     AND resident_id = NEW.resident_id
+     AND allocation_id = NEW.allocation_id;
+  IF release_total <> NEW.amount::BIGINT THEN
+    RAISE EXCEPTION 'DepositApplication reversal requires a full AllocationRelease'
+      USING ERRCODE = '23514';
+  END IF;
+
+  SELECT COUNT(*)::BIGINT,
+         COALESCE(BOOL_OR(
+           side = 'DEBIT'
+           AND amount = NEW.amount
+           AND reason = NEW.reversal_reason
+           AND actor_user_id = NEW.reversed_by_id
+         ), false)
+    INTO reversal_count, matching_reversal
+    FROM ledger_reversals
+   WHERE organization_id = NEW.organization_id
+     AND source_type = 'PAYMENT'
+     AND source_id = NEW.payment_id;
+
+  IF reversal_count <> 1 OR NOT matching_reversal THEN
+    RAISE EXCEPTION 'DepositApplication reversal requires exactly one matching DEBIT LedgerReversal'
+      USING ERRCODE = '23514';
+  END IF;
+
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$m3c_dapp_application_update$ LANGUAGE plpgsql;
 
 CREATE TRIGGER deposit_applications_prevent_link_update
   BEFORE UPDATE ON deposit_applications
