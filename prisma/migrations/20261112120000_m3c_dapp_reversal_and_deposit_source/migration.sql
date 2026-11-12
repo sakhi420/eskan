@@ -367,3 +367,30 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER expenses_prevent_financial_identity_update
   BEFORE UPDATE ON expenses
   FOR EACH ROW EXECUTE FUNCTION prevent_expense_financial_identity_update();
+
+-- A Charge that is settled by a still-posted DepositApplication cannot be
+-- reversed independently. The dedicated application reversal must first restore
+-- Deposit Held and release its DAPP allocation; this guard also protects direct SQL.
+CREATE OR REPLACE FUNCTION prevent_charge_reversal_with_active_deposit_application()
+RETURNS trigger AS $
+BEGIN
+  IF OLD.status = 'POSTED'
+     AND NEW.status = 'REVERSED'
+     AND EXISTS (
+       SELECT 1
+         FROM deposit_applications AS da
+        WHERE da.organization_id = OLD.organization_id
+          AND da.charge_id = OLD.id
+          AND da.status = 'POSTED'
+     ) THEN
+    RAISE EXCEPTION
+      'Charge cannot be reversed while a posted DepositApplication exists; reverse the application first'
+      USING ERRCODE = '23514';
+  END IF;
+  RETURN NEW;
+END;
+$ LANGUAGE plpgsql;
+
+CREATE TRIGGER charges_prevent_reverse_with_active_deposit_application
+  BEFORE UPDATE OF status ON charges
+  FOR EACH ROW EXECUTE FUNCTION prevent_charge_reversal_with_active_deposit_application();
