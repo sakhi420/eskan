@@ -113,10 +113,10 @@ CREATE UNIQUE INDEX "deposit_transactions_organization_id_id_key" ON "deposit_tr
 CREATE UNIQUE INDEX "deposit_transactions_organization_id_resident_id_id_key" ON "deposit_transactions"("organization_id", "resident_id", "id");
 
 -- AddForeignKey
-ALTER TABLE "deposit_transactions" ADD CONSTRAINT "deposit_transactions_actor_user_id_fkey" FOREIGN KEY ("actor_user_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "deposit_transactions" ADD CONSTRAINT "deposit_transactions_actor_user_id_fkey" FOREIGN KEY ("actor_user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "expenses" ADD CONSTRAINT "expenses_actor_user_id_fkey" FOREIGN KEY ("actor_user_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "expenses" ADD CONSTRAINT "expenses_actor_user_id_fkey" FOREIGN KEY ("actor_user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ledger_reversals" ADD CONSTRAINT "ledger_reversals_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
