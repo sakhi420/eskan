@@ -203,6 +203,7 @@ async function seedDeposit(c, org, res, amount) {
     'deposit_applications_prevent_link_update',
     'allocation_releases_prevent_update',
     'allocation_releases_enforce_invariants',
+    'ledger_reversals_validate_deposit_source',
     'ledger_reversals_prevent_update',
     'payment_refunds_prevent_update',
     'expenses_prevent_financial_identity_update',
@@ -211,6 +212,11 @@ async function seedDeposit(c, org, res, amount) {
     const found = await fresh.c.query(`SELECT tgname FROM pg_trigger WHERE NOT tgisinternal AND tgname=$1`, [trigger]);
     check(`[trigger ${trigger}]`, found.rowCount === 1);
   }
+
+  const depositReversalIndex = await fresh.c.query(
+    `SELECT indexname FROM pg_indexes WHERE indexname='ledger_reversals_deposit_source_unique'`,
+  );
+  check('[index: one DEPOSIT reversal per source]', depositReversalIndex.rowCount === 1);
 
   const fks = await fresh.c.query(`SELECT conname FROM pg_constraint WHERE contype='f' AND array_length(conkey, 1) >= 2 ORDER BY conname`);
   const fkNames = new Set(fks.rows.map((r) => r.conname));
@@ -288,6 +294,76 @@ async function seedDeposit(c, org, res, amount) {
        VALUES ($1,$2,$3,$4,'FORFEITED','POSTED',10,'2026-11-02',now())`,
       [uuid(), org, res, childRefund],
     )) === '23514');
+
+  // Deposit reversal is source-aware and serialized by the RECEIVED row lock.
+  const reversalGuardDeposit = await seedDeposit(fresh.c, org, res, 100);
+  const reversalGuardChild = uuid();
+  await fresh.c.query(
+    `INSERT INTO deposit_transactions
+       (id,organization_id,resident_id,source_deposit_transaction_id,type,status,amount,received_at,updated_at)
+     VALUES ($1,$2,$3,$4,'REFUNDED','POSTED',40,'2026-11-02',now())`,
+    [reversalGuardChild, org, res, reversalGuardDeposit],
+  );
+  check(
+    '[deposit reversal: RECEIVED blocked while child event is active]',
+    (await errCode(
+      fresh.c,
+      `INSERT INTO ledger_reversals
+         (id,organization_id,resident_id,source_type,source_id,side,amount,reason,actor_user_id,idempotency_key)
+       VALUES ($1,$2,$3,'DEPOSIT',$4,'DEBIT',100,'source too early',$5,$6)`,
+      [uuid(), org, res, reversalGuardDeposit, user, uuid()],
+    )) === '23514',
+  );
+  check(
+    '[deposit reversal: child REFUNDED event can be reversed while source is active]',
+    (await errCode(
+      fresh.c,
+      `INSERT INTO ledger_reversals
+         (id,organization_id,resident_id,source_type,source_id,side,amount,reason,actor_user_id,idempotency_key)
+       VALUES ($1,$2,$3,'DEPOSIT',$4,'CREDIT',40,'reverse child first',$5,$6)`,
+      [uuid(), org, res, reversalGuardChild, user, uuid()],
+    )) === null,
+  );
+  check(
+    '[deposit reversal: RECEIVED succeeds after child reversal]',
+    (await errCode(
+      fresh.c,
+      `INSERT INTO ledger_reversals
+         (id,organization_id,resident_id,source_type,source_id,side,amount,reason,actor_user_id,idempotency_key)
+       VALUES ($1,$2,$3,'DEPOSIT',$4,'DEBIT',100,'reverse source second',$5,$6)`,
+      [uuid(), org, res, reversalGuardDeposit, user, uuid()],
+    )) === null,
+  );
+  check(
+    '[deposit reversal: duplicate source reversal rejected]',
+    (await errCode(
+      fresh.c,
+      `INSERT INTO ledger_reversals
+         (id,organization_id,resident_id,source_type,source_id,side,amount,reason,actor_user_id,idempotency_key)
+       VALUES ($1,$2,$3,'DEPOSIT',$4,'DEBIT',100,'duplicate source reversal',$5,$6)`,
+      [uuid(), org, res, reversalGuardDeposit, user, uuid()],
+    )) === '23505',
+  );
+  check(
+    '[deposit reversal: child event cannot be reversed twice]',
+    (await errCode(
+      fresh.c,
+      `INSERT INTO ledger_reversals
+         (id,organization_id,resident_id,source_type,source_id,side,amount,reason,actor_user_id,idempotency_key)
+       VALUES ($1,$2,$3,'DEPOSIT',$4,'CREDIT',40,'duplicate child reversal',$5,$6)`,
+      [uuid(), org, res, reversalGuardChild, user, uuid()],
+    )) === '23505',
+  );
+  check(
+    '[deposit reversal: child event cannot be created after source reversal]',
+    (await errCode(
+      fresh.c,
+      `INSERT INTO deposit_transactions
+         (id,organization_id,resident_id,source_deposit_transaction_id,type,status,amount,received_at,updated_at)
+       VALUES ($1,$2,$3,$4,'FORFEITED','POSTED',1,'2026-11-02',now())`,
+      [uuid(), org, res, reversalGuardDeposit],
+    )) === '23514',
+  );
 
   // A single source deposit has one combined balance across refunds, forfeits,
   // and DAPP applications; no individual event type gets a separate allowance.
@@ -475,6 +551,28 @@ async function seedDeposit(c, org, res, amount) {
      VALUES ($1,$2,$3,$4,$5,$6,$7,100,'valid linkage',$8)`,
     [validApplication, org, res, depRecv, internalCharge, internalPayment, internalAllocation, user],
   );
+  // Clear the child event first so the following source-reversal failure is
+  // specifically caused by the still-POSTED DepositApplication.
+  check(
+    '[deposit reversal: child event reversal before DAPP source test]',
+    (await errCode(
+      fresh.c,
+      `INSERT INTO ledger_reversals
+         (id,organization_id,resident_id,source_type,source_id,side,amount,reason,actor_user_id,idempotency_key)
+       VALUES ($1,$2,$3,'DEPOSIT',$4,'CREDIT',10,'reverse child before application',$5,$6)`,
+      [uuid(), org, res, childRefund, user, uuid()],
+    )) === null,
+  );
+  check(
+    '[deposit reversal: RECEIVED blocked while DAPP is POSTED]',
+    (await errCode(
+      fresh.c,
+      `INSERT INTO ledger_reversals
+         (id,organization_id,resident_id,source_type,source_id,side,amount,reason,actor_user_id,idempotency_key)
+       VALUES ($1,$2,$3,'DEPOSIT',$4,'DEBIT',10000,'source held by DAPP',$5,$6)`,
+      [uuid(), org, res, depRecv, user, uuid()],
+    )) === '23514',
+  );
   check(
     '[DAPP: active application blocks Charge reversal]',
     (await errCode(
@@ -613,6 +711,16 @@ async function seedDeposit(c, org, res, amount) {
     (await errCode(fresh.c, `UPDATE payment_allocations SET amount=99 WHERE id=$1`, [internalAllocation])) === 'P0001');
   check('[DAPP: application financial identity immutable]',
     (await errCode(fresh.c, `UPDATE deposit_applications SET amount=99 WHERE id=$1`, [validApplication])) === 'P0001');
+  check(
+    '[deposit reversal: RECEIVED succeeds after DAPP and child events are reversed]',
+    (await errCode(
+      fresh.c,
+      `INSERT INTO ledger_reversals
+         (id,organization_id,resident_id,source_type,source_id,side,amount,reason,actor_user_id,idempotency_key)
+       VALUES ($1,$2,$3,'DEPOSIT',$4,'DEBIT',10000,'all dependent events reversed',$5,$6)`,
+      [uuid(), org, res, depRecv, user, uuid()],
+    )) === null,
+  );
 
   const mismatchPayment = uuid();
   await fresh.c.query(
