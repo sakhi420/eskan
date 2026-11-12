@@ -167,7 +167,7 @@ CREATE TRIGGER payment_allocations_enforce_dapp_single_allocation
 CREATE OR REPLACE FUNCTION prevent_dapp_payment_identity_update()
 RETURNS trigger AS $$
 BEGIN
-  IF OLD.method = 'DEPOSIT_APPLICATION' AND ROW(
+  IF (OLD.method = 'DEPOSIT_APPLICATION' OR NEW.method = 'DEPOSIT_APPLICATION') AND ROW(
     NEW.organization_id, NEW.resident_id, NEW.amount, NEW.method, NEW.receipt_number
   ) IS DISTINCT FROM ROW(
     OLD.organization_id, OLD.resident_id, OLD.amount, OLD.method, OLD.receipt_number
