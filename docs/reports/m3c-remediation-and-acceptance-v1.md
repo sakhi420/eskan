@@ -2,9 +2,9 @@
 
 **Status:** CI VERIFIED — P1-7 HTTP ACCEPTANCE TESTS PASS; HUMAN REVIEW AND OWNER APPROVAL STILL REQUIRED  
 **Base SHA:** `506947b2ac6f475f5c9418dfb640af5c9719bb10`  
-**Verified head SHA:** `5ae15a26137ca3412c464a1926c3fac20843f4d8`  
+**Verified head SHA:** `794ebffd9711c2884980e082cdbcc23f4c65a0db`  
 **PR:** [#5 — M3c financial domain](https://github.com/sakhi420/eskan/pull/5) (Draft, not merged)  
-**CI:** [Run #59 — success](https://github.com/sakhi420/eskan/actions/runs/43264884308) — 2026-11-12
+**CI:** [Run #60 — success](https://github.com/sakhi420/eskan/actions/runs/43265377090) — 2026-11-12
 
 ## Remediation table
 
@@ -24,7 +24,7 @@
 
 ## Current-head verification evidence
 
-All items below refer to the same verified PR head SHA `5ae15a26137ca3412c464a1926c3fac20843f4d8`, not an earlier branch revision.
+All items below refer to the same verified PR head SHA `794ebffd9711c2884980e082cdbcc23f4c65a0db`, not an earlier branch revision.
 
 | CI gate | Result |
 |---|---:|
