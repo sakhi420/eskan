@@ -6,7 +6,7 @@
 ## Git
 - Branch: `feat/m3c-deposit-expense-refund-reversal`
 - Base SHA: `506947b2ac6f475f5c9418dfb640af5c9719bb10` (= `origin/main`)
-- Working tree: clean at completion (committed)
+- Local working tree: not inspected by this GitHub-side patch; pull the branch to update the local clone
 - PR: not created; the feature branch is pushed and awaits owner-side local validation.
 
 ## Scope
@@ -40,19 +40,23 @@
 - OpenAPI: `PaymentMethod.DEPOSIT_APPLICATION` + error codes added; `receiptNumber` optional in `Payment`; lint exit 0
 
 ## Tests
-- Unit: existing suite green
-- Integration: `m3c-deposits-refund-reversal` (15), `m3c-concurrency` (4), `m3c-reconciliation` (1) — all PASS
-- Migration: `scripts/test-m3c-migration.cjs` — 29/29 PASS (fresh DB, CHECKs, tenant FKs, delete protection, parity)
-- Concurrency: barrier-based races (refund/forfeit/apply over balance + refund-vs-forfeit) PASS
-- Reconciliation: independent raw-SQL oracle for Deposit Held + non-cash payment assertion PASS
-- Build: `npm run build` exit 0
-- CI: wired (`ci.yml` M3c migration step; integration auto-discovered)
 
-## Remaining risks
-- P0: none
-- P1: none identified
-- P2: "final checkout" gate interpreted as "no ACTIVE contract" (documented in ADR-0011 §5)
-- Unresolved product decisions: none (D-01..D-18 fully honored)
+The counts/results below are historical for the earlier M3c implementation and do not verify
+the additional remediation commits now on this branch.
+
+- Historical integration source files: deposit/refund/reversal, concurrency and reconciliation.
+- Current source inventory: 33 integration cases (20 + 4 + 1 + 8); not yet executed after this patch.
+- The migration script now includes a separate pre-M3c baseline upgrade rehearsal with M3b
+  financial rows, plus fresh replay and additional DAPP/append-only constraints.
+- Build, Prisma, OpenAPI, lint, format, unit, integration and migration gates must be rerun
+  against the current branch head. CI has not been verified.
+
+## Remaining acceptance gaps
+- P1: HTTP/Supertest tests for the OWNER/ADMIN/OPERATOR/VIEWER permission matrix and
+  cross-tenant/BOLA denial are still outstanding.
+- CI has not run on the current branch head; lint/format gates were added to the workflow.
+- The current branch's new baseline-upgrade migration path and tests must be executed locally.
+- Do not apply M3c migrations to `eskan_dev`, Staging or Production before independent review.
 
 ## Environment boundary
 - CI/Throwaway: migrations + tests exercised (throwaway DBs)
