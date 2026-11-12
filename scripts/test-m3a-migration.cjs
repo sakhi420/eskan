@@ -99,8 +99,31 @@ async function errCode(promise) { try { await promise; return null; } catch (e) 
   check('[partial-index] charges_rent_business_key with type=RENT predicate', partial.rowCount === 1 && /RENT/.test(partial.rows[0].indexdef));
   const chk = await c2.query(`SELECT conname FROM pg_constraint WHERE contype='c' AND conname IN ('charges_period_consistent','absence_credits_amount_positive','billing_runs_due_day_of_month_range') ORDER BY conname`);
   check('[check] M3a CHECK constraints present', chk.rowCount === 3, chk.rows.map(x => x.conname).join(','));
-  const fks = await c2.query(`SELECT count(*)::int n FROM pg_constraint WHERE contype='f' AND array_length(conkey,1) >= 2`);
-  check('[composite-fk] tenant composite FKs = 24', fks.rows[0].n === 24, 'count=' + fks.rows[0].n);
+  // Scope this assertion to M3a-owned tables. Counting every composite FK in
+  // the database makes this historical migration test fail whenever a later
+  // migration (M3b/M3c) legitimately adds its own tenant-scoped relationships.
+  const m3aCompositeFkNames = [
+    'charge_package_components_organization_id_resident_id_char_fkey',
+    'absence_credits_organization_id_resident_id_absence_id_fkey',
+    'absence_credits_organization_id_resident_id_charge_id_fkey',
+  ];
+  const m3aFks = await c2.query(
+    `SELECT conname
+       FROM pg_constraint
+      WHERE contype = 'f'
+        AND array_length(conkey, 1) >= 2
+        AND conname = ANY($1::text[])
+      ORDER BY conname`,
+    [m3aCompositeFkNames],
+  );
+  const actualM3aFkNames = m3aFks.rows.map((row) => row.conname);
+  const expectedM3aFkNames = [...m3aCompositeFkNames].sort();
+  check(
+    '[composite-fk] M3a tenant composite FKs present',
+    actualM3aFkNames.length === expectedM3aFkNames.length &&
+      actualM3aFkNames.every((name, index) => name === expectedM3aFkNames[index]),
+    `expected=${expectedM3aFkNames.length} actual=${actualM3aFkNames.length} names=${actualM3aFkNames.join(',')}`,
+  );
   await c2.end().catch(() => {});
 
   await admin.query(`DROP DATABASE IF EXISTS "${name}" WITH (FORCE)`).catch(() => {});
