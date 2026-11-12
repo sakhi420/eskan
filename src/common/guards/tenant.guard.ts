@@ -34,7 +34,7 @@ export class TenantGuard implements CanActivate {
     if (organizationId) {
       const match = memberships.find((m) => m.organizationId === organizationId);
       if (!match) {
-        throw AppError.forbidden(`No active membership in organization ${organizationId}`);
+        throw AppError.notFound('Organization not found');
       }
       membership = match;
     } else if (memberships.length === 1) {
