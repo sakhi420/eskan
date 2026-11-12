@@ -1106,6 +1106,24 @@ export class DepositsService {
           );
         }
 
+        // Persist the compensating ledger event and the complete allocation release
+        // before changing either status. PostgreSQL's application/payment guards
+        // verify these artifacts before allowing the DAPP to stop consuming Held.
+        const reversal = await tx.ledgerReversal.create({
+          data: {
+            organizationId,
+            residentId: application.residentId,
+            sourceType: ReversalSourceType.PAYMENT,
+            sourceId: application.paymentId,
+            side: EntrySide.DEBIT,
+            amount: application.amount,
+            reason: dto.reason,
+            actorUserId: userId,
+            idempotencyKey,
+          },
+          select: { id: true },
+        });
+
         const updatedPayment = await tx.payment.update({
           where: { id: application.paymentId },
           data: {
@@ -1129,22 +1147,6 @@ export class DepositsService {
           },
           select: APPLICATION_SELECT,
         })) as unknown as ApplicationRow;
-
-        // Reversal side DEBIT — the opposite of the internal payment's CREDIT posting (D-02).
-        const reversal = await tx.ledgerReversal.create({
-          data: {
-            organizationId,
-            residentId: application.residentId,
-            sourceType: ReversalSourceType.PAYMENT,
-            sourceId: application.paymentId,
-            side: EntrySide.DEBIT,
-            amount: application.amount,
-            reason: dto.reason,
-            actorUserId: userId,
-            idempotencyKey,
-          },
-          select: { id: true },
-        });
 
         await this.posting.audit(tx, {
           organizationId,
