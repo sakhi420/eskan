@@ -2042,6 +2042,36 @@ paths:
                 properties:
                   data: { $ref: '#/components/schemas/DepositApplicationResult' }
                   meta: { $ref: '#/components/schemas/Meta' }
+  /api/v1/deposit-applications/{applicationId}/reverse:
+    post:
+      tags: [deposits]
+      summary: reverse a deposit application at final checkout
+      description: "OWNER/ADMIN only. Atomically releases the sole linked allocation, reverses the internal DAPP payment, restores Deposit Held and records the opposite-side LedgerReversal. Generic payment allocation/release/refund/reverse endpoints cannot mutate DAPP settlements."
+      operationId: depositApplicationReverse
+      parameters:
+        - { name: applicationId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReversalRequest' }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '200':
+          description: reversed
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/DepositApplicationReverseResult' }
+                  meta: { $ref: '#/components/schemas/Meta' }
   /api/v1/billing-runs/preview:
     post:
       tags: [charges]
@@ -3353,7 +3383,7 @@ components:
       properties:
         residentId: { type: string, format: uuid }
         money: { $ref: '#/components/schemas/Money' }
-        method: { $ref: '#/components/schemas/PaymentMethod' }
+        method: { $ref: '#/components/schemas/ManualPaymentMethod' }
         receivedAt: { type: string, format: date }
         notes: { type: string, maxLength: 1000 }
         payerName: { type: string, maxLength: 200 }
@@ -3375,13 +3405,13 @@ components:
         reason: { type: string, maxLength: 500 }
     ExpenseRequest:
       type: object
-      required: [category, money, spentAt]
+      required: [category, money, spentAt, paymentMethod]
       properties:
         category: { type: string, minLength: 1, maxLength: 100 }
         money: { $ref: '#/components/schemas/Money' }
         spentAt: { type: string, format: date }
         hostelId: { type: string, format: uuid }
-        paymentMethod: { $ref: '#/components/schemas/PaymentMethod' }
+        paymentMethod: { $ref: '#/components/schemas/ManualPaymentMethod' }
         description: { type: string, maxLength: 1000 }
     SyncDeviceRegisterRequest:
       type: object
@@ -3408,9 +3438,13 @@ components:
     LedgerEntryStatus:
       type: string
       enum: [POSTED, REVERSED]
+    ManualPaymentMethod:
+      type: string
+      description: "Client-selectable manual receipt/expense methods only (D-16). Internal DEPOSIT_APPLICATION is deliberately excluded."
+      enum: [CASH, BANK_TRANSFER, MOBILE_MONEY, OTHER]
     PaymentMethod:
       type: string
-      description: "Manual receipt methods (D-16) plus the internal DEPOSIT_APPLICATION settlement (D-10). DEPOSIT_APPLICATION is issued only by deposit application, is never a cash receipt, and is never accepted as an Expense payment method."
+      description: "Persisted Payment method, including internal DEPOSIT_APPLICATION settlement (D-10). Normal PaymentRequest and ExpenseRequest use ManualPaymentMethod."
       enum: [CASH, BANK_TRANSFER, MOBILE_MONEY, OTHER, DEPOSIT_APPLICATION]
     DepositType:
       type: string
@@ -3794,18 +3828,30 @@ components:
               money: { $ref: '#/components/schemas/Money' }
     DepositApplication:
       type: object
-      description: "Independent, append-only record of deposit-to-charge application (D-10). Not a PaymentAllocation and not a DepositTransaction. Links the organization, resident, the deposit ledger event, and the charge line."
-      required: [id, organizationId, residentId, depositTransactionId, chargeId, money, reason, actorUserId, createdAt]
+      description: "D-10 deposit-to-charge application with structural links to its internal DAPP Payment and sole PaymentAllocation. Financial identity is immutable; reversal state is explicit."
+      required: [id, version, organizationId, residentId, depositTransactionId, chargeId, paymentId, allocationId, status, money, reason, actorUserId, createdAt]
       properties:
         id: { type: string, format: uuid }
+        version: { type: integer, minimum: 1 }
         organizationId: { type: string, format: uuid }
         residentId: { type: string, format: uuid }
         depositTransactionId: { type: string, format: uuid }
         chargeId: { type: string, format: uuid }
+        paymentId: { type: string, format: uuid }
+        allocationId: { type: string, format: uuid }
+        status: { $ref: '#/components/schemas/LedgerEntryStatus' }
         money: { $ref: '#/components/schemas/Money' }
         reason: { type: string }
         actorUserId: { type: string, format: uuid }
         createdAt: { type: string, format: date-time }
+    DepositApplicationReverseResult:
+      type: object
+      required: [application, paymentId, allocationId, reversalId]
+      properties:
+        application: { $ref: '#/components/schemas/DepositApplication' }
+        paymentId: { type: string, format: uuid }
+        allocationId: { type: string, format: uuid }
+        reversalId: { type: string, format: uuid }
     DepositApplicationResult:
       type: object
       description: "Atomic result of applying one deposit to multiple charges (D-10). The whole operation is all-or-nothing: if any single application fails, none is persisted."
