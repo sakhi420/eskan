@@ -22,14 +22,16 @@
     "test:m3b-migration": "node scripts/test-m3b-migration.cjs",
     "test:m3c-migration": "node scripts/test-m3c-migration.cjs",
     "lint": "eslint \"{src,test}/**/*.ts\"",
-    "format:check": "prettier --check \"{src,test,prisma}/**/*.{ts,json,prisma}\"",
+    "format:check": "prettier --check \"{src,test}/**/*.ts\" \"eslint.config.mjs\" \"package.json\" \"tsconfig.json\"",
     "openapi:validate": "npx @redocly/cli@1.25.15 lint contracts/openapi.yaml",
     "db:generate": "prisma generate",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev",
     "db:status": "prisma migrate status",
     "db:studio": "prisma studio",
-    "db:seed": "prisma db seed"
+    "db:seed": "prisma db seed",
+    "lint:fix": "eslint \"{src,test}/**/*.ts\" --fix",
+    "format": "prettier --write \"{src,test}/**/*.ts\" \"eslint.config.mjs\" \"package.json\" \"tsconfig.json\""
   },
   "dependencies": {
     "@nestjs/common": "12.2.0",
@@ -61,7 +63,11 @@
     "supertest": "7.3.1",
     "ts-jest": "29.4.15",
     "ts-node": "^10.9.2",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "@eslint/js": "10.0.1",
+    "eslint": "10.14.0",
+    "prettier": "3.10.0",
+    "typescript-eslint": "8.72.2"
   },
   "engines": {
     "node": ">=24.0.0"
