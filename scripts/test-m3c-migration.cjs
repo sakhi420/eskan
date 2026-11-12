@@ -114,20 +114,36 @@ async function seedDeposit(c, org, res, amount) {
      VALUES ($1,$2,$3,'REFUNDED','POSTED',100,'2026-11-02',now())`,
     [uuid(), legacyFixture.org, legacyFixture.res],
   );
-  await applyMigrations(legacyChild.c, [m3cMigrations[0]]);
   let legacyPreflightError = null;
   try {
-    await applyMigrations(legacyChild.c, [m3cMigrations[1]]);
+    await applyMigrations(legacyChild.c, [m3cMigrations[0]]);
   } catch (e) {
     legacyPreflightError = e;
   }
   check(
-    '[preflight: rejects legacy refund/forfeit events without source links]',
+    '[preflight: rejects legacy refund/forfeit events before any M3c DDL]',
     !!legacyPreflightError &&
       String(legacyPreflightError.message).includes('legacy REFUNDED/FORFEITED'),
     legacyPreflightError
       ? String(legacyPreflightError.message)
       : 'migration unexpectedly succeeded',
+  );
+  const legacyAfterFailure = await legacyChild.c.query(
+    `SELECT
+       to_regtype('public."ReversalSourceType"') IS NULL AS enum_absent,
+       to_regclass('public.ledger_reversals') IS NULL AS table_absent,
+       NOT EXISTS (
+         SELECT 1 FROM information_schema.columns
+          WHERE table_schema='public'
+            AND table_name='deposit_transactions'
+            AND column_name='actor_user_id'
+       ) AS actor_column_absent`,
+  );
+  check(
+    '[preflight: first migration leaves no partial M3c schema behind]',
+    legacyAfterFailure.rows[0].enum_absent &&
+      legacyAfterFailure.rows[0].table_absent &&
+      legacyAfterFailure.rows[0].actor_column_absent,
   );
 
   const fresh = await newDb(admin, 'fresh');
