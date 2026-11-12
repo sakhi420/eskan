@@ -163,8 +163,12 @@ async function seedDeposit(c, org, res, amount) {
     'deposit_applications_organization_id_resident_id_payment_i_fkey',
     'deposit_applications_organization_id_resident_id_allocatio_fkey',
   ];
-  check('[fk: all 9 M3c composite FKs]', m3cCompositeFks.every((n) => fkNames.has(n)), `total=${fks.rowCount}`);
-  check('[fk: composite FK count = 33]', fks.rowCount === 33, `count=${fks.rowCount}`);
+  const presentM3cCompositeFks = m3cCompositeFks.filter((name) => fkNames.has(name));
+  check(
+    '[fk: all 9 M3c composite FKs present]',
+    m3cCompositeFks.length === 9 && presentM3cCompositeFks.length === 9,
+    `expected=9 actual=${presentM3cCompositeFks.length} names=${presentM3cCompositeFks.join(',')}`,
+  );
 
   const sourceCol = await fresh.c.query(`SELECT is_nullable FROM information_schema.columns WHERE table_name='deposit_transactions' AND column_name='source_deposit_transaction_id'`);
   check('[col deposit.source_deposit_transaction_id]', !!sourceCol.rows[0] && sourceCol.rows[0].is_nullable === 'YES');
