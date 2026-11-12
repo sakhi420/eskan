@@ -6,7 +6,7 @@
 ## Git / PR
 - Branch: `feat/m3c-deposit-expense-refund-reversal`
 - Base: `main` at `506947b2ac6f475f5c9418dfb640af5c9719bb10`
-- Verified head: `24b990014d9aa87d8e5d2deb7a4298d794196ad2`
+- Verified implementation head: `06b4ff3b7d1a6aadf7766b897b79f87e89d70286`
 - PR: [#5](https://github.com/sakhi420/eskan/pull/5) — Draft, open, not merged.
 - CI: [Run #81 — success](https://github.com/sakhi420/eskan/actions/runs/43272644798).
 - Local working tree was not inspected by this GitHub-side review. Pull the branch before continuing local work.
@@ -45,7 +45,7 @@
 
 ## Current-head CI evidence
 
-All results below are from SHA `24b990014d9aa87d8e5d2deb7a4298d794196ad2`:
+All results below are from SHA `06b4ff3b7d1a6aadf7766b897b79f87e89d70286`:
 - `npm ci` using the committed lockfile, `npm audit --audit-level=high`, Build, ESLint, Prettier, OpenAPI validation and Prisma validation: PASS.
 - Unit tests: 12 suites / 79 tests.
 - E2E smoke tests: 4 suites / 29 tests, including the new P1-7 HTTP role/BOLA suite.
