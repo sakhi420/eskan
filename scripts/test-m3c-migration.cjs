@@ -221,7 +221,7 @@ async function seedDeposit(c, org, res, amount) {
        VALUES ($1,$2,$3,100,'DEPOSIT_APPLICATION','2026-11-02','SHOULD-NOT-EXIST',now())`,
       [uuid(), org, res])) === '23514');
 
-    const internalCharge = await seedCharge(fresh.c, org, res, 1000);
+  const internalCharge = await seedCharge(fresh.c, org, res, 1000);
   const internalAllocation = uuid();
   await fresh.c.query(
     `INSERT INTO payment_allocations (id, organization_id, resident_id, payment_id, charge_id, amount)
