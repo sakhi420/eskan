@@ -25,6 +25,17 @@ function readMigrations() {
 const results = [];
 const check = (name, ok, extra = '') => results.push(`${ok ? 'PASS' : 'FAIL'} - ${name}${extra ? ' - ' + extra : ''}`);
 async function errCode(c, sql, params = []) { try { await c.query(sql, params); return null; } catch (e) { return e.code || String(e.message); } }
+async function transactionCode(c, work) {
+  await c.query('BEGIN');
+  try {
+    await work();
+    await c.query('COMMIT');
+    return null;
+  } catch (e) {
+    await c.query('ROLLBACK').catch(() => {});
+    return e.code || String(e.message);
+  }
+}
 async function newDb(admin, tag) {
   const name = `eskan_m3c_${tag}_${process.pid}_${Date.now().toString(36)}_${crypto.randomBytes(2).toString('hex')}`;
   await admin.query(`CREATE DATABASE "${name}"`);
@@ -185,7 +196,9 @@ async function seedDeposit(c, org, res, amount) {
     'deposit_transactions_prevent_update',
     'deposit_applications_validate_links',
     'payment_allocations_enforce_dapp_single_allocation',
+    'payments_enforce_dapp_initial_state',
     'payments_prevent_dapp_identity_update',
+    'payments_dapp_reversal_requires_application',
     'payment_allocations_prevent_dapp_update',
     'deposit_applications_prevent_link_update',
     'ledger_reversals_prevent_update',
@@ -374,6 +387,17 @@ async function seedDeposit(c, org, res, amount) {
   check('[immutability: deposit delete]', (await errCode(fresh.c, `DELETE FROM deposit_transactions WHERE id=$1`, [depRecv])) === 'P0001');
   check('[immutability: deposit update]', (await errCode(fresh.c, `UPDATE deposit_transactions SET reason='tampered' WHERE id=$1`, [depRecv])) === 'P0001');
 
+  check(
+    '[DAPP Payment: cannot be inserted already REVERSED]',
+    (await errCode(
+      fresh.c,
+      `INSERT INTO payments
+         (id,organization_id,resident_id,status,amount,method,received_at,receipt_number,reversed_by_id,reversal_reason,reversed_at,updated_at)
+       VALUES ($1,$2,$3,'REVERSED',100,'DEPOSIT_APPLICATION','2026-11-02',NULL,$4,'forged initial reversal',now(),now())`,
+      [uuid(), org, res, user],
+    )) === '23514',
+  );
+
   const reversedAtInsertPayment = uuid();
   await fresh.c.query(
     `INSERT INTO payments (id, organization_id, resident_id, amount, method, received_at, receipt_number, updated_at)
@@ -447,13 +471,114 @@ async function seedDeposit(c, org, res, amount) {
       [internalCharge],
     )) === '23514',
   );
-  await fresh.c.query(
-    `UPDATE deposit_applications
-        SET status='REVERSED', reversed_by_id=$2, reversal_reason='test reversal',
-            reversed_at=now(), version=version+1
-      WHERE id=$1`,
-    [validApplication, user],
+
+  // Directly flipping Application status cannot create held-balance credit.
+  check(
+    '[DAPP: Application-only reversal is rejected]',
+    (await errCode(
+      fresh.c,
+      `UPDATE deposit_applications
+          SET status='REVERSED', reversed_by_id=$2, reversal_reason='forged app-only',
+              reversed_at=now(), version=version+1
+        WHERE id=$1`,
+      [validApplication, user],
+    )) === '23514',
   );
+
+  // A DAPP Payment cannot be reversed alone; the deferred constraint is checked
+  // at COMMIT, after all related writes in a legitimate transaction have run.
+  const paymentOnlyError = await transactionCode(fresh.c, async () => {
+    await fresh.c.query(
+      `UPDATE payments
+          SET status='REVERSED', reversed_by_id=$2, reversal_reason='payment only',
+              reversed_at=now(), version=version+1
+        WHERE id=$1`,
+      [internalPayment, user],
+    );
+  });
+  check('[DAPP: Payment-only reversal is rejected at commit]', paymentOnlyError === '23514');
+
+  // Even a reversed Payment and full Release are insufficient without the
+  // corresponding compensating LedgerReversal.
+  const noLedgerError = await transactionCode(fresh.c, async () => {
+    await fresh.c.query(
+      `INSERT INTO allocation_releases
+         (id,organization_id,resident_id,allocation_id,amount,reason,actor_user_id,created_at)
+       VALUES ($1,$2,$3,$4,100,'missing ledger reversal',$5,now())`,
+      [uuid(), org, res, internalAllocation, user],
+    );
+    await fresh.c.query(
+      `UPDATE payments
+          SET status='REVERSED', reversed_by_id=$2, reversal_reason='missing ledger reversal',
+              reversed_at=now(), version=version+1
+        WHERE id=$1`,
+      [internalPayment, user],
+    );
+    await fresh.c.query(
+      `UPDATE deposit_applications
+          SET status='REVERSED', reversed_by_id=$2, reversal_reason='missing ledger reversal',
+              reversed_at=now(), version=version+1
+        WHERE id=$1`,
+      [validApplication, user],
+    );
+  });
+  check('[DAPP: Application reversal requires a LedgerReversal]', noLedgerError === '23514');
+
+  // A LedgerReversal without a full AllocationRelease also cannot unlock Held.
+  const noReleaseError = await transactionCode(fresh.c, async () => {
+    await fresh.c.query(
+      `INSERT INTO ledger_reversals
+         (id,organization_id,resident_id,source_type,source_id,side,amount,reason,actor_user_id,idempotency_key)
+       VALUES ($1,$2,$3,'PAYMENT',$4,'DEBIT',100,'missing release',$5,$6)`,
+      [uuid(), org, res, internalPayment, user, uuid()],
+    );
+    await fresh.c.query(
+      `UPDATE payments
+          SET status='REVERSED', reversed_by_id=$2, reversal_reason='missing release',
+              reversed_at=now(), version=version+1
+        WHERE id=$1`,
+      [internalPayment, user],
+    );
+    await fresh.c.query(
+      `UPDATE deposit_applications
+          SET status='REVERSED', reversed_by_id=$2, reversal_reason='missing release',
+              reversed_at=now(), version=version+1
+        WHERE id=$1`,
+      [validApplication, user],
+    );
+  });
+  check('[DAPP: Application reversal requires a full AllocationRelease]', noReleaseError === '23514');
+
+  const validDappReversalReason = 'valid complete DAPP reversal';
+  const validDappReversal = await transactionCode(fresh.c, async () => {
+    await fresh.c.query(
+      `INSERT INTO allocation_releases
+         (id,organization_id,resident_id,allocation_id,amount,reason,actor_user_id,created_at)
+       VALUES ($1,$2,$3,$4,100,$5,$6,now())`,
+      [uuid(), org, res, internalAllocation, validDappReversalReason, user],
+    );
+    await fresh.c.query(
+      `INSERT INTO ledger_reversals
+         (id,organization_id,resident_id,source_type,source_id,side,amount,reason,actor_user_id,idempotency_key)
+       VALUES ($1,$2,$3,'PAYMENT',$4,'DEBIT',100,$5,$6,$7)`,
+      [uuid(), org, res, internalPayment, validDappReversalReason, user, uuid()],
+    );
+    await fresh.c.query(
+      `UPDATE payments
+          SET status='REVERSED', reversed_by_id=$2, reversal_reason=$3,
+              reversed_at=now(), version=version+1
+        WHERE id=$1`,
+      [internalPayment, user, validDappReversalReason],
+    );
+    await fresh.c.query(
+      `UPDATE deposit_applications
+          SET status='REVERSED', reversed_by_id=$2, reversal_reason=$3,
+              reversed_at=now(), version=version+1
+        WHERE id=$1`,
+      [validApplication, user, validDappReversalReason],
+    );
+  });
+  check('[DAPP: complete reversal transaction succeeds]', validDappReversal === null);
   check(
     '[DAPP: Charge can be reversed after Application reversal]',
     (await errCode(fresh.c, `UPDATE charges SET status='REVERSED' WHERE id=$1`, [
