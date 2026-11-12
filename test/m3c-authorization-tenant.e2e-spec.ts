@@ -16,7 +16,7 @@ type OrganizationRole = (typeof ROLE_NAMES)[number];
 
 function withDatabase(dbName: string): string {
   const u = new URL(BASE_URL);
-  u.pathname = \`/\${dbName}\`;
+  u.pathname = `/${dbName}`;
   return u.toString();
 }
 
@@ -33,7 +33,7 @@ function assertLocalTestHost(): void {
     !['eskan_dev', 'eskan_test', 'eskan_testing'].includes(db)
   ) {
     if (process.env.ESKAN_TEST_DB_ALLOW !== '1') {
-      throw new Error(\`REFUSED: host="\${host}" db="\${db}" is not local\`);
+      throw new Error(`REFUSED: host="${host}" db="${db}" is not local`);
     }
   }
 }
@@ -58,10 +58,10 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
   beforeAll(async () => {
     assertLocalTestHost();
     jest.setTimeout(120000);
-    dbName = \`eskan_p17_http_\${process.pid}_\${randomUUID().replace(/-/g, '').slice(0, 12)}\`;
+    dbName = `eskan_p17_http_${process.pid}_${randomUUID().replace(/-/g, '').slice(0, 12)}`;
     adminDb = new Client({ connectionString: withDatabase('postgres') });
     await adminDb.connect();
-    await adminDb.query(\`CREATE DATABASE "\${dbName}"\`);
+    await adminDb.query(`CREATE DATABASE "${dbName}"`);
 
     const databaseUrl = withDatabase(dbName);
     const migration = spawnSync(process.execPath, [prismaCli, 'migrate', 'deploy'], {
@@ -69,7 +69,7 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
       encoding: 'utf8',
     });
     if (migration.status !== 0) {
-      throw new Error(\`migrate deploy failed:\n\${migration.stdout}\n\${migration.stderr}\`);
+      throw new Error(`migrate deploy failed:\n${migration.stdout}\n${migration.stderr}`);
     }
 
     db = new Client({ connectionString: databaseUrl });
@@ -90,31 +90,31 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
     expenseB = randomUUID();
 
     await db.query(
-      \`INSERT INTO organizations (id, name, updated_at)
-       VALUES ($1, 'Tenant A', now()), ($2, 'Tenant B', now())\`,
+      `INSERT INTO organizations (id, name, updated_at)
+       VALUES ($1, 'Tenant A', now()), ($2, 'Tenant B', now())`,
       [organizationA, organizationB],
     );
 
     await db.query(
-      \`INSERT INTO users (id, email, password_hash, full_name, updated_at)
+      `INSERT INTO users (id, email, password_hash, full_name, updated_at)
        VALUES
          ($1, 'p17-owner@eskan.test', 'x', 'Owner A', now()),
          ($2, 'p17-admin@eskan.test', 'x', 'Admin A', now()),
          ($3, 'p17-operator@eskan.test', 'x', 'Operator A', now()),
          ($4, 'p17-viewer@eskan.test', 'x', 'Viewer A', now()),
-         ($5, 'p17-owner-b@eskan.test', 'x', 'Owner B', now())\`,
+         ($5, 'p17-owner-b@eskan.test', 'x', 'Owner B', now())`,
       [usersA.OWNER, usersA.ADMIN, usersA.OPERATOR, usersA.VIEWER, userB],
     );
 
     await db.query(
-      \`INSERT INTO organization_memberships
+      `INSERT INTO organization_memberships
          (id, organization_id, user_id, role, active, updated_at)
        VALUES
          ($1, $2, $3, 'OWNER', true, now()),
          ($4, $2, $5, 'ADMIN', true, now()),
          ($6, $2, $7, 'OPERATOR', true, now()),
          ($8, $2, $9, 'VIEWER', true, now()),
-         ($10, $11, $12, 'OWNER', true, now())\`,
+         ($10, $11, $12, 'OWNER', true, now())`,
       [
         randomUUID(),
         organizationA,
@@ -132,26 +132,26 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
     );
 
     await db.query(
-      \`INSERT INTO residents (id, organization_id, full_name, updated_at)
-       VALUES ($1, $2, 'Resident B', now())\`,
+      `INSERT INTO residents (id, organization_id, full_name, updated_at)
+       VALUES ($1, $2, 'Resident B', now())`,
       [residentB, organizationB],
     );
     await db.query(
-      \`INSERT INTO payments
+      `INSERT INTO payments
          (id, organization_id, resident_id, status, amount, method, received_at, receipt_number, updated_at)
-       VALUES ($1, $2, $3, 'POSTED', 500, 'CASH', '2026-11-01', 'TENANT-B-REC-001', now())\`,
+       VALUES ($1, $2, $3, 'POSTED', 500, 'CASH', '2026-11-01', 'TENANT-B-REC-001', now())`,
       [paymentB, organizationB, residentB],
     );
     await db.query(
-      \`INSERT INTO deposit_transactions
+      `INSERT INTO deposit_transactions
          (id, organization_id, resident_id, type, status, amount, received_at, actor_user_id, updated_at)
-       VALUES ($1, $2, $3, 'RECEIVED', 'POSTED', 700, '2026-11-01', $4, now())\`,
+       VALUES ($1, $2, $3, 'RECEIVED', 'POSTED', 700, '2026-11-01', $4, now())`,
       [depositB, organizationB, residentB, userB],
     );
     await db.query(
-      \`INSERT INTO expenses
+      `INSERT INTO expenses
          (id, organization_id, category, status, amount, spent_at, payment_method, actor_user_id, updated_at)
-       VALUES ($1, $2, 'TENANT-B-EXPENSE', 'POSTED', 300, '2026-11-01', 'CASH', $3, now())\`,
+       VALUES ($1, $2, 'TENANT-B-EXPENSE', 'POSTED', 300, '2026-11-01', 'CASH', $3, now())`,
       [expenseB, organizationB, userB],
     );
 
@@ -182,7 +182,7 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
     await app?.close();
     await db?.end().catch(() => {});
     if (adminDb) {
-      await adminDb.query(\`DROP DATABASE IF EXISTS "\${dbName}" WITH (FORCE)\`).catch(() => {});
+      await adminDb.query(`DROP DATABASE IF EXISTS "${dbName}" WITH (FORCE)`).catch(() => {});
       await adminDb.end().catch(() => {});
     }
     if (originalDatabaseUrl === undefined) delete process.env.DATABASE_URL;
@@ -194,7 +194,7 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
   async function tokenFor(role: OrganizationRole | 'OWNER_B'): Promise<string> {
     const userId = role === 'OWNER_B' ? userB : usersA[role];
     const email =
-      role === 'OWNER_B' ? 'p17-owner-b@eskan.test' : \`p17-\${role.toLowerCase()}@eskan.test\`;
+      role === 'OWNER_B' ? 'p17-owner-b@eskan.test' : `p17-${role.toLowerCase()}@eskan.test`;
     const { token } = await tokens.signAccessToken({
       sub: userId,
       email,
@@ -212,7 +212,7 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
   ) {
     return request(app.getHttpServer())
       .post(path)
-      .set('Authorization', \`Bearer \${await tokenFor(role)}\`)
+      .set('Authorization', `Bearer ${await tokenFor(role)}`)
       .set('X-Organization-Id', organizationId)
       .set('Idempotency-Key', randomUUID())
       .send(body);
@@ -225,7 +225,7 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
   ) {
     return request(app.getHttpServer())
       .get(path)
-      .set('Authorization', \`Bearer \${await tokenFor(role)}\`)
+      .set('Authorization', `Bearer ${await tokenFor(role)}`)
       .set('X-Organization-Id', organizationId);
   }
 
@@ -275,7 +275,7 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
 
   it('allows OWNER/ADMIN/OPERATOR and denies VIEWER on deposit receipt creation', async () => {
     await expectRoleGate(
-      \`/api/v1/residents/\${randomUUID()}/deposit-transactions\`,
+      `/api/v1/residents/${randomUUID()}/deposit-transactions`,
       depositCreateBody,
       ['OWNER', 'ADMIN', 'OPERATOR'],
     );
@@ -284,7 +284,7 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
   it('allows OWNER/ADMIN/OPERATOR and denies VIEWER on paid expense creation', async () => {
     for (const role of ROLE_NAMES) {
       const response = await postAs(role, '/api/v1/expenses', {
-        category: \`ROLE-MATRIX-\${role}\`,
+        category: `ROLE-MATRIX-${role}`,
         money,
         spentAt: '2026-11-02',
         paymentMethod: 'CASH',
@@ -302,12 +302,12 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
 
   it('restricts allocations to OWNER/ADMIN/OPERATOR and allocation release to OWNER/ADMIN', async () => {
     await expectRoleGate(
-      \`/api/v1/payments/\${randomUUID()}/allocations\`,
+      `/api/v1/payments/${randomUUID()}/allocations`,
       { chargeId: randomUUID(), money },
       ['OWNER', 'ADMIN', 'OPERATOR'],
     );
     await expectRoleGate(
-      \`/api/v1/allocations/\${randomUUID()}/release\`,
+      `/api/v1/allocations/${randomUUID()}/release`,
       refundBody,
       ['OWNER', 'ADMIN'],
     );
@@ -315,12 +315,12 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
 
   it('restricts payment refund and reversal to OWNER/ADMIN', async () => {
     await expectRoleGate(
-      \`/api/v1/payments/\${randomUUID()}/refund\`,
+      `/api/v1/payments/${randomUUID()}/refund`,
       refundBody,
       ['OWNER', 'ADMIN'],
     );
     await expectRoleGate(
-      \`/api/v1/payments/\${randomUUID()}/reverse\`,
+      `/api/v1/payments/${randomUUID()}/reverse`,
       reversalBody,
       ['OWNER', 'ADMIN'],
     );
@@ -328,7 +328,7 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
 
   it('restricts deposit application and application reversal to OWNER/ADMIN', async () => {
     await expectRoleGate(
-      \`/api/v1/residents/\${randomUUID()}/deposits/apply\`,
+      `/api/v1/residents/${randomUUID()}/deposits/apply`,
       {
         depositTransactionId: randomUUID(),
         reason: 'P1-7 permission test',
@@ -337,7 +337,7 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
       ['OWNER', 'ADMIN'],
     );
     await expectRoleGate(
-      \`/api/v1/deposit-applications/\${randomUUID()}/reverse\`,
+      `/api/v1/deposit-applications/${randomUUID()}/reverse`,
       reversalBody,
       ['OWNER', 'ADMIN'],
     );
@@ -346,17 +346,17 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
   it('restricts deposit refund, forfeit, and reversal to OWNER/ADMIN', async () => {
     const depositId = randomUUID();
     await expectRoleGate(
-      \`/api/v1/deposit-transactions/\${depositId}/refund\`,
+      `/api/v1/deposit-transactions/${depositId}/refund`,
       refundBody,
       ['OWNER', 'ADMIN'],
     );
     await expectRoleGate(
-      \`/api/v1/deposit-transactions/\${depositId}/forfeit\`,
+      `/api/v1/deposit-transactions/${depositId}/forfeit`,
       refundBody,
       ['OWNER', 'ADMIN'],
     );
     await expectRoleGate(
-      \`/api/v1/deposit-transactions/\${depositId}/reverse\`,
+      `/api/v1/deposit-transactions/${depositId}/reverse`,
       reversalBody,
       ['OWNER', 'ADMIN'],
     );
@@ -364,12 +364,12 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
 
   it('restricts expense and charge reversal to OWNER/ADMIN', async () => {
     await expectRoleGate(
-      \`/api/v1/expenses/\${randomUUID()}/reverse\`,
+      `/api/v1/expenses/${randomUUID()}/reverse`,
       reversalBody,
       ['OWNER', 'ADMIN'],
     );
     await expectRoleGate(
-      \`/api/v1/charges/\${randomUUID()}/reverse\`,
+      `/api/v1/charges/${randomUUID()}/reverse`,
       reversalBody,
       ['OWNER', 'ADMIN'],
     );
@@ -396,17 +396,17 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
   });
 
   it('prevents BOLA reads across payment, expense, and resident-deposit resources', async () => {
-    const payment = await getAs('OWNER', \`/api/v1/payments/\${paymentB}\`);
+    const payment = await getAs('OWNER', `/api/v1/payments/${paymentB}`);
     expect(payment.status).toBe(HttpStatus.NOT_FOUND);
     expect(payment.body.code).toBe('RESOURCE_NOT_FOUND');
 
-    const expense = await getAs('OWNER', \`/api/v1/expenses/\${expenseB}\`);
+    const expense = await getAs('OWNER', `/api/v1/expenses/${expenseB}`);
     expect(expense.status).toBe(HttpStatus.NOT_FOUND);
     expect(expense.body.code).toBe('RESOURCE_NOT_FOUND');
 
     const deposits = await getAs(
       'OWNER',
-      \`/api/v1/residents/\${residentB}/deposit-transactions\`,
+      `/api/v1/residents/${residentB}/deposit-transactions`,
     );
     expect(deposits.status).toBe(HttpStatus.NOT_FOUND);
     expect(deposits.body.code).toBe('RESOURCE_NOT_FOUND');
@@ -415,21 +415,21 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
   it('prevents BOLA mutations and leaves the other tenant financial rows unchanged', async () => {
     const paymentReverse = await postAs(
       'OWNER',
-      \`/api/v1/payments/\${paymentB}/reverse\`,
+      `/api/v1/payments/${paymentB}/reverse`,
       reversalBody,
     );
     expect(paymentReverse.status).toBe(HttpStatus.NOT_FOUND);
 
     const depositRefund = await postAs(
       'OWNER',
-      \`/api/v1/deposit-transactions/\${depositB}/refund\`,
+      `/api/v1/deposit-transactions/${depositB}/refund`,
       refundBody,
     );
     expect(depositRefund.status).toBe(HttpStatus.NOT_FOUND);
 
     const expenseReverse = await postAs(
       'OWNER',
-      \`/api/v1/expenses/\${expenseB}/reverse\`,
+      `/api/v1/expenses/${expenseB}/reverse`,
       reversalBody,
     );
     expect(expenseReverse.status).toBe(HttpStatus.NOT_FOUND);
@@ -448,13 +448,13 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
         organizationB,
       ]),
       db.query(
-        \`SELECT count(*)::int n FROM ledger_reversals
-         WHERE organization_id=$1 AND source_id IN ($2, $3)\`,
+        `SELECT count(*)::int n FROM ledger_reversals
+         WHERE organization_id=$1 AND source_id IN ($2, $3)`,
         [organizationB, paymentB, expenseB],
       ),
       db.query(
-        \`SELECT count(*)::int n FROM deposit_transactions
-         WHERE organization_id=$1 AND source_deposit_transaction_id=$2\`,
+        `SELECT count(*)::int n FROM deposit_transactions
+         WHERE organization_id=$1 AND source_deposit_transaction_id=$2`,
         [organizationB, depositB],
       ),
     ]);
