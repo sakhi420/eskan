@@ -104,9 +104,16 @@ describe('M3c remediation (real PostgreSQL + real services)', () => {
     expect(app.paymentId).toBeTruthy();
     expect(app.allocationId).toBeTruthy();
 
-    // While still POSTED, the DAPP payment must refuse both cash refund and generic void.
+    // DAPP must reject every generic mutation path; only reverseApplication owns it.
     await expect(payments.refundPayment(f.org, f.user, app.paymentId, { money: money(100), reason: 'x' } as any, randomUUID(), 'trace')).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
     await expect(payments.reversePayment(f.org, f.user, app.paymentId, { reason: 'x' } as any, randomUUID(), 'trace')).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
+    const otherCharge = await seedCharge(db, f.org, f.resident, 4000);
+    await expect(payments.createAllocation(
+      f.org, f.user, app.paymentId, { chargeId: otherCharge, money: money(1000) } as any, randomUUID(), 'trace',
+    )).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
+    await expect(payments.releaseAllocation(
+      f.org, f.user, app.allocationId, { money: money(1000), reason: 'x' } as any, randomUUID(), 'trace',
+    )).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
 
     const rev: any = await deposits.reverseApplication(f.org, f.user, app.id, { reason: 'wrong' } as any, randomUUID(), 'trace');
     expect(rev.application.status).toBe('REVERSED');
@@ -118,8 +125,28 @@ describe('M3c remediation (real PostgreSQL + real services)', () => {
     expect(payState.rows[0].status).toBe('REVERSED');
     const releases = await db.query(`SELECT count(*)::int n FROM allocation_releases WHERE allocation_id=$1`, [app.allocationId]);
     expect(releases.rows[0].n).toBe(1);
+    const paymentAllocations = await db.query(`SELECT count(*)::int n FROM payment_allocations WHERE payment_id=$1`, [app.paymentId]);
+    expect(paymentAllocations.rows[0].n).toBe(1);
     const lr = await db.query(`SELECT side FROM ledger_reversals WHERE source_type='PAYMENT' AND source_id=$1`, [app.paymentId]);
     expect(lr.rows[0].side).toBe('DEBIT');
+  });
+
+  it('P1-6: rejects Apply when CLOSED and ACTIVE contracts coexist', async () => {
+    const f = await seedCheckoutOrg(db);
+    const hostel = await db.query(`SELECT id FROM hostels WHERE organization_id=$1 LIMIT 1`, [f.org]);
+    await db.query(
+      `INSERT INTO stay_contracts
+       (id, organization_id, hostel_id, resident_id, contract_number, status, start_date, rent_amount, updated_at)
+       VALUES ($1,$2,$3,$4,$5,'ACTIVE','2026-11-02',1000,now())`,
+      [randomUUID(), f.org, hostel.rows[0].id, f.resident, `ACTIVE-${randomUUID().slice(0, 8)}`],
+    );
+    const recv: any = await deposits.receive(f.org, f.user, f.resident, { money: money(5000), receivedAt: '2026-11-02' } as any, randomUUID(), 'trace');
+    const charge = await seedCharge(db, f.org, f.resident, 5000);
+    await expect(deposits.apply(
+      f.org, f.user, f.resident,
+      { depositTransactionId: recv.id, reason: 'checkout', charges: [{ chargeId: charge, money: money(1000) }] } as any,
+      randomUUID(), 'trace',
+    )).rejects.toMatchObject({ code: 'CHECKOUT_REQUIRED' });
   });
 
   it('P1-1: refund+forfeit+apply are source-scoped and never overcount', async () => {
