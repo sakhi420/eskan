@@ -376,7 +376,7 @@ CREATE TRIGGER expenses_prevent_financial_identity_update
 -- reversed independently. The dedicated application reversal must first restore
 -- Deposit Held and release its DAPP allocation; this guard also protects direct SQL.
 CREATE OR REPLACE FUNCTION prevent_charge_reversal_with_active_deposit_application()
-RETURNS trigger AS $
+RETURNS trigger AS $m3c_charge_guard$
 BEGIN
   IF OLD.status = 'POSTED'
      AND NEW.status = 'REVERSED'
@@ -393,7 +393,7 @@ BEGIN
   END IF;
   RETURN NEW;
 END;
-$ LANGUAGE plpgsql;
+$m3c_charge_guard$ LANGUAGE plpgsql;
 
 CREATE TRIGGER charges_prevent_reverse_with_active_deposit_application
   BEFORE UPDATE OF status ON charges
