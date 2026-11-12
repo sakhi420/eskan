@@ -1,10 +1,10 @@
 # M3c Remediation & Acceptance Report
 
-**Status:** CI VERIFIED — P1-7 HTTP ACCEPTANCE TESTS PASS; HUMAN REVIEW AND OWNER APPROVAL STILL REQUIRED  
+**Status:** CI VERIFIED — LOCKFILE SECURITY UPDATE TESTED; HIGH/CRITICAL AUDIT GATE PASSES; HUMAN REVIEW AND OWNER APPROVAL STILL REQUIRED  
 **Base SHA:** `506947b2ac6f475f5c9418dfb640af5c9719bb10`  
-**Verified head SHA:** `6601c038a717d5b0d2daa58430a4df69eb604687`  
+**Verified head SHA:** `24b990014d9aa87d8e5d2deb7a4298d794196ad2`  
 **PR:** [#5 — M3c financial domain](https://github.com/sakhi420/eskan/pull/5) (Draft, not merged)  
-**CI:** [Run #67 — success](https://github.com/sakhi420/eskan/actions/runs/43266432493) — 2026-11-12
+**CI:** [Run #75 — success](https://github.com/sakhi420/eskan/actions/runs/43270826104) — 2026-11-12
 
 ## Remediation table
 
@@ -24,11 +24,11 @@
 
 ## Current-head verification evidence
 
-All items below refer to the same verified PR head SHA `6601c038a717d5b0d2daa58430a4df69eb604687`, not an earlier branch revision.
+All items below refer to the same verified PR head SHA `24b990014d9aa87d8e5d2deb7a4298d794196ad2`, not an earlier branch revision.
 
 | CI gate | Result |
 |---|---:|
-| Dependency install, Prisma Client generation, Build | PASS |
+| `npm ci` from committed lockfile, Prisma Client generation, Build | PASS |
 | ESLint, Prettier, OpenAPI validation, Prisma validation | PASS |
 | Unit tests | 12 suites / 79 tests passed |
 | E2E smoke tests | 4 suites / 29 tests passed |
@@ -43,7 +43,7 @@ The new P1-7 HTTP suite passed in the same E2E run. It asserts the permission ma
 
 ## Migration and financial-integrity review
 
-The two M3c migrations were applied in CI's ephemeral PostgreSQL environment. The M3c migration script passed fresh replay and the separate pre-M3c baseline-upgrade rehearsal with representative M3b Payment/Charge/Allocation rows. A second legacy-data rehearsal proved that a pre-existing REFUNDED/FORFEITED event without a structural source link stops the FIRST M3c migration before any DDL; the test also verified that no enum, table or actor column was left behind.
+The two M3c migrations were applied in CI's ephemeral PostgreSQL environment. The committed dependency lockfile also upgrades NestJS packages to 12.5.0 and Multer to 2.5.0; the normal, non-regenerating `npm ci` workflow verified that exact lockfile. The M3c migration script passed fresh replay and the separate pre-M3c baseline-upgrade rehearsal with representative M3b Payment/Charge/Allocation rows. A second legacy-data rehearsal proved that a pre-existing REFUNDED/FORFEITED event without a structural source link stops the FIRST M3c migration before any DDL; the test also verified that no enum, table or actor column was left behind.
 
 Additional database hardening included:
 - Only internal `DEPOSIT_APPLICATION` payments may have a null receipt; normal payment methods require an official receipt.
@@ -59,10 +59,10 @@ No migration was applied to the developer's local database, Staging or Productio
 
 - PR #5 remains **Draft** and unmerged.
 - A separate human review of the financial migration and domain behavior is still recommended before merge; CI is not a substitute for design review.
-- The earlier `npm install` reported 32 audit findings (4 low, 26 moderate, 2 high). They need dependency-impact triage; do not run `npm audit fix --force` blindly.
+- The committed lockfile removes the two High Multer-chain findings. The permanent `npm audit --audit-level=high` gate now passes on the exact current head. `npm audit` still reports 29 findings (4 low, 25 moderate, 0 high, 0 critical), mostly in development/test tooling; triage them separately and do not use `--force` blindly.
 - Prepare and approve a backup/restore and staged rollout plan before applying migrations to any persistent environment.
 - Sourcery's automated review is skipped because the PR exceeds its 20,000 changed-line limit. This is a tool limit, not a CI failure.
 
 ## Decision
 
-**P1-7 is closed by current-head HTTP/Supertest evidence.** The full CI pipeline is green on the recorded SHA. Keep the PR Draft until the independent human review, dependency audit triage and migration rollout approval are complete.
+**P1-7 is closed by current-head HTTP/Supertest evidence.** The full CI pipeline is green on the recorded SHA. Keep the PR Draft until the independent second-person migration review, remaining Low/Moderate dependency triage, and migration rollout/backup approval are complete.
