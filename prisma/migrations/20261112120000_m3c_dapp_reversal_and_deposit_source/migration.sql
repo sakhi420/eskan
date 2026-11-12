@@ -34,6 +34,25 @@ BEGIN
 END;
 $m3c_preflight$ LANGUAGE plpgsql;
 
+-- Fail closed when the pre-M3c database already contains REFUNDED/FORFEITED
+-- events. The legacy schema has no structural source link, so these rows cannot
+-- safely participate in source-specific balances until they are explicitly mapped.
+DO $m3c_legacy_preflight$
+DECLARE
+  legacy_children BIGINT;
+BEGIN
+  SELECT COUNT(*) INTO legacy_children
+    FROM deposit_transactions
+   WHERE type IN ('REFUNDED', 'FORFEITED');
+
+  IF legacy_children > 0 THEN
+    RAISE EXCEPTION
+      'M3c preflight: % legacy REFUNDED/FORFEITED deposit events require explicit source reconciliation before migration',
+      legacy_children;
+  END IF;
+END;
+$m3c_legacy_preflight$ LANGUAGE plpgsql;
+
 -- 1. Deposit source linkage.
 ALTER TABLE "deposit_transactions" ADD COLUMN "source_deposit_transaction_id" UUID;
 
