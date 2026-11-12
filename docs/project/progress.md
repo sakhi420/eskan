@@ -741,11 +741,16 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 
 ### جزئیات محیطی (بدون افشای secret)
 - Migrationهای M3a روی **دیتابیس توسعهٔ محلی `eskan_dev` هنوز اعمال نشده‌اند** (تست روی DBهای throwaway انجام شد)؛ Staging/Production دست‌نخورده.
-## M3c — Deposit / Refund / Expense / Reversal — 2026-11-12 (remediated)
+## M3c — Deposit / Refund / Expense / Reversal — remediation update
 
-- **شاخه:** `feat/m3c-deposit-expense-refund-reversal` از خط مبنا `506947b`؛ head فعلی پس از اصلاح `62c5b39`.
-- **اصلاحات P0/P1 (Remediation):** ماندهٔ Payment با کسر Refund (P0-1)؛ ممنوعیت `DEPOSIT_APPLICATION` در مسیر عادی Payment/Expense + CHECK دیتابیس (P0-2)؛ برگشت اتمیک DAPP با انتهای/Charge یک‌بار (P0-3)؛ ماندهٔ ودیعه source-scoped با `source_deposit_transaction_id` (P1-1)؛ Sync همهٔ entityهای وابسته (P1-2)؛ جهت LedgerReversal مخالف posting اصلی با جدول نگاشت (P1-3)؛ پیوند ساختاری DAPP↔Payment↔Allocation (P1-4)؛ snapshot پاسخ replay (P1-5)؛ گیت Checkout نهایی fail-closed (P1-6).
-- **Migration افزودنی جدید:** `20261112120000_m3c_dapp_reversal_and_deposit_source` (33 composite FK؛ CHECKهای `payments_dapp_has_no_receipt` و `expenses_payment_method_not_dapp`).
-- **تست‌ها:** Migration **۳۴/۳۴**؛ Integration M3c **۳۲/۳۲** (deposits-refund-reversal 15 · concurrency 4 · reconciliation 1 · remediation 7) با PostgreSQL واقعی؛ Build سبز؛ OpenAPI lint exit 0.
-- **گزارش:** `docs/reports/m3c-remediation-and-acceptance-v1.md`.
-- **وضعیت Migration محیط‌ها:** فقط CI/Throwaway. `eskan_dev`/Staging/Production **هیچ migration اعمال نشده**.
+- **شاخه:** `feat/m3c-deposit-expense-refund-reversal`؛ اصلاحات در همین شاخه و جدا از `main` نگهداری می‌شوند.
+- **DAPP safety:** مسیرهای عمومی create/release/refund/reverse برای `DEPOSIT_APPLICATION` بسته‌اند؛ `reverseApplication` یکتایی و تطابق Allocation را دوباره کنترل می‌کند.
+- **Database invariants:** Migration جدید DAPP را به یک Payment و Allocation کامل و متناظر محدود می‌کند؛ تخصیص دوم برای DAPP رد می‌شود؛ هویت مالی Payment/Allocation/Application قابل تغییر نیست.
+- **Deposit immutability:** ردیف `DepositTransaction` هنگام Void تغییر نمی‌کند؛ `LedgerReversal` تنها رویداد جبرانی است. ماندهٔ منبع، رویدادهای برگشت را در محاسبه لحاظ می‌کند و وضعیت مؤثر API از reversal استخراج می‌شود.
+- **Checkout:** وجود هر قرارداد ACTIVE صریحاً Apply را متوقف می‌کند؛ صرف وجود قرارداد CLOSED کافی نیست.
+- **OpenAPI / Permissions:** درخواست Payment/Expense فقط روش‌های دستی را می‌پذیرد؛ روش پرداخت Expense اجباری است؛ endpoint برگشت DAPP و نقش OWNER/ADMIN ثبت شده‌اند.
+- **Migration tests:** علاوه بر Fresh Replay، مسیر pre-M3c → seed M3b financial rows → apply M3c only → preservation/parity اضافه شده است. باید روی لوکال اجرا شود.
+- **CI:** lint و format:check به Workflow اضافه شده‌اند. CI روی SHA جدید هنوز اجرا/تأیید نشده است.
+- **Integration source inventory:** ۳۳ test case در چهار فایل (۲۰ + ۴ + ۱ + ۸). اجرای جدید هنوز نیازمند تأیید با خروجی واقعی Jest است.
+- **باقی‌ماندهٔ پذیرش:** HTTP/Supertest role matrix و cross-tenant/BOLA tests هنوز P1 باز هستند؛ Build/Jest/Migration/OpenAPI/Lint/Format/CI باید روی commit نهایی واقعاً اجرا شوند.
+- **محیط‌ها:** هیچ Migration روی `eskan_dev`، Staging یا Production اجرا نشده است؛ این مرز حفظ شده است.
