@@ -14,13 +14,9 @@
 --   (it was created by the immediately preceding M3c migration and M3c has not been
 --   applied to any non-throwaway environment), so the new NOT NULL columns are safe.
 
--- Fail closed if the pre-M3c database already contains child deposit events.
--- The old schema has no structural source link, so guessing from Audit JSON could
--- silently deduct a refund/forfeit from the wrong receipt. Reconcile/map these rows
--- explicitly before deployment instead of accepting a corrupted source balance.
--- Fail closed when the pre-M3c database already contains REFUNDED/FORFEITED
--- events. The legacy schema has no structural source link, so these rows cannot
--- safely participate in source-specific balances until they are explicitly mapped.
+-- Legacy REFUNDED/FORFEITED rows are checked before any M3c DDL by the first
+-- M3c migration. Do not move that preflight here: this second migration must not
+-- be reached unless the first migration's fail-closed data check has succeeded.
 -- 1. Deposit source linkage.
 ALTER TABLE "deposit_transactions" ADD COLUMN "source_deposit_transaction_id" UUID;
 
