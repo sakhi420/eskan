@@ -651,6 +651,103 @@ CREATE TRIGGER allocation_releases_prevent_update
   BEFORE UPDATE ON allocation_releases
   FOR EACH ROW EXECUTE FUNCTION prevent_financial_document_update();
 
+-- Allocation releases are append-only and cannot exceed the original allocation.
+-- For DAPP, a release is accepted only as part of the complete, dedicated
+-- reversal transaction: matching DEBIT LedgerReversal + reversed Payment +
+-- the final release that brings the cumulative amount to the Application amount.
+CREATE OR REPLACE FUNCTION enforce_allocation_release_invariants()
+RETURNS trigger AS $m3c_allocation_release$
+DECLARE
+  allocation_amount INTEGER;
+  payment_method "PaymentMethod";
+  payment_status "LedgerEntryStatus";
+  payment_reversed_by UUID;
+  payment_reversal_reason TEXT;
+  application_status "LedgerEntryStatus";
+  application_amount INTEGER;
+  application_payment_id UUID;
+  already_released BIGINT;
+  reversal_count BIGINT;
+  matching_reversal BOOLEAN;
+BEGIN
+  SELECT pa.amount, p.method, p.status, p.reversed_by_id, p.reversal_reason
+    INTO allocation_amount, payment_method, payment_status,
+         payment_reversed_by, payment_reversal_reason
+    FROM payment_allocations AS pa
+    JOIN payments AS p
+      ON p.organization_id = pa.organization_id
+     AND p.resident_id = pa.resident_id
+     AND p.id = pa.payment_id
+   WHERE pa.organization_id = NEW.organization_id
+     AND pa.resident_id = NEW.resident_id
+     AND pa.id = NEW.allocation_id
+   FOR UPDATE OF pa, p;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'AllocationRelease requires an existing tenant-scoped allocation and payment'
+      USING ERRCODE = '23514';
+  END IF;
+
+  SELECT COALESCE(SUM(ar.amount)::BIGINT, 0)
+    INTO already_released
+    FROM allocation_releases AS ar
+   WHERE ar.organization_id = NEW.organization_id
+     AND ar.resident_id = NEW.resident_id
+     AND ar.allocation_id = NEW.allocation_id;
+
+  IF already_released + NEW.amount::BIGINT > allocation_amount::BIGINT THEN
+    RAISE EXCEPTION 'AllocationRelease exceeds the allocation amount'
+      USING ERRCODE = '23514';
+  END IF;
+
+  IF payment_method = 'DEPOSIT_APPLICATION' THEN
+    SELECT da.status, da.amount, da.payment_id
+      INTO application_status, application_amount, application_payment_id
+      FROM deposit_applications AS da
+     WHERE da.organization_id = NEW.organization_id
+       AND da.resident_id = NEW.resident_id
+       AND da.allocation_id = NEW.allocation_id
+     FOR UPDATE;
+
+    IF NOT FOUND
+       OR application_status <> 'POSTED'
+       OR application_payment_id IS NULL
+       OR payment_status <> 'REVERSED'
+       OR payment_reversed_by IS DISTINCT FROM NEW.actor_user_id
+       OR payment_reversal_reason IS DISTINCT FROM NEW.reason
+       OR application_amount <> allocation_amount
+       OR already_released + NEW.amount::BIGINT <> application_amount::BIGINT THEN
+      RAISE EXCEPTION 'DAPP AllocationRelease is permitted only as the final full release during Application reversal'
+        USING ERRCODE = '23514';
+    END IF;
+
+    SELECT COUNT(*)::BIGINT,
+           COALESCE(BOOL_OR(
+             side = 'DEBIT'
+             AND amount = application_amount
+             AND reason = NEW.reason
+             AND actor_user_id = NEW.actor_user_id
+           ), false)
+      INTO reversal_count, matching_reversal
+      FROM ledger_reversals
+     WHERE organization_id = NEW.organization_id
+       AND source_type = 'PAYMENT'
+       AND source_id = application_payment_id;
+
+    IF reversal_count <> 1 OR NOT matching_reversal THEN
+      RAISE EXCEPTION 'DAPP AllocationRelease requires exactly one matching DEBIT LedgerReversal'
+        USING ERRCODE = '23514';
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$m3c_allocation_release$ LANGUAGE plpgsql;
+
+CREATE TRIGGER allocation_releases_enforce_invariants
+  BEFORE INSERT ON allocation_releases
+  FOR EACH ROW EXECUTE FUNCTION enforce_allocation_release_invariants();
+
 CREATE TRIGGER ledger_reversals_prevent_update
   BEFORE UPDATE ON ledger_reversals
   FOR EACH ROW EXECUTE FUNCTION prevent_financial_document_update();
