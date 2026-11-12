@@ -647,6 +647,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE TRIGGER allocation_releases_prevent_update
+  BEFORE UPDATE ON allocation_releases
+  FOR EACH ROW EXECUTE FUNCTION prevent_financial_document_update();
+
 CREATE TRIGGER ledger_reversals_prevent_update
   BEFORE UPDATE ON ledger_reversals
   FOR EACH ROW EXECUTE FUNCTION prevent_financial_document_update();
