@@ -191,6 +191,7 @@ async function seedDeposit(c, org, res, amount) {
     'ledger_reversals_prevent_update',
     'payment_refunds_prevent_update',
     'expenses_prevent_financial_identity_update',
+    'charges_prevent_reverse_with_active_deposit_application',
   ]) {
     const found = await fresh.c.query(`SELECT tgname FROM pg_trigger WHERE NOT tgisinternal AND tgname=$1`, [trigger]);
     check(`[trigger ${trigger}]`, found.rowCount === 1);
@@ -320,6 +321,27 @@ async function seedDeposit(c, org, res, amount) {
     `INSERT INTO deposit_applications (id,organization_id,resident_id,deposit_transaction_id,charge_id,payment_id,allocation_id,amount,reason,actor_user_id)
      VALUES ($1,$2,$3,$4,$5,$6,$7,100,'valid linkage',$8)`,
     [validApplication, org, res, depRecv, internalCharge, internalPayment, internalAllocation, user],
+  );
+  check(
+    '[DAPP: active application blocks Charge reversal]',
+    (await errCode(
+      fresh.c,
+      `UPDATE charges SET status='REVERSED' WHERE id=$1`,
+      [internalCharge],
+    )) === '23514',
+  );
+  await fresh.c.query(
+    `UPDATE deposit_applications
+        SET status='REVERSED', reversed_by_id=$2, reversal_reason='test reversal',
+            reversed_at=now(), version=version+1
+      WHERE id=$1`,
+    [validApplication, user],
+  );
+  check(
+    '[DAPP: Charge can be reversed after Application reversal]',
+    (await errCode(fresh.c, `UPDATE charges SET status='REVERSED' WHERE id=$1`, [
+      internalCharge,
+    ])) === null,
   );
   check('[DAPP: allocation financial identity immutable]',
     (await errCode(fresh.c, `UPDATE payment_allocations SET amount=99 WHERE id=$1`, [internalAllocation])) === 'P0001');
