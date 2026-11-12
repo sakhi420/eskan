@@ -264,6 +264,64 @@ async function seedDeposit(c, org, res, amount) {
       [uuid(), org, res, childRefund],
     )) === '23514');
 
+  // A single source deposit has one combined balance across refunds, forfeits,
+  // and DAPP applications; no individual event type gets a separate allowance.
+  const balanceDeposit = await seedDeposit(fresh.c, org, res, 100);
+  await fresh.c.query(
+    `INSERT INTO deposit_transactions
+       (id,organization_id,resident_id,source_deposit_transaction_id,type,status,amount,received_at,updated_at)
+     VALUES ($1,$2,$3,$4,'REFUNDED','POSTED',60,'2026-11-02',now())`,
+    [uuid(), org, res, balanceDeposit],
+  );
+  await fresh.c.query(
+    `INSERT INTO deposit_transactions
+       (id,organization_id,resident_id,source_deposit_transaction_id,type,status,amount,received_at,updated_at)
+     VALUES ($1,$2,$3,$4,'FORFEITED','POSTED',30,'2026-11-02',now())`,
+    [uuid(), org, res, balanceDeposit],
+  );
+  check(
+    '[source balance: refund + forfeit cannot exceed RECEIVED amount]',
+    (await errCode(
+      fresh.c,
+      `INSERT INTO deposit_transactions
+         (id,organization_id,resident_id,source_deposit_transaction_id,type,status,amount,received_at,updated_at)
+       VALUES ($1,$2,$3,$4,'FORFEITED','POSTED',11,'2026-11-02',now())`,
+      [uuid(), org, res, balanceDeposit],
+    )) === '23514',
+  );
+
+  const balanceCharge = await seedCharge(fresh.c, org, res, 10);
+  const balancePayment = uuid();
+  await fresh.c.query(
+    `INSERT INTO payments
+       (id,organization_id,resident_id,amount,method,received_at,receipt_number,updated_at)
+     VALUES ($1,$2,$3,10,'DEPOSIT_APPLICATION','2026-11-02',NULL,now())`,
+    [balancePayment, org, res],
+  );
+  const balanceAllocation = uuid();
+  await fresh.c.query(
+    `INSERT INTO payment_allocations
+       (id,organization_id,resident_id,payment_id,charge_id,amount)
+     VALUES ($1,$2,$3,$4,$5,10)`,
+    [balanceAllocation, org, res, balancePayment, balanceCharge],
+  );
+  await fresh.c.query(
+    `INSERT INTO deposit_applications
+       (id,organization_id,resident_id,deposit_transaction_id,charge_id,payment_id,allocation_id,amount,reason,actor_user_id)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,10,'remaining source balance',$8)`,
+    [uuid(), org, res, balanceDeposit, balanceCharge, balancePayment, balanceAllocation, user],
+  );
+  check(
+    '[source balance: DAPP cannot exceed balance after refund and forfeit]',
+    (await errCode(
+      fresh.c,
+      `INSERT INTO deposit_transactions
+         (id,organization_id,resident_id,source_deposit_transaction_id,type,status,amount,received_at,updated_at)
+       VALUES ($1,$2,$3,$4,'FORFEITED','POSTED',1,'2026-11-02',now())`,
+      [uuid(), org, res, balanceDeposit],
+    )) === '23514',
+  );
+
   const charge = await seedCharge(fresh.c, org, res, 10000);
   const charge2 = await seedCharge(fresh.c, org, res2, 10000);
   const pay = await seedPayment(fresh.c, org, res, 10000);
@@ -279,6 +337,29 @@ async function seedDeposit(c, org, res, amount) {
 
   check('[immutability: deposit delete]', (await errCode(fresh.c, `DELETE FROM deposit_transactions WHERE id=$1`, [depRecv])) === 'P0001');
   check('[immutability: deposit update]', (await errCode(fresh.c, `UPDATE deposit_transactions SET reason='tampered' WHERE id=$1`, [depRecv])) === 'P0001');
+
+  const reversedAtInsertPayment = uuid();
+  await fresh.c.query(
+    `INSERT INTO payments (id, organization_id, resident_id, amount, method, received_at, receipt_number, updated_at)
+     VALUES ($1,$2,$3,100,'DEPOSIT_APPLICATION','2026-11-02',NULL,now())`,
+    [reversedAtInsertPayment, org, res],
+  );
+  const reversedAtInsertAllocation = uuid();
+  await fresh.c.query(
+    `INSERT INTO payment_allocations (id, organization_id, resident_id, payment_id, charge_id, amount)
+     VALUES ($1,$2,$3,$4,$5,100)`,
+    [reversedAtInsertAllocation, org, res, reversedAtInsertPayment, charge],
+  );
+  check(
+    '[DAPP: cannot be inserted already REVERSED]',
+    (await errCode(
+      fresh.c,
+      `INSERT INTO deposit_applications
+         (id,organization_id,resident_id,deposit_transaction_id,charge_id,payment_id,allocation_id,status,amount,reason,actor_user_id)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,'REVERSED',100,'invalid initial state',$8)`,
+      [uuid(), org, res, charge, charge, reversedAtInsertPayment, reversedAtInsertAllocation, user],
+    )) === '23514',
+  );
 
   const internalPayment = uuid();
   await fresh.c.query(
