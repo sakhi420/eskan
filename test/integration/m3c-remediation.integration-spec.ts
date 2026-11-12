@@ -222,6 +222,24 @@ describe('M3c remediation (real PostgreSQL + real services)', () => {
     expect(app.paymentId).toBeTruthy();
     expect(app.allocationId).toBeTruthy();
 
+    // The source RECEIVED deposit remains held while a DAPP is active.
+    await expect(
+      deposits.reverse(
+        f.org,
+        f.user,
+        recv.id,
+        { reason: 'reverse source too early' } as any,
+        randomUUID(),
+        'trace',
+      ),
+    ).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
+    const sourceReverseBeforeDapp = await db.query(
+      `SELECT count(*)::int n FROM ledger_reversals
+        WHERE source_type='DEPOSIT' AND source_id=$1`,
+      [recv.id],
+    );
+    expect(sourceReverseBeforeDapp.rows[0].n).toBe(0);
+
     // A Charge cannot be reversed independently while its DAPP is still posted.
     await expect(
       charges.reverseCharge(
@@ -338,6 +356,21 @@ describe('M3c remediation (real PostgreSQL + real services)', () => {
       [ch],
     );
     expect(chargeReversal.rows[0].n).toBe(1);
+
+    await deposits.reverse(
+      f.org,
+      f.user,
+      recv.id,
+      { reason: 'reverse source after dependents' } as any,
+      randomUUID(),
+      'trace',
+    );
+    const sourceReversal = await db.query(
+      `SELECT side, amount FROM ledger_reversals
+        WHERE source_type='DEPOSIT' AND source_id=$1`,
+      [recv.id],
+    );
+    expect(sourceReversal.rows).toEqual([{ side: 'DEBIT', amount: 10000 }]);
   });
 
   it('P1-6: rejects Apply when CLOSED and ACTIVE contracts coexist', async () => {
