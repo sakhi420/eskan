@@ -6,9 +6,9 @@
 ## Git / PR
 - Branch: `feat/m3c-deposit-expense-refund-reversal`
 - Base: `main` at `506947b2ac6f475f5c9418dfb640af5c9719bb10`
-- Verified implementation head: `06b4ff3b7d1a6aadf7766b897b79f87e89d70286`
+- Verified implementation head: `10960c3856cc85a9482ee21c1369532a399341cb`
 - PR: [#5](https://github.com/sakhi420/eskan/pull/5) — Draft, open, not merged.
-- CI: [Run #81 — success](https://github.com/sakhi420/eskan/actions/runs/43272644798).
+- CI: [Run #86 — success](https://github.com/sakhi420/eskan/actions/runs/43273827651).
 - Local working tree was not inspected by this GitHub-side review. Pull the branch before continuing local work.
 
 ## Scope
@@ -37,6 +37,7 @@
 - M3c fresh replay and pre-M3c baseline upgrade rehearsal both passed in throwaway CI databases.
 - A legacy-data rehearsal confirmed that an unmapped pre-M3c REFUNDED/FORFEITED event aborts the FIRST M3c migration before any schema change; the test confirms no partial M3c enum/table/column artifacts remain.
 - PostgreSQL triggers enforce source-deposit semantics and require DAPP to use an unreversed POSTED RECEIVED deposit and a POSTED DEBIT charge.
+- A single source-balance cap is enforced at the database layer across active REFUNDED/FORFEITED events and POSTED DepositApplications. The source RECEIVED row is locked before aggregate validation, and mixed consumption cannot exceed the original received amount.
 - A Charge cannot be reversed while a linked DepositApplication remains POSTED. Both service logic and a database trigger enforce the rule; the application must be reversed first to restore Deposit Held and release its DAPP allocation.
 - Prisma parity assertions passed.
 - Dependency lockfile upgrades `@nestjs/common`, `@nestjs/core`, `@nestjs/platform-express`, and `@nestjs/testing` to 12.5.0 and pins transitive `multer` at 2.5.0; current lockfile was tested using ordinary `npm ci`.
@@ -45,13 +46,13 @@
 
 ## Current-head CI evidence
 
-All results below are from SHA `06b4ff3b7d1a6aadf7766b897b79f87e89d70286`:
+All results below are from SHA `10960c3856cc85a9482ee21c1369532a399341cb`:
 - `npm ci` using the committed lockfile, `npm audit --audit-level=high`, Build, ESLint, Prettier, OpenAPI validation and Prisma validation: PASS.
 - Unit tests: 12 suites / 79 tests.
 - E2E smoke tests: 4 suites / 29 tests, including the new P1-7 HTTP role/BOLA suite.
 - M3a: 11/11 migration checks.
 - M3b: 30/30 migration checks.
-- M3c: 70/70 migration checks.
+- M3c: 75/75 migration checks.
 - PostgreSQL integration: 13 suites / 139 tests, including DAPP-first / Charge-second reversal ordering.
 - M-1/M-2 checks, package/hostel concurrency, M-2 parity and idempotency-retention checks: PASS.
 
