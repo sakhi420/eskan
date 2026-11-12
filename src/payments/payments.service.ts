@@ -512,11 +512,18 @@ export class PaymentsService {
         // Re-read balances under the held locks (never on a pre-lock stale read).
         const payment = await tx.payment.findFirst({
           where: { id: paymentId, organizationId },
-          select: { id: true, residentId: true, status: true, amount: true },
+          select: { id: true, residentId: true, status: true, amount: true, method: true },
         });
         if (!payment) throw AppError.notFound('Payment not found');
         if (payment.status !== LedgerEntryStatus.POSTED) {
           throw AppError.conflict('Payment is not usable', ErrorCode.PAYMENT_ALREADY_REVERSED);
+        }
+        // DAPP is a closed internal settlement and cannot be reallocated.
+        if (payment.method === PaymentMethod.DEPOSIT_APPLICATION) {
+          throw AppError.conflict(
+            'Deposit-application payments cannot be allocated through the normal payment endpoint',
+            ErrorCode.BUSINESS_RULE_VIOLATION,
+          );
         }
 
         const charge = await tx.charge.findFirst({
@@ -622,6 +629,22 @@ export class PaymentsService {
           select: { id: true, residentId: true, paymentId: true, chargeId: true, amount: true },
         });
         if (!allocation) throw AppError.notFound('Allocation not found');
+
+        const payment = await tx.payment.findFirst({
+          where: { id: allocation.paymentId, organizationId },
+          select: { id: true, status: true, method: true },
+        });
+        if (!payment) throw AppError.notFound('Payment not found');
+        if (payment.status !== LedgerEntryStatus.POSTED) {
+          throw AppError.conflict('Payment is not usable', ErrorCode.PAYMENT_ALREADY_REVERSED);
+        }
+        // Generic release must not detach a DAPP from its one settlement.
+        if (payment.method === PaymentMethod.DEPOSIT_APPLICATION) {
+          throw AppError.conflict(
+            'Deposit-application allocations can only be released by reversing the DepositApplication',
+            ErrorCode.BUSINESS_RULE_VIOLATION,
+          );
+        }
 
         const releasedTotal = await tx.allocationRelease.aggregate({
           where: { organizationId, allocationId },
