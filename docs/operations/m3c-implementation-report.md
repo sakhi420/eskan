@@ -1,14 +1,14 @@
 # ESKAN M3c — Implementation Report
 
-**Status:** IMPLEMENTED; CURRENT-HEAD CI VERIFIED; HUMAN REVIEW/OWNER APPROVAL PENDING  
+**Status:** IMPLEMENTED; LOCKFILE SECURITY UPDATE VERIFIED BY NORMAL CI; HIGH/CRITICAL AUDIT GATE PASSES; HUMAN REVIEW/OWNER APPROVAL PENDING  
 **Date:** 2026-11-12
 
 ## Git / PR
 - Branch: `feat/m3c-deposit-expense-refund-reversal`
 - Base: `main` at `506947b2ac6f475f5c9418dfb640af5c9719bb10`
-- Verified head: `6601c038a717d5b0d2daa58430a4df69eb604687`
+- Verified head: `24b990014d9aa87d8e5d2deb7a4298d794196ad2`
 - PR: [#5](https://github.com/sakhi420/eskan/pull/5) — Draft, open, not merged.
-- CI: [Run #67 — success](https://github.com/sakhi420/eskan/actions/runs/43266432493).
+- CI: [Run #75 — success](https://github.com/sakhi420/eskan/actions/runs/43270826104).
 - Local working tree was not inspected by this GitHub-side review. Pull the branch before continuing local work.
 
 ## Scope
@@ -38,12 +38,14 @@
 - A legacy-data rehearsal confirmed that an unmapped pre-M3c REFUNDED/FORFEITED event aborts the FIRST M3c migration before any schema change; the test confirms no partial M3c enum/table/column artifacts remain.
 - PostgreSQL triggers enforce source-deposit semantics and require DAPP to use an unreversed POSTED RECEIVED deposit and a POSTED DEBIT charge.
 - Prisma parity assertions passed.
+- Dependency lockfile upgrades `@nestjs/common`, `@nestjs/core`, `@nestjs/platform-express`, and `@nestjs/testing` to 12.5.0 and pins transitive `multer` at 2.5.0; current lockfile was tested using ordinary `npm ci`.
+- `npm audit --audit-level=high`: PASS (0 High / 0 Critical). Remaining `npm audit`: 29 findings (4 Low / 25 Moderate), predominantly development/test dependency chains; not yet fully triaged.
 - Persistent environments actually migrated: **none**.
 
 ## Current-head CI evidence
 
-All results below are from SHA `6601c038a717d5b0d2daa58430a4df69eb604687`:
-- Build, ESLint, Prettier, OpenAPI validation and Prisma validation: PASS.
+All results below are from SHA `24b990014d9aa87d8e5d2deb7a4298d794196ad2`:
+- `npm ci` using the committed lockfile, `npm audit --audit-level=high`, Build, ESLint, Prettier, OpenAPI validation and Prisma validation: PASS.
 - Unit tests: 12 suites / 79 tests.
 - E2E smoke tests: 4 suites / 29 tests, including the new P1-7 HTTP role/BOLA suite.
 - M3a: 11/11 migration checks.
@@ -54,7 +56,7 @@ All results below are from SHA `6601c038a717d5b0d2daa58430a4df69eb604687`:
 
 ## Remaining release gates
 - PR #5 stays Draft and unmerged pending independent human review and explicit owner approval.
-- Triage the 32 npm audit findings previously reported (4 low, 26 moderate, 2 high); avoid blind `npm audit fix --force`.
+- Triage the remaining 29 npm audit findings (4 low, 25 moderate); the two High Multer-chain findings were addressed by the lockfile update. Avoid blind `npm audit fix --force`.
 - Approve backups, restore rehearsal and staged migration rollout before any persistent environment is migrated.
 - Automated Sourcery review skipped the PR because the diff exceeds its 20,000 changed-line limit; this does not affect the green CI result.
 
