@@ -38,28 +38,20 @@ jobs:
           node-version: 24
           cache: npm
 
+      - name: Regenerate package lock with safe updates (temporary)
+        run: |
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          npm audit fix --package-lock-only --ignore-scripts --no-fund
+
+      - name: Upload regenerated package lock (temporary)
+        uses: actions/upload-artifact@v4
+        with:
+          name: eskan-security-package-lock
+          path: package-lock.json
+          if-no-files-found: error
+
       - name: Install dependencies
         run: npm ci
-
-      - name: Dependency audit diagnostics (temporary; non-blocking)
-        continue-on-error: true
-        run: |
-          npm audit --json > /tmp/eskan-npm-audit.json || true
-          node -e '
-            const report = require("/tmp/eskan-npm-audit.json");
-            const rows = Object.entries(report.vulnerabilities || {}).map(([name, v]) => ({
-              package: name,
-              severity: v.severity,
-              direct: v.isDirect,
-              range: v.range,
-              fixAvailable: v.fixAvailable,
-              via: (v.via || []).map(item => typeof item === "string"
-                ? { dependency: item }
-                : { title: item.title, url: item.url, range: item.range, source: item.source })
-            }));
-            console.log("AUDIT_METADATA " + JSON.stringify(report.metadata?.vulnerabilities || {}));
-            for (const row of rows) console.log("AUDIT_PACKAGE " + JSON.stringify(row));
-          '
 
       - name: Generate Prisma client
         run: npx prisma generate
