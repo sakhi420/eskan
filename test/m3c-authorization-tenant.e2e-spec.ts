@@ -300,7 +300,9 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
     }
   });
 
-  it('restricts allocations to OWNER/ADMIN/OPERATOR and allocation release to OWNER/ADMIN', async () => {
+  it(
+    'restricts allocations to OWNER/ADMIN/OPERATOR and allocation release to OWNER/ADMIN',
+    async () => {
     await expectRoleGate(
       `/api/v1/payments/${randomUUID()}/allocations`,
       { chargeId: randomUUID(), money },
@@ -311,7 +313,8 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
       refundBody,
       ['OWNER', 'ADMIN'],
     );
-  });
+    },
+  );
 
   it('restricts payment refund and reversal to OWNER/ADMIN', async () => {
     await expectRoleGate(
@@ -375,7 +378,9 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
     );
   });
 
-  it('restricts CREDIT charge posting to OWNER/ADMIN even though OPERATOR can post DEBIT', async () => {
+  it(
+    'restricts CREDIT charge posting to OWNER/ADMIN even though OPERATOR can post DEBIT',
+    async () => {
     const body = {
       residentId: randomUUID(),
       type: 'OTHER',
@@ -386,7 +391,8 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
       dueDate: '2026-11-01',
     };
     await expectRoleGate('/api/v1/charges', body, ['OWNER', 'ADMIN']);
-  });
+    },
+  );
 
   it('returns 404 when a member selects an organization they do not belong to', async () => {
     const response = await getAs('OWNER_B', '/api/v1/payments', organizationA);
