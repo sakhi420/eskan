@@ -40,7 +40,17 @@ RETURNS trigger AS $m3c_source$
 DECLARE
   v_source_type "DepositType";
   v_source_status "LedgerEntryStatus";
+  v_source_amount INTEGER;
+  v_source_used BIGINT;
 BEGIN
+  IF NEW.status <> 'POSTED'
+     OR NEW.reversed_by_id IS NOT NULL
+     OR NEW.reversal_reason IS NOT NULL
+     OR NEW.reversed_at IS NOT NULL THEN
+    RAISE EXCEPTION 'New deposit events must be POSTED and cannot carry reversal metadata'
+      USING ERRCODE = '23514';
+  END IF;
+
   IF NEW.type = 'RECEIVED' THEN
     IF NEW.source_deposit_transaction_id IS NOT NULL THEN
       RAISE EXCEPTION 'RECEIVED deposit events cannot have a source deposit link'
@@ -52,8 +62,8 @@ BEGIN
         USING ERRCODE = '23514';
     END IF;
 
-    SELECT dt.type, dt.status
-      INTO v_source_type, v_source_status
+    SELECT dt.type, dt.status, dt.amount
+      INTO v_source_type, v_source_status, v_source_amount
       FROM deposit_transactions AS dt
      WHERE dt.id = NEW.source_deposit_transaction_id
        AND dt.organization_id = NEW.organization_id
@@ -69,6 +79,40 @@ BEGIN
             AND lr.source_id = NEW.source_deposit_transaction_id
        ) THEN
       RAISE EXCEPTION 'Deposit refund/forfeit source must be an unreversed POSTED RECEIVED event'
+        USING ERRCODE = '23514';
+    END IF;
+
+    -- The source row is locked above, so concurrent direct-SQL refunds,
+    -- forfeitures, and DAPP applications serialize before this aggregate check.
+    SELECT
+      COALESCE((
+        SELECT SUM(dt.amount)::BIGINT
+          FROM deposit_transactions AS dt
+         WHERE dt.organization_id = NEW.organization_id
+           AND dt.resident_id = NEW.resident_id
+           AND dt.source_deposit_transaction_id = NEW.source_deposit_transaction_id
+           AND dt.status = 'POSTED'
+           AND NOT EXISTS (
+             SELECT 1 FROM ledger_reversals AS lr
+              WHERE lr.organization_id = dt.organization_id
+                AND lr.source_type = 'DEPOSIT'
+                AND lr.source_id = dt.id
+           )
+      ), 0)
+      + COALESCE((
+        SELECT SUM(da.amount)::BIGINT
+          FROM deposit_applications AS da
+         WHERE da.organization_id = NEW.organization_id
+           AND da.resident_id = NEW.resident_id
+           AND da.deposit_transaction_id = NEW.source_deposit_transaction_id
+           AND da.status = 'POSTED'
+      ), 0)
+      INTO v_source_used;
+
+    IF v_source_used + NEW.amount::BIGINT > v_source_amount::BIGINT THEN
+      RAISE EXCEPTION
+        'Deposit source balance exceeded by refund/forfeit: source %, already used %, attempted %',
+        v_source_amount, v_source_used, NEW.amount
         USING ERRCODE = '23514';
     END IF;
   END IF;
@@ -145,6 +189,8 @@ RETURNS trigger AS $$
 DECLARE
   deposit_type "DepositType";
   deposit_status "LedgerEntryStatus";
+  deposit_amount INTEGER;
+  source_used BIGINT;
   charge_status "LedgerEntryStatus";
   charge_entry_side "EntrySide";
   payment_method "PaymentMethod";
@@ -154,8 +200,16 @@ DECLARE
   allocation_charge_id UUID;
   allocation_amount INTEGER;
 BEGIN
-  SELECT type, status
-    INTO deposit_type, deposit_status
+  IF NEW.status <> 'POSTED'
+     OR NEW.reversed_by_id IS NOT NULL
+     OR NEW.reversal_reason IS NOT NULL
+     OR NEW.reversed_at IS NOT NULL THEN
+    RAISE EXCEPTION 'New DepositApplication rows must be POSTED and cannot carry reversal metadata'
+      USING ERRCODE = '23514';
+  END IF;
+
+  SELECT type, status, amount
+    INTO deposit_type, deposit_status, deposit_amount
     FROM deposit_transactions
    WHERE id = NEW.deposit_transaction_id
      AND organization_id = NEW.organization_id
@@ -170,6 +224,40 @@ BEGIN
           AND source_id = NEW.deposit_transaction_id
      ) THEN
     RAISE EXCEPTION 'DepositApplication must consume an unreversed POSTED RECEIVED deposit'
+      USING ERRCODE = '23514';
+  END IF;
+
+  -- Use the same source-scoped balance formula as the application service:
+  -- un-reversed child events plus POSTED applications consume the RECEIVED row.
+  SELECT
+    COALESCE((
+      SELECT SUM(dt.amount)::BIGINT
+        FROM deposit_transactions AS dt
+       WHERE dt.organization_id = NEW.organization_id
+         AND dt.resident_id = NEW.resident_id
+         AND dt.source_deposit_transaction_id = NEW.deposit_transaction_id
+         AND dt.status = 'POSTED'
+         AND NOT EXISTS (
+           SELECT 1 FROM ledger_reversals AS lr
+            WHERE lr.organization_id = dt.organization_id
+              AND lr.source_type = 'DEPOSIT'
+              AND lr.source_id = dt.id
+         )
+    ), 0)
+    + COALESCE((
+      SELECT SUM(da.amount)::BIGINT
+        FROM deposit_applications AS da
+       WHERE da.organization_id = NEW.organization_id
+         AND da.resident_id = NEW.resident_id
+         AND da.deposit_transaction_id = NEW.deposit_transaction_id
+         AND da.status = 'POSTED'
+    ), 0)
+    INTO source_used;
+
+  IF source_used + NEW.amount::BIGINT > deposit_amount::BIGINT THEN
+    RAISE EXCEPTION
+      'Deposit source balance exceeded by application: source %, already used %, attempted %',
+      deposit_amount, source_used, NEW.amount
       USING ERRCODE = '23514';
   END IF;
 
