@@ -50,6 +50,7 @@
 | POST /deposit-transactions/{depositTransactionId}/refund | depositRefund | OWNER, ADMIN |
 | POST /deposit-transactions/{depositTransactionId}/forfeit | depositForfeit | OWNER, ADMIN |
 | POST /residents/{residentId}/deposits/apply | depositApply | OWNER, ADMIN |
+| POST /deposit-applications/{applicationId}/reverse | depositApplicationReverse | OWNER, ADMIN |
 | POST /expenses | expenseCreate | OWNER, ADMIN, OPERATOR |
 | POST /expenses/{expenseId}/reverse | expenseReverse | OWNER, ADMIN |
 | POST /billing-runs | billingRunPost | OWNER, ADMIN |
