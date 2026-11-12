@@ -201,6 +201,7 @@ async function seedDeposit(c, org, res, amount) {
     'payments_dapp_reversal_requires_application',
     'payment_allocations_prevent_dapp_update',
     'deposit_applications_prevent_link_update',
+    'allocation_releases_prevent_update',
     'ledger_reversals_prevent_update',
     'payment_refunds_prevent_update',
     'expenses_prevent_financial_identity_update',
@@ -550,12 +551,13 @@ async function seedDeposit(c, org, res, amount) {
   check('[DAPP: Application reversal requires a full AllocationRelease]', noReleaseError === '23514');
 
   const validDappReversalReason = 'valid complete DAPP reversal';
+  const validDappReleaseId = uuid();
   const validDappReversal = await transactionCode(fresh.c, async () => {
     await fresh.c.query(
       `INSERT INTO allocation_releases
          (id,organization_id,resident_id,allocation_id,amount,reason,actor_user_id,created_at)
        VALUES ($1,$2,$3,$4,100,$5,$6,now())`,
-      [uuid(), org, res, internalAllocation, validDappReversalReason, user],
+      [validDappReleaseId, org, res, internalAllocation, validDappReversalReason, user],
     );
     await fresh.c.query(
       `INSERT INTO ledger_reversals
@@ -579,6 +581,14 @@ async function seedDeposit(c, org, res, amount) {
     );
   });
   check('[DAPP: complete reversal transaction succeeds]', validDappReversal === null);
+  check(
+    '[DAPP: AllocationRelease cannot be rewritten after reversal]',
+    (await errCode(
+      fresh.c,
+      `UPDATE allocation_releases SET amount=99 WHERE id=$1`,
+      [validDappReleaseId],
+    )) === 'P0001',
+  );
   check(
     '[DAPP: Charge can be reversed after Application reversal]',
     (await errCode(fresh.c, `UPDATE charges SET status='REVERSED' WHERE id=$1`, [
