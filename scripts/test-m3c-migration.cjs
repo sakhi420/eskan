@@ -325,6 +325,16 @@ async function seedDeposit(c, org, res, amount) {
     )) === null,
   );
   check(
+    '[deposit reversal: child event cannot be reversed twice]',
+    (await errCode(
+      fresh.c,
+      `INSERT INTO ledger_reversals
+         (id,organization_id,resident_id,source_type,source_id,side,amount,reason,actor_user_id,idempotency_key)
+       VALUES ($1,$2,$3,'DEPOSIT',$4,'CREDIT',40,'duplicate child reversal',$5,$6)`,
+      [uuid(), org, res, reversalGuardChild, user, uuid()],
+    )) === '23505',
+  );
+  check(
     '[deposit reversal: RECEIVED succeeds after child reversal]',
     (await errCode(
       fresh.c,
@@ -342,16 +352,6 @@ async function seedDeposit(c, org, res, amount) {
          (id,organization_id,resident_id,source_type,source_id,side,amount,reason,actor_user_id,idempotency_key)
        VALUES ($1,$2,$3,'DEPOSIT',$4,'DEBIT',100,'duplicate source reversal',$5,$6)`,
       [uuid(), org, res, reversalGuardDeposit, user, uuid()],
-    )) === '23505',
-  );
-  check(
-    '[deposit reversal: child event cannot be reversed twice]',
-    (await errCode(
-      fresh.c,
-      `INSERT INTO ledger_reversals
-         (id,organization_id,resident_id,source_type,source_id,side,amount,reason,actor_user_id,idempotency_key)
-       VALUES ($1,$2,$3,'DEPOSIT',$4,'CREDIT',40,'duplicate child reversal',$5,$6)`,
-      [uuid(), org, res, reversalGuardChild, user, uuid()],
     )) === '23505',
   );
   check(
