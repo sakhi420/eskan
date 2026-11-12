@@ -2,9 +2,9 @@
 
 **Status:** CURRENT-HEAD CI VERIFIED — P1-7 HTTP ACCEPTANCE AND DAPP/CHARGE REVERSAL ORDERING PASS; HIGH/CRITICAL AUDIT GATE PASSES; HUMAN REVIEW AND OWNER APPROVAL STILL REQUIRED  
 **Base SHA:** `506947b2ac6f475f5c9418dfb640af5c9719bb10`  
-**Verified implementation head SHA:** `06b4ff3b7d1a6aadf7766b897b79f87e89d70286`  
+**Verified implementation head SHA:** `10960c3856cc85a9482ee21c1369532a399341cb`  
 **PR:** [#5 — M3c financial domain](https://github.com/sakhi420/eskan/pull/5) (Draft, not merged)  
-**CI:** [Run #81 — success](https://github.com/sakhi420/eskan/actions/runs/43272644798) — 2026-11-12
+**CI:** [Run #86 — success](https://github.com/sakhi420/eskan/actions/runs/43273827651) — 2026-11-12
 
 ## Remediation table
 
@@ -24,7 +24,7 @@
 
 ## Current-head verification evidence
 
-All items below refer to the same verified implementation PR head SHA `06b4ff3b7d1a6aadf7766b897b79f87e89d70286`, not an earlier branch revision.
+All items below refer to the same verified implementation PR head SHA `10960c3856cc85a9482ee21c1369532a399341cb`, not an earlier branch revision.
 
 | CI gate | Result |
 |---|---:|
@@ -36,7 +36,7 @@ All items below refer to the same verified implementation PR head SHA `06b4ff3b7
 | Idempotency-retention CHECK tests | PASS |
 | M3a migration checks | 11/11 passed |
 | M3b migration checks | 30/30 passed |
-| M3c migration checks | 70/70 passed |
+| M3c migration checks | 75/75 passed |
 | PostgreSQL integration tests | 13 suites / 139 tests passed |
 
 The new P1-7 HTTP suite passed in the same E2E run. It asserts the permission matrix over actual HTTP requests rather than relying only on service-level tests. The BOLA checks also read the other tenant's database rows after rejected mutation attempts to prove the rows remain unchanged.
@@ -52,6 +52,7 @@ Additional database hardening included:
 - Actor-user foreign keys for deposits and expenses use RESTRICT so posted actor attribution is not silently erased.
 - M3c-owned tenant composite FKs are checked by name, not by a brittle global count.
 - Database triggers require refunds/forfeitures to reference an unreversed POSTED RECEIVED deposit; DAPP must consume an unreversed POSTED RECEIVED deposit and a POSTED DEBIT charge.
+- Refunds, forfeitures, and DAPP applications share one source-scoped balance cap. PostgreSQL locks the RECEIVED source row and rejects any new child event or application whose combined active amount would exceed the original received amount. The 75/75 M3c test run covered the mixed 60 + 30 + 10 consumption case and rejected further consumption.
 
 No migration was applied to the developer's local database, Staging or Production. The CI run used disposable GitHub Actions PostgreSQL databases.
 
@@ -78,4 +79,4 @@ The feature branch now includes:
 - A real-service Integration test that proves early Charge reversal is rejected without changing Charge/Application/release state, then reverses the DAPP and proves Charge reversal succeeds.
 - A migration-level SQL test for the same database rule and its valid post-application-reversal transition.
 
-**Verification status for this follow-up:** PASS on Run #81 (current head SHA shown above). CI reports 70/70 M3c migration checks and 139/139 PostgreSQL integration tests; the new integration scenario and database trigger assertions passed.
+**Verification status:** PASS on Run #86 (current implementation head SHA shown above). CI reports 75/75 M3c migration checks and 139/139 PostgreSQL integration tests, including the combined source-balance SQL assertions and DAPP-first / Charge-second reversal scenario.
