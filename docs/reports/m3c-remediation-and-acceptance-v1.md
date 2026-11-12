@@ -61,6 +61,8 @@ No migration was applied to the developer's local database, Staging or Productio
 - PR #5 remains **Draft** and unmerged.
 - A separate second-person review of the financial migration and domain behavior is still required before merge; CI is not a substitute for design review.
 - The committed lockfile removes the two High Multer-chain findings. The permanent `npm audit --audit-level=high` gate now passes on the exact current head. `npm audit` still reports 29 findings (4 low, 25 moderate, 0 high, 0 critical), mostly in development/test tooling; triage them separately and do not use `--force` blindly.
+- The remaining findings are in the development/test dependency tree, not the production dependency set: `glob@13.0.7` is used by Jest reporters/config/runtime, while `glob@10.5.0` is nested below `test-exclude`; `minimatch@10.2.6` is used by ESLint/TypeScript-ESLint and the glob chain, and `minimatch@9.0.9` is nested below `test-exclude`; `deepmerge@4.3.1` is pulled by `jest-config`.
+- Upstream advisories list `glob` as affected through 14.0.1 (fixed in 14.0.2) and `minimatch` as affected below 11.0.1. Current parents request incompatible major ranges (`glob@^13`, `glob@^10`, `minimatch@^10`, and `minimatch@^9`); a root override would force major-version mismatches rather than a safe patch update. The `deepmerge` advisory currently lists no patched release. These findings remain open and are not counted as fixed.
 - Prepare and approve a backup/restore and staged rollout plan before applying migrations to any persistent environment.
 - Sourcery's automated review is skipped because the PR exceeds its 20,000 changed-line limit. This is a tool limit, not a CI failure.
 
