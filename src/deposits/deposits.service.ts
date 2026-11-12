@@ -319,10 +319,11 @@ export class DepositsService {
 
         const deposit = await tx.depositTransaction.findFirst({
           where: { id: depositTransactionId, organizationId },
-          select: {
-            id: true, version: true, residentId: true, status: true, type: true,
-            amount: true, sourceDepositTransactionId: true,
-          },
+          // toDepositDto() requires the complete immutable event projection,
+          // including createdAt and updatedAt. Keep this selection aligned
+          // with DEPOSIT_SELECT so reverse() cannot fail while serializing
+          // the successful mutation inside the idempotency transaction.
+          select: DEPOSIT_SELECT,
         });
         if (!deposit) throw AppError.notFound('Deposit transaction not found');
         if (deposit.status !== LedgerEntryStatus.POSTED) {
