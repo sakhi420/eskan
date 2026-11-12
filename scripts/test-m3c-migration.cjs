@@ -217,14 +217,37 @@ async function seedDeposit(c, org, res, amount) {
 
   check('[DAPP: payment financial identity immutable]',
     (await errCode(fresh.c, `UPDATE payments SET amount=101 WHERE id=$1`, [internalPayment])) === 'P0001');
+  check('[payment: cannot convert a receipt into DAPP]',
+    (await errCode(fresh.c, `UPDATE payments SET method='DEPOSIT_APPLICATION' WHERE id=$1`, [pay])) === 'P0001');
+
+  const validApplication = uuid();
+  await fresh.c.query(
+    `INSERT INTO deposit_applications (id,organization_id,resident_id,deposit_transaction_id,charge_id,payment_id,allocation_id,amount,reason,actor_user_id)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,100,'valid linkage',$8)`,
+    [validApplication, org, res, depRecv, internalCharge, internalPayment, internalAllocation, user],
+  );
   check('[DAPP: allocation financial identity immutable]',
     (await errCode(fresh.c, `UPDATE payment_allocations SET amount=99 WHERE id=$1`, [internalAllocation])) === 'P0001');
+  check('[DAPP: application financial identity immutable]',
+    (await errCode(fresh.c, `UPDATE deposit_applications SET amount=99 WHERE id=$1`, [validApplication])) === 'P0001');
 
-  check('[linkage: DepositApplication must match its DAPP Payment/Allocation]',
+  const mismatchPayment = uuid();
+  await fresh.c.query(
+    `INSERT INTO payments (id, organization_id, resident_id, amount, method, received_at, receipt_number, updated_at)
+     VALUES ($1,$2,$3,100,'DEPOSIT_APPLICATION','2026-11-02',NULL,now())`,
+    [mismatchPayment, org, res],
+  );
+  const mismatchAllocation = uuid();
+  await fresh.c.query(
+    `INSERT INTO payment_allocations (id, organization_id, resident_id, payment_id, charge_id, amount)
+     VALUES ($1,$2,$3,$4,$5,100)`,
+    [mismatchAllocation, org, res, mismatchPayment, otherInternalCharge],
+  );
+  check('[linkage: DepositApplication rejects a mismatched Charge]',
     (await errCode(fresh.c,
       `INSERT INTO deposit_applications (id,organization_id,resident_id,deposit_transaction_id,charge_id,payment_id,allocation_id,amount,reason,actor_user_id)
        VALUES ($1,$2,$3,$4,$5,$6,$7,100,'x',$8)`,
-      [uuid(), org, res, depRecv, charge, internalPayment, internalAllocation, user])) === '23514');
+      [uuid(), org, res, depRecv, charge, mismatchPayment, mismatchAllocation, user])) === '23514');
 
   const exp = uuid();
   await fresh.c.query(`INSERT INTO expenses (id, organization_id, category, status, amount, spent_at, updated_at) VALUES ($1,$2,'Util','POSTED',500,'2026-11-03',now())`, [exp, org]);
@@ -247,7 +270,7 @@ async function seedDeposit(c, org, res, amount) {
   try { baselineDiff = fs.readFileSync(baselineOut, 'utf8'); } catch {}
   try { fs.unlinkSync(baselineOut); } catch {}
   check('[baseline parity: migrate diff exit 0]', baselineParity.status === 0, 'status=' + baselineParity.status);
-  check('[baseline parity: migrate diff empty]', baselineDiff.replace(/^\\s*-- This is an empty migration\\.\\s*$/m, '').trim() === '');
+  check('[baseline parity: migrate diff empty]', baselineDiff.replace(/^\s*-- This is an empty migration\.\s*$/m, '').trim() === '');
 
   await fresh.c.end();
   await baseline.c.end();
