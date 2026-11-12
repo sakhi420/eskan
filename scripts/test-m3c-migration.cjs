@@ -248,6 +248,16 @@ async function seedDeposit(c, org, res, amount) {
        VALUES ($1,$2,$3,'REFUNDED','POSTED',10,'2026-11-02',now())`,
       [uuid(), org, res],
     )) === '23514');
+  check(
+    '[source: new child events cannot be inserted already REVERSED]',
+    (await errCode(
+      fresh.c,
+      `INSERT INTO deposit_transactions
+         (id,organization_id,resident_id,source_deposit_transaction_id,type,status,amount,received_at,updated_at)
+       VALUES ($1,$2,$3,$4,'REFUNDED','REVERSED',10,'2026-11-02',now())`,
+      [uuid(), org, res, depRecv],
+    )) === '23514',
+  );
   const childRefund = uuid();
   await fresh.c.query(
     `INSERT INTO deposit_transactions
@@ -287,6 +297,32 @@ async function seedDeposit(c, org, res, amount) {
          (id,organization_id,resident_id,source_deposit_transaction_id,type,status,amount,received_at,updated_at)
        VALUES ($1,$2,$3,$4,'FORFEITED','POSTED',11,'2026-11-02',now())`,
       [uuid(), org, res, balanceDeposit],
+    )) === '23514',
+  );
+
+  const excessBalanceCharge = await seedCharge(fresh.c, org, res, 11);
+  const excessBalancePayment = uuid();
+  await fresh.c.query(
+    `INSERT INTO payments
+       (id,organization_id,resident_id,amount,method,received_at,receipt_number,updated_at)
+     VALUES ($1,$2,$3,11,'DEPOSIT_APPLICATION','2026-11-02',NULL,now())`,
+    [excessBalancePayment, org, res],
+  );
+  const excessBalanceAllocation = uuid();
+  await fresh.c.query(
+    `INSERT INTO payment_allocations
+       (id,organization_id,resident_id,payment_id,charge_id,amount)
+     VALUES ($1,$2,$3,$4,$5,11)`,
+    [excessBalanceAllocation, org, res, excessBalancePayment, excessBalanceCharge],
+  );
+  check(
+    '[source balance: DAPP cannot exceed balance after refund and forfeit]',
+    (await errCode(
+      fresh.c,
+      `INSERT INTO deposit_applications
+         (id,organization_id,resident_id,deposit_transaction_id,charge_id,payment_id,allocation_id,amount,reason,actor_user_id)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,11,'overdraw source',$8)`,
+      [uuid(), org, res, balanceDeposit, excessBalanceCharge, excessBalancePayment, excessBalanceAllocation, user],
     )) === '23514',
   );
 
@@ -357,7 +393,7 @@ async function seedDeposit(c, org, res, amount) {
       `INSERT INTO deposit_applications
          (id,organization_id,resident_id,deposit_transaction_id,charge_id,payment_id,allocation_id,status,amount,reason,actor_user_id)
        VALUES ($1,$2,$3,$4,$5,$6,$7,'REVERSED',100,'invalid initial state',$8)`,
-      [uuid(), org, res, charge, charge, reversedAtInsertPayment, reversedAtInsertAllocation, user],
+      [uuid(), org, res, depRecv, charge, reversedAtInsertPayment, reversedAtInsertAllocation, user],
     )) === '23514',
   );
 
