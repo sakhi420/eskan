@@ -12,15 +12,17 @@ This ADR was amended to fix the P0 financial-integrity defects found in review.
 
 ## Decisions
 
-1. **Deposit ledger is resident-scoped and append-only, balanced per source.**
+1. **Deposit ledger is resident-scoped and strictly append-only, balanced per source.**
    `DepositTransaction` uses `DepositType { RECEIVED, REFUNDED, FORFEITED }`. A
    `REFUNDED`/`FORFEITED` event stores the source RECEIVED via the structural
-   `source_deposit_transaction_id` self-FK (never inferred from Audit JSON).
+   `source_deposit_transaction_id` self-FK (never inferred from Audit JSON). A void
+   never updates the original row: it appends a `LedgerReversal` with the opposite side.
 
 2. **Source-specific Deposit Held (D-08/D-09):**
-   `Held(source) = RECEIVED(source).amount − Σ REFUNDED(source, POSTED) − Σ FORFEITED(source, POSTED) − Σ APPLIED(source, POSTED)`.
-   Refund/forfeit/apply are each checked against this source balance under the org +
-   resident + deposit locks. Resident-level `Deposit Held` is the sum over sources.
+   `Held(source) = RECEIVED(source) − active REFUNDED(source) − active FORFEITED(source) − POSTED APPLIED(source)`.
+   A deposit event remains active unless a corresponding DEPOSIT LedgerReversal exists.
+   Reversing a RECEIVED source requires all dependent refund/forfeit/application activity
+   to have been reversed first. Resident-level `Deposit Held` is the sum over sources.
 
 3. **D-10 deposit application is materially a non-cash settlement (P0-2/P0-3).**
    `apply()` creates, atomically: one internal `Payment`
@@ -34,9 +36,10 @@ This ADR was amended to fix the P0 financial-integrity defects found in review.
    `CLOSED`/`TERMINATED` stay contract AND no `ACTIVE` bed assignment. The absence of an
    `ACTIVE` contract alone is NOT proof of checkout.
 
-5. **Full void only (D-02), per-source.** Reversal marks the row `REVERSED` and records an
-   append-only `LedgerReversal` with the **opposite** posting side. No partial reversal.
-   The reversal side mapping (original → reversal):
+5. **Full void only (D-02), per-source.** The original posting row is never mutated;
+   reversal records an append-only `LedgerReversal` with the **opposite** posting side.
+   API status is an effective projection derived from the reversal record. No partial
+   reversal. The reversal side mapping (original → reversal):
 
    | Source / event          | Original side | Reversal side |
    |-------------------------|---------------|---------------|
@@ -51,9 +54,11 @@ This ADR was amended to fix the P0 financial-integrity defects found in review.
 
 6. **DAPP reversal (P0-3)** happens only through the dedicated endpoint
    `POST /deposit-applications/:id/reverse` (OWNER/ADMIN). In one transaction it releases
-   the linked allocation, reverses the internal Payment, marks the DepositApplication
+   the sole matching allocation, reverses the internal Payment, marks the DepositApplication
    REVERSED (restoring Held exactly once), and writes a PAYMENT LedgerReversal (DEBIT).
-   The generic `refundPayment`/`reversePayment` endpoints reject DAPP.
+   Generic `refundPayment`/`reversePayment`/`createAllocation`/`releaseAllocation`
+   endpoints reject DAPP. ReverseApplication also fails closed if an extra/mismatched
+   Allocation exists for the internal payment.
 
 7. **Expense is paid-only (D-14):** `paymentMethod` is required and restricted to
    `CASH|BANK_TRANSFER|MOBILE_MONEY|OTHER`; `DEPOSIT_APPLICATION` is rejected both in the
@@ -80,5 +85,7 @@ This ADR was amended to fix the P0 financial-integrity defects found in review.
 - `PaymentMethod` gains `DEPOSIT_APPLICATION`; `payments.receipt_number` is nullable.
 - `DepositApplication` gained `payment_id`/`allocation_id`/`status`/`version`/`reversed_*`
   and `DepositTransaction` gained `source_deposit_transaction_id`.
+- Database triggers protect immutable DepositTransaction rows, exact DAPP-to-Allocation
+  linkage, and the one-full-allocation rule for DAPP.
 - Reconciliation oracle: balances are asserted with independent raw SQL, not the service
   balance functions.
