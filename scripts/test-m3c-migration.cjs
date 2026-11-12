@@ -188,6 +188,38 @@ async function seedDeposit(c, org, res, amount) {
   check('[check: expenses_payment_method_not_dapp]', expMethod.rows.length > 0);
 
   const depRecv = await seedDeposit(fresh.c, org, res, 10000);
+  check('[source: RECEIVED cannot have a parent link]',
+    (await errCode(
+      fresh.c,
+      `INSERT INTO deposit_transactions
+         (id,organization_id,resident_id,source_deposit_transaction_id,type,status,amount,received_at,updated_at)
+       VALUES ($1,$2,$3,$4,'RECEIVED','POSTED',10,'2026-11-02',now())`,
+      [uuid(), org, res, depRecv],
+    )) === '23514');
+  check('[source: REFUNDED requires a source]',
+    (await errCode(
+      fresh.c,
+      `INSERT INTO deposit_transactions
+         (id,organization_id,resident_id,type,status,amount,received_at,updated_at)
+       VALUES ($1,$2,$3,'REFUNDED','POSTED',10,'2026-11-02',now())`,
+      [uuid(), org, res],
+    )) === '23514');
+  const childRefund = uuid();
+  await fresh.c.query(
+    `INSERT INTO deposit_transactions
+       (id,organization_id,resident_id,source_deposit_transaction_id,type,status,amount,received_at,updated_at)
+     VALUES ($1,$2,$3,$4,'REFUNDED','POSTED',10,'2026-11-02',now())`,
+    [childRefund, org, res, depRecv],
+  );
+  check('[source: nested refund cannot be used as a source]',
+    (await errCode(
+      fresh.c,
+      `INSERT INTO deposit_transactions
+         (id,organization_id,resident_id,source_deposit_transaction_id,type,status,amount,received_at,updated_at)
+       VALUES ($1,$2,$3,$4,'FORFEITED','POSTED',10,'2026-11-02',now())`,
+      [uuid(), org, res, childRefund],
+    )) === '23514');
+
   const charge = await seedCharge(fresh.c, org, res, 10000);
   const charge2 = await seedCharge(fresh.c, org, res2, 10000);
   const pay = await seedPayment(fresh.c, org, res, 10000);
@@ -268,6 +300,60 @@ async function seedDeposit(c, org, res, amount) {
       `INSERT INTO deposit_applications (id,organization_id,resident_id,deposit_transaction_id,charge_id,payment_id,allocation_id,amount,reason,actor_user_id)
        VALUES ($1,$2,$3,$4,$5,$6,$7,100,'x',$8)`,
       [uuid(), org, res, depRecv, charge, mismatchPayment, mismatchAllocation, user])) === '23514');
+
+  const creditCharge = uuid();
+  await fresh.c.query(
+    `INSERT INTO charges
+       (id, organization_id, resident_id, type, entry_side, amount, period_start, period_end, due_date, description, updated_at)
+     VALUES ($1,$2,$3,'ADJUSTMENT','CREDIT',50,'2026-11-01','2026-12-01','2026-11-01','credit test',now())`,
+    [creditCharge, org, res],
+  );
+
+  const dappForCreditCharge = uuid();
+  await fresh.c.query(
+    `INSERT INTO payments
+       (id,organization_id,resident_id,amount,method,received_at,receipt_number,updated_at)
+     VALUES ($1,$2,$3,50,'DEPOSIT_APPLICATION','2026-11-02',NULL,now())`,
+    [dappForCreditCharge, org, res],
+  );
+  const allocationForCreditCharge = uuid();
+  await fresh.c.query(
+    `INSERT INTO payment_allocations
+       (id,organization_id,resident_id,payment_id,charge_id,amount)
+     VALUES ($1,$2,$3,$4,$5,50)`,
+    [allocationForCreditCharge, org, res, dappForCreditCharge, creditCharge],
+  );
+  check('[DAPP: cannot settle a CREDIT charge]',
+    (await errCode(
+      fresh.c,
+      `INSERT INTO deposit_applications
+         (id,organization_id,resident_id,deposit_transaction_id,charge_id,payment_id,allocation_id,amount,reason,actor_user_id)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,50,'invalid credit charge',$8)`,
+      [uuid(), org, res, depRecv, creditCharge, dappForCreditCharge, allocationForCreditCharge, user],
+    )) === '23514');
+
+  const dappForChildDeposit = uuid();
+  await fresh.c.query(
+    `INSERT INTO payments
+       (id,organization_id,resident_id,amount,method,received_at,receipt_number,updated_at)
+     VALUES ($1,$2,$3,50,'DEPOSIT_APPLICATION','2026-11-02',NULL,now())`,
+    [dappForChildDeposit, org, res],
+  );
+  const allocationForChildDeposit = uuid();
+  await fresh.c.query(
+    `INSERT INTO payment_allocations
+       (id,organization_id,resident_id,payment_id,charge_id,amount)
+     VALUES ($1,$2,$3,$4,$5,50)`,
+    [allocationForChildDeposit, org, res, dappForChildDeposit, charge],
+  );
+  check('[DAPP: cannot consume a REFUNDED child deposit event]',
+    (await errCode(
+      fresh.c,
+      `INSERT INTO deposit_applications
+         (id,organization_id,resident_id,deposit_transaction_id,charge_id,payment_id,allocation_id,amount,reason,actor_user_id)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,50,'invalid child deposit',$8)`,
+      [uuid(), org, res, childRefund, charge, dappForChildDeposit, allocationForChildDeposit, user],
+    )) === '23514');
 
   const refundRow = uuid();
   await fresh.c.query(
