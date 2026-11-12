@@ -1,13 +1,13 @@
 # ESKAN M3c — Implementation Report
 
-**Status:** PASS (code + schema + migration + tests complete; PR submitted, NOT merged)
+**Status:** IMPLEMENTED ON FEATURE BRANCH — LOCAL VALIDATION AND CI STILL REQUIRED
 **Date:** 2026-11-12
 
 ## Git
 - Branch: `feat/m3c-deposit-expense-refund-reversal`
 - Base SHA: `506947b2ac6f475f5c9418dfb640af5c9719bb10` (= `origin/main`)
 - Working tree: clean at completion (committed)
-- PR URL: (to be created against `main`)
+- PR: not created; the feature branch is pushed and awaits owner-side local validation.
 
 ## Scope
 | قابلیت | وضعیت | شواهد |
