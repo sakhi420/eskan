@@ -6,9 +6,9 @@
 ## Git / PR
 - Branch: `feat/m3c-deposit-expense-refund-reversal`
 - Base: `main` at `506947b2ac6f475f5c9418dfb640af5c9719bb10`
-- Verified head: `794ebffd9711c2884980e082cdbcc23f4c65a0db`
+- Verified head: `6601c038a717d5b0d2daa58430a4df69eb604687`
 - PR: [#5](https://github.com/sakhi420/eskan/pull/5) — Draft, open, not merged.
-- CI: [Run #60 — success](https://github.com/sakhi420/eskan/actions/runs/43265377090).
+- CI: [Run #67 — success](https://github.com/sakhi420/eskan/actions/runs/43266432493).
 - Local working tree was not inspected by this GitHub-side review. Pull the branch before continuing local work.
 
 ## Scope
@@ -35,18 +35,20 @@
 - Refund and LedgerReversal records are append-only at the database layer. Expense financial identity cannot be rewritten; reversal metadata remains mutable.
 - Deposit/Expense actor-user references use RESTRICT to preserve audit attribution.
 - M3c fresh replay and pre-M3c baseline upgrade rehearsal both passed in throwaway CI databases.
+- A legacy-data rehearsal confirmed that an unmapped pre-M3c REFUNDED/FORFEITED event aborts the FIRST M3c migration before any schema change; the test confirms no partial M3c enum/table/column artifacts remain.
+- PostgreSQL triggers enforce source-deposit semantics and require DAPP to use an unreversed POSTED RECEIVED deposit and a POSTED DEBIT charge.
 - Prisma parity assertions passed.
 - Persistent environments actually migrated: **none**.
 
 ## Current-head CI evidence
 
-All results below are from SHA `794ebffd9711c2884980e082cdbcc23f4c65a0db`:
+All results below are from SHA `6601c038a717d5b0d2daa58430a4df69eb604687`:
 - Build, ESLint, Prettier, OpenAPI validation and Prisma validation: PASS.
 - Unit tests: 12 suites / 79 tests.
 - E2E smoke tests: 4 suites / 29 tests, including the new P1-7 HTTP role/BOLA suite.
 - M3a: 11/11 migration checks.
 - M3b: 30/30 migration checks.
-- M3c: 60/60 migration checks.
+- M3c: 67/67 migration checks.
 - PostgreSQL integration: 13 suites / 139 tests.
 - M-1/M-2 checks, package/hostel concurrency, M-2 parity and idempotency-retention checks: PASS.
 
