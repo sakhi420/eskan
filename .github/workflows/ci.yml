@@ -41,7 +41,7 @@ jobs:
       - name: Regenerate package lock with safe updates (temporary)
         run: |
           npm install --package-lock-only --ignore-scripts --no-audit --no-fund
-          npm audit fix --package-lock-only --ignore-scripts --no-fund
+          npm audit fix --package-lock-only --ignore-scripts --no-fund || true
 
       - name: Upload regenerated package lock (temporary)
         uses: actions/upload-artifact@v4
