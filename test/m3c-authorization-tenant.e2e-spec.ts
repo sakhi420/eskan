@@ -366,12 +366,13 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
   it('restricts CREDIT charge posting to OWNER/ADMIN even though OPERATOR can post DEBIT', async () => {
     const body = {
       residentId: randomUUID(),
-      type: 'OTHER',
+      type: 'ADJUSTMENT',
       entrySide: 'CREDIT',
       money,
       periodStart: '2026-11-01',
       periodEnd: '2026-12-01',
       dueDate: '2026-11-01',
+      description: 'P1-7 role matrix credit reason',
     };
     await expectRoleGate('/api/v1/charges', body, ['OWNER', 'ADMIN']);
   });
