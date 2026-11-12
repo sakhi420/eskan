@@ -285,7 +285,9 @@ describe('M3b authorization before idempotency replay (HTTP)', () => {
       .set('X-Organization-Id', orgA)
       .set('Idempotency-Key', key)
       .send({ money: { amount: 200, currency: 'AFN' }, reason: 'again' });
-    expect(cross.status).toBe(403);
+    expect(cross.status).toBe(404);
+    expect(cross.body.code).toBe('RESOURCE_NOT_FOUND');
+    expect(cross.body.detail).not.toContain(orgA);
   });
 
   it('rejects invalid payment method and zero/negative amounts (422)', async () => {
