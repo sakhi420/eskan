@@ -107,4 +107,21 @@ export class DepositsController {
       await this.deposits.forfeit(m.organizationId, user.id, depositTransactionId, dto, requireIdempotencyKey(idempotencyKey), req.traceId ?? 'unknown'),
     );
   }
+
+  @Post('deposit-applications/:applicationId/reverse')
+  @HttpCode(HttpStatus.OK)
+  @Roles(Role.OWNER, Role.ADMIN)
+  async reverseApplication(
+    @CurrentMembership() m: MembershipContext,
+    @CurrentUser() user: AuthUser,
+    @Param('applicationId') applicationId: string,
+    @Headers('Idempotency-Key') idempotencyKey: string | undefined,
+    @Body() dto: ReversalDto,
+    @Req() req: RequestWithAuth,
+  ) {
+    return envelope(
+      req,
+      await this.deposits.reverseApplication(m.organizationId, user.id, applicationId, dto, requireIdempotencyKey(idempotencyKey), req.traceId ?? 'unknown'),
+    );
+  }
 }

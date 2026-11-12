@@ -150,6 +150,7 @@ describe('M3c Deposit / Refund / Expense / Reversal (real PostgreSQL + real serv
 
     it('rejects application exceeding the deposit balance', async () => {
       const f = await seedOrg(db);
+      await seedContract(db, f.org, f.resident, 'CLOSED');
       const recv: any = await deposits.receive(f.org, f.user, f.resident, { money: money(3000), receivedAt: '2026-11-02' } as any, randomUUID(), 'trace');
       const ch = await seedCharge(db, f.org, f.resident, 9000);
       await expect(deposits.apply(f.org, f.user, f.resident, { depositTransactionId: recv.id, reason: 'settle', charges: [{ chargeId: ch, money: money(9000) }] } as any, randomUUID(), 'trace')).rejects.toMatchObject({ code: 'DEPOSIT_BALANCE_INSUFFICIENT' });
@@ -157,6 +158,7 @@ describe('M3c Deposit / Refund / Expense / Reversal (real PostgreSQL + real serv
 
     it('rejects application of a charge belonging to another resident', async () => {
       const f = await seedOrg(db);
+      await seedContract(db, f.org, f.resident, 'CLOSED');
       const other = randomUUID();
       await db.query(`INSERT INTO residents (id, organization_id, full_name, updated_at) VALUES ($1,$2,'Other',now())`, [other, f.org]);
       const recv: any = await deposits.receive(f.org, f.user, f.resident, { money: money(10000), receivedAt: '2026-11-02' } as any, randomUUID(), 'trace');

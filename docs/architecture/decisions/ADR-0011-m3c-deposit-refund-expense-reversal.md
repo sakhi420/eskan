@@ -1,61 +1,84 @@
 # ADR-0011 — M3c: Deposit / Refund / Expense / Reversal
 
-**Status:** Accepted (implementation)
-**Date:** 2026-11-12
+**Status:** Accepted (implementation + remediation)
+**Date:** 2026-11-12 (amended for remediation 2026-11-12)
 **Deciders:** delegated product decisions D-01..D-18 (authoritative: `ESKAN_PHASE9_EXECUTION_DIRECTIVE_v1_FA.md`)
 
 ## Context
 
 M3c delivers the deposit ledger, deposit refund/forfeit/application, paid-expense
-recording, and the distinction between void/reversal, cash refund, and adjustment.
+recording, and the strict separation of void/reversal, cash refund, and adjustment.
+This ADR was amended to fix the P0 financial-integrity defects found in review.
 
 ## Decisions
 
-1. **Deposit ledger is resident-scoped and append-only.** `DepositTransaction` uses
-   `DepositType { RECEIVED, REFUNDED, FORFEITED }`; application-to-charges is NOT a
-   DepositType — it is the independent `DepositApplication` entity (contract v0.5.0 lock).
+1. **Deposit ledger is resident-scoped and append-only, balanced per source.**
+   `DepositTransaction` uses `DepositType { RECEIVED, REFUNDED, FORFEITED }`. A
+   `REFUNDED`/`FORFEITED` event stores the source RECEIVED via the structural
+   `source_deposit_transaction_id` self-FK (never inferred from Audit JSON).
 
-2. **Deposit Held is always derived, never stored:**
-   `Held = Σ RECEIVED(POSTED) − Σ REFUNDED(POSTED) − Σ FORFEITED(POSTED) − Σ DepositApplication`
-   computed per-resident after acquiring the org + resident locks.
+2. **Source-specific Deposit Held (D-08/D-09):**
+   `Held(source) = RECEIVED(source).amount − Σ REFUNDED(source, POSTED) − Σ FORFEITED(source, POSTED) − Σ APPLIED(source, POSTED)`.
+   Refund/forfeit/apply are each checked against this source balance under the org +
+   resident + deposit locks. Resident-level `Deposit Held` is the sum over sources.
 
-3. **D-08/D-09 balance check is resident-level:** a refund/forfeit targets a specific
-   RECEIVED deposit (path id) but may never drive the resident's held balance negative
-   (`REFUND_EXCEEDS_DEPOSIT_BALANCE` / `DEPOSIT_BALANCE_INSUFFICIENT`).
+3. **D-10 deposit application is materially a non-cash settlement (P0-2/P0-3).**
+   `apply()` creates, atomically: one internal `Payment`
+   (`method = DEPOSIT_APPLICATION`, `receipt_number = NULL`), one `PaymentAllocation`,
+   and one `DepositApplication` that structurally references BOTH (payment_id,
+   allocation_id — 1:1 UNIQUE). No receipt counter, no cash receipt. `DEPOSIT_APPLICATION`
+   is rejected by the normal payment DTO (`@IsIn` manual methods), the service
+   (`createPayment`), the DB (`payments_dapp_has_no_receipt` CHECK), and the expense DTO.
 
-4. **D-10 deposit application creates, atomically:** one internal `Payment`
-   (`method = DEPOSIT_APPLICATION`, `receipt_number = NULL`), one `PaymentAllocation` to
-   the explicitly selected DEBIT charge, and one `DepositApplication` reference — all in a
-   single transaction. No ReceiptCounter increment, no cash receipt. Lock order is
-   organization → resident → charge(s sorted) → dependent rows.
+4. **"Final checkout" gate (P1-6) fails closed:** application requires a finalized
+   `CLOSED`/`TERMINATED` stay contract AND no `ACTIVE` bed assignment. The absence of an
+   `ACTIVE` contract alone is NOT proof of checkout.
 
-5. **"Final checkout" gate** (D-10): application is rejected with `CHECKOUT_REQUIRED`
-   while the resident has an `ACTIVE` stay contract. (Assumption: a resident with no
-   `ACTIVE` contract has completed checkout; the schema has no separate
-   "checkout-in-progress" flag.)
+5. **Full void only (D-02), per-source.** Reversal marks the row `REVERSED` and records an
+   append-only `LedgerReversal` with the **opposite** posting side. No partial reversal.
+   The reversal side mapping (original → reversal):
 
-6. **Full void only (D-02).** Reversal marks the source row `REVERSED` (with actor,
-   reason, server time) and records an append-only `LedgerReversal` with the opposite
-   side. No partial reversal. Charges/payments with valid allocations release them
-   append-only first, so allocations are never orphaned.
+   | Source / event          | Original side | Reversal side |
+   |-------------------------|---------------|---------------|
+   | Charge (entrySide DEBIT) | DEBIT        | CREDIT        |
+   | Charge (entrySide CREDIT)| CREDIT       | DEBIT         |
+   | Payment (any method)     | CREDIT       | DEBIT         |
+   | Deposit RECEIVED         | CREDIT       | DEBIT         |
+   | Deposit REFUNDED         | DEBIT        | CREDIT        |
+   | Deposit FORFEITED        | DEBIT        | CREDIT        |
+   | Deposit application (DAPP)| DEBIT        | CREDIT        |
+   | Expense                  | DEBIT        | CREDIT        |
 
-7. **LedgerReversal side convention:** CHARGE → opposite of `entrySide`; PAYMENT → CREDIT;
-   DEPOSIT → CREDIT; EXPENSE → DEBIT. `residentId` is nullable here because expenses are
-   hostel-scoped (never exposed in a response for EXPENSE; only PaymentVoidResult exposes
-   a LedgerReversal and always with a resident).
+6. **DAPP reversal (P0-3)** happens only through the dedicated endpoint
+   `POST /deposit-applications/:id/reverse` (OWNER/ADMIN). In one transaction it releases
+   the linked allocation, reverses the internal Payment, marks the DepositApplication
+   REVERSED (restoring Held exactly once), and writes a PAYMENT LedgerReversal (DEBIT).
+   The generic `refundPayment`/`reversePayment` endpoints reject DAPP.
 
-8. **Expense is paid-only (D-14).** `DEPOSIT_APPLICATION` is rejected as an expense
-   payment method. Expenses reverse only via the full-void path with reason + actor.
+7. **Expense is paid-only (D-14):** `paymentMethod` is required and restricted to
+   `CASH|BANK_TRANSFER|MOBILE_MONEY|OTHER`; `DEPOSIT_APPLICATION` is rejected both in the
+   DTO and via `expenses_payment_method_not_dapp` CHECK.
 
-9. **Money is integer AFN (A-016)** everywhere; new tables carry `amount > 0` CHECKs.
+8. **Money is integer AFN (A-016)** everywhere; `amount > 0` CHECKs are present (already
+   enforced for charges/payments/allocations/deposit_transactions/expenses and the new
+   tables).
 
-10. **Financial immutability (D-18)** extends to `deposit_transactions`, `expenses`,
-    `ledger_reversals`, `payment_refunds`, and `deposit_applications` via the shared
-    `prevent_financial_document_delete` BEFORE DELETE trigger.
+9. **Financial immutability (D-18)** extends to all financial documents via the shared
+   `prevent_financial_document_delete` BEFORE DELETE trigger (append-only).
+
+10. **Idempotent replay snapshots results (P1-5).** `apply` and `reversePayment` persist a
+    non-sensitive snapshot (`applicationIds`, `totalApplied`, `remainingDepositBalance`;
+    `paymentId`, `releaseIds`, `reversalId`) so replay returns the committed result, not a
+    recomputation of a later state.
+
+11. **Sync/Audit coverage (P1-2).** Every mutation emits `AuditEvent` + `SyncChange` for
+    every changed entity (Payment, Allocation, AllocationRelease, Charge, DepositTransaction,
+    DepositApplication, LedgerReversal, Expense) in the same transaction.
 
 ## Consequences
 
-- `PaymentMethod` gains `DEPOSIT_APPLICATION`; `payments.receipt_number` becomes nullable
-  (internal settlement payments have no receipt).
-- Reconciliation oracle: `Deposit Held` and the non-cash `DEPOSIT_APPLICATION` payments
-  are asserted with independent raw SQL, not the service balance function.
+- `PaymentMethod` gains `DEPOSIT_APPLICATION`; `payments.receipt_number` is nullable.
+- `DepositApplication` gained `payment_id`/`allocation_id`/`status`/`version`/`reversed_*`
+  and `DepositTransaction` gained `source_deposit_transaction_id`.
+- Reconciliation oracle: balances are asserted with independent raw SQL, not the service
+  balance functions.

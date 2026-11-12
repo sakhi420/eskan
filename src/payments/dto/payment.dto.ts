@@ -1,6 +1,7 @@
-import { IsDefined, IsEnum, IsOptional, IsString, IsUUID, MaxLength, MinLength, ValidateNested } from 'class-validator';
+import { IsDefined, IsIn, IsOptional, IsString, IsUUID, MaxLength, MinLength, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PaymentMethod } from '../../generated/prisma/enums';
+import { MANUAL_PAYMENT_METHODS } from '../../common/money/payment-method';
 import { MoneyDto } from '../../common/money/money.dto';
 import { IsDateOnly } from '../../common/validation/is-date-only.decorator';
 
@@ -13,7 +14,7 @@ export class PaymentDto {
   @Type(() => MoneyDto)
   money!: MoneyDto;
 
-  @IsEnum(PaymentMethod)
+  @IsIn(MANUAL_PAYMENT_METHODS)
   method!: PaymentMethod;
 
   @IsDateOnly()

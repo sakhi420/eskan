@@ -108,21 +108,38 @@ async function seedDeposit(c, org, res, amount) {
     'deposit_applications_organization_id_resident_id_fkey',
     'deposit_applications_organization_id_resident_id_deposit_t_fkey',
     'deposit_applications_organization_id_resident_id_charge_id_fkey',
+    'deposit_transactions_organization_id_resident_id_source_de_fkey',
+    'deposit_applications_organization_id_resident_id_payment_i_fkey',
+    'deposit_applications_organization_id_resident_id_allocatio_fkey',
   ];
-  check('[fk: all 6 M3c composite FKs]', m3cCompositeFks.every((n) => fkNames.has(n)), `total=${fks.rowCount}`);
-  check('[fk: composite FK count = 30]', fks.rowCount === 30, `count=${fks.rowCount}`);
+  check('[fk: all 9 M3c composite FKs]', m3cCompositeFks.every((n) => fkNames.has(n)), `total=${fks.rowCount}`);
+  check('[fk: composite FK count = 33]', fks.rowCount === 33, `count=${fks.rowCount}`);
+
+  const sourceCol = await fresh.c.query(`SELECT is_nullable FROM information_schema.columns WHERE table_name='deposit_transactions' AND column_name='source_deposit_transaction_id'`);
+  check('[col deposit.source_deposit_transaction_id]', !!sourceCol.rows[0] && sourceCol.rows[0].is_nullable === 'YES');
+  const appPay = await fresh.c.query(`SELECT is_nullable FROM information_schema.columns WHERE table_name='deposit_applications' AND column_name='payment_id'`);
+  check('[col application.payment_id NOT NULL]', !!appPay.rows[0] && appPay.rows[0].is_nullable === 'NO');
+  const appAlloc = await fresh.c.query(`SELECT is_nullable FROM information_schema.columns WHERE table_name='deposit_applications' AND column_name='allocation_id'`);
+  check('[col application.allocation_id NOT NULL]', !!appAlloc.rows[0] && appAlloc.rows[0].is_nullable === 'NO');
+
+  const dappReceipt = await fresh.c.query(`SELECT conname FROM pg_constraint WHERE conname='payments_dapp_has_no_receipt'`);
+  check('[check: payments_dapp_has_no_receipt]', dappReceipt.rows.length > 0);
+  const expMethod = await fresh.c.query(`SELECT conname FROM pg_constraint WHERE conname='expenses_payment_method_not_dapp'`);
+  check('[check: expenses_payment_method_not_dapp]', expMethod.rows.length > 0);
 
   const depRecv = await seedDeposit(fresh.c, org, res, 10000);
   const charge = await seedCharge(fresh.c, org, res, 10000);
   const charge2 = await seedCharge(fresh.c, org, res2, 10000);
   const pay = await seedPayment(fresh.c, org, res, 10000);
+  const allocDummy = uuid();
+  await fresh.c.query(`INSERT INTO payment_allocations (id, organization_id, resident_id, payment_id, charge_id, amount) VALUES ($1,$2,$3,$4,$5,1)`, [allocDummy, org, res, pay, charge]);
 
   check('[check: refund amount=0]', (await errCode(fresh.c, `INSERT INTO payment_refunds (id,organization_id,resident_id,payment_id,amount,reason,actor_user_id) VALUES ($1,$2,$3,$4,0,'x',$5)`, [uuid(), org, res, pay, user])) === '23514');
   check('[check: reversal amount=0]', (await errCode(fresh.c, `INSERT INTO ledger_reversals (id,organization_id,resident_id,source_type,source_id,side,amount,reason,actor_user_id,idempotency_key) VALUES ($1,$2,$3,'CHARGE',$4,'DEBIT',0,'x',$5,$6)`, [uuid(), org, res, charge, user, uuid()])) === '23514');
-  check('[check: application amount<0]', (await errCode(fresh.c, `INSERT INTO deposit_applications (id,organization_id,resident_id,deposit_transaction_id,charge_id,amount,reason,actor_user_id) VALUES ($1,$2,$3,$4,$5,-5,'x',$6)`, [uuid(), org, res, depRecv, charge, user])) === '23514');
+  check('[check: application amount<0]', (await errCode(fresh.c, `INSERT INTO deposit_applications (id,organization_id,resident_id,deposit_transaction_id,charge_id,payment_id,allocation_id,amount,reason,actor_user_id) VALUES ($1,$2,$3,$4,$5,$6,$7,-5,'x',$8)`, [uuid(), org, res, depRecv, charge, pay, allocDummy, user])) === '23514');
 
   check('[fk: cross-resident refund]', (await errCode(fresh.c, `INSERT INTO payment_refunds (id,organization_id,resident_id,payment_id,amount,reason,actor_user_id) VALUES ($1,$2,$3,$4,100,'x',$5)`, [uuid(), org, res2, pay, user])) !== null);
-  check('[fk: cross-org application]', (await errCode(fresh.c, `INSERT INTO deposit_applications (id,organization_id,resident_id,deposit_transaction_id,charge_id,amount,reason,actor_user_id) VALUES ($1,$2,$3,$4,$5,100,'x',$6)`, [uuid(), org2, resOrg2, depRecv, charge2, user])) !== null);
+  check('[fk: cross-org application]', (await errCode(fresh.c, `INSERT INTO deposit_applications (id,organization_id,resident_id,deposit_transaction_id,charge_id,payment_id,allocation_id,amount,reason,actor_user_id) VALUES ($1,$2,$3,$4,$5,$6,$7,100,'x',$8)`, [uuid(), org2, resOrg2, depRecv, charge2, pay, allocDummy, user])) !== null);
 
   check('[immutability: deposit delete]', (await errCode(fresh.c, `DELETE FROM deposit_transactions WHERE id=$1`, [depRecv])) === 'P0001');
   const exp = uuid();

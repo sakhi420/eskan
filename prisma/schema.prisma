@@ -235,6 +235,7 @@ model User {
   reversedPayments       Payment[]                   @relation("PaymentReversedBy")
   reversedDeposits       DepositTransaction[]        @relation("DepositReversedBy")
   reversedExpenses       Expense[]                   @relation("ExpenseReversedBy")
+  reversedApplications   DepositApplication[]         @relation("DepositApplicationReversedBy")
   subscriptionEvents     SubscriptionEvent[]         @relation("SubscriptionEventActor")
   verifiedManualPayments ManualSubscriptionPayment[] @relation("ManualPaymentVerifiedBy")
   auditEvents            AuditEvent[]                @relation("AuditEventActor")
@@ -684,6 +685,7 @@ model Payment {
   reversedBy   User?               @relation("PaymentReversedBy", fields: [reversedById], references: [id], onDelete: SetNull)
   allocations  PaymentAllocation[]
   refunds      PaymentRefund[]
+  application  DepositApplication? @relation("DepositApplicationPayment")
 
   @@unique([organizationId, receiptNumber])
   @@unique([organizationId, id])
@@ -705,6 +707,7 @@ model PaymentAllocation {
   payment Payment @relation(fields: [organizationId, residentId, paymentId], references: [organizationId, residentId, id], onDelete: Restrict)
   charge  Charge  @relation(fields: [organizationId, residentId, chargeId], references: [organizationId, residentId, id], onDelete: Restrict)
   releases AllocationRelease[]
+  application DepositApplication? @relation("DepositApplicationAllocation")
 
   @@unique([organizationId, residentId, id])
   @@index([chargeId])
@@ -749,6 +752,7 @@ model DepositTransaction {
   version        Int               @default(1)
   organizationId String            @map("organization_id") @db.Uuid
   residentId     String            @map("resident_id") @db.Uuid
+  sourceDepositTransactionId String? @map("source_deposit_transaction_id") @db.Uuid
   type           DepositType
   status         LedgerEntryStatus @default(POSTED)
   amount         Int
@@ -766,11 +770,14 @@ model DepositTransaction {
   actor        User?        @relation("DepositActor", fields: [actorUserId], references: [id], onDelete: SetNull)
   reversedBy   User?        @relation("DepositReversedBy", fields: [reversedById], references: [id], onDelete: SetNull)
   applications DepositApplication[]
+  sourceDepositTransaction DepositTransaction? @relation("DepositSource", fields: [organizationId, residentId, sourceDepositTransactionId], references: [organizationId, residentId, id], onDelete: Restrict)
+  derivedTransactions      DepositTransaction[] @relation("DepositSource")
 
   @@unique([organizationId, id])
   @@unique([organizationId, residentId, id])
   @@index([organizationId, residentId])
   @@index([organizationId, type])
+  @@index([organizationId, residentId, sourceDepositTransactionId])
   @@map("deposit_transactions")
 }
 
@@ -849,25 +856,38 @@ model PaymentRefund {
 }
 
 model DepositApplication {
-  id                   String             @id @default(uuid()) @db.Uuid
-  organizationId       String             @map("organization_id") @db.Uuid
-  residentId           String             @map("resident_id") @db.Uuid
-  depositTransactionId String             @map("deposit_transaction_id") @db.Uuid
-  chargeId             String             @map("charge_id") @db.Uuid
+  id                   String            @id @default(uuid()) @db.Uuid
+  version              Int               @default(1)
+  organizationId       String            @map("organization_id") @db.Uuid
+  residentId           String            @map("resident_id") @db.Uuid
+  depositTransactionId String            @map("deposit_transaction_id") @db.Uuid
+  chargeId             String            @map("charge_id") @db.Uuid
+  paymentId            String            @map("payment_id") @db.Uuid
+  allocationId         String            @map("allocation_id") @db.Uuid
+  status               LedgerEntryStatus @default(POSTED)
   amount               Int
   reason               String
-  actorUserId          String             @map("actor_user_id") @db.Uuid
-  createdAt            DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  actorUserId          String            @map("actor_user_id") @db.Uuid
+  reversedById         String?           @map("reversed_by_id") @db.Uuid
+  reversalReason       String?           @map("reversal_reason")
+  reversedAt           DateTime?         @map("reversed_at") @db.Timestamptz(3)
+  createdAt            DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
 
   organization       Organization       @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   resident           Resident           @relation(fields: [organizationId, residentId], references: [organizationId, id], onDelete: Restrict)
   depositTransaction DepositTransaction @relation(fields: [organizationId, residentId, depositTransactionId], references: [organizationId, residentId, id], onDelete: Restrict)
   charge             Charge             @relation(fields: [organizationId, residentId, chargeId], references: [organizationId, residentId, id], onDelete: Restrict)
+  payment            Payment            @relation("DepositApplicationPayment", fields: [organizationId, residentId, paymentId], references: [organizationId, residentId, id], onDelete: Restrict)
+  allocation         PaymentAllocation  @relation("DepositApplicationAllocation", fields: [organizationId, residentId, allocationId], references: [organizationId, residentId, id], onDelete: Restrict)
   actor              User               @relation("DepositApplicationActor", fields: [actorUserId], references: [id], onDelete: Restrict)
+  reversedBy         User?              @relation("DepositApplicationReversedBy", fields: [reversedById], references: [id], onDelete: SetNull)
 
+  @@unique([organizationId, residentId, paymentId])
+  @@unique([organizationId, residentId, allocationId])
   @@index([organizationId, depositTransactionId])
   @@index([organizationId, residentId, depositTransactionId])
   @@index([organizationId, residentId, chargeId])
+  @@index([organizationId, status])
   @@index([actorUserId])
   @@map("deposit_applications")
 }

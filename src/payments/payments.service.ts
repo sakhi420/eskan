@@ -256,7 +256,13 @@ export class PaymentsService {
     });
   }
 
-  /** Unapplied amount still available on a payment = amount - allocated + released. */
+  /**
+   * Canonical usable balance of a payment (D-02/D-18): the amount minus every
+   * still-applied allocation, plus released allocation amounts, minus refunds
+   * already issued. This single formula is used by allocate, refund, reverse and
+   * replay so a refund is never double-counted and can never free up the same
+   * amount twice.
+   */
   private async unappliedBalance(
     tx: Prisma.TransactionClient,
     organizationId: string,
@@ -267,7 +273,12 @@ export class PaymentsService {
       where: { organizationId, paymentId },
       _sum: { amount: true },
     });
-    return paymentAmount - (allocated._sum.amount ?? 0) + (await this.releasedForPayment(tx, organizationId, paymentId));
+    const released = await this.releasedForPayment(tx, organizationId, paymentId);
+    const refunded = await tx.paymentRefund.aggregate({
+      where: { organizationId, paymentId },
+      _sum: { amount: true },
+    });
+    return paymentAmount - (allocated._sum.amount ?? 0) + released - (refunded._sum.amount ?? 0);
   }
 
   private async releasedForPayment(
@@ -335,6 +346,12 @@ export class PaymentsService {
           select: { id: true },
         });
         if (!resident) throw AppError.notFound('Resident not found');
+
+        // P0-2: DEPOSIT_APPLICATION is internal-only; the normal receipt path must
+        // never accept it (defense-in-depth beyond the DTO/OpenAPI restriction).
+        if (dto.method === PaymentMethod.DEPOSIT_APPLICATION) {
+          throw AppError.conflict('DEPOSIT_APPLICATION is an internal settlement method and cannot be used for a cash receipt', ErrorCode.BUSINESS_RULE_VIOLATION);
+        }
 
         const receiptNumber = await this.issueReceiptNumber(tx, organizationId);
         const businessDate = await businessTodayForOrg(tx, organizationId);
@@ -674,15 +691,19 @@ export class PaymentsService {
 
         const payment = await tx.payment.findFirst({
           where: { id: paymentId, organizationId },
-          select: { id: true, residentId: true, status: true, amount: true },
+          select: { id: true, residentId: true, status: true, amount: true, method: true },
         });
         if (!payment) throw AppError.notFound('Payment not found');
         if (payment.status !== LedgerEntryStatus.POSTED) throw AppError.conflict('Payment is not usable', ErrorCode.PAYMENT_ALREADY_REVERSED);
 
-        // Refundable amount is the unallocated balance, minus refunds already issued.
+        // P0-3/P1-4: a DEPOSIT_APPLICATION settlement payment carries no real cash;
+        // it can only be reversed through the dedicated deposit-application flow.
+        if (payment.method === PaymentMethod.DEPOSIT_APPLICATION) {
+          throw AppError.conflict('Internal settlement payments cannot be cash-refunded', ErrorCode.BUSINESS_RULE_VIOLATION);
+        }
+
         const unapplied = await this.unappliedBalance(tx, organizationId, paymentId, payment.amount);
-        const refunded = (await tx.paymentRefund.aggregate({ where: { organizationId, paymentId }, _sum: { amount: true } }))._sum.amount ?? 0;
-        if (amount > unapplied - refunded) throw AppError.conflict('Refund exceeds the unallocated payment balance', ErrorCode.PAYMENT_REFUND_EXCEEDS_UNALLOCATED);
+        if (amount > unapplied) throw AppError.conflict('Refund exceeds the unallocated payment balance', ErrorCode.PAYMENT_REFUND_EXCEEDS_UNALLOCATED);
 
         const businessDate = await businessTodayForOrg(tx, organizationId);
         const refund = (await tx.paymentRefund.create({
@@ -730,6 +751,12 @@ export class PaymentsService {
         if (!payment) throw AppError.notFound('Payment not found');
         if (payment.status === LedgerEntryStatus.REVERSED) throw AppError.conflict('Payment is already reversed', ErrorCode.PAYMENT_ALREADY_REVERSED);
 
+        // P0-3: internal settlement payments (DEPOSIT_APPLICATION) are reversed only
+        // through the dedicated deposit-application reversal flow, never here.
+        if (payment.method === PaymentMethod.DEPOSIT_APPLICATION) {
+          throw AppError.conflict('Deposit-application payments must be reversed via the deposit application endpoint', ErrorCode.BUSINESS_RULE_VIOLATION);
+        }
+
         const refundCount = await tx.paymentRefund.count({ where: { organizationId, paymentId } });
         if (refundCount > 0) throw AppError.conflict('Payment has refunds and cannot be voided until those are resolved', ErrorCode.BUSINESS_RULE_VIOLATION);
 
@@ -747,7 +774,9 @@ export class PaymentsService {
             select: RELEASE_SELECT,
           })) as unknown as ReleaseRow;
           releases.push(toReleaseDto(release));
-          await tx.charge.update({ where: { id: alloc.chargeId }, data: { version: { increment: 1 } }, select: { version: true } });
+          const chargeUpdated = await tx.charge.update({ where: { id: alloc.chargeId }, data: { version: { increment: 1 } }, select: { version: true } });
+          await this.emitSync(tx, organizationId, 'ALLOCATION_RELEASE', release.id, 1);
+          await this.emitSync(tx, organizationId, 'CHARGE', alloc.chargeId, chargeUpdated.version);
         }
 
         const updated = (await tx.payment.update({
@@ -759,7 +788,7 @@ export class PaymentsService {
         const reversal = (await tx.ledgerReversal.create({
           data: {
             organizationId, residentId: payment.residentId, sourceType: ReversalSourceType.PAYMENT, sourceId: paymentId,
-            side: EntrySide.CREDIT, amount: payment.amount, reason: dto.reason, actorUserId: userId, idempotencyKey,
+            side: EntrySide.DEBIT, amount: payment.amount, reason: dto.reason, actorUserId: userId, idempotencyKey,
           },
           select: REVERSAL_SELECT,
         })) as unknown as ReversalRow;
@@ -774,20 +803,25 @@ export class PaymentsService {
         return { payment: toPaymentDto(updated), releases, reversal: toReversalDto(reversal) };
       },
       {
-        toRecord: (result) => ({ resourceType: 'PAYMENT', resourceId: result.payment.id }),
+        toRecord: (result) => ({
+          paymentId: result.payment.id,
+          releaseIds: result.releases.map((r) => r.id),
+          reversalId: result.reversal.id,
+        }),
         fromRecord: async (record) => {
-          const ref = record as { resourceId?: string };
-          if (!ref.resourceId) throw AppError.internal('Idempotency record is missing its payment reference');
-          const row = await this.prisma.payment.findFirst({ where: { id: ref.resourceId, organizationId }, select: PAYMENT_SELECT });
+          const ref = record as { paymentId?: string; releaseIds?: string[]; reversalId?: string };
+          if (!ref.paymentId) throw AppError.internal('Idempotency record is missing its payment reference');
+          const row = await this.prisma.payment.findFirst({ where: { id: ref.paymentId, organizationId }, select: PAYMENT_SELECT });
           if (!row) throw AppError.internal('Payment referenced by idempotency record no longer exists');
-          const payment = toPaymentDto(row as unknown as PaymentRow);
-          const allocRows = await this.prisma.paymentAllocation.findMany({ where: { organizationId, paymentId: ref.resourceId }, select: { id: true } });
-          const relRows = allocRows.length
-            ? await this.prisma.allocationRelease.findMany({ where: { organizationId, allocationId: { in: allocRows.map((a) => a.id) } }, select: RELEASE_SELECT, orderBy: { createdAt: 'asc' } })
+          const releaseIds = ref.releaseIds ?? [];
+          const relRows = releaseIds.length
+            ? await this.prisma.allocationRelease.findMany({ where: { organizationId, id: { in: releaseIds } }, select: RELEASE_SELECT, orderBy: { createdAt: 'asc' } })
             : [];
-          const revRow = await this.prisma.ledgerReversal.findFirst({ where: { organizationId, sourceType: ReversalSourceType.PAYMENT, sourceId: ref.resourceId }, select: REVERSAL_SELECT, orderBy: { createdAt: 'desc' } });
+          const revRow = ref.reversalId
+            ? await this.prisma.ledgerReversal.findFirst({ where: { organizationId, id: ref.reversalId }, select: REVERSAL_SELECT })
+            : null;
           return {
-            payment,
+            payment: toPaymentDto(row as unknown as PaymentRow),
             releases: (relRows as unknown as ReleaseRow[]).map(toReleaseDto),
             reversal: revRow ? toReversalDto(revRow as unknown as ReversalRow) : ({} as ReturnType<typeof toReversalDto>),
           };

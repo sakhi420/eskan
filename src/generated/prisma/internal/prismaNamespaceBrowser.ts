@@ -476,6 +476,7 @@ export const DepositTransactionScalarFieldEnum = {
   version: 'version',
   organizationId: 'organizationId',
   residentId: 'residentId',
+  sourceDepositTransactionId: 'sourceDepositTransactionId',
   type: 'type',
   status: 'status',
   amount: 'amount',
@@ -547,13 +548,20 @@ export type PaymentRefundScalarFieldEnum = (typeof PaymentRefundScalarFieldEnum)
 
 export const DepositApplicationScalarFieldEnum = {
   id: 'id',
+  version: 'version',
   organizationId: 'organizationId',
   residentId: 'residentId',
   depositTransactionId: 'depositTransactionId',
   chargeId: 'chargeId',
+  paymentId: 'paymentId',
+  allocationId: 'allocationId',
+  status: 'status',
   amount: 'amount',
   reason: 'reason',
   actorUserId: 'actorUserId',
+  reversedById: 'reversedById',
+  reversalReason: 'reversalReason',
+  reversedAt: 'reversedAt',
   createdAt: 'createdAt'
 } as const
 

@@ -741,18 +741,11 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 
 ### جزئیات محیطی (بدون افشای secret)
 - Migrationهای M3a روی **دیتابیس توسعهٔ محلی `eskan_dev` هنوز اعمال نشده‌اند** (تست روی DBهای throwaway انجام شد)؛ Staging/Production دست‌نخورده.
-## M3c — Deposit / Refund / Expense / Reversal — 2026-11-12
+## M3c — Deposit / Refund / Expense / Reversal — 2026-11-12 (remediated)
 
-- **شاخه:** `feat/m3c-deposit-expense-refund-reversal` از خط مبنا `506947b`.
-- **پیاده‌شده در Runtime:** ماژول `deposits` (دریافت/refund/forfeit/apply/reverse + list)، ماژول `expenses`
-  (create/get/list/reverse)، `paymentRefund`/`paymentReverse` در `payments`، `chargeReverse` در `charges`.
-- **Schema/Migration (افزودنی):** مدل‌های `LedgerReversal`، `PaymentRefund`، `DepositApplication`؛
-  `PaymentMethod.DEPOSIT_APPLICATION`؛ `ReversalSourceType`؛ `actor_user_id` روی deposit/expense؛
-  `payments.receipt_number` nullable (برای Payment داخلی D-10). Migration `20261112000000_m3c_...`.
-- **یکپارچگی مالی:** ماندهٔ ودیعه از رویدادها محاسبه می‌شود (`Held = Received − Refunded − Forfeited − Applied`)؛
-  Application ودیعه یک `Payment` غیرنقدی `DEPOSIT_APPLICATION` + `PaymentAllocation` + `DepositApplication` در یک transaction؛
-  بدون صدور Cash Receipt و بدون افزایش شمارنده.
-- **تفکیک Void/Refund:** Full void (D-02) با `LedgerReversal` مخالف؛ Refund نقدی جدا؛ Partial reversal در MVP نیست.
-- **Audit/Sync/Idempotency:** هر mutation مالی `AuditEvent` + `SyncChange` اتمیک و idempotency `PERMANENT` با replay از resource reference.
-- **تست‌ها:** Migration **۲۹/۲۹** (`scripts/test-m3c-migration.cjs`)؛ Integration **۲۰/۲۰** (deposit/refund/reversal + concurrency barrier + reconciliation با SQL مستقل)؛ Build سبز؛ OpenAPI lint exit 0.
-- **وضعیت Migration محیط‌ها:** CI/Throwaway فقط. `eskan_dev`/Staging/Production **هیچ migration اعمال نشده**.
+- **شاخه:** `feat/m3c-deposit-expense-refund-reversal` از خط مبنا `506947b`؛ head فعلی پس از اصلاح `62c5b39`.
+- **اصلاحات P0/P1 (Remediation):** ماندهٔ Payment با کسر Refund (P0-1)؛ ممنوعیت `DEPOSIT_APPLICATION` در مسیر عادی Payment/Expense + CHECK دیتابیس (P0-2)؛ برگشت اتمیک DAPP با انتهای/Charge یک‌بار (P0-3)؛ ماندهٔ ودیعه source-scoped با `source_deposit_transaction_id` (P1-1)؛ Sync همهٔ entityهای وابسته (P1-2)؛ جهت LedgerReversal مخالف posting اصلی با جدول نگاشت (P1-3)؛ پیوند ساختاری DAPP↔Payment↔Allocation (P1-4)؛ snapshot پاسخ replay (P1-5)؛ گیت Checkout نهایی fail-closed (P1-6).
+- **Migration افزودنی جدید:** `20261112120000_m3c_dapp_reversal_and_deposit_source` (33 composite FK؛ CHECKهای `payments_dapp_has_no_receipt` و `expenses_payment_method_not_dapp`).
+- **تست‌ها:** Migration **۳۴/۳۴**؛ Integration M3c **۳۲/۳۲** (deposits-refund-reversal 15 · concurrency 4 · reconciliation 1 · remediation 7) با PostgreSQL واقعی؛ Build سبز؛ OpenAPI lint exit 0.
+- **گزارش:** `docs/reports/m3c-remediation-and-acceptance-v1.md`.
+- **وضعیت Migration محیط‌ها:** فقط CI/Throwaway. `eskan_dev`/Staging/Production **هیچ migration اعمال نشده**.

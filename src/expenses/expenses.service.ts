@@ -150,7 +150,7 @@ export class ExpensesService {
         const reversal = await tx.ledgerReversal.create({
           data: {
             organizationId, residentId: null, sourceType: ReversalSourceType.EXPENSE, sourceId: expense.id,
-            side: EntrySide.DEBIT, amount: expense.amount, reason: dto.reason, actorUserId: userId, idempotencyKey,
+            side: EntrySide.CREDIT, amount: expense.amount, reason: dto.reason, actorUserId: userId, idempotencyKey,
           },
           select: { id: true },
         });

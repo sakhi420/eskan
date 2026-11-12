@@ -56,6 +56,9 @@ describe('M3c reconciliation (SQL oracle)', () => {
     await db.query(`INSERT INTO residents (id, organization_id, full_name, updated_at) VALUES ($1,$2,'R',now())`, [resident, org]);
     const chargeId = randomUUID();
     await db.query(`INSERT INTO charges (id, organization_id, resident_id, type, amount, period_start, period_end, due_date, updated_at) VALUES ($1,$2,$3,'OTHER',6000,'2026-11-01','2026-12-01','2026-11-01',now())`, [chargeId, org, resident]);
+    const hostel = randomUUID();
+    await db.query(`INSERT INTO hostels (id, organization_id, name, updated_at) VALUES ($1,$2,'H',now())`, [hostel, org]);
+    await db.query(`INSERT INTO stay_contracts (id, organization_id, hostel_id, resident_id, contract_number, status, start_date, rent_amount, updated_at) VALUES ($1,$2,$3,$4,'CNT','CLOSED','2026-11-01',1000,now())`, [randomUUID(), org, hostel, resident]);
 
     const recv: any = await deposits.receive(org, user, resident, { money: money(100000), receivedAt: '2026-11-02' } as any, randomUUID(), 'trace');
     await deposits.refund(org, user, recv.id, { money: money(20000), reason: 'r' } as any, randomUUID(), 'trace');
@@ -68,7 +71,7 @@ describe('M3c reconciliation (SQL oracle)', () => {
         (SELECT coalesce(sum(amount),0)::int FROM deposit_transactions WHERE organization_id=$1 AND resident_id=$2 AND type='RECEIVED' AND status='POSTED') AS received,
         (SELECT coalesce(sum(amount),0)::int FROM deposit_transactions WHERE organization_id=$1 AND resident_id=$2 AND type='REFUNDED' AND status='POSTED') AS refunded,
         (SELECT coalesce(sum(amount),0)::int FROM deposit_transactions WHERE organization_id=$1 AND resident_id=$2 AND type='FORFEITED' AND status='POSTED') AS forfeited,
-        (SELECT coalesce(sum(amount),0)::int FROM deposit_applications WHERE organization_id=$1 AND resident_id=$2) AS applied
+        (SELECT coalesce(sum(amount),0)::int FROM deposit_applications WHERE organization_id=$1 AND resident_id=$2 AND status='POSTED') AS applied
     `, [org, resident]);
     const row = q.rows[0];
     expect(row.received).toBe(100000);

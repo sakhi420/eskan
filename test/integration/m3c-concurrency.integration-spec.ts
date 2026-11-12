@@ -40,6 +40,11 @@ async function seedCharge(db: Client, org: string, res: string, amount: number):
   await db.query(`INSERT INTO charges (id, organization_id, resident_id, type, amount, period_start, period_end, due_date, updated_at) VALUES ($1,$2,$3,'OTHER',$4,'2026-11-01','2026-12-01','2026-11-01',now())`, [id, org, res, amount]);
   return id;
 }
+async function seedContractClosed(db: Client, org: string, res: string): Promise<void> {
+  const hostel = randomUUID();
+  await db.query(`INSERT INTO hostels (id, organization_id, name, updated_at) VALUES ($1,$2,'H',now())`, [hostel, org]);
+  await db.query(`INSERT INTO stay_contracts (id, organization_id, hostel_id, resident_id, contract_number, status, start_date, rent_amount, updated_at) VALUES ($1,$2,$3,$4,'CNT','CLOSED','2026-11-01',1000,now())`, [randomUUID(), org, hostel, res]);
+}
 const money = (amount: number) => ({ amount, currency: 'AFN' });
 
 describe('M3c concurrency (real PostgreSQL + barrier)', () => {
@@ -92,6 +97,7 @@ describe('M3c concurrency (real PostgreSQL + barrier)', () => {
 
   it('concurrent applications on the same deposit cannot over-apply', async () => {
     const f = await seed(db);
+    await seedContractClosed(db, f.org, f.resident);
     const recv: any = await deposits.receive(f.org, f.user, f.resident, { money: money(10000), receivedAt: '2026-11-02' } as any, randomUUID(), 'trace');
     const ch = await seedCharge(db, f.org, f.resident, 20000);
     const gate = barrier(2);
