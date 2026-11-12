@@ -238,12 +238,12 @@ CREATE TRIGGER deposit_applications_prevent_link_update
 -- compensating event, never UPDATE. DepositApplication and Expense are handled
 -- separately because their reversal state is intentionally mutable.
 CREATE OR REPLACE FUNCTION prevent_financial_document_update()
-RETURNS trigger AS $
+RETURNS trigger AS $$
 BEGIN
   RAISE EXCEPTION 'ESKAN_FINANCIAL_IMMUTABILITY: % rows are append-only and cannot be updated', TG_TABLE_NAME
     USING ERRCODE = 'P0001';
 END;
-$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;
 
 CREATE TRIGGER ledger_reversals_prevent_update
   BEFORE UPDATE ON ledger_reversals
@@ -258,7 +258,7 @@ CREATE TRIGGER payment_refunds_prevent_update
 -- actor) cannot be rewritten. A hostel may only be detached by ON DELETE SET NULL;
 -- it cannot be reassigned to another hostel.
 CREATE OR REPLACE FUNCTION prevent_expense_financial_identity_update()
-RETURNS trigger AS $
+RETURNS trigger AS $$
 BEGIN
   IF ROW(
        NEW.organization_id, NEW.category, NEW.amount, NEW.spent_at,
@@ -273,7 +273,7 @@ BEGIN
   END IF;
   RETURN NEW;
 END;
-$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;
 
 CREATE TRIGGER expenses_prevent_financial_identity_update
   BEFORE UPDATE ON expenses
