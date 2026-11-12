@@ -1,69 +1,67 @@
 # ESKAN M3c — Implementation Report
 
-**Status:** IMPLEMENTED ON FEATURE BRANCH — LOCAL VALIDATION AND CI STILL REQUIRED
+**Status:** IMPLEMENTED; CURRENT-HEAD CI VERIFIED; HUMAN REVIEW/OWNER APPROVAL PENDING  
 **Date:** 2026-11-12
 
-## Git
+## Git / PR
 - Branch: `feat/m3c-deposit-expense-refund-reversal`
-- Base SHA: `506947b2ac6f475f5c9418dfb640af5c9719bb10` (= `origin/main`)
-- Local working tree: not inspected by this GitHub-side patch; pull the branch to update the local clone
-- PR: not created; the feature branch is pushed and awaits owner-side local validation.
+- Base: `main` at `506947b2ac6f475f5c9418dfb640af5c9719bb10`
+- Verified head: `5ae15a26137ca3412c464a1926c3fac20843f4d8`
+- PR: [#5](https://github.com/sakhi420/eskan/pull/5) — Draft, open, not merged.
+- CI: [Run #59 — success](https://github.com/sakhi420/eskan/actions/runs/43264884308).
+- Local working tree was not inspected by this GitHub-side review. Pull the branch before continuing local work.
 
 ## Scope
 | قابلیت | وضعیت | شواهد |
 |---|---|---|
-| Deposit Receive | ✅ runtime | `src/deposits/deposits.service.ts` `receive()` + integration |
-| Deposit Refund | ✅ runtime | `refund()` with `REFUND_EXCEEDS_DEPOSIT_BALANCE` + concurrency |
-| Deposit Forfeit | ✅ runtime | `forfeit()` with `DEPOSIT_BALANCE_INSUFFICIENT` + concurrency |
-| Deposit Application | ✅ runtime | `apply()` → non-cash DEPOSIT_APPLICATION Payment + Allocation + DepositApplication |
-| Expense | ✅ runtime | `src/expenses/` create/get/list/reverse |
-| Payment Refund | ✅ runtime | `payments.refundPayment()` |
-| Void/Reversal | ✅ runtime | charge/payment/deposit/expense full void + `LedgerReversal` |
-| Audit/Sync integration | ✅ runtime | every mutation emits AuditEvent + SyncChange atomically |
+| Deposit Receive / Refund / Forfeit | ✅ runtime | Deposit service + current PostgreSQL integration and M3c DB checks |
+| Deposit Application | ✅ runtime | Internal DAPP Payment + exact one Allocation + DepositApplication; dedicated reversal |
+| Expense | ✅ runtime | Create/get/list/reverse; paid-only manual method |
+| Payment Refund | ✅ runtime | Separate real-cash refund path |
+| Void / Reversal | ✅ runtime | Full reversal events for Charge/Payment/Deposit/Expense |
+| Audit / Sync | ✅ runtime | Financial mutations emit AuditEvent + SyncChange transactionally |
+| Tenant isolation | ✅ verified | Composite FKs plus current HTTP BOLA tests |
+| Authorization | ✅ verified | OWNER/ADMIN/OPERATOR/VIEWER HTTP role matrix; P1-7 closed |
 
-## Database
-- Models added: `LedgerReversal`, `PaymentRefund`, `DepositApplication`
-- Models changed: `DepositTransaction` (+`actorUserId`, composite uniques), `Expense` (+`actorUserId`), `Payment` (`receiptNumber` → nullable)
-- Enums: `PaymentMethod` + `DEPOSIT_APPLICATION`; new `ReversalSourceType`
-- Migration: `20261112000000_m3c_deposit_refund_expense_reversal`
-- Constraints: `amount > 0` CHECKs on the 3 new tables
-- Tenant FKs: 6 new composite FKs (composite count 24 → 30)
-- Triggers: 5 new `*_prevent_delete` triggers (reuse `prevent_financial_document_delete`)
-- Prisma parity: `prisma migrate diff` empty (verified in migration test)
-- Actual environments migrated: **none** (CI/throwaway only)
+## Database and migration integrity
+- Models: `LedgerReversal`, `PaymentRefund`, `DepositApplication`.
+- Changed models: `DepositTransaction` and `Expense` actor attribution; `Payment.receiptNumber` nullable only to support internal DAPP.
+- Migrations:
+  - `20261112000000_m3c_deposit_refund_expense_reversal`
+  - `20261112120000_m3c_dapp_reversal_and_deposit_source`
+- Nine M3c-owned tenant composite FKs are asserted by their constraint names.
+- DAPP has explicit source-deposit, Payment, Allocation and Charge links. Its linked Payment must have method `DEPOSIT_APPLICATION`, no receipt, exact amount, and exactly one full allocation.
+- Ordinary payment methods require an official receipt number.
+- Refund and LedgerReversal records are append-only at the database layer. Expense financial identity cannot be rewritten; reversal metadata remains mutable.
+- Deposit/Expense actor-user references use RESTRICT to preserve audit attribution.
+- M3c fresh replay and pre-M3c baseline upgrade rehearsal both passed in throwaway CI databases.
+- Prisma parity assertions passed.
+- Persistent environments actually migrated: **none**.
 
-## API
-- Endpoints added (runtime): `GET/POST /residents/{id}/deposit-transactions`, `POST /residents/{id}/deposits/apply`,
-  `POST /deposit-transactions/{id}/{reverse,refund,forfeit}`, `GET/POST /expenses`, `GET /expenses/{id}`,
-  `POST /expenses/{id}/reverse`, `POST /payments/{id}/{refund,reverse}`, `POST /charges/{id}/reverse`
-- Permissions: matching `docs/api/permissions-matrix.md` (OWNER/ADMIN for sensitive; OWNER/ADMIN/OPERATOR for daily)
-- OpenAPI: `PaymentMethod.DEPOSIT_APPLICATION` + error codes added; `receiptNumber` optional in `Payment`; lint exit 0
+## Current-head CI evidence
 
-## Tests
+All results below are from SHA `5ae15a26137ca3412c464a1926c3fac20843f4d8`:
+- Build, ESLint, Prettier, OpenAPI validation and Prisma validation: PASS.
+- Unit tests: 12 suites / 79 tests.
+- E2E smoke tests: 4 suites / 29 tests, including the new P1-7 HTTP role/BOLA suite.
+- M3a: 11/11 migration checks.
+- M3b: 30/30 migration checks.
+- M3c: 60/60 migration checks.
+- PostgreSQL integration: 13 suites / 139 tests.
+- M-1/M-2 checks, package/hostel concurrency, M-2 parity and idempotency-retention checks: PASS.
 
-The counts/results below are historical for the earlier M3c implementation and do not verify
-the additional remediation commits now on this branch.
-
-- Historical integration source files: deposit/refund/reversal, concurrency and reconciliation.
-- Current source inventory: 33 integration cases (20 + 4 + 1 + 8); not yet executed after this patch.
-- The migration script now includes a separate pre-M3c baseline upgrade rehearsal with M3b
-  financial rows, plus fresh replay and additional DAPP/append-only constraints.
-- Build, Prisma, OpenAPI, lint, format, unit, integration and migration gates must be rerun
-  against the current branch head. CI has not been verified.
-
-## Remaining acceptance gaps
-- P1: HTTP/Supertest tests for the OWNER/ADMIN/OPERATOR/VIEWER permission matrix and
-  cross-tenant/BOLA denial are still outstanding.
-- CI has not run on the current branch head; lint/format gates were added to the workflow.
-- The current branch's new baseline-upgrade migration path and tests must be executed locally.
-- Do not apply M3c migrations to `eskan_dev`, Staging or Production before independent review.
+## Remaining release gates
+- PR #5 stays Draft and unmerged pending independent human review and explicit owner approval.
+- Triage the 32 npm audit findings previously reported (4 low, 26 moderate, 2 high); avoid blind `npm audit fix --force`.
+- Approve backups, restore rehearsal and staged migration rollout before any persistent environment is migrated.
+- Automated Sourcery review skipped the PR because the diff exceeds its 20,000 changed-line limit; this does not affect the green CI result.
 
 ## Environment boundary
-- CI/Throwaway: migrations + tests exercised (throwaway DBs)
-- Clone: not run (optional)
-- eskan_dev: **not migrated**
-- Staging: **not migrated**
-- Production: **not migrated**
+- GitHub Actions: current-head migration and test gates passed using disposable PostgreSQL databases.
+- Local clone: not inspected or changed by this GitHub-side review.
+- `eskan_dev`: **not migrated by this work**.
+- Staging: **not migrated**.
+- Production: **not migrated**.
 
 ## Next step
-- Owner review; PR approval; merge only with independent owner decision.
+Independent human review of financial migrations and domain invariants, then owner decision on PR #5. Do not merge or apply M3c to a persistent database before those gates.
