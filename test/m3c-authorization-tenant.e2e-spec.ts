@@ -300,33 +300,24 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
     }
   });
 
-  it(
-    'restricts allocations to OWNER/ADMIN/OPERATOR and allocation release to OWNER/ADMIN',
-    async () => {
-      await expectRoleGate(
-        `/api/v1/payments/${randomUUID()}/allocations`,
-        { chargeId: randomUUID(), money },
-        ['OWNER', 'ADMIN', 'OPERATOR'],
-      );
-      await expectRoleGate(
-        `/api/v1/allocations/${randomUUID()}/release`,
-        refundBody,
-        ['OWNER', 'ADMIN'],
-      );
-    },
-  );
+  it('restricts allocations to OWNER/ADMIN/OPERATOR and allocation release to OWNER/ADMIN', async () => {
+    await expectRoleGate(
+      `/api/v1/payments/${randomUUID()}/allocations`,
+      { chargeId: randomUUID(), money },
+      ['OWNER', 'ADMIN', 'OPERATOR'],
+    );
+    await expectRoleGate(`/api/v1/allocations/${randomUUID()}/release`, refundBody, [
+      'OWNER',
+      'ADMIN',
+    ]);
+  });
 
   it('restricts payment refund and reversal to OWNER/ADMIN', async () => {
-    await expectRoleGate(
-      `/api/v1/payments/${randomUUID()}/refund`,
-      refundBody,
-      ['OWNER', 'ADMIN'],
-    );
-    await expectRoleGate(
-      `/api/v1/payments/${randomUUID()}/reverse`,
-      reversalBody,
-      ['OWNER', 'ADMIN'],
-    );
+    await expectRoleGate(`/api/v1/payments/${randomUUID()}/refund`, refundBody, ['OWNER', 'ADMIN']);
+    await expectRoleGate(`/api/v1/payments/${randomUUID()}/reverse`, reversalBody, [
+      'OWNER',
+      'ADMIN',
+    ]);
   });
 
   it('restricts deposit application and application reversal to OWNER/ADMIN', async () => {
@@ -339,60 +330,51 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
       },
       ['OWNER', 'ADMIN'],
     );
-    await expectRoleGate(
-      `/api/v1/deposit-applications/${randomUUID()}/reverse`,
-      reversalBody,
-      ['OWNER', 'ADMIN'],
-    );
+    await expectRoleGate(`/api/v1/deposit-applications/${randomUUID()}/reverse`, reversalBody, [
+      'OWNER',
+      'ADMIN',
+    ]);
   });
 
   it('restricts deposit refund, forfeit, and reversal to OWNER/ADMIN', async () => {
     const depositId = randomUUID();
-    await expectRoleGate(
-      `/api/v1/deposit-transactions/${depositId}/refund`,
-      refundBody,
-      ['OWNER', 'ADMIN'],
-    );
-    await expectRoleGate(
-      `/api/v1/deposit-transactions/${depositId}/forfeit`,
-      refundBody,
-      ['OWNER', 'ADMIN'],
-    );
-    await expectRoleGate(
-      `/api/v1/deposit-transactions/${depositId}/reverse`,
-      reversalBody,
-      ['OWNER', 'ADMIN'],
-    );
+    await expectRoleGate(`/api/v1/deposit-transactions/${depositId}/refund`, refundBody, [
+      'OWNER',
+      'ADMIN',
+    ]);
+    await expectRoleGate(`/api/v1/deposit-transactions/${depositId}/forfeit`, refundBody, [
+      'OWNER',
+      'ADMIN',
+    ]);
+    await expectRoleGate(`/api/v1/deposit-transactions/${depositId}/reverse`, reversalBody, [
+      'OWNER',
+      'ADMIN',
+    ]);
   });
 
   it('restricts expense and charge reversal to OWNER/ADMIN', async () => {
-    await expectRoleGate(
-      `/api/v1/expenses/${randomUUID()}/reverse`,
-      reversalBody,
-      ['OWNER', 'ADMIN'],
-    );
-    await expectRoleGate(
-      `/api/v1/charges/${randomUUID()}/reverse`,
-      reversalBody,
-      ['OWNER', 'ADMIN'],
-    );
+    await expectRoleGate(`/api/v1/expenses/${randomUUID()}/reverse`, reversalBody, [
+      'OWNER',
+      'ADMIN',
+    ]);
+    await expectRoleGate(`/api/v1/charges/${randomUUID()}/reverse`, reversalBody, [
+      'OWNER',
+      'ADMIN',
+    ]);
   });
 
-  it(
-    'restricts CREDIT charge posting to OWNER/ADMIN even though OPERATOR can post DEBIT',
-    async () => {
-      const body = {
-        residentId: randomUUID(),
-        type: 'OTHER',
-        entrySide: 'CREDIT',
-        money,
-        periodStart: '2026-11-01',
-        periodEnd: '2026-12-01',
-        dueDate: '2026-11-01',
-      };
-      await expectRoleGate('/api/v1/charges', body, ['OWNER', 'ADMIN']);
-    },
-  );
+  it('restricts CREDIT charge posting to OWNER/ADMIN even though OPERATOR can post DEBIT', async () => {
+    const body = {
+      residentId: randomUUID(),
+      type: 'OTHER',
+      entrySide: 'CREDIT',
+      money,
+      periodStart: '2026-11-01',
+      periodEnd: '2026-12-01',
+      dueDate: '2026-11-01',
+    };
+    await expectRoleGate('/api/v1/charges', body, ['OWNER', 'ADMIN']);
+  });
 
   it('returns 404 when a member selects an organization they do not belong to', async () => {
     const response = await getAs('OWNER_B', '/api/v1/payments', organizationA);
@@ -410,10 +392,7 @@ describe('P1-7 financial authorization and tenant isolation (HTTP)', () => {
     expect(expense.status).toBe(HttpStatus.NOT_FOUND);
     expect(expense.body.code).toBe('RESOURCE_NOT_FOUND');
 
-    const deposits = await getAs(
-      'OWNER',
-      `/api/v1/residents/${residentB}/deposit-transactions`,
-    );
+    const deposits = await getAs('OWNER', `/api/v1/residents/${residentB}/deposit-transactions`);
     expect(deposits.status).toBe(HttpStatus.NOT_FOUND);
     expect(deposits.body.code).toBe('RESOURCE_NOT_FOUND');
   });
