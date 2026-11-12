@@ -61,7 +61,47 @@ async function seedDeposit(c, org, res, amount) {
   const admin = new Client({ connectionString: adminUrl() });
   await admin.connect();
   const migrations = readMigrations();
-  check('[m3c migration present]', migrations.some((m) => m.name.includes('m3c_deposit_refund_expense_reversal')));
+  const m3cMigrations = migrations.filter((m) => m.name.includes('m3c_'));
+  const preM3cMigrations = migrations.filter((m) => !m.name.includes('m3c_'));
+  check('[m3c migrations present]', m3cMigrations.length === 2, `count=${m3cMigrations.length}`);
+
+  // Construct a pre-M3c schema, seed representative M3b financial rows,
+  // then apply only M3c migrations. This is a true baseline-upgrade rehearsal.
+  const baseline = await newDb(admin, 'baseline');
+  await applyMigrations(baseline.c, preM3cMigrations);
+  const baselineTables = await baseline.c.query(
+    `SELECT to_regclass('public.payments') AS payments,
+            to_regclass('public.payment_allocations') AS allocations,
+            to_regclass('public.ledger_reversals') AS reversals`,
+  );
+  check('[baseline: pre-M3c schema]',
+    Boolean(baselineTables.rows[0].payments) &&
+    Boolean(baselineTables.rows[0].allocations) &&
+    baselineTables.rows[0].reversals === null);
+
+  const baselineFixture = await seedOrgRes(baseline.c);
+  const baselineCharge = await seedCharge(baseline.c, baselineFixture.org, baselineFixture.res, 7000);
+  const baselinePayment = await seedPayment(baseline.c, baselineFixture.org, baselineFixture.res, 5000);
+  const baselineAllocation = uuid();
+  await baseline.c.query(
+    `INSERT INTO payment_allocations (id, organization_id, resident_id, payment_id, charge_id, amount)
+     VALUES ($1,$2,$3,$4,$5,2000)`,
+    [baselineAllocation, baselineFixture.org, baselineFixture.res, baselinePayment, baselineCharge],
+  );
+  await applyMigrations(baseline.c, m3cMigrations);
+  const preserved = await baseline.c.query(
+    `SELECT
+       (SELECT count(*)::int FROM payments WHERE id=$1 AND amount=5000) AS payment_count,
+       (SELECT count(*)::int FROM charges WHERE id=$2 AND amount=7000) AS charge_count,
+       (SELECT count(*)::int FROM payment_allocations WHERE id=$3 AND amount=2000) AS allocation_count,
+       (SELECT to_regclass('public.deposit_applications')) AS applications`,
+    [baselinePayment, baselineCharge, baselineAllocation],
+  );
+  check('[baseline: M3b financial rows preserved after M3c upgrade]',
+    preserved.rows[0].payment_count === 1 &&
+    preserved.rows[0].charge_count === 1 &&
+    preserved.rows[0].allocation_count === 1 &&
+    preserved.rows[0].applications === 'deposit_applications');
 
   const fresh = await newDb(admin, 'fresh');
   let applyErr = null;
@@ -98,6 +138,17 @@ async function seedDeposit(c, org, res, amount) {
   const triggers = await fresh.c.query(`SELECT tgname FROM pg_trigger WHERE NOT tgisinternal AND tgname LIKE '%_prevent_delete' ORDER BY tgname`);
   const triggerNames = triggers.rows.map((r) => r.tgname);
   for (const t of ['deposit_transactions_prevent_delete', 'expenses_prevent_delete', 'ledger_reversals_prevent_delete', 'payment_refunds_prevent_delete', 'deposit_applications_prevent_delete']) check(`[trigger ${t}]`, triggerNames.includes(t));
+  for (const trigger of [
+    'deposit_transactions_prevent_update',
+    'deposit_applications_validate_links',
+    'payment_allocations_enforce_dapp_single_allocation',
+    'payments_prevent_dapp_identity_update',
+    'payment_allocations_prevent_dapp_update',
+    'deposit_applications_prevent_link_update',
+  ]) {
+    const found = await fresh.c.query(`SELECT tgname FROM pg_trigger WHERE NOT tgisinternal AND tgname=$1`, [trigger]);
+    check(`[trigger ${trigger}]`, found.rowCount === 1);
+  }
 
   const fks = await fresh.c.query(`SELECT conname FROM pg_constraint WHERE contype='f' AND array_length(conkey, 1) >= 2 ORDER BY conname`);
   const fkNames = new Set(fks.rows.map((r) => r.conname));
@@ -142,6 +193,39 @@ async function seedDeposit(c, org, res, amount) {
   check('[fk: cross-org application]', (await errCode(fresh.c, `INSERT INTO deposit_applications (id,organization_id,resident_id,deposit_transaction_id,charge_id,payment_id,allocation_id,amount,reason,actor_user_id) VALUES ($1,$2,$3,$4,$5,$6,$7,100,'x',$8)`, [uuid(), org2, resOrg2, depRecv, charge2, pay, allocDummy, user])) !== null);
 
   check('[immutability: deposit delete]', (await errCode(fresh.c, `DELETE FROM deposit_transactions WHERE id=$1`, [depRecv])) === 'P0001');
+  check('[immutability: deposit update]', (await errCode(fresh.c, `UPDATE deposit_transactions SET reason='tampered' WHERE id=$1`, [depRecv])) === 'P0001');
+
+  const internalPayment = uuid();
+  await fresh.c.query(
+    `INSERT INTO payments (id, organization_id, resident_id, amount, method, received_at, receipt_number, updated_at)
+     VALUES ($1,$2,$3,100,'DEPOSIT_APPLICATION','2026-11-02',NULL,now())`,
+    [internalPayment, org, res],
+  );
+  const internalCharge = await seedCharge(fresh.c, org, res, 1000);
+  const internalAllocation = uuid();
+  await fresh.c.query(
+    `INSERT INTO payment_allocations (id, organization_id, resident_id, payment_id, charge_id, amount)
+     VALUES ($1,$2,$3,$4,$5,100)`,
+    [internalAllocation, org, res, internalPayment, internalCharge],
+  );
+  const otherInternalCharge = await seedCharge(fresh.c, org, res, 1000);
+  check('[DAPP: rejects second allocation]',
+    (await errCode(fresh.c,
+      `INSERT INTO payment_allocations (id, organization_id, resident_id, payment_id, charge_id, amount)
+       VALUES ($1,$2,$3,$4,$5,100)`,
+      [uuid(), org, res, internalPayment, otherInternalCharge])) === '23514');
+
+  check('[DAPP: payment financial identity immutable]',
+    (await errCode(fresh.c, `UPDATE payments SET amount=101 WHERE id=$1`, [internalPayment])) === 'P0001');
+  check('[DAPP: allocation financial identity immutable]',
+    (await errCode(fresh.c, `UPDATE payment_allocations SET amount=99 WHERE id=$1`, [internalAllocation])) === 'P0001');
+
+  check('[linkage: DepositApplication must match its DAPP Payment/Allocation]',
+    (await errCode(fresh.c,
+      `INSERT INTO deposit_applications (id,organization_id,resident_id,deposit_transaction_id,charge_id,payment_id,allocation_id,amount,reason,actor_user_id)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,100,'x',$8)`,
+      [uuid(), org, res, depRecv, charge, internalPayment, internalAllocation, user])) === '23514');
+
   const exp = uuid();
   await fresh.c.query(`INSERT INTO expenses (id, organization_id, category, status, amount, spent_at, updated_at) VALUES ($1,$2,'Util','POSTED',500,'2026-11-03',now())`, [exp, org]);
   check('[immutability: expense delete]', (await errCode(fresh.c, `DELETE FROM expenses WHERE id=$1`, [exp])) === 'P0001');
@@ -156,8 +240,19 @@ async function seedDeposit(c, org, res, amount) {
   check('[parity: migrate diff exit 0]', r.status === 0, 'status=' + r.status);
   check('[parity: migrate diff empty]', diff.replace(/^\s*-- This is an empty migration\.\s*$/m, '').trim() === '');
 
+  const baselineOut = path.join(require('os').tmpdir(), `m3c_baseline_parity_${baseline.name}.sql`);
+  const baselineParity = spawnSync('npx', ['prisma', 'migrate', 'diff', '--from-config-datasource', '--to-schema', 'prisma/schema.prisma', '--script', '--output', baselineOut],
+    { cwd: ROOT, encoding: 'utf8', env: { ...process.env, DATABASE_URL: dbUrl(baseline.name) }, shell: process.platform === 'win32' });
+  let baselineDiff = '';
+  try { baselineDiff = fs.readFileSync(baselineOut, 'utf8'); } catch {}
+  try { fs.unlinkSync(baselineOut); } catch {}
+  check('[baseline parity: migrate diff exit 0]', baselineParity.status === 0, 'status=' + baselineParity.status);
+  check('[baseline parity: migrate diff empty]', baselineDiff.replace(/^\\s*-- This is an empty migration\\.\\s*$/m, '').trim() === '');
+
   await fresh.c.end();
+  await baseline.c.end();
   await admin.query(`DROP DATABASE IF EXISTS "${fresh.name}" WITH (FORCE)`).catch(() => {});
+  await admin.query(`DROP DATABASE IF EXISTS "${baseline.name}" WITH (FORCE)`).catch(() => {});
   await admin.end().catch(() => {});
   console.log('\n' + results.join('\n'));
   const failed = results.filter((x) => x.startsWith('FAIL')).length;
