@@ -60,6 +60,11 @@ ALTER TABLE "deposit_applications" ADD CONSTRAINT "deposit_applications_reversed
 ALTER TABLE "payments" ADD CONSTRAINT "payments_dapp_has_no_receipt"
   CHECK ("method" <> 'DEPOSIT_APPLICATION' OR "receipt_number" IS NULL);
 
+-- Every externally received payment must retain its official receipt number.
+-- The internal DAPP settlement is the only payment type that is receipt-less.
+ALTER TABLE "payments" ADD CONSTRAINT "payments_manual_requires_receipt"
+  CHECK ("method" = 'DEPOSIT_APPLICATION' OR "receipt_number" IS NOT NULL);
+
 ALTER TABLE "expenses" ADD CONSTRAINT "expenses_payment_method_not_dapp"
   CHECK ("payment_method" IS NULL OR "payment_method" <> 'DEPOSIT_APPLICATION');
 
@@ -228,3 +233,48 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER deposit_applications_prevent_link_update
   BEFORE UPDATE ON deposit_applications
   FOR EACH ROW EXECUTE FUNCTION prevent_deposit_application_link_mutation();
+
+-- Refund and LedgerReversal rows are immutable events: corrections require a
+-- compensating event, never UPDATE. DepositApplication and Expense are handled
+-- separately because their reversal state is intentionally mutable.
+CREATE OR REPLACE FUNCTION prevent_financial_document_update()
+RETURNS trigger AS $
+BEGIN
+  RAISE EXCEPTION 'ESKAN_FINANCIAL_IMMUTABILITY: % rows are append-only and cannot be updated', TG_TABLE_NAME
+    USING ERRCODE = 'P0001';
+END;
+$ LANGUAGE plpgsql;
+
+CREATE TRIGGER ledger_reversals_prevent_update
+  BEFORE UPDATE ON ledger_reversals
+  FOR EACH ROW EXECUTE FUNCTION prevent_financial_document_update();
+
+CREATE TRIGGER payment_refunds_prevent_update
+  BEFORE UPDATE ON payment_refunds
+  FOR EACH ROW EXECUTE FUNCTION prevent_financial_document_update();
+
+-- Expense reversal may update status/version/reversal metadata, but its posted
+-- financial identity (tenant, category, amount, date, method, description and
+-- actor) cannot be rewritten. A hostel may only be detached by ON DELETE SET NULL;
+-- it cannot be reassigned to another hostel.
+CREATE OR REPLACE FUNCTION prevent_expense_financial_identity_update()
+RETURNS trigger AS $
+BEGIN
+  IF ROW(
+       NEW.organization_id, NEW.category, NEW.amount, NEW.spent_at,
+       NEW.payment_method, NEW.description, NEW.actor_user_id, NEW.created_at
+     ) IS DISTINCT FROM ROW(
+       OLD.organization_id, OLD.category, OLD.amount, OLD.spent_at,
+       OLD.payment_method, OLD.description, OLD.actor_user_id, OLD.created_at
+     )
+     OR (NEW.hostel_id IS NOT NULL AND NEW.hostel_id IS DISTINCT FROM OLD.hostel_id) THEN
+    RAISE EXCEPTION 'ESKAN_FINANCIAL_IMMUTABILITY: expense financial identity cannot be rewritten'
+      USING ERRCODE = 'P0001';
+  END IF;
+  RETURN NEW;
+END;
+$ LANGUAGE plpgsql;
+
+CREATE TRIGGER expenses_prevent_financial_identity_update
+  BEFORE UPDATE ON expenses
+  FOR EACH ROW EXECUTE FUNCTION prevent_expense_financial_identity_update();
