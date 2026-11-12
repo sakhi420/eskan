@@ -9,11 +9,7 @@ export function isValidDateOnly(value: string): boolean {
   if (!Number.isInteger(y) || !Number.isInteger(m) || !Number.isInteger(d)) return false;
   const date = new Date(Date.UTC(2000, m - 1, d));
   date.setUTCFullYear(y);
-  return (
-    date.getUTCFullYear() === y &&
-    date.getUTCMonth() === m - 1 &&
-    date.getUTCDate() === d
-  );
+  return date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d;
 }
 
 /**

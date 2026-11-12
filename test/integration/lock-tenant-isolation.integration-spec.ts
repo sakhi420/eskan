@@ -57,7 +57,9 @@ describe('LockService tenant isolation (real PostgreSQL + real Prisma)', () => {
       encoding: 'utf8',
     });
     if (r.status !== 0) {
-      throw new Error(`prisma migrate deploy failed (status ${r.status}):\n${r.stdout ?? ''}\n${r.stderr ?? ''}`);
+      throw new Error(
+        `prisma migrate deploy failed (status ${r.status}):\n${r.stdout ?? ''}\n${r.stderr ?? ''}`,
+      );
     }
     process.env.DATABASE_URL = url;
 
@@ -69,8 +71,14 @@ describe('LockService tenant isolation (real PostgreSQL + real Prisma)', () => {
     orgA = randomUUID();
     orgB = randomUUID();
     resB = randomUUID();
-    await db.query(`INSERT INTO organizations (id, name, updated_at) VALUES ($1,'A',now()),($2,'B',now())`, [orgA, orgB]);
-    await db.query(`INSERT INTO residents (id, organization_id, full_name, updated_at) VALUES ($1,$2,'RB',now())`, [resB, orgB]);
+    await db.query(
+      `INSERT INTO organizations (id, name, updated_at) VALUES ($1,'A',now()),($2,'B',now())`,
+      [orgA, orgB],
+    );
+    await db.query(
+      `INSERT INTO residents (id, organization_id, full_name, updated_at) VALUES ($1,$2,'RB',now())`,
+      [resB, orgB],
+    );
   }, 120000);
 
   afterAll(async () => {
@@ -84,7 +92,9 @@ describe('LockService tenant isolation (real PostgreSQL + real Prisma)', () => {
 
   it('lockForUpdate refuses to lock without an organizationId', async () => {
     await expect(
-      prisma.$transaction(async (tx) => locks.lockForUpdate(tx, 'resident', resB, undefined as unknown as string)),
+      prisma.$transaction(async (tx) =>
+        locks.lockForUpdate(tx, 'resident', resB, undefined as unknown as string),
+      ),
     ).rejects.toThrow(/organizationId/);
   });
 
@@ -124,8 +134,14 @@ describe('LockService tenant isolation (real PostgreSQL + real Prisma)', () => {
   });
 
   it('a correct-org SELECT FOR UPDATE sees the row (1 row), wrong org sees 0 rows', async () => {
-    const wrong = await db.query(`SELECT id FROM residents WHERE id=$1 AND organization_id=$2 FOR UPDATE`, [resB, orgA]);
-    const right = await db.query(`SELECT id FROM residents WHERE id=$1 AND organization_id=$2 FOR UPDATE`, [resB, orgB]);
+    const wrong = await db.query(
+      `SELECT id FROM residents WHERE id=$1 AND organization_id=$2 FOR UPDATE`,
+      [resB, orgA],
+    );
+    const right = await db.query(
+      `SELECT id FROM residents WHERE id=$1 AND organization_id=$2 FOR UPDATE`,
+      [resB, orgB],
+    );
     expect(wrong.rowCount).toBe(0);
     expect(right.rowCount).toBe(1);
   });

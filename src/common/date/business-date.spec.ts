@@ -1,7 +1,4 @@
-import {
-  exclusiveEndForInclusiveLastDay,
-  isValidDateOnly,
-} from './business-date';
+import { exclusiveEndForInclusiveLastDay, isValidDateOnly } from './business-date';
 
 describe('business-date helpers', () => {
   describe('isValidDateOnly', () => {

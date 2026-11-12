@@ -1,5 +1,15 @@
 import {
-  Body, Controller, Get, Headers, HttpCode, HttpStatus, Param, Post, Query, Req, UseGuards,
+  Body,
+  Controller,
+  Get,
+  Headers,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { TenantGuard } from '../common/guards/tenant.guard';
@@ -29,7 +39,12 @@ export class PaymentsController {
   ) {
     return envelope(
       req,
-      await this.payments.listPayments(m.organizationId, parsePage(pageRaw), parseSize(sizeRaw), residentId),
+      await this.payments.listPayments(
+        m.organizationId,
+        parsePage(pageRaw),
+        parseSize(sizeRaw),
+        residentId,
+      ),
     );
   }
 
@@ -44,12 +59,22 @@ export class PaymentsController {
   ) {
     return envelope(
       req,
-      await this.payments.createPayment(m.organizationId, user.id, dto, requireIdempotencyKey(idempotencyKey), req.traceId ?? 'unknown'),
+      await this.payments.createPayment(
+        m.organizationId,
+        user.id,
+        dto,
+        requireIdempotencyKey(idempotencyKey),
+        req.traceId ?? 'unknown',
+      ),
     );
   }
 
   @Get('payments/:paymentId')
-  async get(@CurrentMembership() m: MembershipContext, @Param('paymentId') paymentId: string, @Req() req: RequestWithAuth) {
+  async get(
+    @CurrentMembership() m: MembershipContext,
+    @Param('paymentId') paymentId: string,
+    @Req() req: RequestWithAuth,
+  ) {
     return envelope(req, await this.payments.getPayment(m.organizationId, paymentId));
   }
 

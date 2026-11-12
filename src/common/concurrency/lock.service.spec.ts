@@ -23,8 +23,12 @@ describe('LockService', () => {
   });
 
   it('lockForUpdate rejects a missing organizationId', async () => {
-    await expect(svc.lockForUpdate(tx as never, 'resident', 'res-1', '')).rejects.toThrow(/organizationId/);
-    await expect(svc.lockForUpdate(tx as never, 'hostel', 'h-1', undefined as unknown as string)).rejects.toThrow(/organizationId/);
+    await expect(svc.lockForUpdate(tx as never, 'resident', 'res-1', '')).rejects.toThrow(
+      /organizationId/,
+    );
+    await expect(
+      svc.lockForUpdate(tx as never, 'hostel', 'h-1', undefined as unknown as string),
+    ).rejects.toThrow(/organizationId/);
     expect(q).not.toHaveBeenCalled();
   });
 
@@ -46,6 +50,10 @@ describe('LockService', () => {
 
   it('org-scoped helpers forward organizationId', async () => {
     await svc.lockHostel(tx as never, 'h-1', 'org-9');
-    expect(q).toHaveBeenCalledWith(expect.stringContaining('FROM "hostels" WHERE id = $1 AND organization_id = $2'), 'h-1', 'org-9');
+    expect(q).toHaveBeenCalledWith(
+      expect.stringContaining('FROM "hostels" WHERE id = $1 AND organization_id = $2'),
+      'h-1',
+      'org-9',
+    );
   });
 });

@@ -1,5 +1,13 @@
 import {
-  ArrayMinSize, IsArray, IsDefined, IsOptional, IsString, IsUUID, MaxLength, MinLength, ValidateNested,
+  ArrayMinSize,
+  IsArray,
+  IsDefined,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+  MinLength,
+  ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { MoneyDto } from '../../common/money/money.dto';

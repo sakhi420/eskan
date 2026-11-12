@@ -15,17 +15,31 @@ describe('Money DTOs', () => {
   });
 
   it('MoneyDto accepts INT32_MAX and rejects above it', async () => {
-    expect(await validate(plainToInstance(MoneyDto, { amount: MONEY_MAX, currency: 'AFN' }))).toEqual([]);
-    expect(await validate(plainToInstance(MoneyDto, { amount: MONEY_MAX + 1, currency: 'AFN' }))).not.toEqual([]);
+    expect(
+      await validate(plainToInstance(MoneyDto, { amount: MONEY_MAX, currency: 'AFN' })),
+    ).toEqual([]);
+    expect(
+      await validate(plainToInstance(MoneyDto, { amount: MONEY_MAX + 1, currency: 'AFN' })),
+    ).not.toEqual([]);
   });
 
   it('NonNegativeMoneyDto allows zero and rejects negatives / overflow', async () => {
-    expect(await validate(plainToInstance(NonNegativeMoneyDto, { amount: 0, currency: 'AFN' }))).toEqual([]);
-    expect(await validate(plainToInstance(NonNegativeMoneyDto, { amount: -1, currency: 'AFN' }))).not.toEqual([]);
-    expect(await validate(plainToInstance(NonNegativeMoneyDto, { amount: MONEY_MAX + 1, currency: 'AFN' }))).not.toEqual([]);
+    expect(
+      await validate(plainToInstance(NonNegativeMoneyDto, { amount: 0, currency: 'AFN' })),
+    ).toEqual([]);
+    expect(
+      await validate(plainToInstance(NonNegativeMoneyDto, { amount: -1, currency: 'AFN' })),
+    ).not.toEqual([]);
+    expect(
+      await validate(
+        plainToInstance(NonNegativeMoneyDto, { amount: MONEY_MAX + 1, currency: 'AFN' }),
+      ),
+    ).not.toEqual([]);
   });
 
   it('rejects a non-AFN currency', async () => {
-    expect(await validate(plainToInstance(MoneyDto, { amount: 100, currency: 'USD' }))).not.toEqual([]);
+    expect(await validate(plainToInstance(MoneyDto, { amount: 100, currency: 'USD' }))).not.toEqual(
+      [],
+    );
   });
 });

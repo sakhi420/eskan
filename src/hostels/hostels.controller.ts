@@ -1,4 +1,17 @@
-import { Body, Controller, Get, Headers, HttpCode, HttpStatus, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { HostelsService } from './hostels.service';
 import { TenantGuard } from '../common/guards/tenant.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -44,10 +57,7 @@ export class HostelsController {
     @Req() req: RequestWithAuth,
   ) {
     const key = requireIdempotencyKey(idempotencyKey);
-    return envelope(
-      req,
-      await this.hostels.create(membership.organizationId, user.id, dto, key),
-    );
+    return envelope(req, await this.hostels.create(membership.organizationId, user.id, dto, key));
   }
 
   @Get(':hostelId')

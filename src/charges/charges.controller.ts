@@ -1,5 +1,15 @@
 import {
-  Body, Controller, Get, Headers, HttpCode, HttpStatus, Param, Post, Query, Req, UseGuards,
+  Body,
+  Controller,
+  Get,
+  Headers,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { ChargesService } from './charges.service';
 import { TenantGuard } from '../common/guards/tenant.guard';
@@ -10,7 +20,13 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuthUser, MembershipContext, RequestWithAuth } from '../auth/auth.types';
 import { ChargeType, EntrySide, Role } from '../generated/prisma/enums';
 import { AppError } from '../common/errors/app-error';
-import { envelope, parseEnum, parsePage, parseSize, requireIdempotencyKey } from '../common/http/http-utils';
+import {
+  envelope,
+  parseEnum,
+  parsePage,
+  parseSize,
+  requireIdempotencyKey,
+} from '../common/http/http-utils';
 import { ChargeDto } from './dto/charge.dto';
 import { BillingPostRequestDto, BillingPreviewRequestDto } from './dto/billing.dto';
 import { ReversalDto } from '../deposits/dto/deposit.dto';
@@ -31,7 +47,13 @@ export class ChargesController {
   ) {
     return envelope(
       req,
-      await this.charges.listCharges(m.organizationId, parsePage(pageRaw), parseSize(sizeRaw), residentId, parseEnum(ChargeType, typeRaw)),
+      await this.charges.listCharges(
+        m.organizationId,
+        parsePage(pageRaw),
+        parseSize(sizeRaw),
+        residentId,
+        parseEnum(ChargeType, typeRaw),
+      ),
     );
   }
 
@@ -44,18 +66,32 @@ export class ChargesController {
     @Body() dto: ChargeDto,
     @Req() req: RequestWithAuth,
   ) {
-    if ((dto.entrySide ?? EntrySide.DEBIT) === EntrySide.CREDIT && m.role !== Role.OWNER && m.role !== Role.ADMIN) {
+    if (
+      (dto.entrySide ?? EntrySide.DEBIT) === EntrySide.CREDIT &&
+      m.role !== Role.OWNER &&
+      m.role !== Role.ADMIN
+    ) {
       throw AppError.forbidden('Only OWNER or ADMIN can post credits');
     }
     const key = requireIdempotencyKey(idempotencyKey);
     return envelope(
       req,
-      await this.charges.createCharge(m.organizationId, user.id, dto, key, req.traceId ?? 'unknown'),
+      await this.charges.createCharge(
+        m.organizationId,
+        user.id,
+        dto,
+        key,
+        req.traceId ?? 'unknown',
+      ),
     );
   }
 
   @Get('charges/:chargeId')
-  async get(@CurrentMembership() m: MembershipContext, @Param('chargeId') chargeId: string, @Req() req: RequestWithAuth) {
+  async get(
+    @CurrentMembership() m: MembershipContext,
+    @Param('chargeId') chargeId: string,
+    @Req() req: RequestWithAuth,
+  ) {
     return envelope(req, await this.charges.getCharge(m.organizationId, chargeId));
   }
 
@@ -72,7 +108,14 @@ export class ChargesController {
   ) {
     return envelope(
       req,
-      await this.charges.reverseCharge(m.organizationId, user.id, chargeId, dto, requireIdempotencyKey(idempotencyKey), req.traceId ?? 'unknown'),
+      await this.charges.reverseCharge(
+        m.organizationId,
+        user.id,
+        chargeId,
+        dto,
+        requireIdempotencyKey(idempotencyKey),
+        req.traceId ?? 'unknown',
+      ),
     );
   }
 
@@ -114,7 +157,13 @@ export class ChargesController {
     const key = requireIdempotencyKey(idempotencyKey);
     return envelope(
       req,
-      await this.charges.generateAbsenceCredits(m.organizationId, user.id, absenceId, key, req.traceId ?? 'unknown'),
+      await this.charges.generateAbsenceCredits(
+        m.organizationId,
+        user.id,
+        absenceId,
+        key,
+        req.traceId ?? 'unknown',
+      ),
     );
   }
 }

@@ -23,11 +23,7 @@ export function jcsStringify(value: unknown): string {
   if (typeof value === 'object') {
     const obj = value as Record<string, unknown>;
     const keys = Object.keys(obj).sort();
-    return (
-      '{' +
-      keys.map((k) => `${JSON.stringify(k)}:${jcsStringify(obj[k])}`).join(',') +
-      '}'
-    );
+    return '{' + keys.map((k) => `${JSON.stringify(k)}:${jcsStringify(obj[k])}`).join(',') + '}';
   }
   // undefined / symbol / function cannot originate from validated JSON input.
   return 'null';

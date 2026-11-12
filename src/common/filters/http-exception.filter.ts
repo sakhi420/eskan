@@ -82,7 +82,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
         title: REASONS[status] ?? 'Error',
         status,
         detail,
-        code: status === HttpStatus.UNPROCESSABLE_ENTITY ? ErrorCode.VALIDATION_ERROR : codeFor(status),
+        code:
+          status === HttpStatus.UNPROCESSABLE_ENTITY ? ErrorCode.VALIDATION_ERROR : codeFor(status),
         traceId,
         instance,
         ...(errors ? { errors } : {}),

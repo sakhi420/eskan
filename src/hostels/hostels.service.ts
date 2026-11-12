@@ -92,15 +92,17 @@ export class HostelsService {
     };
   }
 
-  async create(
-    organizationId: string,
-    userId: string,
-    dto: HostelDto,
-    idempotencyKey: string,
-  ) {
+  async create(organizationId: string, userId: string, dto: HostelDto, idempotencyKey: string) {
     const requestHash = this.idempotency.hash(dto);
     return this.idempotency.runAtomic<ReturnType<typeof toHostelDto>>(
-      { organizationId, key: idempotencyKey, endpoint: CREATE_ENDPOINT, userId, requestHash, statusCode: 201 },
+      {
+        organizationId,
+        key: idempotencyKey,
+        endpoint: CREATE_ENDPOINT,
+        userId,
+        requestHash,
+        statusCode: 201,
+      },
       async (tx) => {
         const hostel = await tx.hostel.create({
           data: {
@@ -129,12 +131,7 @@ export class HostelsService {
     return toHostelDto(hostel);
   }
 
-  async update(
-    organizationId: string,
-    hostelId: string,
-    expectedVersion: number,
-    dto: HostelDto,
-  ) {
+  async update(organizationId: string, hostelId: string, expectedVersion: number, dto: HostelDto) {
     // Conditional (compare-and-swap) update so two concurrent requests with the
     // same X-Expected-Version cannot both overwrite the record.
     const updated = await this.prisma.hostel.updateMany({

@@ -1,4 +1,13 @@
-import { IsDefined, IsIn, IsOptional, IsString, IsUUID, MaxLength, MinLength, ValidateNested } from 'class-validator';
+import {
+  IsDefined,
+  IsIn,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+  MinLength,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { PaymentMethod } from '../../generated/prisma/enums';
 import { MANUAL_PAYMENT_METHODS } from '../../common/money/payment-method';

@@ -1,5 +1,15 @@
 import {
-  Body, Controller, Get, Headers, HttpCode, HttpStatus, Param, Post, Query, Req, UseGuards,
+  Body,
+  Controller,
+  Get,
+  Headers,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { ExpensesService } from './expenses.service';
 import { TenantGuard } from '../common/guards/tenant.guard';
@@ -25,7 +35,10 @@ export class ExpensesController {
     @Query('size') sizeRaw: string | undefined,
     @Req() req: RequestWithAuth,
   ) {
-    return envelope(req, await this.expenses.list(m.organizationId, parsePage(pageRaw), parseSize(sizeRaw)));
+    return envelope(
+      req,
+      await this.expenses.list(m.organizationId, parsePage(pageRaw), parseSize(sizeRaw)),
+    );
   }
 
   @Post('expenses')
@@ -39,12 +52,22 @@ export class ExpensesController {
   ) {
     return envelope(
       req,
-      await this.expenses.create(m.organizationId, user.id, dto, requireIdempotencyKey(idempotencyKey), req.traceId ?? 'unknown'),
+      await this.expenses.create(
+        m.organizationId,
+        user.id,
+        dto,
+        requireIdempotencyKey(idempotencyKey),
+        req.traceId ?? 'unknown',
+      ),
     );
   }
 
   @Get('expenses/:expenseId')
-  async get(@CurrentMembership() m: MembershipContext, @Param('expenseId') expenseId: string, @Req() req: RequestWithAuth) {
+  async get(
+    @CurrentMembership() m: MembershipContext,
+    @Param('expenseId') expenseId: string,
+    @Req() req: RequestWithAuth,
+  ) {
     return envelope(req, await this.expenses.get(m.organizationId, expenseId));
   }
 
@@ -61,7 +84,14 @@ export class ExpensesController {
   ) {
     return envelope(
       req,
-      await this.expenses.reverse(m.organizationId, user.id, expenseId, dto, requireIdempotencyKey(idempotencyKey), req.traceId ?? 'unknown'),
+      await this.expenses.reverse(
+        m.organizationId,
+        user.id,
+        expenseId,
+        dto,
+        requireIdempotencyKey(idempotencyKey),
+        req.traceId ?? 'unknown',
+      ),
     );
   }
 }

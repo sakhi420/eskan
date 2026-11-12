@@ -39,7 +39,10 @@ describe('M3a authorization before idempotency replay (HTTP)', () => {
     await admin.connect();
     await admin.query(`CREATE DATABASE "${dbName}"`);
     const url = withDatabase(dbName);
-    const r = spawnSync(process.execPath, [prismaCli, 'migrate', 'deploy'], { env: { ...process.env, DATABASE_URL: url }, encoding: 'utf8' });
+    const r = spawnSync(process.execPath, [prismaCli, 'migrate', 'deploy'], {
+      env: { ...process.env, DATABASE_URL: url },
+      encoding: 'utf8',
+    });
     if (r.status !== 0) throw new Error(`migrate deploy failed: ${r.stdout}${r.stderr}`);
 
     db = new Client({ connectionString: url });
@@ -52,7 +55,10 @@ describe('M3a authorization before idempotency replay (HTTP)', () => {
     ownerB = randomUUID();
     resident = randomUUID();
 
-    await db.query(`INSERT INTO organizations (id, name, updated_at) VALUES ($1,'OrgA',now()), ($2,'OrgB',now())`, [orgA, orgB]);
+    await db.query(
+      `INSERT INTO organizations (id, name, updated_at) VALUES ($1,'OrgA',now()), ($2,'OrgB',now())`,
+      [orgA, orgB],
+    );
     await db.query(
       `INSERT INTO users (id, email, password_hash, full_name, updated_at) VALUES ($1,$2,'x','Owner A',now()), ($3,$4,'x','Operator A',now()), ($5,$6,'x','Owner B',now())`,
       [ownerA, 'a@example.com', operatorA, 'op@example.com', ownerB, 'b@example.com'],
@@ -62,7 +68,10 @@ describe('M3a authorization before idempotency replay (HTTP)', () => {
        VALUES ($1,$2,$3,'OWNER',true,now()), ($4,$2,$5,'OPERATOR',true,now()), ($6,$7,$8,'OWNER',true,now())`,
       [randomUUID(), orgA, ownerA, randomUUID(), operatorA, randomUUID(), orgB, ownerB],
     );
-    await db.query(`INSERT INTO residents (id, organization_id, full_name, updated_at) VALUES ($1,$2,'R',now())`, [resident, orgA]);
+    await db.query(
+      `INSERT INTO residents (id, organization_id, full_name, updated_at) VALUES ($1,$2,'R',now())`,
+      [resident, orgA],
+    );
 
     process.env.JWT_SECRET = 'test-m3a-secret';
     process.env.DATABASE_URL = url;
@@ -109,7 +118,12 @@ describe('M3a authorization before idempotency replay (HTTP)', () => {
   }, 60000);
 
   async function tokenFor(userId: string, email: string, fullName: string): Promise<string> {
-    const { token } = await tokens.signAccessToken({ sub: userId, email, fullName, isPlatformAdmin: false });
+    const { token } = await tokens.signAccessToken({
+      sub: userId,
+      email,
+      fullName,
+      isPlatformAdmin: false,
+    });
     return token;
   }
 

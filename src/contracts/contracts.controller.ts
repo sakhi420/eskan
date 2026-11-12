@@ -1,4 +1,17 @@
-import { Body, Controller, Get, Headers, HttpCode, HttpStatus, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ContractsService } from './contracts.service';
 import { TenantGuard } from '../common/guards/tenant.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -7,7 +20,14 @@ import { CurrentMembership } from '../common/decorators/current-membership.decor
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuthUser, MembershipContext, RequestWithAuth } from '../auth/auth.types';
 import { ContractStatus, Role } from '../generated/prisma/enums';
-import { envelope, parseEnum, parsePage, parseSize, requireExpectedVersion, requireIdempotencyKey } from '../common/http/http-utils';
+import {
+  envelope,
+  parseEnum,
+  parsePage,
+  parseSize,
+  requireExpectedVersion,
+  requireIdempotencyKey,
+} from '../common/http/http-utils';
 import { ContractDto } from './dto/contract.dto';
 
 @Controller()
@@ -23,7 +43,15 @@ export class ContractsController {
     @Query('status') statusRaw: string | undefined,
     @Req() req: RequestWithAuth,
   ) {
-    return envelope(req, await this.contracts.list(m.organizationId, parsePage(pageRaw), parseSize(sizeRaw), parseEnum(ContractStatus, statusRaw)));
+    return envelope(
+      req,
+      await this.contracts.list(
+        m.organizationId,
+        parsePage(pageRaw),
+        parseSize(sizeRaw),
+        parseEnum(ContractStatus, statusRaw),
+      ),
+    );
   }
 
   @Post('contracts')
@@ -40,7 +68,11 @@ export class ContractsController {
   }
 
   @Get('contracts/:contractId')
-  async get(@CurrentMembership() m: MembershipContext, @Param('contractId') contractId: string, @Req() req: RequestWithAuth) {
+  async get(
+    @CurrentMembership() m: MembershipContext,
+    @Param('contractId') contractId: string,
+    @Req() req: RequestWithAuth,
+  ) {
     return envelope(req, await this.contracts.get(m.organizationId, contractId));
   }
 
@@ -54,7 +86,10 @@ export class ContractsController {
     @Req() req: RequestWithAuth,
   ) {
     const expectedVersion = requireExpectedVersion(versionRaw);
-    return envelope(req, await this.contracts.update(m.organizationId, contractId, expectedVersion, dto));
+    return envelope(
+      req,
+      await this.contracts.update(m.organizationId, contractId, expectedVersion, dto),
+    );
   }
 
   @Post('contracts/:contractId/activate')
@@ -70,7 +105,10 @@ export class ContractsController {
   ) {
     const key = requireIdempotencyKey(idempotencyKey);
     const expectedVersion = requireExpectedVersion(versionRaw);
-    return envelope(req, await this.contracts.activate(m.organizationId, contractId, user.id, key, expectedVersion));
+    return envelope(
+      req,
+      await this.contracts.activate(m.organizationId, contractId, user.id, key, expectedVersion),
+    );
   }
 
   @Post('contracts/:contractId/terminate')
@@ -86,7 +124,10 @@ export class ContractsController {
   ) {
     const key = requireIdempotencyKey(idempotencyKey);
     const expectedVersion = requireExpectedVersion(versionRaw);
-    return envelope(req, await this.contracts.terminate(m.organizationId, contractId, user.id, key, expectedVersion));
+    return envelope(
+      req,
+      await this.contracts.terminate(m.organizationId, contractId, user.id, key, expectedVersion),
+    );
   }
 
   @Post('contracts/:contractId/checkout')
@@ -102,6 +143,9 @@ export class ContractsController {
   ) {
     const key = requireIdempotencyKey(idempotencyKey);
     const expectedVersion = requireExpectedVersion(versionRaw);
-    return envelope(req, await this.contracts.checkout(m.organizationId, contractId, user.id, key, expectedVersion));
+    return envelope(
+      req,
+      await this.contracts.checkout(m.organizationId, contractId, user.id, key, expectedVersion),
+    );
   }
 }

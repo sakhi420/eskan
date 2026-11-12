@@ -70,7 +70,10 @@ export function prorateComponents(
   occupiedDays: number,
   calendarDays: number,
 ): { total: number; components: ProratedComponent[] } {
-  const rounded = components.map((c) => ({ ...c, amount: prorate(c.amount, occupiedDays, calendarDays) }));
+  const rounded = components.map((c) => ({
+    ...c,
+    amount: prorate(c.amount, occupiedDays, calendarDays),
+  }));
   const total = rounded.reduce((acc, c) => acc + c.amount, 0);
   return { total, components: rounded };
 }
@@ -89,7 +92,10 @@ export function isCanonicalBillingMonth(start: Date, end: Date): boolean {
 }
 
 /** Splits a half-open interval across calendar-month boundaries (for multi-month absence credits). */
-export function splitIntoMonths(start: Date, end: Date): Array<{ periodStart: Date; periodEnd: Date }> {
+export function splitIntoMonths(
+  start: Date,
+  end: Date,
+): Array<{ periodStart: Date; periodEnd: Date }> {
   const periods: Array<{ periodStart: Date; periodEnd: Date }> = [];
   let cursor = monthStart(start);
   while (cursor < end) {

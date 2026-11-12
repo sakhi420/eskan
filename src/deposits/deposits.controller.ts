@@ -1,5 +1,14 @@
 import {
-  Body, Controller, Get, Headers, HttpCode, HttpStatus, Param, Post, Req, UseGuards,
+  Body,
+  Controller,
+  Get,
+  Headers,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { DepositsService } from './deposits.service';
 import { TenantGuard } from '../common/guards/tenant.guard';
@@ -10,7 +19,13 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuthUser, MembershipContext, RequestWithAuth } from '../auth/auth.types';
 import { Role } from '../generated/prisma/enums';
 import { envelope, requireIdempotencyKey } from '../common/http/http-utils';
-import { DepositApplicationDto, DepositCreateDto, DepositForfeitDto, DepositRefundDto, ReversalDto } from './dto/deposit.dto';
+import {
+  DepositApplicationDto,
+  DepositCreateDto,
+  DepositForfeitDto,
+  DepositRefundDto,
+  ReversalDto,
+} from './dto/deposit.dto';
 
 @Controller()
 @UseGuards(TenantGuard, RolesGuard)
@@ -38,7 +53,14 @@ export class DepositsController {
   ) {
     return envelope(
       req,
-      await this.deposits.receive(m.organizationId, user.id, residentId, dto, requireIdempotencyKey(idempotencyKey), req.traceId ?? 'unknown'),
+      await this.deposits.receive(
+        m.organizationId,
+        user.id,
+        residentId,
+        dto,
+        requireIdempotencyKey(idempotencyKey),
+        req.traceId ?? 'unknown',
+      ),
     );
   }
 
@@ -55,7 +77,14 @@ export class DepositsController {
   ) {
     return envelope(
       req,
-      await this.deposits.apply(m.organizationId, user.id, residentId, dto, requireIdempotencyKey(idempotencyKey), req.traceId ?? 'unknown'),
+      await this.deposits.apply(
+        m.organizationId,
+        user.id,
+        residentId,
+        dto,
+        requireIdempotencyKey(idempotencyKey),
+        req.traceId ?? 'unknown',
+      ),
     );
   }
 
@@ -72,7 +101,14 @@ export class DepositsController {
   ) {
     return envelope(
       req,
-      await this.deposits.reverse(m.organizationId, user.id, depositTransactionId, dto, requireIdempotencyKey(idempotencyKey), req.traceId ?? 'unknown'),
+      await this.deposits.reverse(
+        m.organizationId,
+        user.id,
+        depositTransactionId,
+        dto,
+        requireIdempotencyKey(idempotencyKey),
+        req.traceId ?? 'unknown',
+      ),
     );
   }
 
@@ -88,7 +124,14 @@ export class DepositsController {
   ) {
     return envelope(
       req,
-      await this.deposits.refund(m.organizationId, user.id, depositTransactionId, dto, requireIdempotencyKey(idempotencyKey), req.traceId ?? 'unknown'),
+      await this.deposits.refund(
+        m.organizationId,
+        user.id,
+        depositTransactionId,
+        dto,
+        requireIdempotencyKey(idempotencyKey),
+        req.traceId ?? 'unknown',
+      ),
     );
   }
 
@@ -104,7 +147,14 @@ export class DepositsController {
   ) {
     return envelope(
       req,
-      await this.deposits.forfeit(m.organizationId, user.id, depositTransactionId, dto, requireIdempotencyKey(idempotencyKey), req.traceId ?? 'unknown'),
+      await this.deposits.forfeit(
+        m.organizationId,
+        user.id,
+        depositTransactionId,
+        dto,
+        requireIdempotencyKey(idempotencyKey),
+        req.traceId ?? 'unknown',
+      ),
     );
   }
 
@@ -121,7 +171,14 @@ export class DepositsController {
   ) {
     return envelope(
       req,
-      await this.deposits.reverseApplication(m.organizationId, user.id, applicationId, dto, requireIdempotencyKey(idempotencyKey), req.traceId ?? 'unknown'),
+      await this.deposits.reverseApplication(
+        m.organizationId,
+        user.id,
+        applicationId,
+        dto,
+        requireIdempotencyKey(idempotencyKey),
+        req.traceId ?? 'unknown',
+      ),
     );
   }
 }

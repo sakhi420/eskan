@@ -47,7 +47,10 @@ export class AppError extends HttpException {
     this.message = detail;
   }
 
-  static unauthorized(detail = 'Authentication required', code: ErrorCode = ErrorCode.UNAUTHENTICATED): AppError {
+  static unauthorized(
+    detail = 'Authentication required',
+    code: ErrorCode = ErrorCode.UNAUTHENTICATED,
+  ): AppError {
     return new AppError(code, HttpStatus.UNAUTHORIZED, detail);
   }
 
@@ -59,7 +62,10 @@ export class AppError extends HttpException {
     return new AppError(ErrorCode.RESOURCE_NOT_FOUND, HttpStatus.NOT_FOUND, detail);
   }
 
-  static badRequest(detail = 'Bad request', code: ErrorCode = ErrorCode.VALIDATION_ERROR): AppError {
+  static badRequest(
+    detail = 'Bad request',
+    code: ErrorCode = ErrorCode.VALIDATION_ERROR,
+  ): AppError {
     return new AppError(code, HttpStatus.BAD_REQUEST, detail);
   }
 
@@ -68,7 +74,9 @@ export class AppError extends HttpException {
   }
 
   static validation(detail: string, errors: FieldError[]): AppError {
-    return new AppError(ErrorCode.VALIDATION_ERROR, HttpStatus.UNPROCESSABLE_ENTITY, detail, { errors });
+    return new AppError(ErrorCode.VALIDATION_ERROR, HttpStatus.UNPROCESSABLE_ENTITY, detail, {
+      errors,
+    });
   }
 
   static rateLimited(detail = 'Too many requests'): AppError {

@@ -62,7 +62,10 @@ function toMembershipDto(row: MembershipRow) {
 
 @Injectable()
 export class OrganizationsService {
-  constructor(private readonly prisma: PrismaService, private readonly locks: LockService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly locks: LockService,
+  ) {}
 
   async getCurrent(organizationId: string) {
     const org = await this.prisma.organization.findUnique({

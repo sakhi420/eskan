@@ -57,16 +57,43 @@ interface Fixture {
 }
 
 async function seedFixture(db: Client): Promise<Fixture> {
-  const org = randomUUID(), hostel = randomUUID(), room = randomUUID(), bed = randomUUID(),
-    bed2 = randomUUID(), resident = randomUUID(), contract = randomUUID(), assignment = randomUUID();
+  const org = randomUUID(),
+    hostel = randomUUID(),
+    room = randomUUID(),
+    bed = randomUUID(),
+    bed2 = randomUUID(),
+    resident = randomUUID(),
+    contract = randomUUID(),
+    assignment = randomUUID();
   await db.query(`INSERT INTO organizations (id, name, updated_at) VALUES ($1,'Org',now())`, [org]);
-  await db.query(`INSERT INTO hostels (id, organization_id, name, updated_at) VALUES ($1,$2,'H',now())`, [hostel, org]);
-  await db.query(`INSERT INTO rooms (id, organization_id, hostel_id, code, floor, updated_at) VALUES ($1,$2,$3,'R1',1,now())`, [room, org, hostel]);
-  await db.query(`INSERT INTO beds (id, organization_id, room_id, code, updated_at) VALUES ($1,$2,$3,'B1',now())`, [bed, org, room]);
-  await db.query(`INSERT INTO beds (id, organization_id, room_id, code, updated_at) VALUES ($1,$2,$3,'B2',now())`, [bed2, org, room]);
-  await db.query(`INSERT INTO residents (id, organization_id, full_name, updated_at) VALUES ($1,$2,'R',now())`, [resident, org]);
-  await db.query(`INSERT INTO stay_contracts (id, organization_id, hostel_id, resident_id, contract_number, status, start_date, rent_amount, updated_at) VALUES ($1,$2,$3,$4,$5,'ACTIVE','2020-01-01',5000,now())`, [contract, org, hostel, resident, `CNT-${randomUUID().slice(0, 8)}`]);
-  await db.query(`INSERT INTO bed_assignments (id, organization_id, bed_id, resident_id, contract_id, status, start_date, updated_at) VALUES ($1,$2,$3,$4,$5,'ACTIVE','2020-01-01',now())`, [assignment, org, bed, resident, contract]);
+  await db.query(
+    `INSERT INTO hostels (id, organization_id, name, updated_at) VALUES ($1,$2,'H',now())`,
+    [hostel, org],
+  );
+  await db.query(
+    `INSERT INTO rooms (id, organization_id, hostel_id, code, floor, updated_at) VALUES ($1,$2,$3,'R1',1,now())`,
+    [room, org, hostel],
+  );
+  await db.query(
+    `INSERT INTO beds (id, organization_id, room_id, code, updated_at) VALUES ($1,$2,$3,'B1',now())`,
+    [bed, org, room],
+  );
+  await db.query(
+    `INSERT INTO beds (id, organization_id, room_id, code, updated_at) VALUES ($1,$2,$3,'B2',now())`,
+    [bed2, org, room],
+  );
+  await db.query(
+    `INSERT INTO residents (id, organization_id, full_name, updated_at) VALUES ($1,$2,'R',now())`,
+    [resident, org],
+  );
+  await db.query(
+    `INSERT INTO stay_contracts (id, organization_id, hostel_id, resident_id, contract_number, status, start_date, rent_amount, updated_at) VALUES ($1,$2,$3,$4,$5,'ACTIVE','2020-01-01',5000,now())`,
+    [contract, org, hostel, resident, `CNT-${randomUUID().slice(0, 8)}`],
+  );
+  await db.query(
+    `INSERT INTO bed_assignments (id, organization_id, bed_id, resident_id, contract_id, status, start_date, updated_at) VALUES ($1,$2,$3,$4,$5,'ACTIVE','2020-01-01',now())`,
+    [assignment, org, bed, resident, contract],
+  );
   return { org, hostel, room, bed, bed2, resident, contract, assignment };
 }
 
@@ -93,7 +120,9 @@ describe('M-1 concurrency (real PostgreSQL + real Prisma/services)', () => {
       encoding: 'utf8',
     });
     if (r.status !== 0) {
-      throw new Error(`prisma migrate deploy failed (status ${r.status}):\n${r.stdout ?? ''}\n${r.stderr ?? ''}`);
+      throw new Error(
+        `prisma migrate deploy failed (status ${r.status}):\n${r.stdout ?? ''}\n${r.stderr ?? ''}`,
+      );
     }
 
     prisma = new PrismaService();
@@ -128,12 +157,17 @@ describe('M-1 concurrency (real PostgreSQL + real Prisma/services)', () => {
     expect(fail).toHaveLength(1);
     expect((fail[0].reason as { code?: string }).code).toBe('RESOURCE_VERSION_CONFLICT');
 
-    const row = await db.query(`SELECT status, version, end_date FROM stay_contracts WHERE id=$1`, [f.contract]);
+    const row = await db.query(`SELECT status, version, end_date FROM stay_contracts WHERE id=$1`, [
+      f.contract,
+    ]);
     expect(row.rows[0].status).toBe('CLOSED');
     expect(row.rows[0].version).toBe(2); // exactly ONE ACTIVE→CLOSED transition
     expect(row.rows[0].end_date).not.toBeNull();
 
-    const asg = await db.query(`SELECT status, end_reason, end_date FROM bed_assignments WHERE contract_id=$1`, [f.contract]);
+    const asg = await db.query(
+      `SELECT status, end_reason, end_date FROM bed_assignments WHERE contract_id=$1`,
+      [f.contract],
+    );
     expect(asg.rows).toHaveLength(1);
     expect(asg.rows[0].status).toBe('ENDED');
     expect(asg.rows[0].end_reason).toBe('CHECKOUT');
@@ -164,12 +198,21 @@ describe('M-1 concurrency (real PostgreSQL + real Prisma/services)', () => {
     const f = await seedFixture(db);
     const results = await Promise.allSettled([
       contracts.checkout(f.org, f.contract, randomUUID(), randomUUID(), 1),
-      assignments.transfer(f.org, f.assignment, randomUUID(), { bedId: f.bed2, startDate: '2025-01-01' }, randomUUID(), 1),
+      assignments.transfer(
+        f.org,
+        f.assignment,
+        randomUUID(),
+        { bedId: f.bed2, startDate: '2025-01-01' },
+        randomUUID(),
+        1,
+      ),
     ]);
 
     expect(results[0].status).toBe('fulfilled'); // checkout always reaches CLOSED
 
-    const row = await db.query(`SELECT status, end_date FROM stay_contracts WHERE id=$1`, [f.contract]);
+    const row = await db.query(`SELECT status, end_date FROM stay_contracts WHERE id=$1`, [
+      f.contract,
+    ]);
     expect(row.rows[0].status).toBe('CLOSED');
     expect(row.rows[0].end_date).not.toBeNull();
 
@@ -209,9 +252,11 @@ describe('M-1 concurrency (real PostgreSQL + real Prisma/services)', () => {
     const key = randomUUID();
     await contracts.checkout(f.org, f.contract, randomUUID(), key, 1);
 
-    await expect(contracts.checkout(f.org, f.contract, randomUUID(), key, 2)).rejects.toMatchObject({
-      code: 'IDEMPOTENCY_KEY_REUSED',
-    });
+    await expect(contracts.checkout(f.org, f.contract, randomUUID(), key, 2)).rejects.toMatchObject(
+      {
+        code: 'IDEMPOTENCY_KEY_REUSED',
+      },
+    );
   });
 
   it('checkout persists PERMANENT idempotency retention (expires_at IS NULL)', async () => {

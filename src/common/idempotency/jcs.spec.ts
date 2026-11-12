@@ -23,20 +23,34 @@ describe('jcsStringify (RFC 8785 JCS)', () => {
   });
 
   it('orders nested keys recursively', () => {
-    expect(jcsStringify({ z: { y: 1, x: [1, { b: 1, a: 2 }] } })).toBe('{"z":{"x":[1,{"a":2,"b":1}],"y":1}}');
+    expect(jcsStringify({ z: { y: 1, x: [1, { b: 1, a: 2 }] } })).toBe(
+      '{"z":{"x":[1,{"a":2,"b":1}],"y":1}}',
+    );
   });
 });
 
 describe('canonicalRequestHash', () => {
-  const base = { method: 'POST', route: '/api/v1/charges', pathParams: {}, query: {}, semanticHeaders: {}, body: { residentId: 'r', type: 'RENT', money: { amount: 1000, currency: 'AFN' } } };
+  const base = {
+    method: 'POST',
+    route: '/api/v1/charges',
+    pathParams: {},
+    query: {},
+    semanticHeaders: {},
+    body: { residentId: 'r', type: 'RENT', money: { amount: 1000, currency: 'AFN' } },
+  };
 
   it('is deterministic for identical requests', () => {
-    expect(canonicalRequestHash(base)).toBe(canonicalRequestHash({ ...base, body: { ...base.body } }));
+    expect(canonicalRequestHash(base)).toBe(
+      canonicalRequestHash({ ...base, body: { ...base.body } }),
+    );
   });
 
   it('changes when the body differs', () => {
     expect(canonicalRequestHash(base)).not.toBe(
-      canonicalRequestHash({ ...base, body: { ...base.body, money: { amount: 1001, currency: 'AFN' } } }),
+      canonicalRequestHash({
+        ...base,
+        body: { ...base.body, money: { amount: 1001, currency: 'AFN' } },
+      }),
     );
   });
 
@@ -45,8 +59,16 @@ describe('canonicalRequestHash', () => {
   });
 
   it('includes pathParams when present', () => {
-    const a = canonicalRequestHash({ ...base, route: '/api/v1/absences/{absenceId}/credits', pathParams: { absenceId: 'x' } });
-    const b = canonicalRequestHash({ ...base, route: '/api/v1/absences/{absenceId}/credits', pathParams: { absenceId: 'y' } });
+    const a = canonicalRequestHash({
+      ...base,
+      route: '/api/v1/absences/{absenceId}/credits',
+      pathParams: { absenceId: 'x' },
+    });
+    const b = canonicalRequestHash({
+      ...base,
+      route: '/api/v1/absences/{absenceId}/credits',
+      pathParams: { absenceId: 'y' },
+    });
     expect(a).not.toBe(b);
   });
 });

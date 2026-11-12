@@ -23,8 +23,7 @@ export class TenantGuard implements CanActivate {
     }
 
     const header = request.headers['x-organization-id'];
-    const organizationId =
-      typeof header === 'string' && header.length > 0 ? header : undefined;
+    const organizationId = typeof header === 'string' && header.length > 0 ? header : undefined;
 
     const memberships = await this.tenants.listActiveMemberships(user.id);
     if (memberships.length === 0) {
