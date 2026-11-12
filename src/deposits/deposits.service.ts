@@ -43,11 +43,11 @@ interface ApplicationRow {
   amount: number; reason: string; actorUserId: string; createdAt: Date;
 }
 
-function toDepositDto(row: DepositRow) {
+function toDepositDto(row: DepositRow, reversed = row.status === LedgerEntryStatus.REVERSED) {
   return {
     id: row.id, version: row.version, organizationId: row.organizationId, residentId: row.residentId,
     sourceDepositTransactionId: row.sourceDepositTransactionId ?? undefined,
-    type: row.type, status: row.status,
+    type: row.type, status: reversed ? LedgerEntryStatus.REVERSED : row.status,
     money: { amount: row.amount, currency: 'AFN' },
     receivedAt: row.receivedAt ? toISODate(row.receivedAt) : undefined,
     reason: row.reason ?? undefined,
@@ -83,10 +83,9 @@ export class DepositsService {
   }
 
   /**
-   * Per-source held balance for a single RECEIVED deposit:
-   *   Held = RECEIVED − Σ REFUNDED(source) − Σ FORFEITED(source) − Σ APPLIED(source, POSTED)
-   * where REFUNDED/FORFEITED events point back at the source via the structural
-   * `source_deposit_transaction_id` link and only POSTED (non-reversed) rows count.
+   * Per-source held balance. DepositTransaction rows are immutable: a void is
+   * represented only by a DEPOSIT LedgerReversal. A reversed source receipt
+   * contributes zero; reversed REFUNDED/FORFEITED children no longer reduce Held.
    */
   private async sourceHeld(
     tx: Prisma.TransactionClient,
@@ -99,19 +98,41 @@ export class DepositsService {
     });
     if (!received) return 0;
 
-    const related = await tx.depositTransaction.groupBy({
-      by: ['type'],
-      where: { organizationId, sourceDepositTransactionId: depositId, status: LedgerEntryStatus.POSTED },
-      _sum: { amount: true },
+    const sourceReversal = await tx.ledgerReversal.findFirst({
+      where: { organizationId, sourceType: ReversalSourceType.DEPOSIT, sourceId: depositId },
+      select: { id: true },
     });
-    const relSum = (t: DepositType): number => related.find((x) => x.type === t)?._sum.amount ?? 0;
+    if (sourceReversal) return 0;
+
+    const related = await tx.depositTransaction.findMany({
+      where: { organizationId, sourceDepositTransactionId: depositId, status: LedgerEntryStatus.POSTED },
+      select: { id: true, type: true, amount: true },
+    });
+    const relatedReversals = related.length
+      ? await tx.ledgerReversal.findMany({
+          where: {
+            organizationId,
+            sourceType: ReversalSourceType.DEPOSIT,
+            sourceId: { in: related.map((row) => row.id) },
+          },
+          select: { sourceId: true },
+        })
+      : [];
+    const reversedIds = new Set(relatedReversals.map((row) => row.sourceId));
+    const activeRelated = related.filter((row) => !reversedIds.has(row.id));
+    const refunded = activeRelated
+      .filter((row) => row.type === DepositType.REFUNDED)
+      .reduce((sum, row) => sum + row.amount, 0);
+    const forfeited = activeRelated
+      .filter((row) => row.type === DepositType.FORFEITED)
+      .reduce((sum, row) => sum + row.amount, 0);
 
     const applied = await tx.depositApplication.aggregate({
       where: { organizationId, depositTransactionId: depositId, status: LedgerEntryStatus.POSTED },
       _sum: { amount: true },
     });
 
-    return received.amount - relSum(DepositType.REFUNDED) - relSum(DepositType.FORFEITED) - (applied._sum.amount ?? 0);
+    return received.amount - refunded - forfeited - (applied._sum.amount ?? 0);
   }
 
   /** Resident-level deposit held = sum of the per-source held balances. */
@@ -135,7 +156,18 @@ export class DepositsService {
       orderBy: { createdAt: 'desc' },
       select: DEPOSIT_SELECT,
     });
-    return (rows as unknown as DepositRow[]).map(toDepositDto);
+    const reversals = rows.length
+      ? await this.prisma.ledgerReversal.findMany({
+          where: {
+            organizationId,
+            sourceType: ReversalSourceType.DEPOSIT,
+            sourceId: { in: rows.map((row) => row.id) },
+          },
+          select: { sourceId: true },
+        })
+      : [];
+    const reversedIds = new Set(reversals.map((row) => row.sourceId));
+    return (rows as unknown as DepositRow[]).map((row) => toDepositDto(row, reversedIds.has(row.id)));
   }
 
   async receive(organizationId: string, userId: string, residentId: string, dto: DepositCreateDto, idempotencyKey: string, traceId: string) {
@@ -287,28 +319,45 @@ export class DepositsService {
 
         const deposit = await tx.depositTransaction.findFirst({
           where: { id: depositTransactionId, organizationId },
-          select: { id: true, version: true, residentId: true, status: true, type: true, amount: true },
+          select: {
+            id: true, version: true, residentId: true, status: true, type: true,
+            amount: true, sourceDepositTransactionId: true,
+          },
         });
         if (!deposit) throw AppError.notFound('Deposit transaction not found');
-        if (deposit.status === LedgerEntryStatus.REVERSED) throw AppError.conflict('Deposit event is already reversed', ErrorCode.DEPOSIT_ALREADY_REVERSED);
+        if (deposit.status !== LedgerEntryStatus.POSTED) {
+          throw AppError.conflict('Deposit event is not in a reversible posted state', ErrorCode.DEPOSIT_ALREADY_REVERSED);
+        }
+        const priorReversal = await tx.ledgerReversal.findFirst({
+          where: { organizationId, sourceType: ReversalSourceType.DEPOSIT, sourceId: deposit.id },
+          select: { id: true },
+        });
+        if (priorReversal) throw AppError.conflict('Deposit event is already reversed', ErrorCode.DEPOSIT_ALREADY_REVERSED);
 
         if (deposit.type === DepositType.RECEIVED) {
           const held = await this.sourceHeld(tx, organizationId, deposit.id);
           if (held < deposit.amount) {
             throw AppError.conflict('Reversal of a received deposit requires its dependent events to be reversed first', ErrorCode.BUSINESS_RULE_VIOLATION);
           }
+        } else {
+          if (!deposit.sourceDepositTransactionId) {
+            throw AppError.conflict('Refund/forfeit event is missing its source deposit', ErrorCode.BUSINESS_RULE_VIOLATION);
+          }
+          const sourceReversal = await tx.ledgerReversal.findFirst({
+            where: {
+              organizationId,
+              sourceType: ReversalSourceType.DEPOSIT,
+              sourceId: deposit.sourceDepositTransactionId,
+            },
+            select: { id: true },
+          });
+          if (sourceReversal) {
+            throw AppError.conflict('A child deposit event cannot be reversed after its source receipt was reversed', ErrorCode.BUSINESS_RULE_VIOLATION);
+          }
         }
 
         const businessDate = await businessTodayForOrg(tx, organizationId);
-        const updated = (await tx.depositTransaction.update({
-          where: { id: deposit.id },
-          data: { status: LedgerEntryStatus.REVERSED, reversedById: userId, reversalReason: dto.reason, reversedAt: new Date(), version: { increment: 1 } },
-          select: DEPOSIT_SELECT,
-        })) as unknown as DepositRow;
-
-        // Reversal side is the opposite of the event's original posting side (D-02).
-        // RECEIVED increases Deposit Held (CREDIT) → reversal DEBIT; REFUNDED/FORFEITED
-        // decrease Deposit Held (DEBIT) → reversal CREDIT.
+        // D-02 / section 4.4: the source event is never UPDATEd; this row is immutable.
         const side = deposit.type === DepositType.RECEIVED ? EntrySide.DEBIT : EntrySide.CREDIT;
         const reversal = await tx.ledgerReversal.create({
           data: {
@@ -322,9 +371,9 @@ export class DepositsService {
           organizationId, actorUserId: userId, action: 'DEPOSIT_REVERSED', entityType: 'DEPOSIT', entityId: deposit.id, traceId,
           after: { businessDate, reversalId: reversal.id, reason: dto.reason } as unknown as Prisma.InputJsonValue,
         });
-        await this.emitSync(tx, organizationId, 'DEPOSIT', deposit.id, updated.version);
+        // The original deposit row is unchanged; the reversal event has its own sync record.
         await this.emitSync(tx, organizationId, 'LEDGER_REVERSAL', reversal.id, 1);
-        return toDepositDto(updated);
+        return toDepositDto(deposit as unknown as DepositRow, true);
       },
       {
         toRecord: (result) => ({ resourceType: 'DEPOSIT', resourceId: result.id }),
@@ -333,7 +382,11 @@ export class DepositsService {
           if (!ref.resourceId) throw AppError.internal('Idempotency record is missing its deposit reference');
           const row = await this.prisma.depositTransaction.findFirst({ where: { id: ref.resourceId, organizationId }, select: DEPOSIT_SELECT });
           if (!row) throw AppError.internal('Deposit referenced by idempotency record no longer exists');
-          return toDepositDto(row as unknown as DepositRow);
+          const reversal = await this.prisma.ledgerReversal.findFirst({
+            where: { organizationId, sourceType: ReversalSourceType.DEPOSIT, sourceId: row.id },
+            select: { id: true },
+          });
+          return toDepositDto(row as unknown as DepositRow, Boolean(reversal));
         },
       },
     );
@@ -361,6 +414,9 @@ export class DepositsService {
         const activeContract = await tx.stayContract.findFirst({
           where: { organizationId, residentId, status: ContractStatus.ACTIVE }, select: { id: true },
         });
+        if (activeContract) {
+          throw AppError.conflict('Deposit can only be applied after all active contracts are closed or terminated', ErrorCode.CHECKOUT_REQUIRED);
+        }
         // P1-6 / D-10: absence of an ACTIVE contract alone does NOT prove final checkout
         // (a resident with no contract or only a DRAFT contract is not eligible). The gate
         // fails closed unless a finalized contract exists and no active bed assignment does.
@@ -505,10 +561,28 @@ export class DepositsService {
 
         const payment = await tx.payment.findFirst({
           where: { id: application.paymentId, organizationId },
-          select: { id: true, status: true },
+          select: { id: true, status: true, method: true, amount: true },
         });
         if (!payment) throw AppError.internal('Linked DEPOSIT_APPLICATION payment not found');
         if (payment.status === LedgerEntryStatus.REVERSED) throw AppError.conflict('Linked payment is already reversed', ErrorCode.PAYMENT_ALREADY_REVERSED);
+        if (payment.method !== PaymentMethod.DEPOSIT_APPLICATION || payment.amount !== application.amount) {
+          throw AppError.conflict('DepositApplication/payment linkage is inconsistent', ErrorCode.BUSINESS_RULE_VIOLATION);
+        }
+
+        // Generic allocation endpoints reject DAPP. Fail closed if a second or
+        // mismatched allocation was introduced through legacy/direct DB access.
+        const paymentAllocations = await tx.paymentAllocation.findMany({
+          where: { organizationId, residentId: application.residentId, paymentId: application.paymentId },
+          select: { id: true, chargeId: true, amount: true },
+        });
+        if (
+          paymentAllocations.length !== 1 ||
+          paymentAllocations[0].id !== application.allocationId ||
+          paymentAllocations[0].chargeId !== application.chargeId ||
+          paymentAllocations[0].amount !== application.amount
+        ) {
+          throw AppError.conflict('DepositApplication must own the sole matching allocation for its payment', ErrorCode.BUSINESS_RULE_VIOLATION);
+        }
 
         const businessDate = await businessTodayForOrg(tx, organizationId);
         const now = new Date();
