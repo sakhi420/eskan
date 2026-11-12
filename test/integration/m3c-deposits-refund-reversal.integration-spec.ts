@@ -114,13 +114,24 @@ describe('M3c Deposit / Refund / Expense / Reversal (real PostgreSQL + real serv
       await expect(deposits.forfeit(f.org, f.user, recv.id, { money: money(3000), reason: 'x' } as any, randomUUID(), 'trace')).rejects.toMatchObject({ code: 'DEPOSIT_BALANCE_INSUFFICIENT' });
     });
 
-    it('reverses a received deposit and removes it from the ledger', async () => {
+    it('reverses a received deposit with an append-only LedgerReversal', async () => {
       const f = await seedOrg(db);
       const recv: any = await deposits.receive(f.org, f.user, f.resident, { money: money(9000), receivedAt: '2026-11-02' } as any, randomUUID(), 'trace');
-      const r: any = await deposits.reverse(f.org, f.user, recv.id, { reason: 'mistake' } as any, randomUUID(), 'trace');
-      expect(r.status).toBe('REVERSED');
+      const key = randomUUID();
+      const result: any = await deposits.reverse(f.org, f.user, recv.id, { reason: 'mistake' } as any, key, 'trace');
+      expect(result.status).toBe('REVERSED');
+
+      const replay: any = await deposits.reverse(f.org, f.user, recv.id, { reason: 'mistake' } as any, key, 'trace');
+      expect(replay.status).toBe('REVERSED');
+
+      const source = await db.query(`SELECT status, version FROM deposit_transactions WHERE id=$1`, [recv.id]);
+      expect(source.rows[0].status).toBe('POSTED');
+      expect(source.rows[0].version).toBe(recv.version);
+
       const rev = await db.query(`SELECT count(*)::int n FROM ledger_reversals WHERE source_type='DEPOSIT' AND source_id=$1`, [recv.id]);
       expect(rev.rows[0].n).toBe(1);
+      const listed: any[] = await deposits.listByResident(f.org, f.resident);
+      expect(listed.find((row) => row.id === recv.id)?.status).toBe('REVERSED');
     });
 
     it('rejects deposit application before final checkout (active contract)', async () => {
