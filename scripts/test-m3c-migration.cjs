@@ -202,6 +202,7 @@ async function seedDeposit(c, org, res, amount) {
     'payment_allocations_prevent_dapp_update',
     'deposit_applications_prevent_link_update',
     'allocation_releases_prevent_update',
+    'allocation_releases_enforce_invariants',
     'ledger_reversals_prevent_update',
     'payment_refunds_prevent_update',
     'expenses_prevent_financial_identity_update',
@@ -377,6 +378,16 @@ async function seedDeposit(c, org, res, amount) {
   const pay = await seedPayment(fresh.c, org, res, 10000);
   const allocDummy = uuid();
   await fresh.c.query(`INSERT INTO payment_allocations (id, organization_id, resident_id, payment_id, charge_id, amount) VALUES ($1,$2,$3,$4,$5,1)`, [allocDummy, org, res, pay, charge]);
+  check(
+    '[allocation release: cumulative release cannot exceed allocation amount]',
+    (await errCode(
+      fresh.c,
+      `INSERT INTO allocation_releases
+         (id,organization_id,resident_id,allocation_id,amount,reason,actor_user_id,created_at)
+       VALUES ($1,$2,$3,$4,2,'over-release',$5,now())`,
+      [uuid(), org, res, allocDummy, user],
+    )) === '23514',
+  );
 
   check('[check: refund amount=0]', (await errCode(fresh.c, `INSERT INTO payment_refunds (id,organization_id,resident_id,payment_id,amount,reason,actor_user_id) VALUES ($1,$2,$3,$4,0,'x',$5)`, [uuid(), org, res, pay, user])) === '23514');
   check('[check: reversal amount=0]', (await errCode(fresh.c, `INSERT INTO ledger_reversals (id,organization_id,resident_id,source_type,source_id,side,amount,reason,actor_user_id,idempotency_key) VALUES ($1,$2,$3,'CHARGE',$4,'DEBIT',0,'x',$5,$6)`, [uuid(), org, res, charge, user, uuid()])) === '23514');
@@ -472,6 +483,16 @@ async function seedDeposit(c, org, res, amount) {
       [internalCharge],
     )) === '23514',
   );
+  check(
+    '[DAPP: direct AllocationRelease is rejected while Payment is still POSTED]',
+    (await errCode(
+      fresh.c,
+      `INSERT INTO allocation_releases
+         (id,organization_id,resident_id,allocation_id,amount,reason,actor_user_id,created_at)
+       VALUES ($1,$2,$3,$4,100,'unauthorized DAPP release',$5,now())`,
+      [uuid(), org, res, internalAllocation, user],
+    )) === '23514',
+  );
 
   // Directly flipping Application status cannot create held-balance credit.
   check(
@@ -503,12 +524,6 @@ async function seedDeposit(c, org, res, amount) {
   // corresponding compensating LedgerReversal.
   const noLedgerError = await transactionCode(fresh.c, async () => {
     await fresh.c.query(
-      `INSERT INTO allocation_releases
-         (id,organization_id,resident_id,allocation_id,amount,reason,actor_user_id,created_at)
-       VALUES ($1,$2,$3,$4,100,'missing ledger reversal',$5,now())`,
-      [uuid(), org, res, internalAllocation, user],
-    );
-    await fresh.c.query(
       `UPDATE payments
           SET status='REVERSED', reversed_by_id=$2, reversal_reason='missing ledger reversal',
               reversed_at=now(), version=version+1
@@ -516,14 +531,13 @@ async function seedDeposit(c, org, res, amount) {
       [internalPayment, user],
     );
     await fresh.c.query(
-      `UPDATE deposit_applications
-          SET status='REVERSED', reversed_by_id=$2, reversal_reason='missing ledger reversal',
-              reversed_at=now(), version=version+1
-        WHERE id=$1`,
-      [validApplication, user],
+      `INSERT INTO allocation_releases
+         (id,organization_id,resident_id,allocation_id,amount,reason,actor_user_id,created_at)
+       VALUES ($1,$2,$3,$4,100,'missing ledger reversal',$5,now())`,
+      [uuid(), org, res, internalAllocation, user],
     );
   });
-  check('[DAPP: Application reversal requires a LedgerReversal]', noLedgerError === '23514');
+  check('[DAPP: AllocationRelease requires the matching LedgerReversal]', noLedgerError === '23514');
 
   // A LedgerReversal without a full AllocationRelease also cannot unlock Held.
   const noReleaseError = await transactionCode(fresh.c, async () => {
@@ -554,12 +568,6 @@ async function seedDeposit(c, org, res, amount) {
   const validDappReleaseId = uuid();
   const validDappReversal = await transactionCode(fresh.c, async () => {
     await fresh.c.query(
-      `INSERT INTO allocation_releases
-         (id,organization_id,resident_id,allocation_id,amount,reason,actor_user_id,created_at)
-       VALUES ($1,$2,$3,$4,100,$5,$6,now())`,
-      [validDappReleaseId, org, res, internalAllocation, validDappReversalReason, user],
-    );
-    await fresh.c.query(
       `INSERT INTO ledger_reversals
          (id,organization_id,resident_id,source_type,source_id,side,amount,reason,actor_user_id,idempotency_key)
        VALUES ($1,$2,$3,'PAYMENT',$4,'DEBIT',100,$5,$6,$7)`,
@@ -571,6 +579,12 @@ async function seedDeposit(c, org, res, amount) {
               reversed_at=now(), version=version+1
         WHERE id=$1`,
       [internalPayment, user, validDappReversalReason],
+    );
+    await fresh.c.query(
+      `INSERT INTO allocation_releases
+         (id,organization_id,resident_id,allocation_id,amount,reason,actor_user_id,created_at)
+       VALUES ($1,$2,$3,$4,100,$5,$6,now())`,
+      [validDappReleaseId, org, res, internalAllocation, validDappReversalReason, user],
     );
     await fresh.c.query(
       `UPDATE deposit_applications
