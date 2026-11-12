@@ -42,6 +42,8 @@
 - Prisma parity assertions passed.
 - Dependency lockfile upgrades `@nestjs/common`, `@nestjs/core`, `@nestjs/platform-express`, and `@nestjs/testing` to 12.5.0 and pins transitive `multer` at 2.5.0; current lockfile was tested using ordinary `npm ci`.
 - `npm audit --audit-level=high`: PASS (0 High / 0 Critical). Remaining `npm audit`: 29 findings (4 Low / 25 Moderate), predominantly development/test dependency chains; not yet fully triaged.
+- The remaining findings are in the development/test dependency tree, not the production dependency set: `glob@13.0.7` is used by Jest reporters/config/runtime, while `glob@10.5.0` is nested below `test-exclude`; `minimatch@10.2.6` is used by ESLint/TypeScript-ESLint and the glob chain, and `minimatch@9.0.9` is nested below `test-exclude`; `deepmerge@4.3.1` is pulled by `jest-config`.
+- Upstream advisories list `glob` as affected through 14.0.1 (fixed in 14.0.2) and `minimatch` as affected below 11.0.1. Current parents request incompatible major ranges (`glob@^13`, `glob@^10`, `minimatch@^10`, and `minimatch@^9`); a root override would force major-version mismatches rather than a safe patch update. The `deepmerge` advisory currently lists no patched release. These findings remain open and are not counted as fixed.
 - Persistent environments actually migrated: **none**.
 
 ## Current-head CI evidence
