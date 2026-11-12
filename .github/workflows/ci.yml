@@ -51,15 +51,7 @@ jobs:
         run: npm run lint
 
       - name: Check formatting
-        run: |
-          if npm run format:check; then
-            exit 0
-          fi
-          echo "::group::Prettier diff for P1-7 authorization suite"
-          npx prettier test/m3c-authorization-tenant.e2e-spec.ts > /tmp/eskan-prettier-output.ts
-          diff -u test/m3c-authorization-tenant.e2e-spec.ts /tmp/eskan-prettier-output.ts || true
-          echo "::endgroup::"
-          exit 1
+        run: npm run format:check
 
       - name: Validate OpenAPI contract
         run: npm run openapi:validate
