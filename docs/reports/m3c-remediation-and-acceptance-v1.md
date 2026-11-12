@@ -2,9 +2,9 @@
 
 **Status:** CI VERIFIED — P1-7 HTTP ACCEPTANCE TESTS PASS; HUMAN REVIEW AND OWNER APPROVAL STILL REQUIRED  
 **Base SHA:** `506947b2ac6f475f5c9418dfb640af5c9719bb10`  
-**Verified head SHA:** `794ebffd9711c2884980e082cdbcc23f4c65a0db`  
+**Verified head SHA:** `6601c038a717d5b0d2daa58430a4df69eb604687`  
 **PR:** [#5 — M3c financial domain](https://github.com/sakhi420/eskan/pull/5) (Draft, not merged)  
-**CI:** [Run #60 — success](https://github.com/sakhi420/eskan/actions/runs/43265377090) — 2026-11-12
+**CI:** [Run #67 — success](https://github.com/sakhi420/eskan/actions/runs/43266432493) — 2026-11-12
 
 ## Remediation table
 
@@ -24,7 +24,7 @@
 
 ## Current-head verification evidence
 
-All items below refer to the same verified PR head SHA `794ebffd9711c2884980e082cdbcc23f4c65a0db`, not an earlier branch revision.
+All items below refer to the same verified PR head SHA `6601c038a717d5b0d2daa58430a4df69eb604687`, not an earlier branch revision.
 
 | CI gate | Result |
 |---|---:|
@@ -36,14 +36,14 @@ All items below refer to the same verified PR head SHA `794ebffd9711c2884980e082
 | Idempotency-retention CHECK tests | PASS |
 | M3a migration checks | 11/11 passed |
 | M3b migration checks | 30/30 passed |
-| M3c migration checks | 60/60 passed |
+| M3c migration checks | 67/67 passed |
 | PostgreSQL integration tests | 13 suites / 139 tests passed |
 
 The new P1-7 HTTP suite passed in the same E2E run. It asserts the permission matrix over actual HTTP requests rather than relying only on service-level tests. The BOLA checks also read the other tenant's database rows after rejected mutation attempts to prove the rows remain unchanged.
 
 ## Migration and financial-integrity review
 
-The two M3c migrations were applied in CI's ephemeral PostgreSQL environment. The M3c migration script passed both fresh replay and the separate pre-M3c baseline-upgrade rehearsal with representative M3b Payment/Charge/Allocation rows.
+The two M3c migrations were applied in CI's ephemeral PostgreSQL environment. The M3c migration script passed fresh replay and the separate pre-M3c baseline-upgrade rehearsal with representative M3b Payment/Charge/Allocation rows. A second legacy-data rehearsal proved that a pre-existing REFUNDED/FORFEITED event without a structural source link stops the FIRST M3c migration before any DDL; the test also verified that no enum, table or actor column was left behind.
 
 Additional database hardening included:
 - Only internal `DEPOSIT_APPLICATION` payments may have a null receipt; normal payment methods require an official receipt.
@@ -51,6 +51,7 @@ Additional database hardening included:
 - Expense financial identity is protected against rewriting; only reversal metadata/version/status may change through the reversal flow.
 - Actor-user foreign keys for deposits and expenses use RESTRICT so posted actor attribution is not silently erased.
 - M3c-owned tenant composite FKs are checked by name, not by a brittle global count.
+- Database triggers require refunds/forfeitures to reference an unreversed POSTED RECEIVED deposit; DAPP must consume an unreversed POSTED RECEIVED deposit and a POSTED DEBIT charge.
 
 No migration was applied to the developer's local database, Staging or Production. The CI run used disposable GitHub Actions PostgreSQL databases.
 
