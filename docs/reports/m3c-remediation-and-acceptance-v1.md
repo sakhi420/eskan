@@ -2,9 +2,9 @@
 
 **Status:** CURRENT-HEAD CI VERIFIED — P1-7 HTTP ACCEPTANCE AND DAPP/CHARGE REVERSAL ORDERING PASS; HIGH/CRITICAL AUDIT GATE PASSES; HUMAN REVIEW AND OWNER APPROVAL STILL REQUIRED  
 **Base SHA:** `506947b2ac6f475f5c9418dfb640af5c9719bb10`  
-**Verified implementation head SHA:** `dfe84d32b10a92fd5df638bd24033fa0944d4a62`  
+**Verified implementation head SHA:** `3def75aab45c9080fccb889b2e8f96a4fc7418e7`  
 **PR:** [#5 — M3c financial domain](https://github.com/sakhi420/eskan/pull/5) (Draft, not merged)  
-**CI:** [Run #92 — success](https://github.com/sakhi420/eskan/actions/runs/43275631701) — 2026-11-12
+**CI:** [Run #101 — success](https://github.com/sakhi420/eskan/actions/runs/43278124762) — 2026-11-12
 
 ## Remediation table
 
@@ -36,7 +36,7 @@ All items below refer to the same verified implementation PR head SHA `10960c385
 | Idempotency-retention CHECK tests | PASS |
 | M3a migration checks | 11/11 passed |
 | M3b migration checks | 30/30 passed |
-| M3c migration checks | 83/83 passed |
+| M3c migration checks | 99/99 passed |
 | PostgreSQL integration tests | 13 suites / 139 tests passed |
 
 The new P1-7 HTTP suite passed in the same E2E run. It asserts the permission matrix over actual HTTP requests rather than relying only on service-level tests. The BOLA checks also read the other tenant's database rows after rejected mutation attempts to prove the rows remain unchanged.
@@ -52,7 +52,9 @@ Additional database hardening included:
 - Actor-user foreign keys for deposits and expenses use RESTRICT so posted actor attribution is not silently erased.
 - M3c-owned tenant composite FKs are checked by name, not by a brittle global count.
 - Database triggers require refunds/forfeitures to reference an unreversed POSTED RECEIVED deposit; DAPP must consume an unreversed POSTED RECEIVED deposit and a POSTED DEBIT charge.
-- Refunds, forfeitures, and DAPP applications share one source-scoped balance cap. PostgreSQL locks the RECEIVED source row and rejects any new child event or application whose combined active amount would exceed the original received amount. The 83/83 M3c test run covered mixed 60 + 30 + 10 consumption and rejected further consumption.
+- Refunds, forfeitures, and DAPP applications share one source-scoped balance cap. PostgreSQL locks the RECEIVED source row and rejects any new child event or application whose combined active amount would exceed the original received amount. Run #101's 99/99 M3c tests cover mixed 60 + 30 + 10 consumption and reject further consumption.
+- Deposit reversals are now database-guarded as well as service-guarded. A `RECEIVED` deposit cannot be reversed while any active REFUNDED/FORFEITED child or POSTED DepositApplication remains. A REFUNDED/FORFEITED event can be reversed only while its parent RECEIVED event is still POSTED and unreversed. A partial unique index permits only one DEPOSIT reversal per source event.
+- Tests cover the ordering: active child blocks source reversal; reverse child first; source reversal then succeeds; duplicate child/source reversal and new child creation after source reversal are rejected. A separate DAPP case proves the source remains blocked while DAPP is POSTED and becomes reversible only after the dedicated DAPP reversal.
 - A DepositApplication can transition from POSTED to REVERSED only when its linked DAPP Payment is REVERSED, its complete AllocationRelease exists, exactly one matching DEBIT LedgerReversal exists, and its Charge is still POSTED. A deferred payment constraint prevents reversing the Payment alone; a trigger also rejects an Application-only status change.
 
 No migration was applied to the developer's local database, Staging or Production. The CI run used disposable GitHub Actions PostgreSQL databases.
@@ -82,4 +84,4 @@ The feature branch now includes:
 - A real-service Integration test that proves early Charge reversal is rejected without changing Charge/Application/release state, then reverses the DAPP and proves Charge reversal succeeds.
 - A migration-level SQL test for the same database rule and its valid post-application-reversal transition.
 
-**Verification status:** PASS on Run #92 (current implementation head SHA shown above). CI reports 83/83 M3c migration checks and 139/139 PostgreSQL integration tests. The added direct-SQL tests reject Application-only reversal, Payment-only reversal at commit, and incomplete reversal lacking either a full AllocationRelease or LedgerReversal; the complete compensating transaction passes.
+**Verification status:** PASS on Run #101 (current implementation head SHA shown above). CI reports 99/99 M3c migration checks and 139/139 PostgreSQL integration tests. The new database assertions cover complete DAPP reversal, source-specific balance protection, source/child reversal order, duplicate reversal rejection, and the prohibition on creating children after source reversal.
