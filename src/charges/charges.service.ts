@@ -1032,6 +1032,24 @@ export class ChargesService {
         if (charge.status === LedgerEntryStatus.REVERSED)
           throw AppError.conflict('Charge is already reversed', ErrorCode.CHARGE_ALREADY_REVERSED);
 
+        // A DAPP is a deposit settlement, not an ordinary payment allocation.
+        // Its dedicated reversal must restore the held deposit and reopen this
+        // charge before the charge itself can be reversed.
+        const activeDepositApplication = await tx.depositApplication.findFirst({
+          where: {
+            organizationId,
+            chargeId,
+            status: LedgerEntryStatus.POSTED,
+          },
+          select: { id: true },
+        });
+        if (activeDepositApplication) {
+          throw AppError.conflict(
+            'Charge has an active deposit application; reverse the application first',
+            ErrorCode.BUSINESS_RULE_VIOLATION,
+          );
+        }
+
         const businessDate = await businessTodayForOrg(tx, organizationId);
 
         // D-02: a charge with valid allocations must release them all first so they
