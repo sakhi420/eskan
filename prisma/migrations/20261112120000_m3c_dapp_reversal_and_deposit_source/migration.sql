@@ -748,6 +748,123 @@ CREATE TRIGGER allocation_releases_enforce_invariants
   BEFORE INSERT ON allocation_releases
   FOR EACH ROW EXECUTE FUNCTION enforce_allocation_release_invariants();
 
+-- A deposit event may have only one reversal. The service already enforces this
+-- with a preflight check; the partial unique index makes it true for direct SQL too.
+DO $m3c_deposit_reversal_preflight$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+      FROM ledger_reversals
+     WHERE source_type = 'DEPOSIT'
+     GROUP BY organization_id, source_id
+    HAVING COUNT(*) > 1
+  ) THEN
+    RAISE EXCEPTION 'M3c preflight: duplicate DEPOSIT reversals exist; reconcile before applying the source-reversal guard';
+  END IF;
+END;
+$m3c_deposit_reversal_preflight$;
+
+CREATE UNIQUE INDEX ledger_reversals_deposit_source_unique
+  ON ledger_reversals (organization_id, source_id)
+  WHERE source_type = 'DEPOSIT';
+
+-- Validate the full deposit reversal lifecycle at the database boundary.
+-- Lock the relevant RECEIVED row so child-event creation/reversal, DAPP creation/
+-- reversal, and source-receipt reversal serialize on the same source.
+CREATE OR REPLACE FUNCTION enforce_deposit_reversal_source_state()
+RETURNS trigger AS $m3c_deposit_reversal$
+DECLARE
+  deposit_type "DepositType";
+  deposit_status "LedgerEntryStatus";
+  deposit_amount INTEGER;
+  parent_source_id UUID;
+BEGIN
+  IF NEW.source_type <> 'DEPOSIT' THEN
+    RETURN NEW;
+  END IF;
+
+  SELECT type, status, amount, source_deposit_transaction_id
+    INTO deposit_type, deposit_status, deposit_amount, parent_source_id
+    FROM deposit_transactions
+   WHERE organization_id = NEW.organization_id
+     AND resident_id = NEW.resident_id
+     AND id = NEW.source_id
+   FOR UPDATE;
+
+  IF NOT FOUND OR deposit_status <> 'POSTED' OR NEW.amount <> deposit_amount THEN
+    RAISE EXCEPTION 'DEPOSIT reversal must target an existing POSTED event with the exact event amount'
+      USING ERRCODE = '23514';
+  END IF;
+
+  IF deposit_type = 'RECEIVED' THEN
+    IF NEW.side <> 'DEBIT' THEN
+      RAISE EXCEPTION 'RECEIVED deposit reversal must be DEBIT'
+        USING ERRCODE = '23514';
+    END IF;
+
+    IF EXISTS (
+      SELECT 1
+        FROM deposit_transactions AS child
+       WHERE child.organization_id = NEW.organization_id
+         AND child.resident_id = NEW.resident_id
+         AND child.source_deposit_transaction_id = NEW.source_id
+         AND child.status = 'POSTED'
+         AND NOT EXISTS (
+           SELECT 1
+             FROM ledger_reversals AS child_reversal
+            WHERE child_reversal.organization_id = child.organization_id
+              AND child_reversal.source_type = 'DEPOSIT'
+              AND child_reversal.source_id = child.id
+         )
+    ) OR EXISTS (
+      SELECT 1
+        FROM deposit_applications AS da
+       WHERE da.organization_id = NEW.organization_id
+         AND da.resident_id = NEW.resident_id
+         AND da.deposit_transaction_id = NEW.source_id
+         AND da.status = 'POSTED'
+    ) THEN
+      RAISE EXCEPTION 'RECEIVED deposit cannot be reversed while active refund/forfeit events or DepositApplications remain'
+        USING ERRCODE = '23514';
+    END IF;
+  ELSIF deposit_type IN ('REFUNDED', 'FORFEITED') THEN
+    IF NEW.side <> 'CREDIT' OR parent_source_id IS NULL THEN
+      RAISE EXCEPTION 'REFUNDED/FORFEITED reversal must be CREDIT and retain its source RECEIVED deposit'
+        USING ERRCODE = '23514';
+    END IF;
+
+    PERFORM 1
+      FROM deposit_transactions AS source
+     WHERE source.organization_id = NEW.organization_id
+       AND source.resident_id = NEW.resident_id
+       AND source.id = parent_source_id
+       AND source.type = 'RECEIVED'
+       AND source.status = 'POSTED'
+     FOR UPDATE;
+
+    IF NOT FOUND OR EXISTS (
+      SELECT 1
+        FROM ledger_reversals AS source_reversal
+       WHERE source_reversal.organization_id = NEW.organization_id
+         AND source_reversal.source_type = 'DEPOSIT'
+         AND source_reversal.source_id = parent_source_id
+    ) THEN
+      RAISE EXCEPTION 'REFUNDED/FORFEITED event cannot be reversed after its source RECEIVED deposit'
+        USING ERRCODE = '23514';
+    END IF;
+  ELSE
+    RAISE EXCEPTION 'Unknown deposit event type for DEPOSIT reversal'
+      USING ERRCODE = '23514';
+  END IF;
+
+  RETURN NEW;
+END;
+$m3c_deposit_reversal$ LANGUAGE plpgsql;
+
+CREATE TRIGGER ledger_reversals_validate_deposit_source
+  BEFORE INSERT ON ledger_reversals
+  FOR EACH ROW EXECUTE FUNCTION enforce_deposit_reversal_source_state();
+
 CREATE TRIGGER ledger_reversals_prevent_update
   BEFORE UPDATE ON ledger_reversals
   FOR EACH ROW EXECUTE FUNCTION prevent_financial_document_update();
