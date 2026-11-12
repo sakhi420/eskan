@@ -1,3 +1,23 @@
+-- PRE-M3c DATA PREFLIGHT — before any M3c DDL.
+-- The legacy schema has REFUNDED/FORFEITED events but no structural source link.
+-- Never guess their source from Audit JSON: stop before changing the schema and
+-- require an explicit, reviewed reconciliation/mapping plan first.
+DO $m3c_legacy_preflight$
+DECLARE
+  legacy_children BIGINT;
+BEGIN
+  SELECT COUNT(*) INTO legacy_children
+    FROM deposit_transactions
+   WHERE type IN ('REFUNDED', 'FORFEITED');
+
+  IF legacy_children > 0 THEN
+    RAISE EXCEPTION
+      'M3c preflight: % legacy REFUNDED/FORFEITED deposit events require explicit source reconciliation before migration',
+      legacy_children;
+  END IF;
+END;
+$m3c_legacy_preflight$ LANGUAGE plpgsql;
+
 -- M3c — Deposit Ledger / Refund / Expense / Reversal.
 -- Additive and non-destructive:
 --   * ReversalSourceType enum (CHARGE/PAYMENT/DEPOSIT/EXPENSE) for the append-only
