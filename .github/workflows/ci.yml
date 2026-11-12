@@ -122,3 +122,36 @@ jobs:
 
       - name: PostgreSQL integration tests (lifecycle + concurrency + tenant isolation)
         run: npm run test:integration
+
+  commit-security-package-lock:
+    needs: build-and-test
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'feat/m3c-deposit-expense-refund-reversal'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Download validated package lock
+        uses: actions/download-artifact@v4
+        with:
+          name: eskan-security-package-lock
+          path: .
+
+      - name: Commit validated lockfile
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          if git diff --cached --quiet; then
+            echo "package-lock.json already matches the validated artifact"
+          else
+            git commit -m "chore(deps): lock validated Nest 12.5 security update"
+            git push origin "HEAD:${GITHUB_HEAD_REF}"
+          fi
