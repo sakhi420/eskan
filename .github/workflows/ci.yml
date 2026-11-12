@@ -47,6 +47,12 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Lint TypeScript
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check
+
       - name: Validate OpenAPI contract
         run: npm run openapi:validate
 
