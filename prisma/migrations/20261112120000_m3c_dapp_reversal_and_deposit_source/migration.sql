@@ -70,8 +70,8 @@ ALTER TABLE "deposit_transactions" ADD CONSTRAINT "deposit_transactions_organiza
 CREATE OR REPLACE FUNCTION enforce_deposit_source_linkage()
 RETURNS trigger AS $m3c_source$
 DECLARE
-  source_type "DepositType";
-  source_status "LedgerEntryStatus";
+  v_source_type "DepositType";
+  v_source_status "LedgerEntryStatus";
 BEGIN
   IF NEW.type = 'RECEIVED' THEN
     IF NEW.source_deposit_transaction_id IS NOT NULL THEN
@@ -84,19 +84,20 @@ BEGIN
         USING ERRCODE = '23514';
     END IF;
 
-    SELECT type, status
-      INTO source_type, source_status
-      FROM deposit_transactions
-     WHERE id = NEW.source_deposit_transaction_id
-       AND organization_id = NEW.organization_id
-       AND resident_id = NEW.resident_id;
+    SELECT dt.type, dt.status
+      INTO v_source_type, v_source_status
+      FROM deposit_transactions AS dt
+     WHERE dt.id = NEW.source_deposit_transaction_id
+       AND dt.organization_id = NEW.organization_id
+       AND dt.resident_id = NEW.resident_id;
 
-    IF NOT FOUND OR source_type <> 'RECEIVED' OR source_status <> 'POSTED'
+    IF NOT FOUND OR v_source_type <> 'RECEIVED' OR v_source_status <> 'POSTED'
        OR EXISTS (
-         SELECT 1 FROM ledger_reversals
-          WHERE organization_id = NEW.organization_id
-            AND source_type = 'DEPOSIT'
-            AND source_id = NEW.source_deposit_transaction_id
+         SELECT 1
+           FROM ledger_reversals AS lr
+          WHERE lr.organization_id = NEW.organization_id
+            AND lr.source_type = 'DEPOSIT'
+            AND lr.source_id = NEW.source_deposit_transaction_id
        ) THEN
       RAISE EXCEPTION 'Deposit refund/forfeit source must be an unreversed POSTED RECEIVED event'
         USING ERRCODE = '23514';
