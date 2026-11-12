@@ -145,6 +145,9 @@ async function seedDeposit(c, org, res, amount) {
     'payments_prevent_dapp_identity_update',
     'payment_allocations_prevent_dapp_update',
     'deposit_applications_prevent_link_update',
+    'ledger_reversals_prevent_update',
+    'payment_refunds_prevent_update',
+    'expenses_prevent_financial_identity_update',
   ]) {
     const found = await fresh.c.query(`SELECT tgname FROM pg_trigger WHERE NOT tgisinternal AND tgname=$1`, [trigger]);
     check(`[trigger ${trigger}]`, found.rowCount === 1);
@@ -179,6 +182,8 @@ async function seedDeposit(c, org, res, amount) {
 
   const dappReceipt = await fresh.c.query(`SELECT conname FROM pg_constraint WHERE conname='payments_dapp_has_no_receipt'`);
   check('[check: payments_dapp_has_no_receipt]', dappReceipt.rows.length > 0);
+  const manualReceipt = await fresh.c.query(`SELECT conname FROM pg_constraint WHERE conname='payments_manual_requires_receipt'`);
+  check('[check: payments_manual_requires_receipt]', manualReceipt.rows.length > 0);
   const expMethod = await fresh.c.query(`SELECT conname FROM pg_constraint WHERE conname='expenses_payment_method_not_dapp'`);
   check('[check: expenses_payment_method_not_dapp]', expMethod.rows.length > 0);
 
@@ -205,7 +210,18 @@ async function seedDeposit(c, org, res, amount) {
      VALUES ($1,$2,$3,100,'DEPOSIT_APPLICATION','2026-11-02',NULL,now())`,
     [internalPayment, org, res],
   );
-  const internalCharge = await seedCharge(fresh.c, org, res, 1000);
+  check('[receipt: ordinary CASH payment cannot omit receipt number]',
+    (await errCode(fresh.c,
+      `INSERT INTO payments (id, organization_id, resident_id, amount, method, received_at, receipt_number, updated_at)
+       VALUES ($1,$2,$3,100,'CASH','2026-11-02',NULL,now())`,
+      [uuid(), org, res])) === '23514');
+  check('[receipt: DAPP cannot carry an official receipt number]',
+    (await errCode(fresh.c,
+      `INSERT INTO payments (id, organization_id, resident_id, amount, method, received_at, receipt_number, updated_at)
+       VALUES ($1,$2,$3,100,'DEPOSIT_APPLICATION','2026-11-02','SHOULD-NOT-EXIST',now())`,
+      [uuid(), org, res])) === '23514');
+
+    const internalCharge = await seedCharge(fresh.c, org, res, 1000);
   const internalAllocation = uuid();
   await fresh.c.query(
     `INSERT INTO payment_allocations (id, organization_id, resident_id, payment_id, charge_id, amount)
@@ -253,8 +269,41 @@ async function seedDeposit(c, org, res, amount) {
        VALUES ($1,$2,$3,$4,$5,$6,$7,100,'x',$8)`,
       [uuid(), org, res, depRecv, charge, mismatchPayment, mismatchAllocation, user])) === '23514');
 
+  const refundRow = uuid();
+  await fresh.c.query(
+    `INSERT INTO payment_refunds (id, organization_id, resident_id, payment_id, amount, reason, actor_user_id)
+     VALUES ($1,$2,$3,$4,10,'immutable refund',$5)`,
+    [refundRow, org, res, pay, user],
+  );
+  check('[immutability: payment refund update]',
+    (await errCode(fresh.c, `UPDATE payment_refunds SET reason='tampered' WHERE id=$1`, [refundRow])) === 'P0001');
+
+  const reversalRow = uuid();
+  await fresh.c.query(
+    `INSERT INTO ledger_reversals (id, organization_id, resident_id, source_type, source_id, side, amount, reason, actor_user_id, idempotency_key)
+     VALUES ($1,$2,$3,'PAYMENT',$4,'DEBIT',10,'immutable reversal',$5,$6)`,
+    [reversalRow, org, res, pay, user, uuid()],
+  );
+  check('[immutability: ledger reversal update]',
+    (await errCode(fresh.c, `UPDATE ledger_reversals SET reason='tampered' WHERE id=$1`, [reversalRow])) === 'P0001');
+
   const exp = uuid();
-  await fresh.c.query(`INSERT INTO expenses (id, organization_id, category, status, amount, spent_at, updated_at) VALUES ($1,$2,'Util','POSTED',500,'2026-11-03',now())`, [exp, org]);
+  await fresh.c.query(
+    `INSERT INTO expenses (id, organization_id, category, status, amount, spent_at, payment_method, actor_user_id, updated_at)
+     VALUES ($1,$2,'Util','POSTED',500,'2026-11-03','CASH',$3,now())`,
+    [exp, org, user],
+  );
+  check('[immutability: expense financial identity update]',
+    (await errCode(fresh.c, `UPDATE expenses SET amount=501 WHERE id=$1`, [exp])) === 'P0001');
+  const expenseReverseTransition = await errCode(
+    fresh.c,
+    `UPDATE expenses
+        SET status='REVERSED', reversed_by_id=$2, reversal_reason='approved test reversal',
+            reversed_at=now(), version=version+1, updated_at=now()
+      WHERE id=$1`,
+    [exp, user],
+  );
+  check('[immutability: expense reversal metadata remains mutable]', expenseReverseTransition === null);
   check('[immutability: expense delete]', (await errCode(fresh.c, `DELETE FROM expenses WHERE id=$1`, [exp])) === 'P0001');
 
   const { spawnSync } = require('child_process');
