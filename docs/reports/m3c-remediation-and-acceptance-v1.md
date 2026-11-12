@@ -36,7 +36,7 @@ All items below refer to the same verified PR head SHA `24b990014d9aa87d8e5d2deb
 | Idempotency-retention CHECK tests | PASS |
 | M3a migration checks | 11/11 passed |
 | M3b migration checks | 30/30 passed |
-| M3c migration checks | 67/67 passed |
+| M3c migration checks | 70/70 passed |
 | PostgreSQL integration tests | 13 suites / 139 tests passed |
 
 The new P1-7 HTTP suite passed in the same E2E run. It asserts the permission matrix over actual HTTP requests rather than relying only on service-level tests. The BOLA checks also read the other tenant's database rows after rejected mutation attempts to prove the rows remain unchanged.
@@ -58,7 +58,7 @@ No migration was applied to the developer's local database, Staging or Productio
 ## Remaining review and release gates
 
 - PR #5 remains **Draft** and unmerged.
-- A separate human review of the financial migration and domain behavior is still recommended before merge; CI is not a substitute for design review.
+- A separate second-person review of the financial migration and domain behavior is still required before merge; CI is not a substitute for design review.
 - The committed lockfile removes the two High Multer-chain findings. The permanent `npm audit --audit-level=high` gate now passes on the exact current head. `npm audit` still reports 29 findings (4 low, 25 moderate, 0 high, 0 critical), mostly in development/test tooling; triage them separately and do not use `--force` blindly.
 - Prepare and approve a backup/restore and staged rollout plan before applying migrations to any persistent environment.
 - Sourcery's automated review is skipped because the PR exceeds its 20,000 changed-line limit. This is a tool limit, not a CI failure.
@@ -78,4 +78,4 @@ The feature branch now includes:
 - A real-service Integration test that proves early Charge reversal is rejected without changing Charge/Application/release state, then reverses the DAPP and proves Charge reversal succeeds.
 - A migration-level SQL test for the same database rule and its valid post-application-reversal transition.
 
-**Verification status for this follow-up:** pending CI on the current PR head. The previous green run predates this follow-up and is not evidence for these new changes.
+**Verification status for this follow-up:** PASS on Run #81 (current head SHA shown above). CI reports 70/70 M3c migration checks and 139/139 PostgreSQL integration tests; the new integration scenario and database trigger assertions passed.
