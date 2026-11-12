@@ -1,73 +1,67 @@
 # M3c Remediation & Acceptance Report
 
-**Status:** REMEDIATION PATCH PUSHED — LOCAL VALIDATION AND INDEPENDENT REVIEW REQUIRED (CI not verified)
-**Base SHA:** `506947b2ac6f475f5c9418dfb640af5c9719bb10`
-**Head at start of remediation:** `62c5b391201849e5292a39152e960e48ceff4647`
-**Target branch:** `feat/m3c-deposit-expense-refund-reversal`
+**Status:** CI VERIFIED — P1-7 HTTP ACCEPTANCE TESTS PASS; HUMAN REVIEW AND OWNER APPROVAL STILL REQUIRED  
+**Base SHA:** `506947b2ac6f475f5c9418dfb640af5c9719bb10`  
+**Verified head SHA:** `5ae15a26137ca3412c464a1926c3fac20843f4d8`  
+**PR:** [#5 — M3c financial domain](https://github.com/sakhi420/eskan/pull/5) (Draft, not merged)  
+**CI:** [Run #59 — success](https://github.com/sakhi420/eskan/actions/runs/43264884308) — 2026-11-12
 
 ## Remediation table
 
-> The PASS results in the original remediation report refer to the prior tested SHA
-> `1c186e90fa7265e751c5b60c89e50cffdddf9201`. The follow-up changes listed here are
-> committed after that SHA and have **not** been executed in this environment. Do not
-> interpret the earlier PASS results as validation of the current branch head.
+| ID | Item | Severity | Implementation / verification | Result |
+|---|---|---|---|---|
+| P0-1 | Payment refund must reduce allocatable balance | P0 | Canonical `unappliedBalance()` is used by `refundPayment()`; current unit, E2E and integration gates passed | PASS |
+| P0-2 | DAPP must not be forgeable through normal payment paths | P0 | DTO/service restrictions, DB receipt constraints, migration assertions; only internal DAPP may omit receipt | PASS |
+| P0-3 | DAPP reversal restores Held and reopens the charge exactly once | P0 | Dedicated `reverseApplication()`, structural Payment/Allocation links and single-allocation guards; current E2E/integration and M3c DB tests passed | PASS |
+| P1-1 | Deposit balance is calculated per source | P1 | Explicit `source_deposit_transaction_id` links and reversal-aware source balance projection; M3c migration and current integration gates passed | PASS |
+| P1-2 | SyncChange for every changed entity | P1 | Posting/reversal paths emit transactional AuditEvent and SyncChange; current integration suite passed | PASS |
+| P1-3 | LedgerReversal side is opposite to the original posting | P1 | Explicit side mapping for Charge, Payment, Deposit and Expense; current unit/integration gates passed | PASS |
+| P1-4 | Structural DAPP ↔ Payment ↔ Allocation linkage | P1 | Composite tenant FKs, unique links and database trigger checking exact Payment/Allocation/Charge/amount identity; M3c DB checks passed | PASS |
+| P1-5 | Idempotent replay returns the committed snapshot | P1 | `toRecord/fromRecord` paths for financial mutations; current unit/integration gates passed | PASS |
+| P1-6 | Final-checkout gate fails closed | P1 | Requires CLOSED/TERMINATED contract and no ACTIVE bed assignment; current project test gates passed | PASS |
+| P1-7 | HTTP role matrix and cross-tenant/BOLA isolation | P1 | New `test/m3c-authorization-tenant.e2e-spec.ts`: all four roles, financial routes, generic 404 for non-member selector, cross-tenant reads/mutations and post-attempt DB state checks | PASS |
+| P2 | Expense method, positive amount, append-only and actor attribution | P2 | DB checks and update/delete guards; Expense reversal metadata remains mutable while financial identity is protected; M3c DB checks passed | PASS |
 
-| ID | Item | Severity | Change | Evidence | Result |
-|---|---|---|---|---|---|
-| P0-1 | Payment refund not deducted from allocatable balance | P0 | canonical `unappliedBalance()` = amount − allocations + releases − refunds; `refundPayment` uses it directly (no double-subtract) | `m3c-remediation` "P0-1" | PASS |
-| P0-2 | DAPP forgeable via normal payment path | P0 | `MANUAL_PAYMENT_METHODS` DTO restriction + service rejection + `payments_dapp_has_no_receipt` CHECK | `m3c-remediation` "P0-2" + migration check | PASS |
-| P0-3 | DAPP reversal must restore Held + reopen charge once | P0 | dedicated `reverseApplication()`; generic allocation/create/release/refund/reverse reject DAPP; sole Allocation is checked | remediation integration + DB constraints (run locally) | IMPLEMENTED; execution not verified here |
-| P1-1 | Deposits balanced per source, not per resident | P1 | source-specific balance now also accounts for DEPOSIT LedgerReversal events without mutating source rows | source review; execution pending | IMPLEMENTED; retest required |
-| P1-2 | SyncChange for every changed entity | P1 | allocation/release/charge sync emitted in `apply`, `reversePayment`, `reverseApplication` | code + reconciliation oracle | PASS |
-| P1-3 | LedgerReversal side = opposite of original posting | P1 | documented mapping; payment→DEBIT, RECEIVED→DEBIT, REFUNDED/FORFEITED→CREDIT, expense→CREDIT | `m3c-remediation` "P1-3" | PASS |
-| P1-4 | Structural DAPP↔Payment↔Allocation linkage | P1 | FK columns + composite tenant FKs + UNIQUE 1:1 | migration check (33 composite FKs) | PASS |
-| P1-5 | Idempotent replay returns committed snapshot | P1 | snapshot `toRecord`/`fromRecord` for apply + reversePayment | `m3c-remediation` "P1-5" | PASS |
-| P1-6 | Final-checkout gate fails closed | P1 | require CLOSED/TERMINATED contract, explicitly reject any ACTIVE contract, and require no ACTIVE BedAssignment | added checkout test | IMPLEMENTED; execution pending |
-| P1-7 | HTTP role + tenant isolation | P1 | roles enforced via controller decorators (no new e2e written this pass) | `permissions-matrix.md` | PARTIAL (service-level; HTTP e2e not added) |
-| P2 | Expense method required; amount>0 CHECK; append-only | P2 | new Expense requests require a manual method in DTO/OpenAPI; DB column remains nullable for historical rows; DAPP is DB-rejected | schema/DTO/OpenAPI review | IMPLEMENTED; execution pending |
+## Current-head verification evidence
 
-## Test evidence
+All items below refer to the same verified PR head SHA `5ae15a26137ca3412c464a1926c3fac20843f4d8`, not an earlier branch revision.
 
-### Historical run on the previous SHA
+| CI gate | Result |
+|---|---:|
+| Dependency install, Prisma Client generation, Build | PASS |
+| ESLint, Prettier, OpenAPI validation, Prisma validation | PASS |
+| Unit tests | 12 suites / 79 tests passed |
+| E2E smoke tests | 4 suites / 29 tests passed |
+| M-1, M-2, M-2 concurrency, M-2 Prisma parity | PASS |
+| Idempotency-retention CHECK tests | PASS |
+| M3a migration checks | 11/11 passed |
+| M3b migration checks | 30/30 passed |
+| M3c migration checks | 60/60 passed |
+| PostgreSQL integration tests | 13 suites / 139 tests passed |
 
-The supplied earlier report recorded Build, Prisma validation/generation, migration checks,
-integration tests and OpenAPI lint as passing on the pre-follow-up SHA
-`1c186e90fa7265e751c5b60c89e50cffdddf9201`. Those results are historical and do not
-validate the additional commits in the current branch.
+The new P1-7 HTTP suite passed in the same E2E run. It asserts the permission matrix over actual HTTP requests rather than relying only on service-level tests. The BOLA checks also read the other tenant's database rows after rejected mutation attempts to prove the rows remain unchanged.
 
-### Current branch — pending local execution
+## Migration and financial-integrity review
 
-- Integration source inventory: **33 cases** (deposits-refund-reversal 20 · concurrency 4 ·
-  reconciliation 1 · remediation 8). This is a source count, **not** an execution result.
-- `scripts/test-m3c-migration.cjs` now covers fresh replay and a separate pre-M3c baseline
-  upgrade with seeded M3b Payment/Charge/Allocation rows; it has not yet been run after this patch.
-- Run Build, Prisma validation/generation, OpenAPI lint, lint, format, unit/integration tests
-  and the migration script on the current branch. Record actual PASS/FAIL/SKIP output.
-- CI on the current branch head has not run or been verified.
+The two M3c migrations were applied in CI's ephemeral PostgreSQL environment. The M3c migration script passed both fresh replay and the separate pre-M3c baseline-upgrade rehearsal with representative M3b Payment/Charge/Allocation rows.
 
-## Migration
+Additional database hardening included:
+- Only internal `DEPOSIT_APPLICATION` payments may have a null receipt; normal payment methods require an official receipt.
+- `PaymentRefund` and `LedgerReversal` are protected against UPDATE and DELETE.
+- Expense financial identity is protected against rewriting; only reversal metadata/version/status may change through the reversal flow.
+- Actor-user foreign keys for deposits and expenses use RESTRICT so posted actor attribution is not silently erased.
+- M3c-owned tenant composite FKs are checked by name, not by a brittle global count.
 
-- New additive migration: `20261112120000_m3c_dapp_reversal_and_deposit_source`
-- Empty-DB fresh apply: covered by full migration replay.
-- Baseline upgrade: the migration script now separately builds the pre-M3c schema,
-  seeds representative M3b Payment/Charge/Allocation rows, applies only M3c migrations,
-  checks row preservation, and compares Prisma parity. This rehearsal must be run locally.
-  `eskan_dev`/Staging/Production **not migrated**.
+No migration was applied to the developer's local database, Staging or Production. The CI run used disposable GitHub Actions PostgreSQL databases.
 
-## Remaining risks / open decisions
+## Remaining review and release gates
 
-- P1-7 HTTP-layer e2e (roles + BOLA/tenant) remains open. Controller role decorators exist,
-  but assertion-level Supertest tests for OWNER/ADMIN/OPERATOR/VIEWER and cross-tenant access
-  are still required before financial release acceptance.
-- DepositTransaction void now leaves the source row untouched and records LedgerReversal;
-  effective status is projected from reversal events. The DB blocks source UPDATE/DELETE.
-- OpenAPI now describes the DAPP reverse endpoint, manual-only input methods and the actual
-  DepositApplication response fields. CI now includes lint and format checks; no CI run on
-  the final SHA has been observed.
-- "Final checkout" proof remains model-limited (no dedicated checkout-in-progress flag):
-  implemented as CLOSED/TERMINATED contract + no ACTIVE BedAssignment (ADR-0011 §4).
+- PR #5 remains **Draft** and unmerged.
+- A separate human review of the financial migration and domain behavior is still recommended before merge; CI is not a substitute for design review.
+- The earlier `npm install` reported 32 audit findings (4 low, 26 moderate, 2 high). They need dependency-impact triage; do not run `npm audit fix --force` blindly.
+- Prepare and approve a backup/restore and staged rollout plan before applying migrations to any persistent environment.
+- Sourcery's automated review is skipped because the PR exceeds its 20,000 changed-line limit. This is a tool limit, not a CI failure.
 
-## Next step
+## Decision
 
-Owner review + PR creation against `main` (branch already pushed). Merge only with
-independent owner decision.
+**P1-7 is closed by current-head HTTP/Supertest evidence.** The full CI pipeline is green on the recorded SHA. Keep the PR Draft until the independent human review, dependency audit triage and migration rollout approval are complete.
