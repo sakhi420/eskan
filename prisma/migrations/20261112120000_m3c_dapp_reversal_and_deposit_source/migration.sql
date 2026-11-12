@@ -57,7 +57,8 @@ BEGIN
       FROM deposit_transactions AS dt
      WHERE dt.id = NEW.source_deposit_transaction_id
        AND dt.organization_id = NEW.organization_id
-       AND dt.resident_id = NEW.resident_id;
+       AND dt.resident_id = NEW.resident_id
+     FOR UPDATE;
 
     IF NOT FOUND OR v_source_type <> 'RECEIVED' OR v_source_status <> 'POSTED'
        OR EXISTS (
@@ -158,7 +159,8 @@ BEGIN
     FROM deposit_transactions
    WHERE id = NEW.deposit_transaction_id
      AND organization_id = NEW.organization_id
-     AND resident_id = NEW.resident_id;
+     AND resident_id = NEW.resident_id
+   FOR UPDATE;
 
   IF NOT FOUND OR deposit_type <> 'RECEIVED' OR deposit_status <> 'POSTED'
      OR EXISTS (
@@ -176,7 +178,8 @@ BEGIN
     FROM charges
    WHERE id = NEW.charge_id
      AND organization_id = NEW.organization_id
-     AND resident_id = NEW.resident_id;
+     AND resident_id = NEW.resident_id
+   FOR UPDATE;
 
   IF NOT FOUND OR charge_status <> 'POSTED' OR charge_entry_side <> 'DEBIT' THEN
     RAISE EXCEPTION 'DepositApplication must settle a POSTED DEBIT charge'
@@ -203,7 +206,8 @@ BEGIN
     FROM payment_allocations
    WHERE id = NEW.allocation_id
      AND organization_id = NEW.organization_id
-     AND resident_id = NEW.resident_id;
+     AND resident_id = NEW.resident_id
+   FOR UPDATE;
 
   IF NOT FOUND
      OR allocation_payment_id <> NEW.payment_id
