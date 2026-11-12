@@ -6,9 +6,9 @@
 ## Git / PR
 - Branch: `feat/m3c-deposit-expense-refund-reversal`
 - Base: `main` at `506947b2ac6f475f5c9418dfb640af5c9719bb10`
-- Verified implementation head: `10960c3856cc85a9482ee21c1369532a399341cb`
+- Verified implementation head: `dfe84d32b10a92fd5df638bd24033fa0944d4a62`
 - PR: [#5](https://github.com/sakhi420/eskan/pull/5) — Draft, open, not merged.
-- CI: [Run #86 — success](https://github.com/sakhi420/eskan/actions/runs/43273827651).
+- CI: [Run #92 — success](https://github.com/sakhi420/eskan/actions/runs/43275631701).
 - Local working tree was not inspected by this GitHub-side review. Pull the branch before continuing local work.
 
 ## Scope
@@ -39,6 +39,7 @@
 - PostgreSQL triggers enforce source-deposit semantics and require DAPP to use an unreversed POSTED RECEIVED deposit and a POSTED DEBIT charge.
 - A single source-balance cap is enforced at the database layer across active REFUNDED/FORFEITED events and POSTED DepositApplications. The source RECEIVED row is locked before aggregate validation, and mixed consumption cannot exceed the original received amount.
 - A Charge cannot be reversed while a linked DepositApplication remains POSTED. Both service logic and a database trigger enforce the rule; the application must be reversed first to restore Deposit Held and release its DAPP allocation.
+- A DAPP Payment cannot be reversed independently, and an Application cannot be marked REVERSED unless its linked Payment is REVERSED, the exact full AllocationRelease has been written, exactly one matching DEBIT LedgerReversal exists, and the Charge remains POSTED. A deferred constraint trigger verifies Payment/Application consistency at commit. The service now writes the compensating event and full release before the two status transitions.
 - Prisma parity assertions passed.
 - Dependency lockfile upgrades `@nestjs/common`, `@nestjs/core`, `@nestjs/platform-express`, and `@nestjs/testing` to 12.5.0 and pins transitive `multer` at 2.5.0; current lockfile was tested using ordinary `npm ci`.
 - `npm audit --audit-level=high`: PASS (0 High / 0 Critical). Remaining `npm audit`: 29 findings (4 Low / 25 Moderate), predominantly development/test dependency chains; not yet fully triaged.
@@ -48,14 +49,14 @@
 
 ## Current-head CI evidence
 
-All results below are from SHA `10960c3856cc85a9482ee21c1369532a399341cb`:
+All results below are from SHA `dfe84d32b10a92fd5df638bd24033fa0944d4a62`:
 - `npm ci` using the committed lockfile, `npm audit --audit-level=high`, Build, ESLint, Prettier, OpenAPI validation and Prisma validation: PASS.
 - Unit tests: 12 suites / 79 tests.
 - E2E smoke tests: 4 suites / 29 tests, including the new P1-7 HTTP role/BOLA suite.
 - M3a: 11/11 migration checks.
 - M3b: 30/30 migration checks.
-- M3c: 75/75 migration checks.
-- PostgreSQL integration: 13 suites / 139 tests, including DAPP-first / Charge-second reversal ordering.
+- M3c: 83/83 migration checks.
+- PostgreSQL integration: 13 suites / 139 tests, including DAPP-first / Charge-second reversal ordering and the real `reverseApplication()` transaction.
 - M-1/M-2 checks, package/hostel concurrency, M-2 parity and idempotency-retention checks: PASS.
 
 ## Remaining release gates
