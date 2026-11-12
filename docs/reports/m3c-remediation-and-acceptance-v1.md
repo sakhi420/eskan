@@ -66,3 +66,16 @@ No migration was applied to the developer's local database, Staging or Productio
 ## Decision
 
 **P1-7 is closed by current-head HTTP/Supertest evidence.** The full CI pipeline is green on the recorded SHA. Keep the PR Draft until the independent second-person migration review, remaining Low/Moderate dependency triage, and migration rollout/backup approval are complete.
+
+## Follow-up review — DAPP / Charge reversal ordering (2026-11-12)
+
+A focused service/database review found that the generic Charge reversal path released allocations and reversed the Charge without first checking whether a still-POSTED DepositApplication owned one of those allocations. That could leave the application POSTED (and its amount still deducted from Deposit Held) while the underlying Charge was REVERSED.
+
+The feature branch now includes:
+- A service guard in `ChargesService.reverseCharge()` that rejects the operation while a POSTED DepositApplication exists for the Charge; the caller must use the dedicated `reverseApplication()` path first.
+- A PostgreSQL `BEFORE UPDATE OF status` trigger that rejects a Charge transition to REVERSED while a POSTED DepositApplication exists.
+- Row locks in the deposit-source / DAPP link-validation triggers for source Deposit, Charge, and Allocation rows.
+- A real-service Integration test that proves early Charge reversal is rejected without changing Charge/Application/release state, then reverses the DAPP and proves Charge reversal succeeds.
+- A migration-level SQL test for the same database rule and its valid post-application-reversal transition.
+
+**Verification status for this follow-up:** pending CI on the current PR head. The previous green run predates this follow-up and is not evidence for these new changes.
