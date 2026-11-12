@@ -14,6 +14,26 @@
 --   (it was created by the immediately preceding M3c migration and M3c has not been
 --   applied to any non-throwaway environment), so the new NOT NULL columns are safe.
 
+-- Fail closed if the pre-M3c database already contains child deposit events.
+-- The old schema has no structural source link, so guessing from Audit JSON could
+-- silently deduct a refund/forfeit from the wrong receipt. Reconcile/map these rows
+-- explicitly before deployment instead of accepting a corrupted source balance.
+DO $m3c_preflight$
+DECLARE
+  unlinked_children BIGINT;
+BEGIN
+  SELECT COUNT(*) INTO unlinked_children
+    FROM deposit_transactions
+   WHERE type IN ('REFUNDED', 'FORFEITED');
+
+  IF unlinked_children > 0 THEN
+    RAISE EXCEPTION
+      'M3c preflight: % pre-existing REFUNDED/FORFEITED deposit rows have no structural source link; reconcile them before migration',
+      unlinked_children;
+  END IF;
+END;
+$m3c_preflight$ LANGUAGE plpgsql;
+
 -- 1. Deposit source linkage.
 ALTER TABLE "deposit_transactions" ADD COLUMN "source_deposit_transaction_id" UUID;
 
@@ -24,6 +44,53 @@ ALTER TABLE "deposit_transactions" ADD CONSTRAINT "deposit_transactions_organiza
   FOREIGN KEY ("organization_id", "resident_id", "source_deposit_transaction_id")
   REFERENCES "deposit_transactions"("organization_id", "resident_id", "id")
   ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- A source link is valid only for a REFUNDED/FORFEITED child event and must
+-- point to a still-posted RECEIVED source in the same tenant/resident. RECEIVED
+-- events themselves cannot carry a parent link.
+CREATE OR REPLACE FUNCTION enforce_deposit_source_linkage()
+RETURNS trigger AS $m3c_source$
+DECLARE
+  source_type "DepositType";
+  source_status "LedgerEntryStatus";
+BEGIN
+  IF NEW.type = 'RECEIVED' THEN
+    IF NEW.source_deposit_transaction_id IS NOT NULL THEN
+      RAISE EXCEPTION 'RECEIVED deposit events cannot have a source deposit link'
+        USING ERRCODE = '23514';
+    END IF;
+  ELSE
+    IF NEW.source_deposit_transaction_id IS NULL THEN
+      RAISE EXCEPTION 'REFUNDED/FORFEITED deposit events require a source RECEIVED deposit'
+        USING ERRCODE = '23514';
+    END IF;
+
+    SELECT type, status
+      INTO source_type, source_status
+      FROM deposit_transactions
+     WHERE id = NEW.source_deposit_transaction_id
+       AND organization_id = NEW.organization_id
+       AND resident_id = NEW.resident_id;
+
+    IF NOT FOUND OR source_type <> 'RECEIVED' OR source_status <> 'POSTED'
+       OR EXISTS (
+         SELECT 1 FROM ledger_reversals
+          WHERE organization_id = NEW.organization_id
+            AND source_type = 'DEPOSIT'
+            AND source_id = NEW.source_deposit_transaction_id
+       ) THEN
+      RAISE EXCEPTION 'Deposit refund/forfeit source must be an unreversed POSTED RECEIVED event'
+        USING ERRCODE = '23514';
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$m3c_source$ LANGUAGE plpgsql;
+
+CREATE TRIGGER deposit_transactions_validate_source_link
+  BEFORE INSERT ON deposit_transactions
+  FOR EACH ROW EXECUTE FUNCTION enforce_deposit_source_linkage();
 
 -- 2. DepositApplication structural links + reversal state.
 ALTER TABLE "deposit_applications" ADD COLUMN "payment_id" UUID NOT NULL;
@@ -87,6 +154,10 @@ CREATE TRIGGER deposit_transactions_prevent_update
 CREATE OR REPLACE FUNCTION enforce_deposit_application_linkage()
 RETURNS trigger AS $$
 DECLARE
+  deposit_type "DepositType";
+  deposit_status "LedgerEntryStatus";
+  charge_status "LedgerEntryStatus";
+  charge_entry_side "EntrySide";
   payment_method "PaymentMethod";
   payment_receipt TEXT;
   payment_amount INTEGER;
@@ -94,6 +165,36 @@ DECLARE
   allocation_charge_id UUID;
   allocation_amount INTEGER;
 BEGIN
+  SELECT type, status
+    INTO deposit_type, deposit_status
+    FROM deposit_transactions
+   WHERE id = NEW.deposit_transaction_id
+     AND organization_id = NEW.organization_id
+     AND resident_id = NEW.resident_id;
+
+  IF NOT FOUND OR deposit_type <> 'RECEIVED' OR deposit_status <> 'POSTED'
+     OR EXISTS (
+       SELECT 1 FROM ledger_reversals
+        WHERE organization_id = NEW.organization_id
+          AND source_type = 'DEPOSIT'
+          AND source_id = NEW.deposit_transaction_id
+     ) THEN
+    RAISE EXCEPTION 'DepositApplication must consume an unreversed POSTED RECEIVED deposit'
+      USING ERRCODE = '23514';
+  END IF;
+
+  SELECT status, entry_side
+    INTO charge_status, charge_entry_side
+    FROM charges
+   WHERE id = NEW.charge_id
+     AND organization_id = NEW.organization_id
+     AND resident_id = NEW.resident_id;
+
+  IF NOT FOUND OR charge_status <> 'POSTED' OR charge_entry_side <> 'DEBIT' THEN
+    RAISE EXCEPTION 'DepositApplication must settle a POSTED DEBIT charge'
+      USING ERRCODE = '23514';
+  END IF;
+
   SELECT method, receipt_number, amount
     INTO payment_method, payment_receipt, payment_amount
     FROM payments
