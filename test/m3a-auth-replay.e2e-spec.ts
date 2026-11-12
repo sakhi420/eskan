@@ -158,8 +158,9 @@ describe('M3a authorization before idempotency replay (HTTP)', () => {
       .set('X-Organization-Id', orgA)
       .set('Idempotency-Key', idemKey)
       .send(creditBody);
-    expect(res.status).toBe(403);
-    expect(res.body.code).toBe('FORBIDDEN');
+    expect(res.status).toBe(404);
+    expect(res.body.code).toBe('RESOURCE_NOT_FOUND');
+    expect(res.body.detail).not.toContain(orgA);
   });
 
   it('operator cannot post an organization-wide billing run', async () => {
