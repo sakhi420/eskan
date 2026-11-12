@@ -103,6 +103,33 @@ async function seedDeposit(c, org, res, amount) {
     preserved.rows[0].allocation_count === 1 &&
     preserved.rows[0].applications === 'deposit_applications');
 
+  // The legacy schema has DepositType REFUNDED/FORFEITED but no source link.
+  // M3c must stop rather than silently omit these rows from source balances.
+  const legacyChild = await newDb(admin, 'legacy_child');
+  await applyMigrations(legacyChild.c, preM3cMigrations);
+  const legacyFixture = await seedOrgRes(legacyChild.c);
+  await legacyChild.c.query(
+    `INSERT INTO deposit_transactions
+       (id, organization_id, resident_id, type, status, amount, received_at, updated_at)
+     VALUES ($1,$2,$3,'REFUNDED','POSTED',100,'2026-11-02',now())`,
+    [uuid(), legacyFixture.org, legacyFixture.res],
+  );
+  await applyMigrations(legacyChild.c, [m3cMigrations[0]]);
+  let legacyPreflightError = null;
+  try {
+    await applyMigrations(legacyChild.c, [m3cMigrations[1]]);
+  } catch (e) {
+    legacyPreflightError = e;
+  }
+  check(
+    '[preflight: rejects legacy refund/forfeit events without source links]',
+    !!legacyPreflightError &&
+      String(legacyPreflightError.message).includes('legacy REFUNDED/FORFEITED'),
+    legacyPreflightError
+      ? String(legacyPreflightError.message)
+      : 'migration unexpectedly succeeded',
+  );
+
   const fresh = await newDb(admin, 'fresh');
   let applyErr = null;
   try { await applyMigrations(fresh.c, migrations); } catch (e) { applyErr = e; }
@@ -413,8 +440,10 @@ async function seedDeposit(c, org, res, amount) {
 
   await fresh.c.end();
   await baseline.c.end();
+  await legacyChild.c.end();
   await admin.query(`DROP DATABASE IF EXISTS "${fresh.name}" WITH (FORCE)`).catch(() => {});
   await admin.query(`DROP DATABASE IF EXISTS "${baseline.name}" WITH (FORCE)`).catch(() => {});
+  await admin.query(`DROP DATABASE IF EXISTS "${legacyChild.name}" WITH (FORCE)`).catch(() => {});
   await admin.end().catch(() => {});
   console.log('\n' + results.join('\n'));
   const failed = results.filter((x) => x.startsWith('FAIL')).length;
