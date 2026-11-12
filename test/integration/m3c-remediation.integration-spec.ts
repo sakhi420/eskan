@@ -7,6 +7,7 @@ import { IdempotencyService } from '../../src/common/idempotency/idempotency.ser
 import { LockService } from '../../src/common/concurrency/lock.service';
 import { PostingService } from '../../src/common/finance/posting.service';
 import { DepositsService } from '../../src/deposits/deposits.service';
+import { ChargesService } from '../../src/charges/charges.service';
 import { ExpensesService } from '../../src/expenses/expenses.service';
 import { PaymentsService } from '../../src/payments/payments.service';
 
@@ -74,7 +75,10 @@ async function seedCharge(db: Client, org: string, res: string, amount: number):
 
 describe('M3c remediation (real PostgreSQL + real services)', () => {
   let admin: Client, db: Client, dbName: string, prisma: PrismaService;
-  let deposits: DepositsService, expenses: ExpensesService, payments: PaymentsService;
+  let deposits: DepositsService,
+    expenses: ExpensesService,
+    payments: PaymentsService,
+    charges: ChargesService;
 
   beforeAll(async () => {
     assertLocalTestHost();
@@ -97,6 +101,7 @@ describe('M3c remediation (real PostgreSQL + real services)', () => {
     deposits = new DepositsService(prisma, idem(), posting, locks);
     expenses = new ExpensesService(prisma, idem(), posting, locks);
     payments = new PaymentsService(prisma, idem(), posting, locks);
+    charges = new ChargesService(prisma, idem(), posting, locks);
     db = new Client({ connectionString: url });
     await db.connect();
   }, 120000);
@@ -217,6 +222,30 @@ describe('M3c remediation (real PostgreSQL + real services)', () => {
     expect(app.paymentId).toBeTruthy();
     expect(app.allocationId).toBeTruthy();
 
+    // A Charge cannot be reversed independently while its DAPP is still posted.
+    await expect(
+      charges.reverseCharge(
+        f.org,
+        f.user,
+        ch,
+        { reason: 'reverse too early' } as any,
+        randomUUID(),
+        'trace',
+      ),
+    ).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
+    const blockedChargeState = await db.query(
+      `SELECT
+         (SELECT status FROM charges WHERE id=$1) AS charge_status,
+         (SELECT status FROM deposit_applications WHERE id=$2) AS application_status,
+         (SELECT count(*)::int FROM allocation_releases WHERE allocation_id=$3) AS release_count`,
+      [ch, app.id, app.allocationId],
+    );
+    expect(blockedChargeState.rows[0]).toEqual({
+      charge_status: 'POSTED',
+      application_status: 'POSTED',
+      release_count: 0,
+    });
+
     // DAPP must reject every generic mutation path; only reverseApplication owns it.
     await expect(
       payments.refundPayment(
@@ -293,6 +322,22 @@ describe('M3c remediation (real PostgreSQL + real services)', () => {
       [app.paymentId],
     );
     expect(lr.rows[0].side).toBe('DEBIT');
+
+    const chargeReverse: any = await charges.reverseCharge(
+      f.org,
+      f.user,
+      ch,
+      { reason: 'reverse after DAPP reversal' } as any,
+      randomUUID(),
+      'trace',
+    );
+    expect(chargeReverse.status).toBe('REVERSED');
+    const chargeReversal = await db.query(
+      `SELECT count(*)::int n FROM ledger_reversals
+        WHERE source_type='CHARGE' AND source_id=$1`,
+      [ch],
+    );
+    expect(chargeReversal.rows[0].n).toBe(1);
   });
 
   it('P1-6: rejects Apply when CLOSED and ACTIVE contracts coexist', async () => {
