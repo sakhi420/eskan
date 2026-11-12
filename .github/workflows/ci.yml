@@ -41,6 +41,26 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Dependency audit diagnostics (temporary; non-blocking)
+        continue-on-error: true
+        run: |
+          npm audit --json > /tmp/eskan-npm-audit.json || true
+          node -e '
+            const report = require("/tmp/eskan-npm-audit.json");
+            const rows = Object.entries(report.vulnerabilities || {}).map(([name, v]) => ({
+              package: name,
+              severity: v.severity,
+              direct: v.isDirect,
+              range: v.range,
+              fixAvailable: v.fixAvailable,
+              via: (v.via || []).map(item => typeof item === "string"
+                ? { dependency: item }
+                : { title: item.title, url: item.url, range: item.range, source: item.source })
+            }));
+            console.log("AUDIT_METADATA " + JSON.stringify(report.metadata?.vulnerabilities || {}));
+            for (const row of rows) console.log("AUDIT_PACKAGE " + JSON.stringify(row));
+          '
+
       - name: Generate Prisma client
         run: npx prisma generate
 
