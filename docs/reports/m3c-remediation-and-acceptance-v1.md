@@ -1,11 +1,12 @@
 # M3c Remediation & Acceptance Report
 
-**Status:** EXACT PR-HEAD CI VERIFIED — P1-7 HTTP ACCEPTANCE AND DAPP/CHARGE REVERSAL ORDERING PASS; AUDIT FINDINGS TRIAGED BUT UNPATCHED; INDEPENDENT REVIEW / BACKUP-RESTORE / OWNER APPROVAL STILL REQUIRED  
+**Status:** M3c IMPLEMENTATION MERGED — RUN #112 PASSED; DATABASE MIGRATION TO `eskan_dev` PENDING; INDEPENDENT REVIEW NOT RECORDED  
 **Base SHA:** `506947b2ac6f475f5c9418dfb640af5c9719bb10`  
-**Last PR head covered by full CI Run #102:** `787809e663d982cca58d1e61f95ac84a9a3a9999` (documentation-only commits were added after this run; no implementation/test paths changed).  
-**Last code-bearing implementation SHA:** `3def75aab45c9080fccb889b2e8f96a4fc7418e7`  
-**PR:** [#5 — M3c financial domain](https://github.com/sakhi420/eskan/pull/5) (Draft, not merged)  
-**Last full CI on the PR head at the time of the run:** [Run #102 — success](https://github.com/sakhi420/eskan/actions/runs/43278611645) — 2026-11-13
+**Code-bearing implementation SHA:** `3def75aab45c9080fccb889b2e8f96a4fc7418e7`  
+**PR #5 head:** `f554ebc62cff513c8f31e828ad68ffeb48bc52e3`  
+**Merge commit:** `4da7415f78278bb504d91c9ac0f1c3c91b6c1c35`  
+**PR:** [#5 — M3c financial domain](https://github.com/sakhi420/eskan/pull/5) (merged 2026-11-13)  
+**Latest full CI:** [Run #112 — success](https://github.com/sakhi420/eskan/actions/runs/43412431492) — all 31 workflow steps passed
 
 ## Remediation table
 
@@ -25,7 +26,7 @@
 
 ## Current-head verification evidence
 
-The code-bearing implementation SHA `3def75aab45c9080fccb889b2e8f96a4fc7418e7` passed Run #101. PR head `787809e663d982cca58d1e61f95ac84a9a3a9999` was the head at the time of Run #102; the full CI workflow passed on that exact revision. Documentation-only review and release-handoff changes were committed afterward.
+The code-bearing implementation SHA `3def75aab45c9080fccb889b2e8f96a4fc7418e7` passed Run #101. The PR head `f554ebc62cff513c8f31e828ad68ffeb48bc52e3` passed the latest full workflow in Run #112; all 31 workflow steps completed successfully. The PR was merged using merge commit `4da7415f78278bb504d91c9ac0f1c3c91b6c1c35`.
 
 | CI gate | Result |
 |---|---:|
@@ -58,7 +59,7 @@ Additional database hardening included:
 - Tests cover the ordering: active child blocks source reversal; reverse child first; source reversal then succeeds; duplicate child/source reversal and new child creation after source reversal are rejected. A separate DAPP case proves the source remains blocked while DAPP is POSTED and becomes reversible only after the dedicated DAPP reversal.
 - A DepositApplication can transition from POSTED to REVERSED only when its linked DAPP Payment is REVERSED, its complete AllocationRelease exists, exactly one matching DEBIT LedgerReversal exists, and its Charge is still POSTED. A deferred payment constraint prevents reversing the Payment alone; a trigger also rejects an Application-only status change.
 
-No migration was applied to the developer's local database, Staging or Production. The CI run used disposable GitHub Actions PostgreSQL databases.
+The CI runs used disposable GitHub Actions PostgreSQL databases. The M3c migrations have **not yet been applied to `eskan_dev`, Staging, or Production**. The merge itself did not change any database.
 
 ## Remaining review and release gates
 
@@ -84,7 +85,9 @@ The following are explicit review questions, not confirmed runtime defects:
 
 ## Decision
 
-**P1-7 is closed by HTTP/Supertest evidence.** The full CI pipeline passed on the exact PR head `787809e663d982cca58d1e61f95ac84a9a3a9999` at the time of Run #102. Later changes to this PR are documentation-only. Keep the PR Draft until a separate human reviewer signs off the two migrations and the financial invariants, the residual Low/Moderate dependency risk is accepted by the owner, and the backup/restore rehearsal plus staged rollout plan are approved.
+**P1-7 is closed by HTTP/Supertest evidence.** PR #5 was merged on 2026-11-13 under the explicit instruction of the project owner (merge commit `4da7415f78278bb504d91c9ac0f1c3c91b6c1c35`). This was an owner-directed exception to the previously recorded independent-review-before-merge gate. No independent second-person approval is recorded in GitHub; this report does not represent the implementation as independently reviewed.
+
+The 29 Low/Moderate dependency findings remain triaged but unpatched. The owner-directed merge does not mean they were remediated. No M3c migration was executed on a persistent database by the merge. Run `docs/operations/ESKAN_M3C_MIGRATION_EXECUTION_PROMPT_FA.md` for the controlled backup, restore rehearsal, clone migration/test sequence, and final application to local `eskan_dev` only. Staging and Production remain prohibited for this task; independent review and operational approval remain mandatory before wider rollout.
 
 ## Follow-up review — DAPP / Charge reversal ordering (2026-11-12)
 
