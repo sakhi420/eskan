@@ -19,7 +19,7 @@ No M3c migration has been applied to `eskan_dev`, Staging, or Production. CI use
 
 Run #102 completed successfully on exact PR head `787809e663d982cca58d1e61f95ac84a9a3a9999` at the time of that run. Its single `build-and-test` job completed all 27 substantive workflow steps successfully, including dependency installation/security gate, Prisma generation, build, ESLint, Prettier, OpenAPI and Prisma validation, unit tests, E2E smoke tests, migration checks, and PostgreSQL integration tests. Several documentation-only commits were added to this PR afterward; no runtime source, schema, migration, API contract, or test files changed in those commits. Run #102 is therefore evidence for the implementation and its then-current docs, not a claim that the newest documentation-only commit itself was re-run.
 
-The detailed recorded test evidence on the code-bearing SHA `3def75a...` (Run #101), repeated by the full workflow on the current documentation-only follow-up head in Run #102, is:
+The detailed recorded test evidence on the code-bearing SHA `3def75a...` (Run #101), with the full workflow repeated on PR head `787809e...` in Run #102, is:
 
 | Gate | Recorded result |
 |---|---:|
