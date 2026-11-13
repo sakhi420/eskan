@@ -1,10 +1,11 @@
 # M3c Remediation & Acceptance Report
 
-**Status:** CURRENT-HEAD CI VERIFIED — P1-7 HTTP ACCEPTANCE AND DAPP/CHARGE REVERSAL ORDERING PASS; HIGH/CRITICAL AUDIT GATE PASSES; HUMAN REVIEW AND OWNER APPROVAL STILL REQUIRED  
+**Status:** EXACT PR-HEAD CI VERIFIED — P1-7 HTTP ACCEPTANCE AND DAPP/CHARGE REVERSAL ORDERING PASS; AUDIT FINDINGS TRIAGED BUT UNPATCHED; INDEPENDENT REVIEW / BACKUP-RESTORE / OWNER APPROVAL STILL REQUIRED  
 **Base SHA:** `506947b2ac6f475f5c9418dfb640af5c9719bb10`  
-**Verified implementation head SHA:** `3def75aab45c9080fccb889b2e8f96a4fc7418e7`  
+**Current PR head SHA:** `787809e663d982cca58d1e61f95ac84a9a3a9999`  
+**Last code-bearing implementation SHA:** `3def75aab45c9080fccb889b2e8f96a4fc7418e7`  
 **PR:** [#5 — M3c financial domain](https://github.com/sakhi420/eskan/pull/5) (Draft, not merged)  
-**CI:** [Run #101 — success](https://github.com/sakhi420/eskan/actions/runs/43278124762) — 2026-11-12
+**Latest full CI on exact PR head:** [Run #102 — success](https://github.com/sakhi420/eskan/actions/runs/43278611645) — 2026-11-13
 
 ## Remediation table
 
@@ -24,7 +25,7 @@
 
 ## Current-head verification evidence
 
-All items below refer to the same verified implementation PR head SHA `10960c3856cc85a9482ee21c1369532a399341cb`, not an earlier branch revision.
+The code-bearing implementation SHA `3def75aab45c9080fccb889b2e8f96a4fc7418e7` passed Run #101. The current PR head `787809e663d982cca58d1e61f95ac84a9a3a9999` is a documentation-only follow-up; the full CI workflow was repeated on that exact PR head in Run #102 and passed.
 
 | CI gate | Result |
 |---|---:|
@@ -52,7 +53,7 @@ Additional database hardening included:
 - Actor-user foreign keys for deposits and expenses use RESTRICT so posted actor attribution is not silently erased.
 - M3c-owned tenant composite FKs are checked by name, not by a brittle global count.
 - Database triggers require refunds/forfeitures to reference an unreversed POSTED RECEIVED deposit; DAPP must consume an unreversed POSTED RECEIVED deposit and a POSTED DEBIT charge.
-- Refunds, forfeitures, and DAPP applications share one source-scoped balance cap. PostgreSQL locks the RECEIVED source row and rejects any new child event or application whose combined active amount would exceed the original received amount. Run #101's 99/99 M3c tests cover mixed 60 + 30 + 10 consumption and reject further consumption.
+- Refunds, forfeitures, and DAPP applications share one source-scoped balance cap. PostgreSQL locks the RECEIVED source row and rejects any new child event or application whose combined active amount would exceed the original received amount. The M3c migration gate passed 99/99 on Run #101 and was re-executed by the full CI workflow on the exact PR head in Run #102.
 - Deposit reversals are now database-guarded as well as service-guarded. A `RECEIVED` deposit cannot be reversed while any active REFUNDED/FORFEITED child or POSTED DepositApplication remains. A REFUNDED/FORFEITED event can be reversed only while its parent RECEIVED event is still POSTED and unreversed. A partial unique index permits only one DEPOSIT reversal per source event.
 - Tests cover the ordering: active child blocks source reversal; reverse child first; source reversal then succeeds; duplicate child/source reversal and new child creation after source reversal are rejected. A separate DAPP case proves the source remains blocked while DAPP is POSTED and becomes reversible only after the dedicated DAPP reversal.
 - A DepositApplication can transition from POSTED to REVERSED only when its linked DAPP Payment is REVERSED, its complete AllocationRelease exists, exactly one matching DEBIT LedgerReversal exists, and its Charge is still POSTED. A deferred payment constraint prevents reversing the Payment alone; a trigger also rejects an Application-only status change.
@@ -65,13 +66,25 @@ No migration was applied to the developer's local database, Staging or Productio
 - A separate second-person review of the financial migration and domain behavior is still required before merge; CI is not a substitute for design review.
 - The committed lockfile removes the two High Multer-chain findings. The permanent `npm audit --audit-level=high` gate now passes on the exact current head. `npm audit` still reports 29 findings (4 low, 25 moderate, 0 high, 0 critical), mostly in development/test tooling; triage them separately and do not use `--force` blindly.
 - The remaining findings are in the development/test dependency tree, not the production dependency set: `glob@13.0.7` is used by Jest reporters/config/runtime, while `glob@10.5.0` is nested below `test-exclude`; `minimatch@10.2.6` is used by ESLint/TypeScript-ESLint and the glob chain, and `minimatch@9.0.9` is nested below `test-exclude`; `deepmerge@4.3.1` is pulled by `jest-config`.
-- Upstream advisories list `glob` as affected through 14.0.1 (fixed in 14.0.2) and `minimatch` as affected below 11.0.1. Current parents request incompatible major ranges (`glob@^13`, `glob@^10`, `minimatch@^10`, and `minimatch@^9`); a root override would force major-version mismatches rather than a safe patch update. The `deepmerge` advisory currently lists no patched release. These findings remain open and are not counted as fixed.
+- **Triage completed, remediation not completed:** the recorded audit contains 29 findings (4 Low / 25 Moderate / 0 High / 0 Critical). Lockfile inspection found the affected package instances only in the development/test dependency graph (\`dev: true\`), not as direct production dependencies.
+- \`glob@13.0.7\` and \`glob@10.5.0\` are affected by [GHSA-3g3m-2fjr-6pw4](https://github.com/advisories/GHSA-3g3m-2fjr-6pw4), fixed in 14.0.2; their parents currently require the 13.x and 10.x ranges.
+- \`minimatch@10.2.6\` and \`minimatch@9.0.9\` are affected by [GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249), fixed in 11.0.1; their parents currently require the 10.x and 9.x ranges.
+- \`deepmerge@4.3.1\` (under Jest configuration) is affected by [GHSA-gcqx-w48m-w2h4](https://github.com/advisories/GHSA-gcqx-w48m-w2h4); the advisory currently lists no patched release.
+- The affected parent ranges do not permit semver-compatible upgrades to the fixed major versions. A blanket override or \`npm audit fix --force\` is not accepted. These findings remain unpatched; owner risk acceptance or a future compatible upstream upgrade is required.
 - Prepare and approve a backup/restore and staged rollout plan before applying migrations to any persistent environment.
 - Sourcery's automated review is skipped because the PR exceeds its 20,000 changed-line limit. This is a tool limit, not a CI failure.
 
+## Independent-review focus points
+
+The following are explicit review questions, not confirmed runtime defects:
+
+1. Confirm whether the database should enforce the reverse-existence invariant that every committed \`DEPOSIT_APPLICATION\` Payment has exactly one matching DepositApplication. The application insert validates its Payment and Allocation; the public service path creates the linked records atomically. Decide whether a directly inserted orphan internal Payment must also be impossible at the database boundary.
+2. Confirm the intended compatibility treatment of nullable \`actor_user_id\` columns on DepositTransaction/Expense. Service writes attach the authenticated actor; historical rows may remain NULL. Decide whether an insert-time database guard is required for any new direct write.
+3. Independently re-check rollback/failure behavior, including the legacy preflight before the first M3c DDL, lock ordering on source deposits, DAPP reversal ordering, and the deferred Payment/Application consistency trigger.
+
 ## Decision
 
-**P1-7 is closed by current-head HTTP/Supertest evidence.** The full CI pipeline is green on the recorded SHA. Keep the PR Draft until the independent second-person migration review, remaining Low/Moderate dependency triage, and migration rollout/backup approval are complete.
+**P1-7 is closed by HTTP/Supertest evidence.** The full CI pipeline is green on exact current PR head \`787809e663d982cca58d1e61f95ac84a9a3a9999\` (Run #102). Keep the PR Draft until a separate human reviewer signs off the two migrations and the financial invariants, the residual Low/Moderate dependency risk is accepted by the owner, and the backup/restore rehearsal plus staged rollout plan are approved.
 
 ## Follow-up review — DAPP / Charge reversal ordering (2026-11-12)
 
@@ -84,4 +97,4 @@ The feature branch now includes:
 - A real-service Integration test that proves early Charge reversal is rejected without changing Charge/Application/release state, then reverses the DAPP and proves Charge reversal succeeds.
 - A migration-level SQL test for the same database rule and its valid post-application-reversal transition.
 
-**Verification status:** PASS on Run #101 (current implementation head SHA shown above). CI reports 99/99 M3c migration checks and 139/139 PostgreSQL integration tests. The new database assertions cover complete DAPP reversal, source-specific balance protection, source/child reversal order, duplicate reversal rejection, and the prohibition on creating children after source reversal.
+**Verification status:** PASS on Run #101 for code-bearing SHA `3def75aab45c9080fccb889b2e8f96a4fc7418e7`; full CI also passed on exact current PR head `787809e663d982cca58d1e61f95ac84a9a3a9999` in Run #102. CI reports 99/99 M3c migration checks and 139/139 PostgreSQL integration tests. The database assertions cover complete DAPP reversal, source-specific balance protection, source/child reversal order, duplicate reversal rejection, and the prohibition on creating children after source reversal.
