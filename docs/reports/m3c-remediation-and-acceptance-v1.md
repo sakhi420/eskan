@@ -2,7 +2,7 @@
 
 **Status:** EXACT PR-HEAD CI VERIFIED — P1-7 HTTP ACCEPTANCE AND DAPP/CHARGE REVERSAL ORDERING PASS; AUDIT FINDINGS TRIAGED BUT UNPATCHED; INDEPENDENT REVIEW / BACKUP-RESTORE / OWNER APPROVAL STILL REQUIRED  
 **Base SHA:** `506947b2ac6f475f5c9418dfb640af5c9719bb10`  
-**Current PR head SHA:** `787809e663d982cca58d1e61f95ac84a9a3a9999`  
+**Last PR head covered by full CI Run #102:** `787809e663d982cca58d1e61f95ac84a9a3a9999` (documentation-only commits were added after this run; no implementation/test paths changed).  
 **Last code-bearing implementation SHA:** `3def75aab45c9080fccb889b2e8f96a4fc7418e7`  
 **PR:** [#5 — M3c financial domain](https://github.com/sakhi420/eskan/pull/5) (Draft, not merged)  
 **Latest full CI on exact PR head:** [Run #102 — success](https://github.com/sakhi420/eskan/actions/runs/43278611645) — 2026-11-13
