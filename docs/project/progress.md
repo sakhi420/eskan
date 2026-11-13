@@ -19,7 +19,7 @@
 | 8.1 | سخت‌سازی صحت/سازگاری (بازبینی) | ✅ انجام شد (P0 fixes + smoke ۱۴۴/۱۴۴ = 42+16+48+14+24) | atomic idempotency, CAS locking, resident overlap, transfer/checkout, fail-fast migration |
 | 8.2 | چرخه‌حیات هم‌روندی و یکپارچگی داده | ✅ انجام شد (LockService + business date + overlap contract + smoke ۱۵۷/۱۵۷ = 42+16+48+14+24+13) | resident contract overlap, row locks, business date, idempotency expiry |
 | 9   | مالی (charge/payment/deposit) | 🔄 در حال اجرا — M-1 ✅، M-2 ✅، 4c ✅، M3a ✅ (PR #2)، M3b ✅ (PR #4)، M3c کد ادغام‌شده (PR #5؛ merge `4da7415`؛ CI Run #112 موفق؛ M3c migration checks 99/99)؛ Migration روی `eskan_dev` هنوز اجرا نشده؛ بازبینی مستقل ثبت نشده؛ M3d بعد از اجرای Migration | integer AFN (A-016), reversal, immutability |
-| 10  | مصارف و گزارش | ⏳ در انتظار | reports |
+| 10  | گزارش‌ها و خروجی‌ها | ⏳ در انتظار | reports, exports |
 | 11  | idempotency/audit/sync | ⏳ در انتظار | cursor, tombstone |
 | 12  | امنیت و سخت‌سازی | ⏳ در انتظار | OWASP, validation |
 | 13  | آزمون کامل و کیفیت | ⏳ در انتظار | e2e, reconciliation |
@@ -743,16 +743,17 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 
 ### جزئیات محیطی (بدون افشای secret)
 - Migrationهای M3a روی **دیتابیس توسعهٔ محلی `eskan_dev` هنوز اعمال نشده‌اند** (تست روی DBهای throwaway انجام شد)؛ Staging/Production دست‌نخورده.
-## M3c — Deposit / Refund / Expense / Reversal — remediation update
+## M3c — Deposit / Refund / Expense / Reversal — merged checkpoint (2026-11-13)
 
-- **شاخه:** `feat/m3c-deposit-expense-refund-reversal`؛ اصلاحات در همین شاخه و جدا از `main` نگهداری می‌شوند.
+- **وضعیت Git:** PR #5 با دستور صریح مالک ادغام شد؛ merge commit: `4da7415f78278bb504d91c9ac0f1c3c91b6c1c35`. سرشاخهٔ PR: `f554ebc62cff513c8f31e828ad68ffeb48bc52e3`.
+- **CI:** Run #112 روی سرشاخهٔ PR موفق شد؛ **31/31 workflow steps**. شواهد آزمون M3c migration برابر 99/99 و PostgreSQL integration برابر 139/139 است.
 - **DAPP safety:** مسیرهای عمومی create/release/refund/reverse برای `DEPOSIT_APPLICATION` بسته‌اند؛ `reverseApplication` یکتایی و تطابق Allocation را دوباره کنترل می‌کند.
-- **Database invariants:** Migration جدید DAPP را به یک Payment و Allocation کامل و متناظر محدود می‌کند؛ تخصیص دوم برای DAPP رد می‌شود؛ هویت مالی Payment/Allocation/Application قابل تغییر نیست.
+- **Database invariants:** DAPP به یک Payment و Allocation کامل و متناظر محدود شده؛ تخصیص دوم برای DAPP رد می‌شود؛ هویت مالی Payment/Allocation/Application قابل تغییر نیست.
 - **Deposit immutability:** ردیف `DepositTransaction` هنگام Void تغییر نمی‌کند؛ `LedgerReversal` تنها رویداد جبرانی است. ماندهٔ منبع، رویدادهای برگشت را در محاسبه لحاظ می‌کند و وضعیت مؤثر API از reversal استخراج می‌شود.
 - **Checkout:** وجود هر قرارداد ACTIVE صریحاً Apply را متوقف می‌کند؛ صرف وجود قرارداد CLOSED کافی نیست.
 - **OpenAPI / Permissions:** درخواست Payment/Expense فقط روش‌های دستی را می‌پذیرد؛ روش پرداخت Expense اجباری است؛ endpoint برگشت DAPP و نقش OWNER/ADMIN ثبت شده‌اند.
-- **Migration tests:** علاوه بر Fresh Replay، مسیر pre-M3c → seed M3b financial rows → apply M3c only → preservation/parity اضافه شده است. باید روی لوکال اجرا شود.
-- **CI:** lint و format:check به Workflow اضافه شده‌اند. CI روی SHA جدید هنوز اجرا/تأیید نشده است.
-- **Integration source inventory:** ۳۳ test case در چهار فایل (۲۰ + ۴ + ۱ + ۸). اجرای جدید هنوز نیازمند تأیید با خروجی واقعی Jest است.
-- **باقی‌ماندهٔ پذیرش:** HTTP/Supertest role matrix و cross-tenant/BOLA tests هنوز P1 باز هستند؛ Build/Jest/Migration/OpenAPI/Lint/Format/CI باید روی commit نهایی واقعاً اجرا شوند.
-- **محیط‌ها:** هیچ Migration روی `eskan_dev`، Staging یا Production اجرا نشده است؛ این مرز حفظ شده است.
+- **بازبینی مستقل:** بازبینی نفر دوم در GitHub ثبت نشده است. ادغام یک استثنای owner-directed بود و نباید به‌عنوان تأیید مستقل گزارش شود.
+- **وابستگی‌ها:** ۲۹ هشدار باقی‌مانده (۴ Low / ۲۵ Moderate) triage شده‌اند اما رفع نشده‌اند؛ ۰ High / ۰ Critical در gate ثبت‌شدهٔ CI.
+- **Migration در دیتابیس:** دو Migration M3c هنوز روی `eskan_dev` اعمال نشده‌اند. دستور اجرایی: `docs/operations/ESKAN_M3C_MIGRATION_EXECUTION_PROMPT_FA.md`.
+- **مرز محیط‌ها:** اجرای M3c فقط روی Clone محلی و سپس `eskan_dev`، پس از Backup/Restore rehearsal و تست‌ها مجاز است. Staging و Production دست‌نخورده می‌مانند.
+- **Next:** پس از Migration موفق `eskan_dev` و post-migration verification، شروع M3d (Account / Statement / Audit Read / Sync Pull).
