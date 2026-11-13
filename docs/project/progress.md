@@ -757,3 +757,18 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 - **Migration در دیتابیس:** دو Migration M3c هنوز روی `eskan_dev` اعمال نشده‌اند. دستور اجرایی: `docs/operations/ESKAN_M3C_MIGRATION_EXECUTION_PROMPT_FA.md`.
 - **مرز محیط‌ها:** اجرای M3c فقط روی Clone محلی و سپس `eskan_dev`، پس از Backup/Restore rehearsal و تست‌ها مجاز است. Staging و Production دست‌نخورده می‌مانند.
 - **Next:** پس از Migration موفق `eskan_dev` و post-migration verification، شروع M3d (Account / Statement / Audit Read / Sync Pull).
+## اعمال M3c روی `eskan_dev` — 2026-11-13
+
+- **هر دو Migration M3c با موفقیت روی `eskan_dev` اعمال شدند** (با `npx prisma migrate deploy`؛ نه `migrate dev`):
+  - `20261112000000_m3c_deposit_refund_expense_reversal`
+  - `20261112120000_m3c_dapp_reversal_and_deposit_source`
+- **Backup پیش‌از-Migration (Gate D):** `C:\eskan_backups\eskan_dev_20261113_161147.dump` — حجم `276,522` bytes — SHA-256 `435A82C7…B4F6` — `pg_restore --list` معتبر (305 آیتم / 309 TOC، exit 0).
+- **Restore rehearsal (Gate E):** Clone `eskan_m3c_rehearsal_20261113_161444` — `pg_restore --exit-on-error` exit 0 — identity و شمارش‌های کلیدی مطابق منبع — هر دو Migration روی Clone موفق و `migrate status` up to date.
+- **Legacy preflight:** ۰ رویداد `REFUNDED`/`FORFEITED` بدون Source Link → مسیر عادی (بدون fail-fast).
+- **وضعیت Migration بعد:** `prisma migrate status` → «Database schema is up to date!» (19 migrations)؛ `prisma validate` valid.
+- **pg_catalog:** 33 composite FK حاضر؛ CHECK‌های `payments_dapp_has_no_receipt` و `expenses_payment_method_not_dapp`؛ ستون `deposit_transactions.source_deposit_transaction_id`؛ `deposit_applications.payment_id`/`allocation_id` NOT NULL.
+- **حفظ داده (Reconciliation):** شمارش‌های کلیدی بدون تغییر (organizations 72 · residents 84 · stay_contracts 90 · hostels 53 · users 72 · idempotency_records 427)؛ جداول مالی صفر و جداول جدید M3c خالی. فقط `_prisma_migrations` ۱۸ → ۲۰.
+- **تست‌ها:** M3c migration **99/99**؛ parity **7/7**؛ e2e **4 suites/29**؛ integration **13 suites/139**؛ build/validate/generate/openapi همه exit 0.
+- **گزارش عملیاتی:** `docs/operations/m3c-dev-migration-execution-report.md`.
+- **مرز محیط‌ها:** `eskan_dev` = Applied؛ Staging = Not Applied؛ Production = Not Applied.
+- **Next:** شروع M3d (Account / Statement / Audit Read / Sync Pull).
