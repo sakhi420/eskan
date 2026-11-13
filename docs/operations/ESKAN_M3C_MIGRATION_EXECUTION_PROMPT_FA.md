@@ -242,7 +242,7 @@ Get-FileHash -Algorithm SHA256 $BackupFile
 
 ## 10. Gate F — آزمون‌های پس از Migration روی Clone و تست‌های ایزوله
 
-با `DATABASE_URL` مناسب و بدون تغییر دادن دیتابیس منبع:
+برای اجرای اسکریپت‌های تست، ابتدا منطق اتصال آن‌ها را بخوان. این اسکریپت‌ها معمولاً از `DATABASE_URL` محلیِ allowlisted فقط برای ساخت اتصال مدیریتی به دیتابیس `postgres` استفاده می‌کنند و سپس DBهای disposable مستقل می‌سازند. برای این تست‌ها از URL تأییدشدهٔ محلی `eskan_dev` به‌عنوان اتصال پایه استفاده کن، نه URL دیتابیس Clone با نام سفارشی؛ مطمئن شو هیچ Query یا Migration روی خود `eskan_dev` اجرا نمی‌شود. برای اجرای `prisma migrate deploy` روی Clone، فقط در همان Process، URL اختصاصی Clone را جداگانه تنظیم کن.
 
 1. `node scripts/test-m3c-migration.cjs` را اجرا کن و نتیجهٔ تمام checks را ثبت کن.
 2. `node scripts/test-m2-prisma-parity.cjs` را اجرا کن و خالی بودن migration diff را تأیید کن.
