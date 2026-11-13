@@ -1,16 +1,17 @@
 # ESKAN M3c — Implementation Report
 
-**Status:** PR HEAD CI VERIFIED — M3c MIGRATION / HTTP / INTEGRATION GATES PASS; DEPENDENCY FINDINGS TRIAGED BUT UNPATCHED; INDEPENDENT REVIEW, BACKUP/RESTORE APPROVAL, AND OWNER DECISION PENDING  
+**Status:** M3c IMPLEMENTATION MERGED — LATEST PR CI RUN #112 PASSED; M3c DATABASE MIGRATION STILL PENDING ON `eskan_dev`; INDEPENDENT REVIEW NOT RECORDED; DEPENDENCY FINDINGS TRIAGED BUT UNPATCHED  
 **Date:** 2026-11-13
 
 ## Git / PR
 - Branch: `feat/m3c-deposit-expense-refund-reversal`
 - Base: `main` at `506947b2ac6f475f5c9418dfb640af5c9719bb10`
-- Last PR head covered by a full CI run (Run #102): `787809e663d982cca58d1e61f95ac84a9a3a9999`. Documentation-only review/report updates were committed afterward; no runtime source, schema, migration, contract, or test files changed in those follow-up commits.
 - Code-bearing implementation head: `3def75aab45c9080fccb889b2e8f96a4fc7418e7`.
-- PR: [#5](https://github.com/sakhi420/eskan/pull/5) — Draft, open, not merged.
-- Last recorded full CI: [Run #102 — success](https://github.com/sakhi420/eskan/actions/runs/43278611645), executed on PR head `787809e...` at the time of that run.
-- Run #101 verified the last code-bearing implementation head; Run #102 repeated the full workflow on exact PR head `787809e...` at the time of that run.
+- PR head covered by latest full CI: `f554ebc62cff513c8f31e828ad68ffeb48bc52e3`.
+- PR: [#5](https://github.com/sakhi420/eskan/pull/5) — **merged 2026-11-13**.
+- Merge commit: `4da7415f78278bb504d91c9ac0f1c3c91b6c1c35`.
+- Latest full CI: [Run #112 — success](https://github.com/sakhi420/eskan/actions/runs/43412431492), all 31 workflow steps passed.
+- The merge was explicitly owner-directed despite no independent second-person review being recorded; it is not represented as independently reviewed. This is a documented owner exception, not a completed review.
 - Local working tree was not inspected by this GitHub-side review. Pull the branch before continuing local work.
 
 ## Scope
@@ -76,16 +77,15 @@ All results below are from SHA `3def75aab45c9080fccb889b2e8f96a4fc7418e7`:
 - M-1/M-2 checks, package/hostel concurrency, M-2 parity and idempotency-retention checks: PASS.
 
 ## Remaining release gates
-- A second person must independently review both M3c migrations and the financial invariants. CI and this preparation review are not substitutes for that independent approval.
-- Complete and record the backup/restore rehearsal on a controlled clone, then approve a staged migration plan before any persistent environment is migrated.
-- The owner must explicitly accept the 29 unpatched Low/Moderate development-tooling findings or defer merge pending compatible upstream fixes.
-- The owner must approve removing Draft status and merging only after the review and operational gates above are satisfied.
-- Automated Sourcery review skipped the PR because the diff exceeds its 20,000 changed-line limit; this is not a CI failure.
+- The independent second-person review of both M3c migrations and financial invariants remains OPEN. It must be completed before Staging/Production rollout; the owner-directed merge did not satisfy this review.
+- The 29 Low/Moderate development/test dependency findings remain unpatched (4 Low / 25 Moderate / 0 High / 0 Critical); they are triaged, not remediated.
+- Run the controlled Backup/Restore rehearsal and then execute the M3c migration instruction on local `eskan_dev` only. Do not migrate Staging or Production.
+- Automated Sourcery review skipped the PR because the diff exceeds its 20,000 changed-line limit; this is not a CI failure and not an independent review.
 
 ## Environment boundary
 - GitHub Actions: current-head migration and test gates passed using disposable PostgreSQL databases.
 - Local clone: not inspected or changed by this GitHub-side review.
-- `eskan_dev`: **not migrated by this work**.
+- `eskan_dev`: **M3c not yet migrated**; the separate operator instruction is `docs/operations/ESKAN_M3C_MIGRATION_EXECUTION_PROMPT_FA.md`.
 - Staging: **not migrated**.
 - Production: **not migrated**.
 
@@ -97,4 +97,4 @@ All results below are from SHA `3def75aab45c9080fccb889b2e8f96a4fc7418e7`:
 
 ## Next step
 
-Obtain the independent review, record the owner's residual-risk decision, and complete backup/restore rehearsal plus staged rollout approval. Keep PR #5 Draft and do not merge or apply M3c to a persistent database before those gates.
+Execute `docs/operations/ESKAN_M3C_MIGRATION_EXECUTION_PROMPT_FA.md` against a verified local `eskan_dev` target: backup, restore rehearsal, preflight, clone migration/tests, and only then the dev migration. Independent review remains required before any Staging/Production rollout. M3d begins only after the `eskan_dev` migration and post-migration checks pass.
