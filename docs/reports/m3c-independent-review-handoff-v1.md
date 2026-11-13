@@ -6,18 +6,18 @@
 **Base SHA:** `506947b2ac6f475f5c9418dfb640af5c9719bb10`  
 **Last PR head covered by full CI Run #102:** `787809e663d982cca58d1e61f95ac84a9a3a9999` (later commits update documentation only; implementation/test paths are unchanged).  
 **Last code-bearing implementation SHA:** `3def75aab45c9080fccb889b2e8f96a4fc7418e7`  
-**Latest exact-head CI:** [Run #102 — success](https://github.com/sakhi420/eskan/actions/runs/43278611645)  
+**Last full CI run:** [Run #102 — success](https://github.com/sakhi420/eskan/actions/runs/43278611645)  
 **PR state:** Draft / open / not merged
 
 ## Purpose and limits
 
-This document prepares an independent reviewer to examine the M3c financial domain and its two PostgreSQL migrations. It is a review handoff, **not** an independent approval or a merge authorization. The preparation review inspected the PR metadata, current diff inventory, the two migrations, key service flows, migration/integration test sources, the lockfile dependency tree, and the latest CI run. It does not replace a separate human review of the complete 169-file / 25,868-addition PR.
+This document prepares an independent reviewer to examine the M3c financial domain and its two PostgreSQL migrations. It is a review handoff, **not** an independent approval or a merge authorization. The preparation review inspected the PR metadata, current diff inventory, the two migrations, key service flows, migration/integration test sources, the lockfile dependency tree, and the latest CI run. It does not replace a separate human review of the full PR diff.
 
 No M3c migration has been applied to `eskan_dev`, Staging, or Production. CI used disposable PostgreSQL databases. This preparation did not inspect or alter the developer's local working tree.
 
 ## Evidence already available
 
-Run #102 completed successfully on exact PR head `787809e663d982cca58d1e61f95ac84a9a3a9999` at the time of that run. Its single `build-and-test` job completed all 27 substantive workflow steps successfully, including dependency installation/security gate, Prisma generation, build, ESLint, Prettier, OpenAPI and Prisma validation, unit tests, E2E smoke tests, migration checks, and PostgreSQL integration tests. Four documentation-only commits were added to this PR afterward; no runtime source, schema, migration, API contract, or test files changed in those commits. Run #102 is therefore evidence for the implementation and its then-current docs, not a claim that the newest documentation-only commit itself was re-run.
+Run #102 completed successfully on exact PR head `787809e663d982cca58d1e61f95ac84a9a3a9999` at the time of that run. Its single `build-and-test` job completed all 27 substantive workflow steps successfully, including dependency installation/security gate, Prisma generation, build, ESLint, Prettier, OpenAPI and Prisma validation, unit tests, E2E smoke tests, migration checks, and PostgreSQL integration tests. Several documentation-only commits were added to this PR afterward; no runtime source, schema, migration, API contract, or test files changed in those commits. Run #102 is therefore evidence for the implementation and its then-current docs, not a claim that the newest documentation-only commit itself was re-run.
 
 The detailed recorded test evidence on the code-bearing SHA `3def75a...` (Run #101), repeated by the full workflow on the current documentation-only follow-up head in Run #102, is:
 
