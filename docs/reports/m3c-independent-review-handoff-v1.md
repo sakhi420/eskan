@@ -4,22 +4,23 @@
 **Repository:** `sakhi420/eskan`  
 **Pull request:** [#5 — deposits, expenses, refunds, and reversals](https://github.com/sakhi420/eskan/pull/5)  
 **Base SHA:** `506947b2ac6f475f5c9418dfb640af5c9719bb10`  
-**Last PR head covered by full CI Run #102:** `787809e663d982cca58d1e61f95ac84a9a3a9999` (later commits update documentation only; implementation/test paths are unchanged).  
+**PR head covered by latest full CI Run #112:** `f554ebc62cff513c8f31e828ad68ffeb48bc52e3`  
 **Last code-bearing implementation SHA:** `3def75aab45c9080fccb889b2e8f96a4fc7418e7`  
-**Last full CI run:** [Run #102 — success](https://github.com/sakhi420/eskan/actions/runs/43278611645)  
-**PR state:** Draft / open / not merged
+**Merge commit:** `4da7415f78278bb504d91c9ac0f1c3c91b6c1c35`  
+**Latest full CI:** [Run #112 — success](https://github.com/sakhi420/eskan/actions/runs/43412431492), 31/31 workflow steps  
+**PR state:** Merged on 2026-11-13 under explicit owner instruction
 
 ## Purpose and limits
 
-This document prepares an independent reviewer to examine the M3c financial domain and its two PostgreSQL migrations. It is a review handoff, **not** an independent approval or a merge authorization. The preparation review inspected the PR metadata, current diff inventory, the two migrations, key service flows, migration/integration test sources, the lockfile dependency tree, and the latest CI run. It does not replace a separate human review of the full PR diff.
+This document prepares an independent reviewer to examine the M3c financial domain and its two PostgreSQL migrations after an owner-directed merge. It is a review handoff, **not** an independent approval or a migration/deployment authorization. The preparation review inspected the PR metadata, current diff inventory, the two migrations, key service flows, migration/integration test sources, the lockfile dependency tree, and recorded CI evidence. A separate human review is still outstanding.
 
 No M3c migration has been applied to `eskan_dev`, Staging, or Production. CI used disposable PostgreSQL databases. This preparation did not inspect or alter the developer's local working tree.
 
 ## Evidence already available
 
-Run #102 completed successfully on exact PR head `787809e663d982cca58d1e61f95ac84a9a3a9999` at the time of that run. Its single `build-and-test` job completed all 27 substantive workflow steps successfully, including dependency installation/security gate, Prisma generation, build, ESLint, Prettier, OpenAPI and Prisma validation, unit tests, E2E smoke tests, migration checks, and PostgreSQL integration tests. Several documentation-only commits were added to this PR afterward; no runtime source, schema, migration, API contract, or test files changed in those commits. Run #102 is therefore evidence for the implementation and its then-current docs, not a claim that the newest documentation-only commit itself was re-run.
+Run #112 completed successfully on exact PR head `f554ebc62cff513c8f31e828ad68ffeb48bc52e3`. Its `build-and-test` job completed all 31 workflow steps successfully, including dependency installation/security gate, Prisma generation, build, ESLint, Prettier, OpenAPI and Prisma validation, unit tests, E2E smoke tests, migration checks, and PostgreSQL integration tests. This is the latest full PR CI evidence. The resulting code was merged with commit `4da7415f78278bb504d91c9ac0f1c3c91b6c1c35`.
 
-The detailed recorded test evidence on the code-bearing SHA `3def75a...` (Run #101), with the full workflow repeated on PR head `787809e...` in Run #102, is:
+The detailed test counts were established on code-bearing SHA `3def75a...` (Run #101) and re-run through the full workflow on PR head `f554ebc...` in Run #112:
 
 | Gate | Recorded result |
 |---|---:|
@@ -109,19 +110,21 @@ This has **not** been performed for M3c and must not be marked complete based on
 - [ ] Run the M3c preflight and migration sequence only against the isolated clone; preserve logs and command outputs.
 - [ ] Run migration status, Prisma parity, financial reconciliation, and relevant smoke tests on the clone.
 - [ ] Record a rollback / restore decision and an ordered staged rollout plan.
-- [ ] Obtain explicit owner approval before any M3c migration is applied to `eskan_dev`, Staging, or Production.
+- [ ] For the authorized local development migration only, complete the backup and isolated restore rehearsal described in `docs/operations/ESKAN_M3C_MIGRATION_EXECUTION_PROMPT_FA.md` before applying M3c to `eskan_dev`.
+- [ ] Do not apply M3c to Staging or Production under this instruction. Those environments require a separate approval and the independent review.
 
-The current branch and CI have not changed any persistent environment.
+The merge and CI have not changed any persistent database. The M3c migrations have not yet been applied to `eskan_dev`, Staging, or Production.
 
 ## Approval record
 
 | Gate | Current state | Evidence required to close |
 |---|---|---|
-| Automated CI | PASS | [Run #102](https://github.com/sakhi420/eskan/actions/runs/43278611645) |
-| Independent second-person review | OPEN | Reviewer identity, exact-head review, and review result |
-| Low/Moderate dependency risk | TRIAGED / OWNER ACCEPTANCE OPEN | Explicit owner risk decision or compatible package updates |
-| Backup / restore rehearsal | OPEN | Clone source, backup/restore logs, reconciliation results |
-| Staged rollout approval | OPEN | Written rollout/rollback plan and owner approval |
-| Ready to merge | **NO** | All gates above closed; then owner authorizes un-Draft and merge |
+| Automated CI | PASS | [Run #112](https://github.com/sakhi420/eskan/actions/runs/43412431492) — 31/31 steps |
+| Owner-directed merge | DONE | PR #5 merged as `4da7415f78278bb504d91c9ac0f1c3c91b6c1c35` |
+| Independent second-person review | OPEN | Reviewer identity, exact-merge-head review, and review result |
+| Low/Moderate dependency findings | TRIAGED / UNPATCHED | 4 Low / 25 Moderate; no claim of remediation |
+| Local `eskan_dev` backup/restore rehearsal | OPEN | Backup hash, Clone restore and reconciliation logs |
+| Staging / Production rollout | NOT AUTHORIZED | Independent review and separate owner authorization required |
+| M3c migration on `eskan_dev` | PENDING | Follow the controlled execution prompt; do not skip any Gate |
 
-**Current decision:** keep PR #5 Draft and unmerged. Do not deploy these migrations to a persistent database until the independent review and operational gates are closed.
+**Current decision:** PR #5 is merged by explicit owner instruction, not by independent approval. Execute the M3c migration instruction only on local `eskan_dev` after Backup/Restore rehearsal and all clone tests pass. Do not migrate Staging or Production.
