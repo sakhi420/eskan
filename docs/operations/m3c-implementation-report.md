@@ -1,14 +1,16 @@
 # ESKAN M3c — Implementation Report
 
-**Status:** IMPLEMENTED; CURRENT-HEAD CI VERIFIED INCLUDING DAPP/CHARGE REVERSAL ORDER; HIGH/CRITICAL AUDIT GATE PASSES; HUMAN REVIEW/OWNER APPROVAL PENDING  
-**Date:** 2026-11-12
+**Status:** PR HEAD CI VERIFIED — M3c MIGRATION / HTTP / INTEGRATION GATES PASS; DEPENDENCY FINDINGS TRIAGED BUT UNPATCHED; INDEPENDENT REVIEW, BACKUP/RESTORE APPROVAL, AND OWNER DECISION PENDING  
+**Date:** 2026-11-13
 
 ## Git / PR
 - Branch: `feat/m3c-deposit-expense-refund-reversal`
 - Base: `main` at `506947b2ac6f475f5c9418dfb640af5c9719bb10`
-- Verified implementation head: `3def75aab45c9080fccb889b2e8f96a4fc7418e7`
+- PR head: `787809e663d982cca58d1e61f95ac84a9a3a9999` (docs-only follow-up to the code-bearing implementation head below).
+- Code-bearing implementation head: `3def75aab45c9080fccb889b2e8f96a4fc7418e7`.
 - PR: [#5](https://github.com/sakhi420/eskan/pull/5) — Draft, open, not merged.
-- CI: [Run #101 — success](https://github.com/sakhi420/eskan/actions/runs/43278124762).
+- Full CI on exact PR head: [Run #102 — success](https://github.com/sakhi420/eskan/actions/runs/43278611645).
+- Run #101 verified the last code-bearing implementation head; Run #102 repeated the full workflow on the exact current PR head.
 - Local working tree was not inspected by this GitHub-side review. Pull the branch before continuing local work.
 
 ## Scope
@@ -46,7 +48,19 @@
 - Dependency lockfile upgrades `@nestjs/common`, `@nestjs/core`, `@nestjs/platform-express`, and `@nestjs/testing` to 12.5.0 and pins transitive `multer` at 2.5.0; current lockfile was tested using ordinary `npm ci`.
 - `npm audit --audit-level=high`: PASS (0 High / 0 Critical). Remaining `npm audit`: 29 findings (4 Low / 25 Moderate), predominantly development/test dependency chains; not yet fully triaged.
 - The remaining findings are in the development/test dependency tree, not the production dependency set: `glob@13.0.7` is used by Jest reporters/config/runtime, while `glob@10.5.0` is nested below `test-exclude`; `minimatch@10.2.6` is used by ESLint/TypeScript-ESLint and the glob chain, and `minimatch@9.0.9` is nested below `test-exclude`; `deepmerge@4.3.1` is pulled by `jest-config`.
-- Upstream advisories list `glob` as affected through 14.0.1 (fixed in 14.0.2) and `minimatch` as affected below 11.0.1. Current parents request incompatible major ranges (`glob@^13`, `glob@^10`, `minimatch@^10`, and `minimatch@^9`); a root override would force major-version mismatches rather than a safe patch update. The `deepmerge` advisory currently lists no patched release. These findings remain open and are not counted as fixed.
+### Dependency audit disposition — 2026-11-13
+
+The recorded full audit contains **29 findings (4 Low, 25 Moderate, 0 High, 0 Critical)**. Inspection of the exact committed lockfile shows the affected package instances are development/test dependencies (\`dev: true\`), not direct production dependencies:
+
+| Package instance(s) in lockfile | Advisory and fixed release | Constraint / disposition |
+|---|---|---|
+| \`glob@13.0.7\`, \`glob@10.5.0\` | [GHSA-3g3m-2fjr-6pw4](https://github.com/advisories/GHSA-3g3m-2fjr-6pw4); fixed in \`14.0.2\` | Current parents require \`^13\` and \`^10\`; no compatible patched release within those ranges. |
+| \`minimatch@10.2.6\`, \`minimatch@9.0.9\` | [GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249); fixed in \`11.0.1\` | Current parents require \`^10\` and \`^9\`; no compatible patched release within those ranges. |
+| \`deepmerge@4.3.1\` | [GHSA-gcqx-w48m-w2h4](https://github.com/advisories/GHSA-gcqx-w48m-w2h4) | The reviewed advisory lists no patched release. |
+
+**Triage result:** the remaining findings are classified as development/test-tooling exposure; they are **not fixed** and must not be reported as remediated. A blanket root override or \`npm audit fix --force\` is rejected because it would cross parent major-version ranges and can destabilize the build/test toolchain. Revisit when upstream parent packages support patched versions. The CI security gate remains \`npm audit --audit-level=high\` and passed with zero High/Critical findings; that gate does not clear the 29 Low/Moderate findings.
+
+**Residual risk acceptance:** the project owner must explicitly accept this documented development-tooling risk for the PR, or defer merge until compatible upstream upgrades are available.
 - Persistent environments actually migrated: **none**.
 
 ## Current-head CI evidence
@@ -62,10 +76,11 @@ All results below are from SHA `3def75aab45c9080fccb889b2e8f96a4fc7418e7`:
 - M-1/M-2 checks, package/hostel concurrency, M-2 parity and idempotency-retention checks: PASS.
 
 ## Remaining release gates
-- PR #5 stays Draft and unmerged pending independent human review and explicit owner approval.
-- Triage the remaining 29 npm audit findings (4 low, 25 moderate); the two High Multer-chain findings were addressed by the lockfile update. Avoid blind `npm audit fix --force`.
-- Approve backups, restore rehearsal and staged migration rollout before any persistent environment is migrated.
-- Automated Sourcery review skipped the PR because the diff exceeds its 20,000 changed-line limit; this does not affect the green CI result.
+- A second person must independently review both M3c migrations and the financial invariants. CI and this preparation review are not substitutes for that independent approval.
+- Complete and record the backup/restore rehearsal on a controlled clone, then approve a staged migration plan before any persistent environment is migrated.
+- The owner must explicitly accept the 29 unpatched Low/Moderate development-tooling findings or defer merge pending compatible upstream fixes.
+- The owner must approve removing Draft status and merging only after the review and operational gates above are satisfied.
+- Automated Sourcery review skipped the PR because the diff exceeds its 20,000 changed-line limit; this is not a CI failure.
 
 ## Environment boundary
 - GitHub Actions: current-head migration and test gates passed using disposable PostgreSQL databases.
@@ -74,5 +89,12 @@ All results below are from SHA `3def75aab45c9080fccb889b2e8f96a4fc7418e7`:
 - Staging: **not migrated**.
 - Production: **not migrated**.
 
+## Focus points for the independent reviewer
+
+- Confirm whether the database must enforce the reverse existence invariant that every committed \`DEPOSIT_APPLICATION\` Payment has exactly one matching DepositApplication. The application insert checks the Payment/Allocation links, and the public service path creates all linked records atomically; explicitly decide whether an orphan internal Payment must also be impossible through direct database writes.
+- Confirm the intended treatment of nullable \`actor_user_id\` on legacy-compatible DepositTransaction/Expense columns: application service writes set the authenticated actor, while historical rows may remain NULL. Decide whether an insert-time database guard is required for new direct writes.
+- Re-check migration rollback/failure behavior, especially the first-migration legacy preflight, source-deposit row locks, DAPP reversal ordering, and deferred consistency trigger behavior.
+
 ## Next step
-Independent human review of financial migrations and domain invariants, then owner decision on PR #5. Do not merge or apply M3c to a persistent database before those gates.
+
+Obtain the independent review, record the owner's residual-risk decision, and complete backup/restore rehearsal plus staged rollout approval. Keep PR #5 Draft and do not merge or apply M3c to a persistent database before those gates.
