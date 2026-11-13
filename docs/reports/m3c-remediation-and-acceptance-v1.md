@@ -5,7 +5,7 @@
 **Last PR head covered by full CI Run #102:** `787809e663d982cca58d1e61f95ac84a9a3a9999` (documentation-only commits were added after this run; no implementation/test paths changed).  
 **Last code-bearing implementation SHA:** `3def75aab45c9080fccb889b2e8f96a4fc7418e7`  
 **PR:** [#5 — M3c financial domain](https://github.com/sakhi420/eskan/pull/5) (Draft, not merged)  
-**Latest full CI on exact PR head:** [Run #102 — success](https://github.com/sakhi420/eskan/actions/runs/43278611645) — 2026-11-13
+**Last full CI on the PR head at the time of the run:** [Run #102 — success](https://github.com/sakhi420/eskan/actions/runs/43278611645) — 2026-11-13
 
 ## Remediation table
 
@@ -25,7 +25,7 @@
 
 ## Current-head verification evidence
 
-The code-bearing implementation SHA `3def75aab45c9080fccb889b2e8f96a4fc7418e7` passed Run #101. The current PR head `787809e663d982cca58d1e61f95ac84a9a3a9999` is a documentation-only follow-up; the full CI workflow was repeated on that exact PR head in Run #102 and passed.
+The code-bearing implementation SHA `3def75aab45c9080fccb889b2e8f96a4fc7418e7` passed Run #101. PR head `787809e663d982cca58d1e61f95ac84a9a3a9999` was the head at the time of Run #102; the full CI workflow passed on that exact revision. Documentation-only review and release-handoff changes were committed afterward.
 
 | CI gate | Result |
 |---|---:|
@@ -66,11 +66,11 @@ No migration was applied to the developer's local database, Staging or Productio
 - A separate second-person review of the financial migration and domain behavior is still required before merge; CI is not a substitute for design review.
 - The committed lockfile removes the two High Multer-chain findings. The permanent `npm audit --audit-level=high` gate now passes on the exact current head. `npm audit` still reports 29 findings (4 low, 25 moderate, 0 high, 0 critical), mostly in development/test tooling; triage them separately and do not use `--force` blindly.
 - The remaining findings are in the development/test dependency tree, not the production dependency set: `glob@13.0.7` is used by Jest reporters/config/runtime, while `glob@10.5.0` is nested below `test-exclude`; `minimatch@10.2.6` is used by ESLint/TypeScript-ESLint and the glob chain, and `minimatch@9.0.9` is nested below `test-exclude`; `deepmerge@4.3.1` is pulled by `jest-config`.
-- **Triage completed, remediation not completed:** the recorded audit contains 29 findings (4 Low / 25 Moderate / 0 High / 0 Critical). Lockfile inspection found the affected package instances only in the development/test dependency graph (\`dev: true\`), not as direct production dependencies.
-- \`glob@13.0.7\` and \`glob@10.5.0\` are affected by [GHSA-3g3m-2fjr-6pw4](https://github.com/advisories/GHSA-3g3m-2fjr-6pw4), fixed in 14.0.2; their parents currently require the 13.x and 10.x ranges.
-- \`minimatch@10.2.6\` and \`minimatch@9.0.9\` are affected by [GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249), fixed in 11.0.1; their parents currently require the 10.x and 9.x ranges.
-- \`deepmerge@4.3.1\` (under Jest configuration) is affected by [GHSA-gcqx-w48m-w2h4](https://github.com/advisories/GHSA-gcqx-w48m-w2h4); the advisory currently lists no patched release.
-- The affected parent ranges do not permit semver-compatible upgrades to the fixed major versions. A blanket override or \`npm audit fix --force\` is not accepted. These findings remain unpatched; owner risk acceptance or a future compatible upstream upgrade is required.
+- **Triage completed, remediation not completed:** the recorded audit contains 29 findings (4 Low / 25 Moderate / 0 High / 0 Critical). Lockfile inspection found the affected package instances only in the development/test dependency graph (`dev: true`), not as direct production dependencies.
+- `glob@13.0.7` and `glob@10.5.0` are affected by [GHSA-3g3m-2fjr-6pw4](https://github.com/advisories/GHSA-3g3m-2fjr-6pw4), fixed in 14.0.2; their parents currently require the 13.x and 10.x ranges.
+- `minimatch@10.2.6` and `minimatch@9.0.9` are affected by [GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249), fixed in 11.0.1; their parents currently require the 10.x and 9.x ranges.
+- `deepmerge@4.3.1` (under Jest configuration) is affected by [GHSA-gcqx-w48m-w2h4](https://github.com/advisories/GHSA-gcqx-w48m-w2h4); the advisory currently lists no patched release.
+- The affected parent ranges do not permit semver-compatible upgrades to the fixed major versions. A blanket override or `npm audit fix --force` is not accepted. These findings remain unpatched; owner risk acceptance or a future compatible upstream upgrade is required.
 - Prepare and approve a backup/restore and staged rollout plan before applying migrations to any persistent environment.
 - Sourcery's automated review is skipped because the PR exceeds its 20,000 changed-line limit. This is a tool limit, not a CI failure.
 
@@ -78,13 +78,13 @@ No migration was applied to the developer's local database, Staging or Productio
 
 The following are explicit review questions, not confirmed runtime defects:
 
-1. Confirm whether the database should enforce the reverse-existence invariant that every committed \`DEPOSIT_APPLICATION\` Payment has exactly one matching DepositApplication. The application insert validates its Payment and Allocation; the public service path creates the linked records atomically. Decide whether a directly inserted orphan internal Payment must also be impossible at the database boundary.
-2. Confirm the intended compatibility treatment of nullable \`actor_user_id\` columns on DepositTransaction/Expense. Service writes attach the authenticated actor; historical rows may remain NULL. Decide whether an insert-time database guard is required for any new direct write.
+1. Confirm whether the database should enforce the reverse-existence invariant that every committed `DEPOSIT_APPLICATION` Payment has exactly one matching DepositApplication. The application insert validates its Payment and Allocation; the public service path creates the linked records atomically. Decide whether a directly inserted orphan internal Payment must also be impossible at the database boundary.
+2. Confirm the intended compatibility treatment of nullable `actor_user_id` columns on DepositTransaction/Expense. Service writes attach the authenticated actor; historical rows may remain NULL. Decide whether an insert-time database guard is required for any new direct write.
 3. Independently re-check rollback/failure behavior, including the legacy preflight before the first M3c DDL, lock ordering on source deposits, DAPP reversal ordering, and the deferred Payment/Application consistency trigger.
 
 ## Decision
 
-**P1-7 is closed by HTTP/Supertest evidence.** The full CI pipeline is green on exact current PR head \`787809e663d982cca58d1e61f95ac84a9a3a9999\` (Run #102). Keep the PR Draft until a separate human reviewer signs off the two migrations and the financial invariants, the residual Low/Moderate dependency risk is accepted by the owner, and the backup/restore rehearsal plus staged rollout plan are approved.
+**P1-7 is closed by HTTP/Supertest evidence.** The full CI pipeline passed on the exact PR head `787809e663d982cca58d1e61f95ac84a9a3a9999` at the time of Run #102. Later changes to this PR are documentation-only. Keep the PR Draft until a separate human reviewer signs off the two migrations and the financial invariants, the residual Low/Moderate dependency risk is accepted by the owner, and the backup/restore rehearsal plus staged rollout plan are approved.
 
 ## Follow-up review — DAPP / Charge reversal ordering (2026-11-12)
 
@@ -97,4 +97,4 @@ The feature branch now includes:
 - A real-service Integration test that proves early Charge reversal is rejected without changing Charge/Application/release state, then reverses the DAPP and proves Charge reversal succeeds.
 - A migration-level SQL test for the same database rule and its valid post-application-reversal transition.
 
-**Verification status:** PASS on Run #101 for code-bearing SHA `3def75aab45c9080fccb889b2e8f96a4fc7418e7`; full CI also passed on exact current PR head `787809e663d982cca58d1e61f95ac84a9a3a9999` in Run #102. CI reports 99/99 M3c migration checks and 139/139 PostgreSQL integration tests. The database assertions cover complete DAPP reversal, source-specific balance protection, source/child reversal order, duplicate reversal rejection, and the prohibition on creating children after source reversal.
+**Verification status:** PASS on Run #101 for code-bearing SHA `3def75aab45c9080fccb889b2e8f96a4fc7418e7`; full CI also passed on exact PR head `787809e663d982cca58d1e61f95ac84a9a3a9999` at the time of Run #102. CI reports 99/99 M3c migration checks and 139/139 PostgreSQL integration tests. The database assertions cover complete DAPP reversal, source-specific balance protection, source/child reversal order, duplicate reversal rejection, and the prohibition on creating children after source reversal.
