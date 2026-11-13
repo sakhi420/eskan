@@ -18,7 +18,7 @@
 | 8   | ساکن/قرارداد/تخصیص | ✅ انجام شد (کد + smoke واقعی ۴۸/۴۸) | overlap, concurrency |
 | 8.1 | سخت‌سازی صحت/سازگاری (بازبینی) | ✅ انجام شد (P0 fixes + smoke ۱۴۴/۱۴۴ = 42+16+48+14+24) | atomic idempotency, CAS locking, resident overlap, transfer/checkout, fail-fast migration |
 | 8.2 | چرخه‌حیات هم‌روندی و یکپارچگی داده | ✅ انجام شد (LockService + business date + overlap contract + smoke ۱۵۷/۱۵۷ = 42+16+48+14+24+13) | resident contract overlap, row locks, business date, idempotency expiry |
-| 9   | مالی (charge/payment/deposit) | 🔄 در حال اجرا — M-1 ✅، M-2 ✅، 4c ✅، M3a ✅ (PR #2)، M3b ✅ (PR #4)، M3c ✅ (PR در انتظار)؛ M3d بعدی | integer AFN (A-016), reversal, immutability |
+| 9   | مالی (charge/payment/deposit) | 🔄 در حال اجرا — M-1 ✅، M-2 ✅، 4c ✅، M3a ✅ (PR #2)، M3b ✅ (PR #4)، M3c کدنویسی و CI ✅ (PR #5 باز، Draft، ادغام‌نشده؛ Run #102؛ 99/99 آزمون Migration)؛ بازبینی مستقل و Backup/Restore باقی؛ M3d بعدی | integer AFN (A-016), reversal, immutability |
 | 10  | مصارف و گزارش | ⏳ در انتظار | reports |
 | 11  | idempotency/audit/sync | ⏳ در انتظار | cursor, tombstone |
 | 12  | امنیت و سخت‌سازی | ⏳ در انتظار | OWASP, validation |
@@ -27,10 +27,12 @@
 | 15  | مستندات و تحویل | ⏳ در انتظار | — |
 | 16  | گزارش نهایی | ⏳ در انتظار | — |
 
-## وضعیت جاری فاز ۹ (M-gates) — به‌روز 2026-11-10
+## وضعیت جاری فاز ۹ (M-gates) — به‌روز 2026-11-13
 
 - **Merge:** M3a (Charge/Billing/Absence-Credit) از طریق **PR #2** ادغام شد (commit `41af931e8be5ef194670989cae603c6cb1c51eca`)؛ **M3b (Payment/Receipt/Allocation/Release) از طریق PR #4 ادغام شد** (merge commit `198423c6459dd385e1dc905bdd9314de3a29f746`). CI روی هر دو موفق بود.
-- **وضعیت M-gates:** M-1 ✅، M-2 ✅، 4c ✅، M3a ✅، **M3b ✅ (ادغام PR #4)**. M3c بعد، M3d پس از آن.
+- **وضعیت M-gates:** M-1 ✅، M-2 ✅، 4c ✅، M3a ✅، **M3b ✅ (ادغام PR #4)**. پیاده‌سازی M3c روی شاخهٔ `feat/m3c-deposit-expense-refund-reversal` کامل شده و PR #5 باز است؛ **هنوز Draft و ادغام‌نشده**. سرِ فعلی PR: `787809e663d982cca58d1e61f95ac84a9a3a9999`؛ CI کامل Run #102 موفق و M3c migration checks برابر 99/99 است. M3d پس از پذیرش و ادغام M3c.
+- **دروازه‌های باز M3c:** بازبینی مستقل نفر دوم روی دو Migration و قواعد مالی؛ تصمیم مالک دربارهٔ ۲۹ هشدار باقی‌ماندهٔ وابستگی توسعه/آزمون (۴ Low و ۲۵ Moderate، triage شده اما رفع نشده)؛ تمرین ثبت‌شدهٔ Backup/Restore روی Clone و تأیید rollout مرحله‌ای. تا تکمیل این موارد PR #5 در Draft می‌ماند و هیچ Migration مربوط به M3c روی `eskan_dev`، Staging یا Production اجرا نمی‌شود.
+
 - **وضعیت Migration در محیط‌ها (تفکیک دقیق):** migrationهای M-1/M-2/4c/M3a/M3b روی `eskan_dev` اعمال شده‌اند (M3a+M3b در 2026-11-11 با Backup + Rehearsal روی clone اعمال شد). **Staging و Production هیچ migration اعمال نشده است.** «تست‌شده در CI» ≠ «اعمال‌شده روی دیتابیس توسعه/Staging/Production».
 - **Absence Credit ≠ Absence Lifecycle:** M3a فقط تولید Credit را برای غیابتی که قبلاً به `RETURNED` رسیده پشتیبانی می‌کند. چرخهٔ کامل غیابت (درخواست/تأیید/ثبت خروج/تأیید بازگشت) هنوز کار مستقل و پیاده‌نشده است.
 - **Backend (از `src/` و OpenAPI):** ماژول‌های `auth`، `organizations`، `hostels/rooms/beds`، `residents`، `contracts`، `assignments`، `packages`، `charges` (M3a)، `payments` (M3b) و `deposits`/`expenses` (M3c) پیاده‌شده‌اند. ماژول‌های `reports`، `sync` (pull)، `admin/**` هنوز **ماژول اجرایی ندارند** (فقط در قرارداد/Schema وجود دارند).
