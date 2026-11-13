@@ -99,7 +99,7 @@ The recorded audit lists **29 findings: 4 Low, 25 Moderate, 0 High, 0 Critical**
 | `minimatch@10.2.6`, `minimatch@9.0.9` | [GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249) / `11.0.1` | Parent dependencies require 10.x and 9.x. |
 | `deepmerge@4.3.1` | [GHSA-gcqx-w48m-w2h4](https://github.com/advisories/GHSA-gcqx-w48m-w2h4) / no patched version listed | Pulled by `jest-config`. |
 
-Do not use a blind `npm audit fix --force` or major-version root overrides to make the report appear green. The CI gate `npm audit --audit-level=high` passes; that does not remediate the 29 Low/Moderate findings. The project owner must accept this development-tooling risk explicitly or defer merge until compatible upstream versions are available. Review the advisories directly before sign-off.
+Do not use a blind `npm audit fix --force` or major-version root overrides to make the report appear green. The CI gate `npm audit --audit-level=high` passes; that does not remediate the 29 Low/Moderate findings. The owner directed the merge while these findings remained open; this is not remediation and does not mean the findings are harmless. Keep them in the risk register and revisit when compatible upstream versions are available, before any Staging/Production rollout.
 
 ## Backup, restore, and rollout gate
 
