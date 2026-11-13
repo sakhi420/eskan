@@ -41,11 +41,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Dependency security gate (fail on high/critical)
+        run: npm audit --audit-level=high
+
       - name: Generate Prisma client
         run: npx prisma generate
 
       - name: Build
         run: npm run build
+
+      - name: Lint TypeScript
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check
 
       - name: Validate OpenAPI contract
         run: npm run openapi:validate
@@ -98,6 +107,9 @@ jobs:
 
       - name: M3b migrations & DB constraint tests
         run: node scripts/test-m3b-migration.cjs
+
+      - name: M3c migrations & DB constraint tests
+        run: node scripts/test-m3c-migration.cjs
 
       - name: PostgreSQL integration tests (lifecycle + concurrency + tenant isolation)
         run: npm run test:integration

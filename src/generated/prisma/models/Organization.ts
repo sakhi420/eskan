@@ -244,6 +244,9 @@ export type OrganizationWhereInput = {
   payments?: Prisma.PaymentListRelationFilter
   depositTransactions?: Prisma.DepositTransactionListRelationFilter
   expenses?: Prisma.ExpenseListRelationFilter
+  paymentRefunds?: Prisma.PaymentRefundListRelationFilter
+  depositApplications?: Prisma.DepositApplicationListRelationFilter
+  ledgerReversals?: Prisma.LedgerReversalListRelationFilter
   subscription?: Prisma.XOR<Prisma.OrganizationSubscriptionNullableScalarRelationFilter, Prisma.OrganizationSubscriptionWhereInput> | null
   subscriptionEvents?: Prisma.SubscriptionEventListRelationFilter
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentListRelationFilter
@@ -279,6 +282,9 @@ export type OrganizationOrderByWithRelationInput = {
   payments?: Prisma.PaymentOrderByRelationAggregateInput
   depositTransactions?: Prisma.DepositTransactionOrderByRelationAggregateInput
   expenses?: Prisma.ExpenseOrderByRelationAggregateInput
+  paymentRefunds?: Prisma.PaymentRefundOrderByRelationAggregateInput
+  depositApplications?: Prisma.DepositApplicationOrderByRelationAggregateInput
+  ledgerReversals?: Prisma.LedgerReversalOrderByRelationAggregateInput
   subscription?: Prisma.OrganizationSubscriptionOrderByWithRelationInput
   subscriptionEvents?: Prisma.SubscriptionEventOrderByRelationAggregateInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentOrderByRelationAggregateInput
@@ -317,6 +323,9 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   payments?: Prisma.PaymentListRelationFilter
   depositTransactions?: Prisma.DepositTransactionListRelationFilter
   expenses?: Prisma.ExpenseListRelationFilter
+  paymentRefunds?: Prisma.PaymentRefundListRelationFilter
+  depositApplications?: Prisma.DepositApplicationListRelationFilter
+  ledgerReversals?: Prisma.LedgerReversalListRelationFilter
   subscription?: Prisma.XOR<Prisma.OrganizationSubscriptionNullableScalarRelationFilter, Prisma.OrganizationSubscriptionWhereInput> | null
   subscriptionEvents?: Prisma.SubscriptionEventListRelationFilter
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentListRelationFilter
@@ -380,6 +389,9 @@ export type OrganizationCreateInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
@@ -415,6 +427,9 @@ export type OrganizationUncheckedCreateInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
@@ -450,6 +465,9 @@ export type OrganizationUpdateInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
@@ -485,6 +503,9 @@ export type OrganizationUncheckedUpdateInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -827,6 +848,48 @@ export type OrganizationUpdateOneRequiredWithoutExpensesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutExpensesInput, Prisma.OrganizationUpdateWithoutExpensesInput>, Prisma.OrganizationUncheckedUpdateWithoutExpensesInput>
 }
 
+export type OrganizationCreateNestedOneWithoutLedgerReversalsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutLedgerReversalsInput, Prisma.OrganizationUncheckedCreateWithoutLedgerReversalsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutLedgerReversalsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutLedgerReversalsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutLedgerReversalsInput, Prisma.OrganizationUncheckedCreateWithoutLedgerReversalsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutLedgerReversalsInput
+  upsert?: Prisma.OrganizationUpsertWithoutLedgerReversalsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutLedgerReversalsInput, Prisma.OrganizationUpdateWithoutLedgerReversalsInput>, Prisma.OrganizationUncheckedUpdateWithoutLedgerReversalsInput>
+}
+
+export type OrganizationCreateNestedOneWithoutPaymentRefundsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutPaymentRefundsInput, Prisma.OrganizationUncheckedCreateWithoutPaymentRefundsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutPaymentRefundsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutPaymentRefundsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutPaymentRefundsInput, Prisma.OrganizationUncheckedCreateWithoutPaymentRefundsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutPaymentRefundsInput
+  upsert?: Prisma.OrganizationUpsertWithoutPaymentRefundsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutPaymentRefundsInput, Prisma.OrganizationUpdateWithoutPaymentRefundsInput>, Prisma.OrganizationUncheckedUpdateWithoutPaymentRefundsInput>
+}
+
+export type OrganizationCreateNestedOneWithoutDepositApplicationsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutDepositApplicationsInput, Prisma.OrganizationUncheckedCreateWithoutDepositApplicationsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutDepositApplicationsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutDepositApplicationsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutDepositApplicationsInput, Prisma.OrganizationUncheckedCreateWithoutDepositApplicationsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutDepositApplicationsInput
+  upsert?: Prisma.OrganizationUpsertWithoutDepositApplicationsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutDepositApplicationsInput, Prisma.OrganizationUpdateWithoutDepositApplicationsInput>, Prisma.OrganizationUncheckedUpdateWithoutDepositApplicationsInput>
+}
+
 export type OrganizationCreateNestedOneWithoutSubscriptionInput = {
   create?: Prisma.XOR<Prisma.OrganizationCreateWithoutSubscriptionInput, Prisma.OrganizationUncheckedCreateWithoutSubscriptionInput>
   connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutSubscriptionInput
@@ -958,6 +1021,9 @@ export type OrganizationCreateWithoutMembershipsInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
@@ -992,6 +1058,9 @@ export type OrganizationUncheckedCreateWithoutMembershipsInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1042,6 +1111,9 @@ export type OrganizationUpdateWithoutMembershipsInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
@@ -1076,6 +1148,9 @@ export type OrganizationUncheckedUpdateWithoutMembershipsInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1110,6 +1185,9 @@ export type OrganizationCreateWithoutInvitationsInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
@@ -1144,6 +1222,9 @@ export type OrganizationUncheckedCreateWithoutInvitationsInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1194,6 +1275,9 @@ export type OrganizationUpdateWithoutInvitationsInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
@@ -1228,6 +1312,9 @@ export type OrganizationUncheckedUpdateWithoutInvitationsInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1262,6 +1349,9 @@ export type OrganizationCreateWithoutHostelsInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
@@ -1296,6 +1386,9 @@ export type OrganizationUncheckedCreateWithoutHostelsInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1346,6 +1439,9 @@ export type OrganizationUpdateWithoutHostelsInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
@@ -1380,6 +1476,9 @@ export type OrganizationUncheckedUpdateWithoutHostelsInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1414,6 +1513,9 @@ export type OrganizationCreateWithoutRoomsInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
@@ -1448,6 +1550,9 @@ export type OrganizationUncheckedCreateWithoutRoomsInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1498,6 +1603,9 @@ export type OrganizationUpdateWithoutRoomsInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
@@ -1532,6 +1640,9 @@ export type OrganizationUncheckedUpdateWithoutRoomsInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1566,6 +1677,9 @@ export type OrganizationCreateWithoutBedsInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
@@ -1600,6 +1714,9 @@ export type OrganizationUncheckedCreateWithoutBedsInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1650,6 +1767,9 @@ export type OrganizationUpdateWithoutBedsInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
@@ -1684,6 +1804,9 @@ export type OrganizationUncheckedUpdateWithoutBedsInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1719,6 +1842,9 @@ export type OrganizationCreateWithoutPackagesInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
@@ -1753,6 +1879,9 @@ export type OrganizationUncheckedCreateWithoutPackagesInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1803,6 +1932,9 @@ export type OrganizationUpdateWithoutPackagesInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
@@ -1837,6 +1969,9 @@ export type OrganizationUncheckedUpdateWithoutPackagesInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1871,6 +2006,9 @@ export type OrganizationCreateWithoutTemporaryAbsencesInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
@@ -1905,6 +2043,9 @@ export type OrganizationUncheckedCreateWithoutTemporaryAbsencesInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1955,6 +2096,9 @@ export type OrganizationUpdateWithoutTemporaryAbsencesInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
@@ -1989,6 +2133,9 @@ export type OrganizationUncheckedUpdateWithoutTemporaryAbsencesInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2022,6 +2169,9 @@ export type OrganizationCreateWithoutResidentsInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
@@ -2056,6 +2206,9 @@ export type OrganizationUncheckedCreateWithoutResidentsInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2106,6 +2259,9 @@ export type OrganizationUpdateWithoutResidentsInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
@@ -2140,6 +2296,9 @@ export type OrganizationUncheckedUpdateWithoutResidentsInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2174,6 +2333,9 @@ export type OrganizationCreateWithoutStayContractsInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
@@ -2208,6 +2370,9 @@ export type OrganizationUncheckedCreateWithoutStayContractsInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2258,6 +2423,9 @@ export type OrganizationUpdateWithoutStayContractsInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
@@ -2292,6 +2460,9 @@ export type OrganizationUncheckedUpdateWithoutStayContractsInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2326,6 +2497,9 @@ export type OrganizationCreateWithoutBedAssignmentsInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
@@ -2360,6 +2534,9 @@ export type OrganizationUncheckedCreateWithoutBedAssignmentsInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2410,6 +2587,9 @@ export type OrganizationUpdateWithoutBedAssignmentsInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
@@ -2444,6 +2624,9 @@ export type OrganizationUncheckedUpdateWithoutBedAssignmentsInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2478,6 +2661,9 @@ export type OrganizationCreateWithoutChargesInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
@@ -2512,6 +2698,9 @@ export type OrganizationUncheckedCreateWithoutChargesInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2562,6 +2751,9 @@ export type OrganizationUpdateWithoutChargesInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
@@ -2596,6 +2788,9 @@ export type OrganizationUncheckedUpdateWithoutChargesInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2631,6 +2826,9 @@ export type OrganizationCreateWithoutBillingRunsInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
@@ -2665,6 +2863,9 @@ export type OrganizationUncheckedCreateWithoutBillingRunsInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2715,6 +2916,9 @@ export type OrganizationUpdateWithoutBillingRunsInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
@@ -2749,6 +2953,9 @@ export type OrganizationUncheckedUpdateWithoutBillingRunsInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2782,6 +2989,9 @@ export type OrganizationCreateWithoutPaymentsInput = {
   charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
@@ -2816,6 +3026,9 @@ export type OrganizationUncheckedCreateWithoutPaymentsInput = {
   charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2866,6 +3079,9 @@ export type OrganizationUpdateWithoutPaymentsInput = {
   charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
@@ -2900,6 +3116,9 @@ export type OrganizationUncheckedUpdateWithoutPaymentsInput = {
   charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2935,6 +3154,9 @@ export type OrganizationCreateWithoutReceiptCountersInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
@@ -2969,6 +3191,9 @@ export type OrganizationUncheckedCreateWithoutReceiptCountersInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
@@ -3019,6 +3244,9 @@ export type OrganizationUpdateWithoutReceiptCountersInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
@@ -3053,6 +3281,9 @@ export type OrganizationUncheckedUpdateWithoutReceiptCountersInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -3087,6 +3318,9 @@ export type OrganizationCreateWithoutAllocationReleasesInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
@@ -3121,6 +3355,9 @@ export type OrganizationUncheckedCreateWithoutAllocationReleasesInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
@@ -3171,6 +3408,9 @@ export type OrganizationUpdateWithoutAllocationReleasesInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
@@ -3205,6 +3445,9 @@ export type OrganizationUncheckedUpdateWithoutAllocationReleasesInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -3238,6 +3481,9 @@ export type OrganizationCreateWithoutDepositTransactionsInput = {
   charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
   payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
@@ -3272,6 +3518,9 @@ export type OrganizationUncheckedCreateWithoutDepositTransactionsInput = {
   charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
@@ -3322,6 +3571,9 @@ export type OrganizationUpdateWithoutDepositTransactionsInput = {
   charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
@@ -3356,6 +3608,9 @@ export type OrganizationUncheckedUpdateWithoutDepositTransactionsInput = {
   charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -3390,6 +3645,9 @@ export type OrganizationCreateWithoutExpensesInput = {
   charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
   payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
@@ -3424,6 +3682,9 @@ export type OrganizationUncheckedCreateWithoutExpensesInput = {
   charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
@@ -3474,6 +3735,9 @@ export type OrganizationUpdateWithoutExpensesInput = {
   charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
@@ -3508,6 +3772,501 @@ export type OrganizationUncheckedUpdateWithoutExpensesInput = {
   charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
+  billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutLedgerReversalsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
+  billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutLedgerReversalsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
+  billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutLedgerReversalsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutLedgerReversalsInput, Prisma.OrganizationUncheckedCreateWithoutLedgerReversalsInput>
+}
+
+export type OrganizationUpsertWithoutLedgerReversalsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutLedgerReversalsInput, Prisma.OrganizationUncheckedUpdateWithoutLedgerReversalsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutLedgerReversalsInput, Prisma.OrganizationUncheckedCreateWithoutLedgerReversalsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutLedgerReversalsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutLedgerReversalsInput, Prisma.OrganizationUncheckedUpdateWithoutLedgerReversalsInput>
+}
+
+export type OrganizationUpdateWithoutLedgerReversalsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
+  billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutLedgerReversalsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
+  billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutPaymentRefundsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
+  billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutPaymentRefundsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
+  billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutPaymentRefundsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutPaymentRefundsInput, Prisma.OrganizationUncheckedCreateWithoutPaymentRefundsInput>
+}
+
+export type OrganizationUpsertWithoutPaymentRefundsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutPaymentRefundsInput, Prisma.OrganizationUncheckedUpdateWithoutPaymentRefundsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutPaymentRefundsInput, Prisma.OrganizationUncheckedCreateWithoutPaymentRefundsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutPaymentRefundsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutPaymentRefundsInput, Prisma.OrganizationUncheckedUpdateWithoutPaymentRefundsInput>
+}
+
+export type OrganizationUpdateWithoutPaymentRefundsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
+  billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutPaymentRefundsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUncheckedUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUncheckedUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutOrganizationNestedInput
+  billingRuns?: Prisma.BillingRunUncheckedUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutDepositApplicationsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceCreateNestedManyWithoutOrganizationInput
+  billingRuns?: Prisma.BillingRunCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutDepositApplicationsInput = {
+  id?: string
+  version?: number
+  name: string
+  timezone?: string
+  defaultCurrency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  hostels?: Prisma.HostelUncheckedCreateNestedManyWithoutOrganizationInput
+  rooms?: Prisma.RoomUncheckedCreateNestedManyWithoutOrganizationInput
+  beds?: Prisma.BedUncheckedCreateNestedManyWithoutOrganizationInput
+  residents?: Prisma.ResidentUncheckedCreateNestedManyWithoutOrganizationInput
+  stayContracts?: Prisma.StayContractUncheckedCreateNestedManyWithoutOrganizationInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedCreateNestedManyWithoutOrganizationInput
+  charges?: Prisma.ChargeUncheckedCreateNestedManyWithoutOrganizationInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
+  syncChanges?: Prisma.SyncChangeUncheckedCreateNestedManyWithoutOrganizationInput
+  syncState?: Prisma.OrganizationSyncStateUncheckedCreateNestedOneWithoutOrganizationInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUncheckedCreateNestedManyWithoutOrganizationInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutOrganizationInput
+  packages?: Prisma.AccommodationPackageUncheckedCreateNestedManyWithoutOrganizationInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutOrganizationInput
+  billingRuns?: Prisma.BillingRunUncheckedCreateNestedManyWithoutOrganizationInput
+  receiptCounters?: Prisma.ReceiptCounterUncheckedCreateNestedManyWithoutOrganizationInput
+  allocationReleases?: Prisma.AllocationReleaseUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutDepositApplicationsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutDepositApplicationsInput, Prisma.OrganizationUncheckedCreateWithoutDepositApplicationsInput>
+}
+
+export type OrganizationUpsertWithoutDepositApplicationsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutDepositApplicationsInput, Prisma.OrganizationUncheckedUpdateWithoutDepositApplicationsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutDepositApplicationsInput, Prisma.OrganizationUncheckedCreateWithoutDepositApplicationsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutDepositApplicationsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutDepositApplicationsInput, Prisma.OrganizationUncheckedUpdateWithoutDepositApplicationsInput>
+}
+
+export type OrganizationUpdateWithoutDepositApplicationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
+  manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
+  syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
+  syncChanges?: Prisma.SyncChangeUpdateManyWithoutOrganizationNestedInput
+  syncState?: Prisma.OrganizationSyncStateUpdateOneWithoutOrganizationNestedInput
+  idempotencyRecords?: Prisma.IdempotencyRecordUpdateManyWithoutOrganizationNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutOrganizationNestedInput
+  packages?: Prisma.AccommodationPackageUpdateManyWithoutOrganizationNestedInput
+  temporaryAbsences?: Prisma.TemporaryAbsenceUpdateManyWithoutOrganizationNestedInput
+  billingRuns?: Prisma.BillingRunUpdateManyWithoutOrganizationNestedInput
+  receiptCounters?: Prisma.ReceiptCounterUpdateManyWithoutOrganizationNestedInput
+  allocationReleases?: Prisma.AllocationReleaseUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutDepositApplicationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  hostels?: Prisma.HostelUncheckedUpdateManyWithoutOrganizationNestedInput
+  rooms?: Prisma.RoomUncheckedUpdateManyWithoutOrganizationNestedInput
+  beds?: Prisma.BedUncheckedUpdateManyWithoutOrganizationNestedInput
+  residents?: Prisma.ResidentUncheckedUpdateManyWithoutOrganizationNestedInput
+  stayContracts?: Prisma.StayContractUncheckedUpdateManyWithoutOrganizationNestedInput
+  bedAssignments?: Prisma.BedAssignmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  charges?: Prisma.ChargeUncheckedUpdateManyWithoutOrganizationNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -3543,6 +4302,9 @@ export type OrganizationCreateWithoutSubscriptionInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
   syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
@@ -3577,6 +4339,9 @@ export type OrganizationUncheckedCreateWithoutSubscriptionInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
   syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
@@ -3627,6 +4392,9 @@ export type OrganizationUpdateWithoutSubscriptionInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
   syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
@@ -3661,6 +4429,9 @@ export type OrganizationUncheckedUpdateWithoutSubscriptionInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -3695,6 +4466,9 @@ export type OrganizationCreateWithoutSubscriptionEventsInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
   syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
@@ -3729,6 +4503,9 @@ export type OrganizationUncheckedCreateWithoutSubscriptionEventsInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
   syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
@@ -3779,6 +4556,9 @@ export type OrganizationUpdateWithoutSubscriptionEventsInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
   syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
@@ -3813,6 +4593,9 @@ export type OrganizationUncheckedUpdateWithoutSubscriptionEventsInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -3847,6 +4630,9 @@ export type OrganizationCreateWithoutManualSubscriptionPaymentsInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
   syncDevices?: Prisma.SyncDeviceCreateNestedManyWithoutOrganizationInput
@@ -3881,6 +4667,9 @@ export type OrganizationUncheckedCreateWithoutManualSubscriptionPaymentsInput = 
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
   syncDevices?: Prisma.SyncDeviceUncheckedCreateNestedManyWithoutOrganizationInput
@@ -3931,6 +4720,9 @@ export type OrganizationUpdateWithoutManualSubscriptionPaymentsInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
   syncDevices?: Prisma.SyncDeviceUpdateManyWithoutOrganizationNestedInput
@@ -3965,6 +4757,9 @@ export type OrganizationUncheckedUpdateWithoutManualSubscriptionPaymentsInput = 
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
   syncDevices?: Prisma.SyncDeviceUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -3999,6 +4794,9 @@ export type OrganizationCreateWithoutSyncDevicesInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
@@ -4033,6 +4831,9 @@ export type OrganizationUncheckedCreateWithoutSyncDevicesInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
@@ -4083,6 +4884,9 @@ export type OrganizationUpdateWithoutSyncDevicesInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
@@ -4117,6 +4921,9 @@ export type OrganizationUncheckedUpdateWithoutSyncDevicesInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -4151,6 +4958,9 @@ export type OrganizationCreateWithoutSyncChangesInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
@@ -4185,6 +4995,9 @@ export type OrganizationUncheckedCreateWithoutSyncChangesInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
@@ -4235,6 +5048,9 @@ export type OrganizationUpdateWithoutSyncChangesInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
@@ -4269,6 +5085,9 @@ export type OrganizationUncheckedUpdateWithoutSyncChangesInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -4303,6 +5122,9 @@ export type OrganizationCreateWithoutSyncStateInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
@@ -4337,6 +5159,9 @@ export type OrganizationUncheckedCreateWithoutSyncStateInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
@@ -4387,6 +5212,9 @@ export type OrganizationUpdateWithoutSyncStateInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
@@ -4421,6 +5249,9 @@ export type OrganizationUncheckedUpdateWithoutSyncStateInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -4455,6 +5286,9 @@ export type OrganizationCreateWithoutIdempotencyRecordsInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
@@ -4489,6 +5323,9 @@ export type OrganizationUncheckedCreateWithoutIdempotencyRecordsInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
@@ -4539,6 +5376,9 @@ export type OrganizationUpdateWithoutIdempotencyRecordsInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
@@ -4573,6 +5413,9 @@ export type OrganizationUncheckedUpdateWithoutIdempotencyRecordsInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -4607,6 +5450,9 @@ export type OrganizationCreateWithoutAuditEventsInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentCreateNestedManyWithoutOrganizationInput
@@ -4641,6 +5487,9 @@ export type OrganizationUncheckedCreateWithoutAuditEventsInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrganizationInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrganizationInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutOrganizationInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedCreateNestedManyWithoutOrganizationInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutOrganizationInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedCreateNestedManyWithoutOrganizationInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedCreateNestedManyWithoutOrganizationInput
@@ -4691,6 +5540,9 @@ export type OrganizationUpdateWithoutAuditEventsInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUpdateManyWithoutOrganizationNestedInput
@@ -4725,6 +5577,9 @@ export type OrganizationUncheckedUpdateWithoutAuditEventsInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrganizationNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutOrganizationNestedInput
+  paymentRefunds?: Prisma.PaymentRefundUncheckedUpdateManyWithoutOrganizationNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutOrganizationNestedInput
+  ledgerReversals?: Prisma.LedgerReversalUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   subscriptionEvents?: Prisma.SubscriptionEventUncheckedUpdateManyWithoutOrganizationNestedInput
   manualSubscriptionPayments?: Prisma.ManualSubscriptionPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -4757,6 +5612,9 @@ export type OrganizationCountOutputType = {
   payments: number
   depositTransactions: number
   expenses: number
+  paymentRefunds: number
+  depositApplications: number
+  ledgerReversals: number
   subscriptionEvents: number
   manualSubscriptionPayments: number
   syncDevices: number
@@ -4783,6 +5641,9 @@ export type OrganizationCountOutputTypeSelect<ExtArgs extends runtime.Types.Exte
   payments?: boolean | OrganizationCountOutputTypeCountPaymentsArgs
   depositTransactions?: boolean | OrganizationCountOutputTypeCountDepositTransactionsArgs
   expenses?: boolean | OrganizationCountOutputTypeCountExpensesArgs
+  paymentRefunds?: boolean | OrganizationCountOutputTypeCountPaymentRefundsArgs
+  depositApplications?: boolean | OrganizationCountOutputTypeCountDepositApplicationsArgs
+  ledgerReversals?: boolean | OrganizationCountOutputTypeCountLedgerReversalsArgs
   subscriptionEvents?: boolean | OrganizationCountOutputTypeCountSubscriptionEventsArgs
   manualSubscriptionPayments?: boolean | OrganizationCountOutputTypeCountManualSubscriptionPaymentsArgs
   syncDevices?: boolean | OrganizationCountOutputTypeCountSyncDevicesArgs
@@ -4893,6 +5754,27 @@ export type OrganizationCountOutputTypeCountExpensesArgs<ExtArgs extends runtime
 /**
  * OrganizationCountOutputType without action
  */
+export type OrganizationCountOutputTypeCountPaymentRefundsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PaymentRefundWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountDepositApplicationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DepositApplicationWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountLedgerReversalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LedgerReversalWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
 export type OrganizationCountOutputTypeCountSubscriptionEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.SubscriptionEventWhereInput
 }
@@ -4988,6 +5870,9 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   payments?: boolean | Prisma.Organization$paymentsArgs<ExtArgs>
   depositTransactions?: boolean | Prisma.Organization$depositTransactionsArgs<ExtArgs>
   expenses?: boolean | Prisma.Organization$expensesArgs<ExtArgs>
+  paymentRefunds?: boolean | Prisma.Organization$paymentRefundsArgs<ExtArgs>
+  depositApplications?: boolean | Prisma.Organization$depositApplicationsArgs<ExtArgs>
+  ledgerReversals?: boolean | Prisma.Organization$ledgerReversalsArgs<ExtArgs>
   subscription?: boolean | Prisma.Organization$subscriptionArgs<ExtArgs>
   subscriptionEvents?: boolean | Prisma.Organization$subscriptionEventsArgs<ExtArgs>
   manualSubscriptionPayments?: boolean | Prisma.Organization$manualSubscriptionPaymentsArgs<ExtArgs>
@@ -5048,6 +5933,9 @@ export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.Interna
   payments?: boolean | Prisma.Organization$paymentsArgs<ExtArgs>
   depositTransactions?: boolean | Prisma.Organization$depositTransactionsArgs<ExtArgs>
   expenses?: boolean | Prisma.Organization$expensesArgs<ExtArgs>
+  paymentRefunds?: boolean | Prisma.Organization$paymentRefundsArgs<ExtArgs>
+  depositApplications?: boolean | Prisma.Organization$depositApplicationsArgs<ExtArgs>
+  ledgerReversals?: boolean | Prisma.Organization$ledgerReversalsArgs<ExtArgs>
   subscription?: boolean | Prisma.Organization$subscriptionArgs<ExtArgs>
   subscriptionEvents?: boolean | Prisma.Organization$subscriptionEventsArgs<ExtArgs>
   manualSubscriptionPayments?: boolean | Prisma.Organization$manualSubscriptionPaymentsArgs<ExtArgs>
@@ -5081,6 +5969,9 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     payments: Prisma.$PaymentPayload<ExtArgs>[]
     depositTransactions: Prisma.$DepositTransactionPayload<ExtArgs>[]
     expenses: Prisma.$ExpensePayload<ExtArgs>[]
+    paymentRefunds: Prisma.$PaymentRefundPayload<ExtArgs>[]
+    depositApplications: Prisma.$DepositApplicationPayload<ExtArgs>[]
+    ledgerReversals: Prisma.$LedgerReversalPayload<ExtArgs>[]
     subscription: Prisma.$OrganizationSubscriptionPayload<ExtArgs> | null
     subscriptionEvents: Prisma.$SubscriptionEventPayload<ExtArgs>[]
     manualSubscriptionPayments: Prisma.$ManualSubscriptionPaymentPayload<ExtArgs>[]
@@ -5509,6 +6400,9 @@ export interface Prisma__OrganizationClient<T, Null = never, ExtArgs extends run
   payments<T extends Prisma.Organization$paymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   depositTransactions<T extends Prisma.Organization$depositTransactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$depositTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DepositTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   expenses<T extends Prisma.Organization$expensesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$expensesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ExpensePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  paymentRefunds<T extends Prisma.Organization$paymentRefundsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$paymentRefundsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentRefundPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  depositApplications<T extends Prisma.Organization$depositApplicationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$depositApplicationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DepositApplicationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  ledgerReversals<T extends Prisma.Organization$ledgerReversalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$ledgerReversalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LedgerReversalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   subscription<T extends Prisma.Organization$subscriptionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$subscriptionArgs<ExtArgs>>): Prisma.Prisma__OrganizationSubscriptionClient<runtime.Types.Result.GetResult<Prisma.$OrganizationSubscriptionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   subscriptionEvents<T extends Prisma.Organization$subscriptionEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$subscriptionEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubscriptionEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   manualSubscriptionPayments<T extends Prisma.Organization$manualSubscriptionPaymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$manualSubscriptionPaymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ManualSubscriptionPaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -6236,6 +7130,78 @@ export type Organization$expensesArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.ExpenseScalarFieldEnum | Prisma.ExpenseScalarFieldEnum[]
+}
+
+/**
+ * Organization.paymentRefunds
+ */
+export type Organization$paymentRefundsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PaymentRefund
+   */
+  select?: Prisma.PaymentRefundSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PaymentRefund
+   */
+  omit?: Prisma.PaymentRefundOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentRefundInclude<ExtArgs> | null
+  where?: Prisma.PaymentRefundWhereInput
+  orderBy?: Prisma.PaymentRefundOrderByWithRelationInput | Prisma.PaymentRefundOrderByWithRelationInput[]
+  cursor?: Prisma.PaymentRefundWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PaymentRefundScalarFieldEnum | Prisma.PaymentRefundScalarFieldEnum[]
+}
+
+/**
+ * Organization.depositApplications
+ */
+export type Organization$depositApplicationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DepositApplication
+   */
+  select?: Prisma.DepositApplicationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DepositApplication
+   */
+  omit?: Prisma.DepositApplicationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DepositApplicationInclude<ExtArgs> | null
+  where?: Prisma.DepositApplicationWhereInput
+  orderBy?: Prisma.DepositApplicationOrderByWithRelationInput | Prisma.DepositApplicationOrderByWithRelationInput[]
+  cursor?: Prisma.DepositApplicationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DepositApplicationScalarFieldEnum | Prisma.DepositApplicationScalarFieldEnum[]
+}
+
+/**
+ * Organization.ledgerReversals
+ */
+export type Organization$ledgerReversalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LedgerReversal
+   */
+  select?: Prisma.LedgerReversalSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LedgerReversal
+   */
+  omit?: Prisma.LedgerReversalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LedgerReversalInclude<ExtArgs> | null
+  where?: Prisma.LedgerReversalWhereInput
+  orderBy?: Prisma.LedgerReversalOrderByWithRelationInput | Prisma.LedgerReversalOrderByWithRelationInput[]
+  cursor?: Prisma.LedgerReversalWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LedgerReversalScalarFieldEnum | Prisma.LedgerReversalScalarFieldEnum[]
 }
 
 /**

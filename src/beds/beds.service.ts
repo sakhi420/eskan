@@ -6,7 +6,12 @@ import { ErrorCode } from '../common/errors/error-codes';
 import { IdempotencyService } from '../common/idempotency/idempotency.service';
 import { LockService } from '../common/concurrency/lock.service';
 import { isUniqueViolation } from '../common/prisma/unique-violation';
-import { ArchiveStatus, AssignmentStatus, BedStatus, MaintenanceStatus } from '../generated/prisma/enums';
+import {
+  ArchiveStatus,
+  AssignmentStatus,
+  BedStatus,
+  MaintenanceStatus,
+} from '../generated/prisma/enums';
 import { BedDto } from './dto/bed.dto';
 
 const BED_SELECT = {
@@ -132,7 +137,13 @@ export class BedsService {
         await this.assertRoomForCreate(tx, organizationId, roomId);
         try {
           const bed = await tx.bed.create({
-            data: { organizationId, roomId, code: dto.code, notes: dto.notes, maintenanceStatus: dto.maintenanceStatus ?? MaintenanceStatus.OPERATIONAL },
+            data: {
+              organizationId,
+              roomId,
+              code: dto.code,
+              notes: dto.notes,
+              maintenanceStatus: dto.maintenanceStatus ?? MaintenanceStatus.OPERATIONAL,
+            },
             select: BED_SELECT,
           });
           return toBedDto(bed);

@@ -44,7 +44,12 @@ export class PackagesController {
   ) {
     return envelope(
       req,
-      await this.packages.list(membership.organizationId, hostelId, parsePage(pageRaw), parseSize(sizeRaw)),
+      await this.packages.list(
+        membership.organizationId,
+        hostelId,
+        parsePage(pageRaw),
+        parseSize(sizeRaw),
+      ),
     );
   }
 

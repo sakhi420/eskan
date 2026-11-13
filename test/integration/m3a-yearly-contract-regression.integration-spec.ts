@@ -25,7 +25,9 @@ function assertLocalTestHost(): void {
     const u = new URL(BASE_URL);
     host = u.hostname;
     db = decodeURIComponent(u.pathname.replace(/^\//, ''));
-  } catch { /* keep empty */ }
+  } catch {
+    /* keep empty */
+  }
   const okHost = ['localhost', '127.0.0.1', '::1'].includes(host);
   const okDb = ['eskan_dev', 'eskan_test', 'eskan_testing'].includes(db);
   if ((!okHost || !okDb) && process.env.ESKAN_TEST_DB_ALLOW !== '1') {
@@ -36,18 +38,35 @@ function assertLocalTestHost(): void {
   }
 }
 
-interface LegacyFixture { org: string; hostel: string; resident: string; contract: string; }
+interface LegacyFixture {
+  org: string;
+  hostel: string;
+  resident: string;
+  contract: string;
+}
 
 /**
  * Seeds a legacy stay_contract DIRECTLY in PostgreSQL (bypassing the service
  * and its YEARLY rejection) so the regression test exercises the exact data a
  * pre-M3a database would contain: a DRAFT contract with billing_cycle=YEARLY.
  */
-async function seedLegacyDraft(db: Client, billingCycle: 'MONTHLY' | 'YEARLY'): Promise<LegacyFixture> {
-  const org = randomUUID(), hostel = randomUUID(), resident = randomUUID(), contract = randomUUID();
+async function seedLegacyDraft(
+  db: Client,
+  billingCycle: 'MONTHLY' | 'YEARLY',
+): Promise<LegacyFixture> {
+  const org = randomUUID(),
+    hostel = randomUUID(),
+    resident = randomUUID(),
+    contract = randomUUID();
   await db.query(`INSERT INTO organizations (id, name, updated_at) VALUES ($1,'Org',now())`, [org]);
-  await db.query(`INSERT INTO hostels (id, organization_id, name, updated_at) VALUES ($1,$2,'H',now())`, [hostel, org]);
-  await db.query(`INSERT INTO residents (id, organization_id, full_name, updated_at) VALUES ($1,$2,'R',now())`, [resident, org]);
+  await db.query(
+    `INSERT INTO hostels (id, organization_id, name, updated_at) VALUES ($1,$2,'H',now())`,
+    [hostel, org],
+  );
+  await db.query(
+    `INSERT INTO residents (id, organization_id, full_name, updated_at) VALUES ($1,$2,'R',now())`,
+    [resident, org],
+  );
   await db.query(
     `INSERT INTO stay_contracts (id, organization_id, hostel_id, resident_id, contract_number, status, start_date, rent_amount, billing_cycle, updated_at)
      VALUES ($1,$2,$3,$4,$5,'DRAFT','2026-11-01',5000,$6,now())`,
@@ -89,7 +108,9 @@ describe('M3a legacy YEARLY contract regression (real PostgreSQL + real services
       encoding: 'utf8',
     });
     if (r.status !== 0) {
-      throw new Error(`prisma migrate deploy failed (status ${r.status}):\n${r.stdout ?? ''}\n${r.stderr ?? ''}`);
+      throw new Error(
+        `prisma migrate deploy failed (status ${r.status}):\n${r.stdout ?? ''}\n${r.stderr ?? ''}`,
+      );
     }
 
     prisma = new PrismaService();
@@ -114,14 +135,18 @@ describe('M3a legacy YEARLY contract regression (real PostgreSQL + real services
     const f = await seedLegacyDraft(db, 'YEARLY');
 
     // Prove the legacy row really is YEARLY before we touch it.
-    const before = await db.query(`SELECT billing_cycle, version FROM stay_contracts WHERE id=$1`, [f.contract]);
+    const before = await db.query(`SELECT billing_cycle, version FROM stay_contracts WHERE id=$1`, [
+      f.contract,
+    ]);
     expect(before.rows[0].billing_cycle).toBe('YEARLY');
 
     // Update only notes/other fields, omitting billingCycle entirely.
     const r: any = await contracts.update(f.org, f.contract, 1, editDto(f) as any);
 
     expect(r.billingCycle).toBe('YEARLY');
-    const after = await db.query(`SELECT billing_cycle, version FROM stay_contracts WHERE id=$1`, [f.contract]);
+    const after = await db.query(`SELECT billing_cycle, version FROM stay_contracts WHERE id=$1`, [
+      f.contract,
+    ]);
     expect(after.rows[0].billing_cycle).toBe('YEARLY');
     expect(after.rows[0].version).toBe(2);
   });
@@ -133,7 +158,10 @@ describe('M3a legacy YEARLY contract regression (real PostgreSQL + real services
       contracts.activate(f.org, f.contract, randomUUID(), randomUUID(), 1),
     ).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
 
-    const row = await db.query(`SELECT status, version, billing_cycle FROM stay_contracts WHERE id=$1`, [f.contract]);
+    const row = await db.query(
+      `SELECT status, version, billing_cycle FROM stay_contracts WHERE id=$1`,
+      [f.contract],
+    );
     expect(row.rows[0].status).toBe('DRAFT');
     expect(row.rows[0].version).toBe(1);
     expect(row.rows[0].billing_cycle).toBe('YEARLY');
@@ -143,18 +171,34 @@ describe('M3a legacy YEARLY contract regression (real PostgreSQL + real services
     const f = await seedLegacyDraft(db, 'YEARLY');
 
     // Explicit decision to convert the legacy cycle to MONTHLY.
-    const updated: any = await contracts.update(f.org, f.contract, 1, editDto(f, { billingCycle: 'MONTHLY' }) as any);
+    const updated: any = await contracts.update(
+      f.org,
+      f.contract,
+      1,
+      editDto(f, { billingCycle: 'MONTHLY' }) as any,
+    );
     expect(updated.billingCycle).toBe('MONTHLY');
 
-    const mid = await db.query(`SELECT billing_cycle, version FROM stay_contracts WHERE id=$1`, [f.contract]);
+    const mid = await db.query(`SELECT billing_cycle, version FROM stay_contracts WHERE id=$1`, [
+      f.contract,
+    ]);
     expect(mid.rows[0].billing_cycle).toBe('MONTHLY');
     expect(mid.rows[0].version).toBe(2);
 
     // Now activation succeeds.
-    const activated: any = await contracts.activate(f.org, f.contract, randomUUID(), randomUUID(), 2);
+    const activated: any = await contracts.activate(
+      f.org,
+      f.contract,
+      randomUUID(),
+      randomUUID(),
+      2,
+    );
     expect(activated.status).toBe('ACTIVE');
 
-    const final = await db.query(`SELECT status, version, billing_cycle FROM stay_contracts WHERE id=$1`, [f.contract]);
+    const final = await db.query(
+      `SELECT status, version, billing_cycle FROM stay_contracts WHERE id=$1`,
+      [f.contract],
+    );
     expect(final.rows[0].status).toBe('ACTIVE');
     expect(final.rows[0].version).toBe(3);
     expect(final.rows[0].billing_cycle).toBe('MONTHLY');

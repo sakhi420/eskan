@@ -77,48 +77,48 @@ export class AuthService {
     let user: UserRecord;
     try {
       user = await this.prisma.$transaction(async (tx) => {
-      const free = await tx.subscriptionPlan.findUnique({ where: { code: 'FREE' } });
-      if (!free) {
-        throw AppError.conflict('Subscription plans are not seeded (FREE plan missing)');
-      }
+        const free = await tx.subscriptionPlan.findUnique({ where: { code: 'FREE' } });
+        if (!free) {
+          throw AppError.conflict('Subscription plans are not seeded (FREE plan missing)');
+        }
 
-      const createdUser = await tx.user.create({
-        data: { email, passwordHash, fullName: dto.fullName.trim() },
-      });
+        const createdUser = await tx.user.create({
+          data: { email, passwordHash, fullName: dto.fullName.trim() },
+        });
 
-      const org = await tx.organization.create({
-        data: {
-          name: dto.organizationName.trim(),
-          memberships: { create: { userId: createdUser.id, role: 'OWNER' } },
-        },
-      });
-
-      await tx.organizationSubscription.create({
-        data: {
-          organizationId: org.id,
-          planId: free.id,
-          status: 'TRIALING',
-          trialStartsAt: now,
-          trialEndsAt,
-        },
-      });
-
-      await tx.subscriptionEvent.create({
-        data: {
-          organizationId: org.id,
-          actorUserId: createdUser.id,
-          action: 'TRIAL_STARTED',
-          traceId,
-          after: {
-            status: 'TRIALING',
-            planCode: free.code,
-            trialEndsAt: trialEndsAt.toISOString(),
+        const org = await tx.organization.create({
+          data: {
+            name: dto.organizationName.trim(),
+            memberships: { create: { userId: createdUser.id, role: 'OWNER' } },
           },
-        },
-      });
+        });
 
-      return createdUser;
-    });
+        await tx.organizationSubscription.create({
+          data: {
+            organizationId: org.id,
+            planId: free.id,
+            status: 'TRIALING',
+            trialStartsAt: now,
+            trialEndsAt,
+          },
+        });
+
+        await tx.subscriptionEvent.create({
+          data: {
+            organizationId: org.id,
+            actorUserId: createdUser.id,
+            action: 'TRIAL_STARTED',
+            traceId,
+            after: {
+              status: 'TRIALING',
+              planCode: free.code,
+              trialEndsAt: trialEndsAt.toISOString(),
+            },
+          },
+        });
+
+        return createdUser;
+      });
     } catch (err) {
       if (isUniqueViolation(err)) {
         // Lost a concurrent registration for the same email.
@@ -172,15 +172,22 @@ export class AuthService {
         where: { id: session.replacedById },
         select: { replacedById: true, revokedAt: true },
       });
-      const successorConsumed = !successor || successor.replacedById !== null || successor.revokedAt !== null;
+      const successorConsumed =
+        !successor || successor.replacedById !== null || successor.revokedAt !== null;
       if (successorConsumed) {
         await this.revokeFamily(session.userId, session.family);
-        throw AppError.unauthorized('Refresh token has been reused and was revoked', ErrorCode.REFRESH_TOKEN_REUSED);
+        throw AppError.unauthorized(
+          'Refresh token has been reused and was revoked',
+          ErrorCode.REFRESH_TOKEN_REUSED,
+        );
       }
       // The successor is still the active tip: this is a concurrent double-submit
       // of the same token, not a proven reuse. Reject WITHOUT revoking the family
       // (revoking here would log out the legitimate client that just won).
-      throw AppError.unauthorized('Refresh token rotation conflict; retry with the new token', ErrorCode.REFRESH_TOKEN_ROTATION_CONFLICT);
+      throw AppError.unauthorized(
+        'Refresh token rotation conflict; retry with the new token',
+        ErrorCode.REFRESH_TOKEN_ROTATION_CONFLICT,
+      );
     }
     if (session.revokedAt !== null) {
       // Explicitly revoked (logout / logout-all / change-password).
@@ -236,7 +243,10 @@ export class AuthService {
     });
 
     if (!rotated) {
-      throw AppError.unauthorized('Refresh token rotation conflict; retry with the new token', ErrorCode.REFRESH_TOKEN_ROTATION_CONFLICT);
+      throw AppError.unauthorized(
+        'Refresh token rotation conflict; retry with the new token',
+        ErrorCode.REFRESH_TOKEN_ROTATION_CONFLICT,
+      );
     }
 
     return { ...payload, refreshToken: raw };

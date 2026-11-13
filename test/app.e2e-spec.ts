@@ -25,14 +25,20 @@ describe('HealthController (e2e)', () => {
   });
 
   it('GET /health/live returns ok', () => {
-    return request(app.getHttpServer()).get('/health/live').expect(200).expect((res) => {
-      expect(res.body.status).toBe('ok');
-    });
+    return request(app.getHttpServer())
+      .get('/health/live')
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.status).toBe('ok');
+      });
   });
 
   it('GET /health/ready reports database up', () => {
-    return request(app.getHttpServer()).get('/health/ready').expect(200).expect((res) => {
-      expect(res.body.database).toBe('up');
-    });
+    return request(app.getHttpServer())
+      .get('/health/ready')
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.database).toBe('up');
+      });
   });
 });

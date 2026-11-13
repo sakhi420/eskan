@@ -138,6 +138,21 @@ export type DepositTransaction = Prisma.DepositTransactionModel
  */
 export type Expense = Prisma.ExpenseModel
 /**
+ * Model LedgerReversal
+ * 
+ */
+export type LedgerReversal = Prisma.LedgerReversalModel
+/**
+ * Model PaymentRefund
+ * 
+ */
+export type PaymentRefund = Prisma.PaymentRefundModel
+/**
+ * Model DepositApplication
+ * 
+ */
+export type DepositApplication = Prisma.DepositApplicationModel
+/**
  * Model SubscriptionPlan
  * 
  */

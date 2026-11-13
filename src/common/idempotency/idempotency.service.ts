@@ -85,7 +85,11 @@ export class IdempotencyService {
     // longer occupies storage or participates in the unique index.
     // PERMANENT records (queueable offline-first lifecycle mutations) are never
     // lazily expired or deleted; only TRANSIENT records follow the 30-day window.
-    if (existing.retentionClass !== 'PERMANENT' && existing.expiresAt != null && existing.expiresAt.getTime() <= Date.now()) {
+    if (
+      existing.retentionClass !== 'PERMANENT' &&
+      existing.expiresAt != null &&
+      existing.expiresAt.getTime() <= Date.now()
+    ) {
       await this.prisma.idempotencyRecord.deleteMany({ where: { id: existing.id } });
       return null;
     }
@@ -123,7 +127,11 @@ export class IdempotencyService {
 
     if (!existing) return null;
 
-    if (existing.retentionClass !== 'PERMANENT' && existing.expiresAt != null && existing.expiresAt.getTime() <= Date.now()) {
+    if (
+      existing.retentionClass !== 'PERMANENT' &&
+      existing.expiresAt != null &&
+      existing.expiresAt.getTime() <= Date.now()
+    ) {
       await this.prisma.idempotencyRecord.deleteMany({ where: { id: existing.id } });
       return null;
     }
@@ -207,7 +215,10 @@ export class IdempotencyService {
       return await this.prisma.$transaction(async (tx) => {
         await this.claim(tx, args);
         const result = await mutate(tx);
-        await this.complete(tx, { ...args, responseBody: replay ? replay.toRecord(result) : result });
+        await this.complete(tx, {
+          ...args,
+          responseBody: replay ? replay.toRecord(result) : result,
+        });
         return result;
       });
     } catch (err) {

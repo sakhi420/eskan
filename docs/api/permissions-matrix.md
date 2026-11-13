@@ -50,6 +50,7 @@
 | POST /deposit-transactions/{depositTransactionId}/refund | depositRefund | OWNER, ADMIN |
 | POST /deposit-transactions/{depositTransactionId}/forfeit | depositForfeit | OWNER, ADMIN |
 | POST /residents/{residentId}/deposits/apply | depositApply | OWNER, ADMIN |
+| POST /deposit-applications/{applicationId}/reverse | depositApplicationReverse | OWNER, ADMIN |
 | POST /expenses | expenseCreate | OWNER, ADMIN, OPERATOR |
 | POST /expenses/{expenseId}/reverse | expenseReverse | OWNER, ADMIN |
 | POST /billing-runs | billingRunPost | OWNER, ADMIN |
@@ -141,7 +142,7 @@
 - عضویت دارد ولی نقش کافی ندارد → **403** `FORBIDDEN`/`INSUFFICIENT_ROLE`.
 - همهٔ enforcement سمت سرور؛ مخفی‌کردن دکمه در UI مجوز نیست.
 
-> **قرارداد هدف در برابر رفتار فعلی کد (gap شناخته‌شده):** قواعد ۴۰۴/۴۰۳ بالا سیاستِ هدف است. کد فعلی `TenantGuard` عدم عضویت را `403` برمی‌گرداند و `PlatformAdminGuard` غیر-ادمین را `403` برمی‌گرداند؛ هم‌ترازی این رفتار با ۴۰۴ هدف، کار مرحلهٔ پیاده‌سازی است (نه این اسناد). تا آن زمان این سیاست باید «قرارداد آینده» تلقی شود، نه قابلیتِ اجراشدهٔ فعلی.
+> **رفتار اجرایی:** انتخاب سازمانی با `X-Organization-Id` که کاربر عضو فعال آن نیست، از `TenantGuard` با پاسخ عمومی `404 RESOURCE_NOT_FOUND` رد می‌شود تا وجود یا عدم وجود سازمان افشا نشود. کاربر بدون هیچ عضویت فعال همچنان `403` می‌گیرد؛ عضویت معتبر با نقش ناکافی نیز `403` است. در مسیرهای Platform Admin، غیر `PLATFORM_ADMIN` همچنان `403` می‌گیرد.
 
 ## نکات
 

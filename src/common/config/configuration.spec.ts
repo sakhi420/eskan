@@ -6,7 +6,9 @@ describe('configuration.validate', () => {
   });
 
   it('throws when JWT_SECRET is missing', () => {
-    expect(() => validate({ DATABASE_URL: 'postgresql://localhost:5432/eskan_dev' })).toThrow(/JWT_SECRET/);
+    expect(() => validate({ DATABASE_URL: 'postgresql://localhost:5432/eskan_dev' })).toThrow(
+      /JWT_SECRET/,
+    );
   });
 
   it('returns the config when required vars are present', () => {

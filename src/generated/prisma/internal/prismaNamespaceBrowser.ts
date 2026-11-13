@@ -75,6 +75,9 @@ export const ModelName = {
   AllocationRelease: 'AllocationRelease',
   DepositTransaction: 'DepositTransaction',
   Expense: 'Expense',
+  LedgerReversal: 'LedgerReversal',
+  PaymentRefund: 'PaymentRefund',
+  DepositApplication: 'DepositApplication',
   SubscriptionPlan: 'SubscriptionPlan',
   OrganizationSubscription: 'OrganizationSubscription',
   SubscriptionEvent: 'SubscriptionEvent',
@@ -473,11 +476,13 @@ export const DepositTransactionScalarFieldEnum = {
   version: 'version',
   organizationId: 'organizationId',
   residentId: 'residentId',
+  sourceDepositTransactionId: 'sourceDepositTransactionId',
   type: 'type',
   status: 'status',
   amount: 'amount',
   receivedAt: 'receivedAt',
   reason: 'reason',
+  actorUserId: 'actorUserId',
   reversedById: 'reversedById',
   reversalReason: 'reversalReason',
   reversedAt: 'reversedAt',
@@ -499,6 +504,7 @@ export const ExpenseScalarFieldEnum = {
   spentAt: 'spentAt',
   paymentMethod: 'paymentMethod',
   description: 'description',
+  actorUserId: 'actorUserId',
   reversedById: 'reversedById',
   reversalReason: 'reversalReason',
   reversedAt: 'reversedAt',
@@ -507,6 +513,59 @@ export const ExpenseScalarFieldEnum = {
 } as const
 
 export type ExpenseScalarFieldEnum = (typeof ExpenseScalarFieldEnum)[keyof typeof ExpenseScalarFieldEnum]
+
+
+export const LedgerReversalScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  residentId: 'residentId',
+  sourceType: 'sourceType',
+  sourceId: 'sourceId',
+  side: 'side',
+  amount: 'amount',
+  reason: 'reason',
+  actorUserId: 'actorUserId',
+  idempotencyKey: 'idempotencyKey',
+  createdAt: 'createdAt'
+} as const
+
+export type LedgerReversalScalarFieldEnum = (typeof LedgerReversalScalarFieldEnum)[keyof typeof LedgerReversalScalarFieldEnum]
+
+
+export const PaymentRefundScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  residentId: 'residentId',
+  paymentId: 'paymentId',
+  amount: 'amount',
+  reason: 'reason',
+  actorUserId: 'actorUserId',
+  createdAt: 'createdAt'
+} as const
+
+export type PaymentRefundScalarFieldEnum = (typeof PaymentRefundScalarFieldEnum)[keyof typeof PaymentRefundScalarFieldEnum]
+
+
+export const DepositApplicationScalarFieldEnum = {
+  id: 'id',
+  version: 'version',
+  organizationId: 'organizationId',
+  residentId: 'residentId',
+  depositTransactionId: 'depositTransactionId',
+  chargeId: 'chargeId',
+  paymentId: 'paymentId',
+  allocationId: 'allocationId',
+  status: 'status',
+  amount: 'amount',
+  reason: 'reason',
+  actorUserId: 'actorUserId',
+  reversedById: 'reversedById',
+  reversalReason: 'reversalReason',
+  reversedAt: 'reversedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type DepositApplicationScalarFieldEnum = (typeof DepositApplicationScalarFieldEnum)[keyof typeof DepositApplicationScalarFieldEnum]
 
 
 export const SubscriptionPlanScalarFieldEnum = {

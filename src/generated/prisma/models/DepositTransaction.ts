@@ -41,11 +41,13 @@ export type DepositTransactionMinAggregateOutputType = {
   version: number | null
   organizationId: string | null
   residentId: string | null
+  sourceDepositTransactionId: string | null
   type: $Enums.DepositType | null
   status: $Enums.LedgerEntryStatus | null
   amount: number | null
   receivedAt: Date | null
   reason: string | null
+  actorUserId: string | null
   reversedById: string | null
   reversalReason: string | null
   reversedAt: Date | null
@@ -58,11 +60,13 @@ export type DepositTransactionMaxAggregateOutputType = {
   version: number | null
   organizationId: string | null
   residentId: string | null
+  sourceDepositTransactionId: string | null
   type: $Enums.DepositType | null
   status: $Enums.LedgerEntryStatus | null
   amount: number | null
   receivedAt: Date | null
   reason: string | null
+  actorUserId: string | null
   reversedById: string | null
   reversalReason: string | null
   reversedAt: Date | null
@@ -75,11 +79,13 @@ export type DepositTransactionCountAggregateOutputType = {
   version: number
   organizationId: number
   residentId: number
+  sourceDepositTransactionId: number
   type: number
   status: number
   amount: number
   receivedAt: number
   reason: number
+  actorUserId: number
   reversedById: number
   reversalReason: number
   reversedAt: number
@@ -104,11 +110,13 @@ export type DepositTransactionMinAggregateInputType = {
   version?: true
   organizationId?: true
   residentId?: true
+  sourceDepositTransactionId?: true
   type?: true
   status?: true
   amount?: true
   receivedAt?: true
   reason?: true
+  actorUserId?: true
   reversedById?: true
   reversalReason?: true
   reversedAt?: true
@@ -121,11 +129,13 @@ export type DepositTransactionMaxAggregateInputType = {
   version?: true
   organizationId?: true
   residentId?: true
+  sourceDepositTransactionId?: true
   type?: true
   status?: true
   amount?: true
   receivedAt?: true
   reason?: true
+  actorUserId?: true
   reversedById?: true
   reversalReason?: true
   reversedAt?: true
@@ -138,11 +148,13 @@ export type DepositTransactionCountAggregateInputType = {
   version?: true
   organizationId?: true
   residentId?: true
+  sourceDepositTransactionId?: true
   type?: true
   status?: true
   amount?: true
   receivedAt?: true
   reason?: true
+  actorUserId?: true
   reversedById?: true
   reversalReason?: true
   reversedAt?: true
@@ -242,11 +254,13 @@ export type DepositTransactionGroupByOutputType = {
   version: number
   organizationId: string
   residentId: string
+  sourceDepositTransactionId: string | null
   type: $Enums.DepositType
   status: $Enums.LedgerEntryStatus
   amount: number
   receivedAt: Date | null
   reason: string | null
+  actorUserId: string | null
   reversedById: string | null
   reversalReason: string | null
   reversedAt: Date | null
@@ -282,11 +296,13 @@ export type DepositTransactionWhereInput = {
   version?: Prisma.IntFilter<"DepositTransaction"> | number
   organizationId?: Prisma.UuidFilter<"DepositTransaction"> | string
   residentId?: Prisma.UuidFilter<"DepositTransaction"> | string
+  sourceDepositTransactionId?: Prisma.UuidNullableFilter<"DepositTransaction"> | string | null
   type?: Prisma.EnumDepositTypeFilter<"DepositTransaction"> | $Enums.DepositType
   status?: Prisma.EnumLedgerEntryStatusFilter<"DepositTransaction"> | $Enums.LedgerEntryStatus
   amount?: Prisma.IntFilter<"DepositTransaction"> | number
   receivedAt?: Prisma.DateTimeNullableFilter<"DepositTransaction"> | Date | string | null
   reason?: Prisma.StringNullableFilter<"DepositTransaction"> | string | null
+  actorUserId?: Prisma.UuidNullableFilter<"DepositTransaction"> | string | null
   reversedById?: Prisma.UuidNullableFilter<"DepositTransaction"> | string | null
   reversalReason?: Prisma.StringNullableFilter<"DepositTransaction"> | string | null
   reversedAt?: Prisma.DateTimeNullableFilter<"DepositTransaction"> | Date | string | null
@@ -294,7 +310,11 @@ export type DepositTransactionWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"DepositTransaction"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   resident?: Prisma.XOR<Prisma.ResidentScalarRelationFilter, Prisma.ResidentWhereInput>
+  actor?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   reversedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  applications?: Prisma.DepositApplicationListRelationFilter
+  sourceDepositTransaction?: Prisma.XOR<Prisma.DepositTransactionNullableScalarRelationFilter, Prisma.DepositTransactionWhereInput> | null
+  derivedTransactions?: Prisma.DepositTransactionListRelationFilter
 }
 
 export type DepositTransactionOrderByWithRelationInput = {
@@ -302,11 +322,13 @@ export type DepositTransactionOrderByWithRelationInput = {
   version?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
   residentId?: Prisma.SortOrder
+  sourceDepositTransactionId?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrder
   status?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   receivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   reason?: Prisma.SortOrderInput | Prisma.SortOrder
+  actorUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   reversedById?: Prisma.SortOrderInput | Prisma.SortOrder
   reversalReason?: Prisma.SortOrderInput | Prisma.SortOrder
   reversedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -314,22 +336,30 @@ export type DepositTransactionOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
   resident?: Prisma.ResidentOrderByWithRelationInput
+  actor?: Prisma.UserOrderByWithRelationInput
   reversedBy?: Prisma.UserOrderByWithRelationInput
+  applications?: Prisma.DepositApplicationOrderByRelationAggregateInput
+  sourceDepositTransaction?: Prisma.DepositTransactionOrderByWithRelationInput
+  derivedTransactions?: Prisma.DepositTransactionOrderByRelationAggregateInput
 }
 
 export type DepositTransactionWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  organizationId_id?: Prisma.DepositTransactionOrganizationIdIdCompoundUniqueInput
+  organizationId_residentId_id?: Prisma.DepositTransactionOrganizationIdResidentIdIdCompoundUniqueInput
   AND?: Prisma.DepositTransactionWhereInput | Prisma.DepositTransactionWhereInput[]
   OR?: Prisma.DepositTransactionWhereInput[]
   NOT?: Prisma.DepositTransactionWhereInput | Prisma.DepositTransactionWhereInput[]
   version?: Prisma.IntFilter<"DepositTransaction"> | number
   organizationId?: Prisma.UuidFilter<"DepositTransaction"> | string
   residentId?: Prisma.UuidFilter<"DepositTransaction"> | string
+  sourceDepositTransactionId?: Prisma.UuidNullableFilter<"DepositTransaction"> | string | null
   type?: Prisma.EnumDepositTypeFilter<"DepositTransaction"> | $Enums.DepositType
   status?: Prisma.EnumLedgerEntryStatusFilter<"DepositTransaction"> | $Enums.LedgerEntryStatus
   amount?: Prisma.IntFilter<"DepositTransaction"> | number
   receivedAt?: Prisma.DateTimeNullableFilter<"DepositTransaction"> | Date | string | null
   reason?: Prisma.StringNullableFilter<"DepositTransaction"> | string | null
+  actorUserId?: Prisma.UuidNullableFilter<"DepositTransaction"> | string | null
   reversedById?: Prisma.UuidNullableFilter<"DepositTransaction"> | string | null
   reversalReason?: Prisma.StringNullableFilter<"DepositTransaction"> | string | null
   reversedAt?: Prisma.DateTimeNullableFilter<"DepositTransaction"> | Date | string | null
@@ -337,19 +367,25 @@ export type DepositTransactionWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"DepositTransaction"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   resident?: Prisma.XOR<Prisma.ResidentScalarRelationFilter, Prisma.ResidentWhereInput>
+  actor?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   reversedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
-}, "id">
+  applications?: Prisma.DepositApplicationListRelationFilter
+  sourceDepositTransaction?: Prisma.XOR<Prisma.DepositTransactionNullableScalarRelationFilter, Prisma.DepositTransactionWhereInput> | null
+  derivedTransactions?: Prisma.DepositTransactionListRelationFilter
+}, "id" | "organizationId_id" | "organizationId_residentId_id">
 
 export type DepositTransactionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   version?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
   residentId?: Prisma.SortOrder
+  sourceDepositTransactionId?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrder
   status?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   receivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   reason?: Prisma.SortOrderInput | Prisma.SortOrder
+  actorUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   reversedById?: Prisma.SortOrderInput | Prisma.SortOrder
   reversalReason?: Prisma.SortOrderInput | Prisma.SortOrder
   reversedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -370,11 +406,13 @@ export type DepositTransactionScalarWhereWithAggregatesInput = {
   version?: Prisma.IntWithAggregatesFilter<"DepositTransaction"> | number
   organizationId?: Prisma.UuidWithAggregatesFilter<"DepositTransaction"> | string
   residentId?: Prisma.UuidWithAggregatesFilter<"DepositTransaction"> | string
+  sourceDepositTransactionId?: Prisma.UuidNullableWithAggregatesFilter<"DepositTransaction"> | string | null
   type?: Prisma.EnumDepositTypeWithAggregatesFilter<"DepositTransaction"> | $Enums.DepositType
   status?: Prisma.EnumLedgerEntryStatusWithAggregatesFilter<"DepositTransaction"> | $Enums.LedgerEntryStatus
   amount?: Prisma.IntWithAggregatesFilter<"DepositTransaction"> | number
   receivedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"DepositTransaction"> | Date | string | null
   reason?: Prisma.StringNullableWithAggregatesFilter<"DepositTransaction"> | string | null
+  actorUserId?: Prisma.UuidNullableWithAggregatesFilter<"DepositTransaction"> | string | null
   reversedById?: Prisma.UuidNullableWithAggregatesFilter<"DepositTransaction"> | string | null
   reversalReason?: Prisma.StringNullableWithAggregatesFilter<"DepositTransaction"> | string | null
   reversedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"DepositTransaction"> | Date | string | null
@@ -396,7 +434,11 @@ export type DepositTransactionCreateInput = {
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutDepositTransactionsInput
   resident: Prisma.ResidentCreateNestedOneWithoutDepositsInput
+  actor?: Prisma.UserCreateNestedOneWithoutDepositActorsInput
   reversedBy?: Prisma.UserCreateNestedOneWithoutReversedDepositsInput
+  applications?: Prisma.DepositApplicationCreateNestedManyWithoutDepositTransactionInput
+  sourceDepositTransaction?: Prisma.DepositTransactionCreateNestedOneWithoutDerivedTransactionsInput
+  derivedTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutSourceDepositTransactionInput
 }
 
 export type DepositTransactionUncheckedCreateInput = {
@@ -404,16 +446,20 @@ export type DepositTransactionUncheckedCreateInput = {
   version?: number
   organizationId: string
   residentId: string
+  sourceDepositTransactionId?: string | null
   type: $Enums.DepositType
   status?: $Enums.LedgerEntryStatus
   amount: number
   receivedAt?: Date | string | null
   reason?: string | null
+  actorUserId?: string | null
   reversedById?: string | null
   reversalReason?: string | null
   reversedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  applications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutDepositTransactionInput
+  derivedTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutSourceDepositTransactionInput
 }
 
 export type DepositTransactionUpdateInput = {
@@ -430,7 +476,11 @@ export type DepositTransactionUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutDepositTransactionsNestedInput
   resident?: Prisma.ResidentUpdateOneRequiredWithoutDepositsNestedInput
+  actor?: Prisma.UserUpdateOneWithoutDepositActorsNestedInput
   reversedBy?: Prisma.UserUpdateOneWithoutReversedDepositsNestedInput
+  applications?: Prisma.DepositApplicationUpdateManyWithoutDepositTransactionNestedInput
+  sourceDepositTransaction?: Prisma.DepositTransactionUpdateOneWithoutDerivedTransactionsNestedInput
+  derivedTransactions?: Prisma.DepositTransactionUpdateManyWithoutSourceDepositTransactionNestedInput
 }
 
 export type DepositTransactionUncheckedUpdateInput = {
@@ -438,16 +488,20 @@ export type DepositTransactionUncheckedUpdateInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   residentId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceDepositTransactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumDepositTypeFieldUpdateOperationsInput | $Enums.DepositType
   status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  applications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutDepositTransactionNestedInput
+  derivedTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutSourceDepositTransactionNestedInput
 }
 
 export type DepositTransactionCreateManyInput = {
@@ -455,11 +509,13 @@ export type DepositTransactionCreateManyInput = {
   version?: number
   organizationId: string
   residentId: string
+  sourceDepositTransactionId?: string | null
   type: $Enums.DepositType
   status?: $Enums.LedgerEntryStatus
   amount: number
   receivedAt?: Date | string | null
   reason?: string | null
+  actorUserId?: string | null
   reversedById?: string | null
   reversalReason?: string | null
   reversedAt?: Date | string | null
@@ -486,11 +542,13 @@ export type DepositTransactionUncheckedUpdateManyInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   residentId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceDepositTransactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumDepositTypeFieldUpdateOperationsInput | $Enums.DepositType
   status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -508,16 +566,34 @@ export type DepositTransactionOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type DepositTransactionNullableScalarRelationFilter = {
+  is?: Prisma.DepositTransactionWhereInput | null
+  isNot?: Prisma.DepositTransactionWhereInput | null
+}
+
+export type DepositTransactionOrganizationIdIdCompoundUniqueInput = {
+  organizationId: string
+  id: string
+}
+
+export type DepositTransactionOrganizationIdResidentIdIdCompoundUniqueInput = {
+  organizationId: string
+  residentId: string
+  id: string
+}
+
 export type DepositTransactionCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   version?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
   residentId?: Prisma.SortOrder
+  sourceDepositTransactionId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   status?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   receivedAt?: Prisma.SortOrder
   reason?: Prisma.SortOrder
+  actorUserId?: Prisma.SortOrder
   reversedById?: Prisma.SortOrder
   reversalReason?: Prisma.SortOrder
   reversedAt?: Prisma.SortOrder
@@ -535,11 +611,13 @@ export type DepositTransactionMaxOrderByAggregateInput = {
   version?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
   residentId?: Prisma.SortOrder
+  sourceDepositTransactionId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   status?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   receivedAt?: Prisma.SortOrder
   reason?: Prisma.SortOrder
+  actorUserId?: Prisma.SortOrder
   reversedById?: Prisma.SortOrder
   reversalReason?: Prisma.SortOrder
   reversedAt?: Prisma.SortOrder
@@ -552,11 +630,13 @@ export type DepositTransactionMinOrderByAggregateInput = {
   version?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
   residentId?: Prisma.SortOrder
+  sourceDepositTransactionId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   status?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   receivedAt?: Prisma.SortOrder
   reason?: Prisma.SortOrder
+  actorUserId?: Prisma.SortOrder
   reversedById?: Prisma.SortOrder
   reversalReason?: Prisma.SortOrder
   reversedAt?: Prisma.SortOrder
@@ -567,6 +647,11 @@ export type DepositTransactionMinOrderByAggregateInput = {
 export type DepositTransactionSumOrderByAggregateInput = {
   version?: Prisma.SortOrder
   amount?: Prisma.SortOrder
+}
+
+export type DepositTransactionScalarRelationFilter = {
+  is?: Prisma.DepositTransactionWhereInput
+  isNot?: Prisma.DepositTransactionWhereInput
 }
 
 export type DepositTransactionCreateNestedManyWithoutOrganizationInput = {
@@ -618,10 +703,24 @@ export type DepositTransactionCreateNestedManyWithoutReversedByInput = {
   connect?: Prisma.DepositTransactionWhereUniqueInput | Prisma.DepositTransactionWhereUniqueInput[]
 }
 
+export type DepositTransactionCreateNestedManyWithoutActorInput = {
+  create?: Prisma.XOR<Prisma.DepositTransactionCreateWithoutActorInput, Prisma.DepositTransactionUncheckedCreateWithoutActorInput> | Prisma.DepositTransactionCreateWithoutActorInput[] | Prisma.DepositTransactionUncheckedCreateWithoutActorInput[]
+  connectOrCreate?: Prisma.DepositTransactionCreateOrConnectWithoutActorInput | Prisma.DepositTransactionCreateOrConnectWithoutActorInput[]
+  createMany?: Prisma.DepositTransactionCreateManyActorInputEnvelope
+  connect?: Prisma.DepositTransactionWhereUniqueInput | Prisma.DepositTransactionWhereUniqueInput[]
+}
+
 export type DepositTransactionUncheckedCreateNestedManyWithoutReversedByInput = {
   create?: Prisma.XOR<Prisma.DepositTransactionCreateWithoutReversedByInput, Prisma.DepositTransactionUncheckedCreateWithoutReversedByInput> | Prisma.DepositTransactionCreateWithoutReversedByInput[] | Prisma.DepositTransactionUncheckedCreateWithoutReversedByInput[]
   connectOrCreate?: Prisma.DepositTransactionCreateOrConnectWithoutReversedByInput | Prisma.DepositTransactionCreateOrConnectWithoutReversedByInput[]
   createMany?: Prisma.DepositTransactionCreateManyReversedByInputEnvelope
+  connect?: Prisma.DepositTransactionWhereUniqueInput | Prisma.DepositTransactionWhereUniqueInput[]
+}
+
+export type DepositTransactionUncheckedCreateNestedManyWithoutActorInput = {
+  create?: Prisma.XOR<Prisma.DepositTransactionCreateWithoutActorInput, Prisma.DepositTransactionUncheckedCreateWithoutActorInput> | Prisma.DepositTransactionCreateWithoutActorInput[] | Prisma.DepositTransactionUncheckedCreateWithoutActorInput[]
+  connectOrCreate?: Prisma.DepositTransactionCreateOrConnectWithoutActorInput | Prisma.DepositTransactionCreateOrConnectWithoutActorInput[]
+  createMany?: Prisma.DepositTransactionCreateManyActorInputEnvelope
   connect?: Prisma.DepositTransactionWhereUniqueInput | Prisma.DepositTransactionWhereUniqueInput[]
 }
 
@@ -639,6 +738,20 @@ export type DepositTransactionUpdateManyWithoutReversedByNestedInput = {
   deleteMany?: Prisma.DepositTransactionScalarWhereInput | Prisma.DepositTransactionScalarWhereInput[]
 }
 
+export type DepositTransactionUpdateManyWithoutActorNestedInput = {
+  create?: Prisma.XOR<Prisma.DepositTransactionCreateWithoutActorInput, Prisma.DepositTransactionUncheckedCreateWithoutActorInput> | Prisma.DepositTransactionCreateWithoutActorInput[] | Prisma.DepositTransactionUncheckedCreateWithoutActorInput[]
+  connectOrCreate?: Prisma.DepositTransactionCreateOrConnectWithoutActorInput | Prisma.DepositTransactionCreateOrConnectWithoutActorInput[]
+  upsert?: Prisma.DepositTransactionUpsertWithWhereUniqueWithoutActorInput | Prisma.DepositTransactionUpsertWithWhereUniqueWithoutActorInput[]
+  createMany?: Prisma.DepositTransactionCreateManyActorInputEnvelope
+  set?: Prisma.DepositTransactionWhereUniqueInput | Prisma.DepositTransactionWhereUniqueInput[]
+  disconnect?: Prisma.DepositTransactionWhereUniqueInput | Prisma.DepositTransactionWhereUniqueInput[]
+  delete?: Prisma.DepositTransactionWhereUniqueInput | Prisma.DepositTransactionWhereUniqueInput[]
+  connect?: Prisma.DepositTransactionWhereUniqueInput | Prisma.DepositTransactionWhereUniqueInput[]
+  update?: Prisma.DepositTransactionUpdateWithWhereUniqueWithoutActorInput | Prisma.DepositTransactionUpdateWithWhereUniqueWithoutActorInput[]
+  updateMany?: Prisma.DepositTransactionUpdateManyWithWhereWithoutActorInput | Prisma.DepositTransactionUpdateManyWithWhereWithoutActorInput[]
+  deleteMany?: Prisma.DepositTransactionScalarWhereInput | Prisma.DepositTransactionScalarWhereInput[]
+}
+
 export type DepositTransactionUncheckedUpdateManyWithoutReversedByNestedInput = {
   create?: Prisma.XOR<Prisma.DepositTransactionCreateWithoutReversedByInput, Prisma.DepositTransactionUncheckedCreateWithoutReversedByInput> | Prisma.DepositTransactionCreateWithoutReversedByInput[] | Prisma.DepositTransactionUncheckedCreateWithoutReversedByInput[]
   connectOrCreate?: Prisma.DepositTransactionCreateOrConnectWithoutReversedByInput | Prisma.DepositTransactionCreateOrConnectWithoutReversedByInput[]
@@ -650,6 +763,20 @@ export type DepositTransactionUncheckedUpdateManyWithoutReversedByNestedInput = 
   connect?: Prisma.DepositTransactionWhereUniqueInput | Prisma.DepositTransactionWhereUniqueInput[]
   update?: Prisma.DepositTransactionUpdateWithWhereUniqueWithoutReversedByInput | Prisma.DepositTransactionUpdateWithWhereUniqueWithoutReversedByInput[]
   updateMany?: Prisma.DepositTransactionUpdateManyWithWhereWithoutReversedByInput | Prisma.DepositTransactionUpdateManyWithWhereWithoutReversedByInput[]
+  deleteMany?: Prisma.DepositTransactionScalarWhereInput | Prisma.DepositTransactionScalarWhereInput[]
+}
+
+export type DepositTransactionUncheckedUpdateManyWithoutActorNestedInput = {
+  create?: Prisma.XOR<Prisma.DepositTransactionCreateWithoutActorInput, Prisma.DepositTransactionUncheckedCreateWithoutActorInput> | Prisma.DepositTransactionCreateWithoutActorInput[] | Prisma.DepositTransactionUncheckedCreateWithoutActorInput[]
+  connectOrCreate?: Prisma.DepositTransactionCreateOrConnectWithoutActorInput | Prisma.DepositTransactionCreateOrConnectWithoutActorInput[]
+  upsert?: Prisma.DepositTransactionUpsertWithWhereUniqueWithoutActorInput | Prisma.DepositTransactionUpsertWithWhereUniqueWithoutActorInput[]
+  createMany?: Prisma.DepositTransactionCreateManyActorInputEnvelope
+  set?: Prisma.DepositTransactionWhereUniqueInput | Prisma.DepositTransactionWhereUniqueInput[]
+  disconnect?: Prisma.DepositTransactionWhereUniqueInput | Prisma.DepositTransactionWhereUniqueInput[]
+  delete?: Prisma.DepositTransactionWhereUniqueInput | Prisma.DepositTransactionWhereUniqueInput[]
+  connect?: Prisma.DepositTransactionWhereUniqueInput | Prisma.DepositTransactionWhereUniqueInput[]
+  update?: Prisma.DepositTransactionUpdateWithWhereUniqueWithoutActorInput | Prisma.DepositTransactionUpdateWithWhereUniqueWithoutActorInput[]
+  updateMany?: Prisma.DepositTransactionUpdateManyWithWhereWithoutActorInput | Prisma.DepositTransactionUpdateManyWithWhereWithoutActorInput[]
   deleteMany?: Prisma.DepositTransactionScalarWhereInput | Prisma.DepositTransactionScalarWhereInput[]
 }
 
@@ -695,8 +822,80 @@ export type DepositTransactionUncheckedUpdateManyWithoutResidentNestedInput = {
   deleteMany?: Prisma.DepositTransactionScalarWhereInput | Prisma.DepositTransactionScalarWhereInput[]
 }
 
+export type DepositTransactionCreateNestedOneWithoutDerivedTransactionsInput = {
+  create?: Prisma.XOR<Prisma.DepositTransactionCreateWithoutDerivedTransactionsInput, Prisma.DepositTransactionUncheckedCreateWithoutDerivedTransactionsInput>
+  connectOrCreate?: Prisma.DepositTransactionCreateOrConnectWithoutDerivedTransactionsInput
+  connect?: Prisma.DepositTransactionWhereUniqueInput
+}
+
+export type DepositTransactionCreateNestedManyWithoutSourceDepositTransactionInput = {
+  create?: Prisma.XOR<Prisma.DepositTransactionCreateWithoutSourceDepositTransactionInput, Prisma.DepositTransactionUncheckedCreateWithoutSourceDepositTransactionInput> | Prisma.DepositTransactionCreateWithoutSourceDepositTransactionInput[] | Prisma.DepositTransactionUncheckedCreateWithoutSourceDepositTransactionInput[]
+  connectOrCreate?: Prisma.DepositTransactionCreateOrConnectWithoutSourceDepositTransactionInput | Prisma.DepositTransactionCreateOrConnectWithoutSourceDepositTransactionInput[]
+  createMany?: Prisma.DepositTransactionCreateManySourceDepositTransactionInputEnvelope
+  connect?: Prisma.DepositTransactionWhereUniqueInput | Prisma.DepositTransactionWhereUniqueInput[]
+}
+
+export type DepositTransactionUncheckedCreateNestedManyWithoutSourceDepositTransactionInput = {
+  create?: Prisma.XOR<Prisma.DepositTransactionCreateWithoutSourceDepositTransactionInput, Prisma.DepositTransactionUncheckedCreateWithoutSourceDepositTransactionInput> | Prisma.DepositTransactionCreateWithoutSourceDepositTransactionInput[] | Prisma.DepositTransactionUncheckedCreateWithoutSourceDepositTransactionInput[]
+  connectOrCreate?: Prisma.DepositTransactionCreateOrConnectWithoutSourceDepositTransactionInput | Prisma.DepositTransactionCreateOrConnectWithoutSourceDepositTransactionInput[]
+  createMany?: Prisma.DepositTransactionCreateManySourceDepositTransactionInputEnvelope
+  connect?: Prisma.DepositTransactionWhereUniqueInput | Prisma.DepositTransactionWhereUniqueInput[]
+}
+
 export type EnumDepositTypeFieldUpdateOperationsInput = {
   set?: $Enums.DepositType
+}
+
+export type DepositTransactionUpdateOneWithoutDerivedTransactionsNestedInput = {
+  create?: Prisma.XOR<Prisma.DepositTransactionCreateWithoutDerivedTransactionsInput, Prisma.DepositTransactionUncheckedCreateWithoutDerivedTransactionsInput>
+  connectOrCreate?: Prisma.DepositTransactionCreateOrConnectWithoutDerivedTransactionsInput
+  upsert?: Prisma.DepositTransactionUpsertWithoutDerivedTransactionsInput
+  disconnect?: Prisma.DepositTransactionWhereInput | boolean
+  delete?: Prisma.DepositTransactionWhereInput | boolean
+  connect?: Prisma.DepositTransactionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DepositTransactionUpdateToOneWithWhereWithoutDerivedTransactionsInput, Prisma.DepositTransactionUpdateWithoutDerivedTransactionsInput>, Prisma.DepositTransactionUncheckedUpdateWithoutDerivedTransactionsInput>
+}
+
+export type DepositTransactionUpdateManyWithoutSourceDepositTransactionNestedInput = {
+  create?: Prisma.XOR<Prisma.DepositTransactionCreateWithoutSourceDepositTransactionInput, Prisma.DepositTransactionUncheckedCreateWithoutSourceDepositTransactionInput> | Prisma.DepositTransactionCreateWithoutSourceDepositTransactionInput[] | Prisma.DepositTransactionUncheckedCreateWithoutSourceDepositTransactionInput[]
+  connectOrCreate?: Prisma.DepositTransactionCreateOrConnectWithoutSourceDepositTransactionInput | Prisma.DepositTransactionCreateOrConnectWithoutSourceDepositTransactionInput[]
+  upsert?: Prisma.DepositTransactionUpsertWithWhereUniqueWithoutSourceDepositTransactionInput | Prisma.DepositTransactionUpsertWithWhereUniqueWithoutSourceDepositTransactionInput[]
+  createMany?: Prisma.DepositTransactionCreateManySourceDepositTransactionInputEnvelope
+  set?: Prisma.DepositTransactionWhereUniqueInput | Prisma.DepositTransactionWhereUniqueInput[]
+  disconnect?: Prisma.DepositTransactionWhereUniqueInput | Prisma.DepositTransactionWhereUniqueInput[]
+  delete?: Prisma.DepositTransactionWhereUniqueInput | Prisma.DepositTransactionWhereUniqueInput[]
+  connect?: Prisma.DepositTransactionWhereUniqueInput | Prisma.DepositTransactionWhereUniqueInput[]
+  update?: Prisma.DepositTransactionUpdateWithWhereUniqueWithoutSourceDepositTransactionInput | Prisma.DepositTransactionUpdateWithWhereUniqueWithoutSourceDepositTransactionInput[]
+  updateMany?: Prisma.DepositTransactionUpdateManyWithWhereWithoutSourceDepositTransactionInput | Prisma.DepositTransactionUpdateManyWithWhereWithoutSourceDepositTransactionInput[]
+  deleteMany?: Prisma.DepositTransactionScalarWhereInput | Prisma.DepositTransactionScalarWhereInput[]
+}
+
+export type DepositTransactionUncheckedUpdateManyWithoutSourceDepositTransactionNestedInput = {
+  create?: Prisma.XOR<Prisma.DepositTransactionCreateWithoutSourceDepositTransactionInput, Prisma.DepositTransactionUncheckedCreateWithoutSourceDepositTransactionInput> | Prisma.DepositTransactionCreateWithoutSourceDepositTransactionInput[] | Prisma.DepositTransactionUncheckedCreateWithoutSourceDepositTransactionInput[]
+  connectOrCreate?: Prisma.DepositTransactionCreateOrConnectWithoutSourceDepositTransactionInput | Prisma.DepositTransactionCreateOrConnectWithoutSourceDepositTransactionInput[]
+  upsert?: Prisma.DepositTransactionUpsertWithWhereUniqueWithoutSourceDepositTransactionInput | Prisma.DepositTransactionUpsertWithWhereUniqueWithoutSourceDepositTransactionInput[]
+  createMany?: Prisma.DepositTransactionCreateManySourceDepositTransactionInputEnvelope
+  set?: Prisma.DepositTransactionWhereUniqueInput | Prisma.DepositTransactionWhereUniqueInput[]
+  disconnect?: Prisma.DepositTransactionWhereUniqueInput | Prisma.DepositTransactionWhereUniqueInput[]
+  delete?: Prisma.DepositTransactionWhereUniqueInput | Prisma.DepositTransactionWhereUniqueInput[]
+  connect?: Prisma.DepositTransactionWhereUniqueInput | Prisma.DepositTransactionWhereUniqueInput[]
+  update?: Prisma.DepositTransactionUpdateWithWhereUniqueWithoutSourceDepositTransactionInput | Prisma.DepositTransactionUpdateWithWhereUniqueWithoutSourceDepositTransactionInput[]
+  updateMany?: Prisma.DepositTransactionUpdateManyWithWhereWithoutSourceDepositTransactionInput | Prisma.DepositTransactionUpdateManyWithWhereWithoutSourceDepositTransactionInput[]
+  deleteMany?: Prisma.DepositTransactionScalarWhereInput | Prisma.DepositTransactionScalarWhereInput[]
+}
+
+export type DepositTransactionCreateNestedOneWithoutApplicationsInput = {
+  create?: Prisma.XOR<Prisma.DepositTransactionCreateWithoutApplicationsInput, Prisma.DepositTransactionUncheckedCreateWithoutApplicationsInput>
+  connectOrCreate?: Prisma.DepositTransactionCreateOrConnectWithoutApplicationsInput
+  connect?: Prisma.DepositTransactionWhereUniqueInput
+}
+
+export type DepositTransactionUpdateOneRequiredWithoutApplicationsNestedInput = {
+  create?: Prisma.XOR<Prisma.DepositTransactionCreateWithoutApplicationsInput, Prisma.DepositTransactionUncheckedCreateWithoutApplicationsInput>
+  connectOrCreate?: Prisma.DepositTransactionCreateOrConnectWithoutApplicationsInput
+  upsert?: Prisma.DepositTransactionUpsertWithoutApplicationsInput
+  connect?: Prisma.DepositTransactionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DepositTransactionUpdateToOneWithWhereWithoutApplicationsInput, Prisma.DepositTransactionUpdateWithoutApplicationsInput>, Prisma.DepositTransactionUncheckedUpdateWithoutApplicationsInput>
 }
 
 export type DepositTransactionCreateWithoutOrganizationInput = {
@@ -712,23 +911,31 @@ export type DepositTransactionCreateWithoutOrganizationInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   resident: Prisma.ResidentCreateNestedOneWithoutDepositsInput
+  actor?: Prisma.UserCreateNestedOneWithoutDepositActorsInput
   reversedBy?: Prisma.UserCreateNestedOneWithoutReversedDepositsInput
+  applications?: Prisma.DepositApplicationCreateNestedManyWithoutDepositTransactionInput
+  sourceDepositTransaction?: Prisma.DepositTransactionCreateNestedOneWithoutDerivedTransactionsInput
+  derivedTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutSourceDepositTransactionInput
 }
 
 export type DepositTransactionUncheckedCreateWithoutOrganizationInput = {
   id?: string
   version?: number
   residentId: string
+  sourceDepositTransactionId?: string | null
   type: $Enums.DepositType
   status?: $Enums.LedgerEntryStatus
   amount: number
   receivedAt?: Date | string | null
   reason?: string | null
+  actorUserId?: string | null
   reversedById?: string | null
   reversalReason?: string | null
   reversedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  applications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutDepositTransactionInput
+  derivedTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutSourceDepositTransactionInput
 }
 
 export type DepositTransactionCreateOrConnectWithoutOrganizationInput = {
@@ -765,11 +972,13 @@ export type DepositTransactionScalarWhereInput = {
   version?: Prisma.IntFilter<"DepositTransaction"> | number
   organizationId?: Prisma.UuidFilter<"DepositTransaction"> | string
   residentId?: Prisma.UuidFilter<"DepositTransaction"> | string
+  sourceDepositTransactionId?: Prisma.UuidNullableFilter<"DepositTransaction"> | string | null
   type?: Prisma.EnumDepositTypeFilter<"DepositTransaction"> | $Enums.DepositType
   status?: Prisma.EnumLedgerEntryStatusFilter<"DepositTransaction"> | $Enums.LedgerEntryStatus
   amount?: Prisma.IntFilter<"DepositTransaction"> | number
   receivedAt?: Prisma.DateTimeNullableFilter<"DepositTransaction"> | Date | string | null
   reason?: Prisma.StringNullableFilter<"DepositTransaction"> | string | null
+  actorUserId?: Prisma.UuidNullableFilter<"DepositTransaction"> | string | null
   reversedById?: Prisma.UuidNullableFilter<"DepositTransaction"> | string | null
   reversalReason?: Prisma.StringNullableFilter<"DepositTransaction"> | string | null
   reversedAt?: Prisma.DateTimeNullableFilter<"DepositTransaction"> | Date | string | null
@@ -791,6 +1000,10 @@ export type DepositTransactionCreateWithoutReversedByInput = {
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutDepositTransactionsInput
   resident: Prisma.ResidentCreateNestedOneWithoutDepositsInput
+  actor?: Prisma.UserCreateNestedOneWithoutDepositActorsInput
+  applications?: Prisma.DepositApplicationCreateNestedManyWithoutDepositTransactionInput
+  sourceDepositTransaction?: Prisma.DepositTransactionCreateNestedOneWithoutDerivedTransactionsInput
+  derivedTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutSourceDepositTransactionInput
 }
 
 export type DepositTransactionUncheckedCreateWithoutReversedByInput = {
@@ -798,15 +1011,19 @@ export type DepositTransactionUncheckedCreateWithoutReversedByInput = {
   version?: number
   organizationId: string
   residentId: string
+  sourceDepositTransactionId?: string | null
   type: $Enums.DepositType
   status?: $Enums.LedgerEntryStatus
   amount: number
   receivedAt?: Date | string | null
   reason?: string | null
+  actorUserId?: string | null
   reversalReason?: string | null
   reversedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  applications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutDepositTransactionInput
+  derivedTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutSourceDepositTransactionInput
 }
 
 export type DepositTransactionCreateOrConnectWithoutReversedByInput = {
@@ -816,6 +1033,56 @@ export type DepositTransactionCreateOrConnectWithoutReversedByInput = {
 
 export type DepositTransactionCreateManyReversedByInputEnvelope = {
   data: Prisma.DepositTransactionCreateManyReversedByInput | Prisma.DepositTransactionCreateManyReversedByInput[]
+  skipDuplicates?: boolean
+}
+
+export type DepositTransactionCreateWithoutActorInput = {
+  id?: string
+  version?: number
+  type: $Enums.DepositType
+  status?: $Enums.LedgerEntryStatus
+  amount: number
+  receivedAt?: Date | string | null
+  reason?: string | null
+  reversalReason?: string | null
+  reversedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutDepositTransactionsInput
+  resident: Prisma.ResidentCreateNestedOneWithoutDepositsInput
+  reversedBy?: Prisma.UserCreateNestedOneWithoutReversedDepositsInput
+  applications?: Prisma.DepositApplicationCreateNestedManyWithoutDepositTransactionInput
+  sourceDepositTransaction?: Prisma.DepositTransactionCreateNestedOneWithoutDerivedTransactionsInput
+  derivedTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutSourceDepositTransactionInput
+}
+
+export type DepositTransactionUncheckedCreateWithoutActorInput = {
+  id?: string
+  version?: number
+  organizationId: string
+  residentId: string
+  sourceDepositTransactionId?: string | null
+  type: $Enums.DepositType
+  status?: $Enums.LedgerEntryStatus
+  amount: number
+  receivedAt?: Date | string | null
+  reason?: string | null
+  reversedById?: string | null
+  reversalReason?: string | null
+  reversedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  applications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutDepositTransactionInput
+  derivedTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutSourceDepositTransactionInput
+}
+
+export type DepositTransactionCreateOrConnectWithoutActorInput = {
+  where: Prisma.DepositTransactionWhereUniqueInput
+  create: Prisma.XOR<Prisma.DepositTransactionCreateWithoutActorInput, Prisma.DepositTransactionUncheckedCreateWithoutActorInput>
+}
+
+export type DepositTransactionCreateManyActorInputEnvelope = {
+  data: Prisma.DepositTransactionCreateManyActorInput | Prisma.DepositTransactionCreateManyActorInput[]
   skipDuplicates?: boolean
 }
 
@@ -835,6 +1102,22 @@ export type DepositTransactionUpdateManyWithWhereWithoutReversedByInput = {
   data: Prisma.XOR<Prisma.DepositTransactionUpdateManyMutationInput, Prisma.DepositTransactionUncheckedUpdateManyWithoutReversedByInput>
 }
 
+export type DepositTransactionUpsertWithWhereUniqueWithoutActorInput = {
+  where: Prisma.DepositTransactionWhereUniqueInput
+  update: Prisma.XOR<Prisma.DepositTransactionUpdateWithoutActorInput, Prisma.DepositTransactionUncheckedUpdateWithoutActorInput>
+  create: Prisma.XOR<Prisma.DepositTransactionCreateWithoutActorInput, Prisma.DepositTransactionUncheckedCreateWithoutActorInput>
+}
+
+export type DepositTransactionUpdateWithWhereUniqueWithoutActorInput = {
+  where: Prisma.DepositTransactionWhereUniqueInput
+  data: Prisma.XOR<Prisma.DepositTransactionUpdateWithoutActorInput, Prisma.DepositTransactionUncheckedUpdateWithoutActorInput>
+}
+
+export type DepositTransactionUpdateManyWithWhereWithoutActorInput = {
+  where: Prisma.DepositTransactionScalarWhereInput
+  data: Prisma.XOR<Prisma.DepositTransactionUpdateManyMutationInput, Prisma.DepositTransactionUncheckedUpdateManyWithoutActorInput>
+}
+
 export type DepositTransactionCreateWithoutResidentInput = {
   id?: string
   version?: number
@@ -848,22 +1131,30 @@ export type DepositTransactionCreateWithoutResidentInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutDepositTransactionsInput
+  actor?: Prisma.UserCreateNestedOneWithoutDepositActorsInput
   reversedBy?: Prisma.UserCreateNestedOneWithoutReversedDepositsInput
+  applications?: Prisma.DepositApplicationCreateNestedManyWithoutDepositTransactionInput
+  sourceDepositTransaction?: Prisma.DepositTransactionCreateNestedOneWithoutDerivedTransactionsInput
+  derivedTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutSourceDepositTransactionInput
 }
 
 export type DepositTransactionUncheckedCreateWithoutResidentInput = {
   id?: string
   version?: number
+  sourceDepositTransactionId?: string | null
   type: $Enums.DepositType
   status?: $Enums.LedgerEntryStatus
   amount: number
   receivedAt?: Date | string | null
   reason?: string | null
+  actorUserId?: string | null
   reversedById?: string | null
   reversalReason?: string | null
   reversedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  applications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutDepositTransactionInput
+  derivedTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutSourceDepositTransactionInput
 }
 
 export type DepositTransactionCreateOrConnectWithoutResidentInput = {
@@ -892,15 +1183,273 @@ export type DepositTransactionUpdateManyWithWhereWithoutResidentInput = {
   data: Prisma.XOR<Prisma.DepositTransactionUpdateManyMutationInput, Prisma.DepositTransactionUncheckedUpdateManyWithoutResidentInput>
 }
 
-export type DepositTransactionCreateManyOrganizationInput = {
+export type DepositTransactionCreateWithoutDerivedTransactionsInput = {
   id?: string
   version?: number
-  residentId: string
   type: $Enums.DepositType
   status?: $Enums.LedgerEntryStatus
   amount: number
   receivedAt?: Date | string | null
   reason?: string | null
+  reversalReason?: string | null
+  reversedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutDepositTransactionsInput
+  resident: Prisma.ResidentCreateNestedOneWithoutDepositsInput
+  actor?: Prisma.UserCreateNestedOneWithoutDepositActorsInput
+  reversedBy?: Prisma.UserCreateNestedOneWithoutReversedDepositsInput
+  applications?: Prisma.DepositApplicationCreateNestedManyWithoutDepositTransactionInput
+  sourceDepositTransaction?: Prisma.DepositTransactionCreateNestedOneWithoutDerivedTransactionsInput
+}
+
+export type DepositTransactionUncheckedCreateWithoutDerivedTransactionsInput = {
+  id?: string
+  version?: number
+  organizationId: string
+  residentId: string
+  sourceDepositTransactionId?: string | null
+  type: $Enums.DepositType
+  status?: $Enums.LedgerEntryStatus
+  amount: number
+  receivedAt?: Date | string | null
+  reason?: string | null
+  actorUserId?: string | null
+  reversedById?: string | null
+  reversalReason?: string | null
+  reversedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  applications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutDepositTransactionInput
+}
+
+export type DepositTransactionCreateOrConnectWithoutDerivedTransactionsInput = {
+  where: Prisma.DepositTransactionWhereUniqueInput
+  create: Prisma.XOR<Prisma.DepositTransactionCreateWithoutDerivedTransactionsInput, Prisma.DepositTransactionUncheckedCreateWithoutDerivedTransactionsInput>
+}
+
+export type DepositTransactionCreateWithoutSourceDepositTransactionInput = {
+  id?: string
+  version?: number
+  type: $Enums.DepositType
+  status?: $Enums.LedgerEntryStatus
+  amount: number
+  receivedAt?: Date | string | null
+  reason?: string | null
+  reversalReason?: string | null
+  reversedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutDepositTransactionsInput
+  resident: Prisma.ResidentCreateNestedOneWithoutDepositsInput
+  actor?: Prisma.UserCreateNestedOneWithoutDepositActorsInput
+  reversedBy?: Prisma.UserCreateNestedOneWithoutReversedDepositsInput
+  applications?: Prisma.DepositApplicationCreateNestedManyWithoutDepositTransactionInput
+  derivedTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutSourceDepositTransactionInput
+}
+
+export type DepositTransactionUncheckedCreateWithoutSourceDepositTransactionInput = {
+  id?: string
+  version?: number
+  type: $Enums.DepositType
+  status?: $Enums.LedgerEntryStatus
+  amount: number
+  receivedAt?: Date | string | null
+  reason?: string | null
+  actorUserId?: string | null
+  reversedById?: string | null
+  reversalReason?: string | null
+  reversedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  applications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutDepositTransactionInput
+  derivedTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutSourceDepositTransactionInput
+}
+
+export type DepositTransactionCreateOrConnectWithoutSourceDepositTransactionInput = {
+  where: Prisma.DepositTransactionWhereUniqueInput
+  create: Prisma.XOR<Prisma.DepositTransactionCreateWithoutSourceDepositTransactionInput, Prisma.DepositTransactionUncheckedCreateWithoutSourceDepositTransactionInput>
+}
+
+export type DepositTransactionCreateManySourceDepositTransactionInputEnvelope = {
+  data: Prisma.DepositTransactionCreateManySourceDepositTransactionInput | Prisma.DepositTransactionCreateManySourceDepositTransactionInput[]
+  skipDuplicates?: boolean
+}
+
+export type DepositTransactionUpsertWithoutDerivedTransactionsInput = {
+  update: Prisma.XOR<Prisma.DepositTransactionUpdateWithoutDerivedTransactionsInput, Prisma.DepositTransactionUncheckedUpdateWithoutDerivedTransactionsInput>
+  create: Prisma.XOR<Prisma.DepositTransactionCreateWithoutDerivedTransactionsInput, Prisma.DepositTransactionUncheckedCreateWithoutDerivedTransactionsInput>
+  where?: Prisma.DepositTransactionWhereInput
+}
+
+export type DepositTransactionUpdateToOneWithWhereWithoutDerivedTransactionsInput = {
+  where?: Prisma.DepositTransactionWhereInput
+  data: Prisma.XOR<Prisma.DepositTransactionUpdateWithoutDerivedTransactionsInput, Prisma.DepositTransactionUncheckedUpdateWithoutDerivedTransactionsInput>
+}
+
+export type DepositTransactionUpdateWithoutDerivedTransactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  type?: Prisma.EnumDepositTypeFieldUpdateOperationsInput | $Enums.DepositType
+  status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutDepositTransactionsNestedInput
+  resident?: Prisma.ResidentUpdateOneRequiredWithoutDepositsNestedInput
+  actor?: Prisma.UserUpdateOneWithoutDepositActorsNestedInput
+  reversedBy?: Prisma.UserUpdateOneWithoutReversedDepositsNestedInput
+  applications?: Prisma.DepositApplicationUpdateManyWithoutDepositTransactionNestedInput
+  sourceDepositTransaction?: Prisma.DepositTransactionUpdateOneWithoutDerivedTransactionsNestedInput
+}
+
+export type DepositTransactionUncheckedUpdateWithoutDerivedTransactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  residentId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceDepositTransactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumDepositTypeFieldUpdateOperationsInput | $Enums.DepositType
+  status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  applications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutDepositTransactionNestedInput
+}
+
+export type DepositTransactionUpsertWithWhereUniqueWithoutSourceDepositTransactionInput = {
+  where: Prisma.DepositTransactionWhereUniqueInput
+  update: Prisma.XOR<Prisma.DepositTransactionUpdateWithoutSourceDepositTransactionInput, Prisma.DepositTransactionUncheckedUpdateWithoutSourceDepositTransactionInput>
+  create: Prisma.XOR<Prisma.DepositTransactionCreateWithoutSourceDepositTransactionInput, Prisma.DepositTransactionUncheckedCreateWithoutSourceDepositTransactionInput>
+}
+
+export type DepositTransactionUpdateWithWhereUniqueWithoutSourceDepositTransactionInput = {
+  where: Prisma.DepositTransactionWhereUniqueInput
+  data: Prisma.XOR<Prisma.DepositTransactionUpdateWithoutSourceDepositTransactionInput, Prisma.DepositTransactionUncheckedUpdateWithoutSourceDepositTransactionInput>
+}
+
+export type DepositTransactionUpdateManyWithWhereWithoutSourceDepositTransactionInput = {
+  where: Prisma.DepositTransactionScalarWhereInput
+  data: Prisma.XOR<Prisma.DepositTransactionUpdateManyMutationInput, Prisma.DepositTransactionUncheckedUpdateManyWithoutSourceDepositTransactionInput>
+}
+
+export type DepositTransactionCreateWithoutApplicationsInput = {
+  id?: string
+  version?: number
+  type: $Enums.DepositType
+  status?: $Enums.LedgerEntryStatus
+  amount: number
+  receivedAt?: Date | string | null
+  reason?: string | null
+  reversalReason?: string | null
+  reversedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutDepositTransactionsInput
+  resident: Prisma.ResidentCreateNestedOneWithoutDepositsInput
+  actor?: Prisma.UserCreateNestedOneWithoutDepositActorsInput
+  reversedBy?: Prisma.UserCreateNestedOneWithoutReversedDepositsInput
+  sourceDepositTransaction?: Prisma.DepositTransactionCreateNestedOneWithoutDerivedTransactionsInput
+  derivedTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutSourceDepositTransactionInput
+}
+
+export type DepositTransactionUncheckedCreateWithoutApplicationsInput = {
+  id?: string
+  version?: number
+  organizationId: string
+  residentId: string
+  sourceDepositTransactionId?: string | null
+  type: $Enums.DepositType
+  status?: $Enums.LedgerEntryStatus
+  amount: number
+  receivedAt?: Date | string | null
+  reason?: string | null
+  actorUserId?: string | null
+  reversedById?: string | null
+  reversalReason?: string | null
+  reversedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  derivedTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutSourceDepositTransactionInput
+}
+
+export type DepositTransactionCreateOrConnectWithoutApplicationsInput = {
+  where: Prisma.DepositTransactionWhereUniqueInput
+  create: Prisma.XOR<Prisma.DepositTransactionCreateWithoutApplicationsInput, Prisma.DepositTransactionUncheckedCreateWithoutApplicationsInput>
+}
+
+export type DepositTransactionUpsertWithoutApplicationsInput = {
+  update: Prisma.XOR<Prisma.DepositTransactionUpdateWithoutApplicationsInput, Prisma.DepositTransactionUncheckedUpdateWithoutApplicationsInput>
+  create: Prisma.XOR<Prisma.DepositTransactionCreateWithoutApplicationsInput, Prisma.DepositTransactionUncheckedCreateWithoutApplicationsInput>
+  where?: Prisma.DepositTransactionWhereInput
+}
+
+export type DepositTransactionUpdateToOneWithWhereWithoutApplicationsInput = {
+  where?: Prisma.DepositTransactionWhereInput
+  data: Prisma.XOR<Prisma.DepositTransactionUpdateWithoutApplicationsInput, Prisma.DepositTransactionUncheckedUpdateWithoutApplicationsInput>
+}
+
+export type DepositTransactionUpdateWithoutApplicationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  type?: Prisma.EnumDepositTypeFieldUpdateOperationsInput | $Enums.DepositType
+  status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutDepositTransactionsNestedInput
+  resident?: Prisma.ResidentUpdateOneRequiredWithoutDepositsNestedInput
+  actor?: Prisma.UserUpdateOneWithoutDepositActorsNestedInput
+  reversedBy?: Prisma.UserUpdateOneWithoutReversedDepositsNestedInput
+  sourceDepositTransaction?: Prisma.DepositTransactionUpdateOneWithoutDerivedTransactionsNestedInput
+  derivedTransactions?: Prisma.DepositTransactionUpdateManyWithoutSourceDepositTransactionNestedInput
+}
+
+export type DepositTransactionUncheckedUpdateWithoutApplicationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  residentId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceDepositTransactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumDepositTypeFieldUpdateOperationsInput | $Enums.DepositType
+  status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  derivedTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutSourceDepositTransactionNestedInput
+}
+
+export type DepositTransactionCreateManyOrganizationInput = {
+  id?: string
+  version?: number
+  residentId: string
+  sourceDepositTransactionId?: string | null
+  type: $Enums.DepositType
+  status?: $Enums.LedgerEntryStatus
+  amount: number
+  receivedAt?: Date | string | null
+  reason?: string | null
+  actorUserId?: string | null
   reversedById?: string | null
   reversalReason?: string | null
   reversedAt?: Date | string | null
@@ -921,34 +1470,44 @@ export type DepositTransactionUpdateWithoutOrganizationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   resident?: Prisma.ResidentUpdateOneRequiredWithoutDepositsNestedInput
+  actor?: Prisma.UserUpdateOneWithoutDepositActorsNestedInput
   reversedBy?: Prisma.UserUpdateOneWithoutReversedDepositsNestedInput
+  applications?: Prisma.DepositApplicationUpdateManyWithoutDepositTransactionNestedInput
+  sourceDepositTransaction?: Prisma.DepositTransactionUpdateOneWithoutDerivedTransactionsNestedInput
+  derivedTransactions?: Prisma.DepositTransactionUpdateManyWithoutSourceDepositTransactionNestedInput
 }
 
 export type DepositTransactionUncheckedUpdateWithoutOrganizationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   residentId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceDepositTransactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumDepositTypeFieldUpdateOperationsInput | $Enums.DepositType
   status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  applications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutDepositTransactionNestedInput
+  derivedTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutSourceDepositTransactionNestedInput
 }
 
 export type DepositTransactionUncheckedUpdateManyWithoutOrganizationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   residentId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceDepositTransactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumDepositTypeFieldUpdateOperationsInput | $Enums.DepositType
   status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -961,11 +1520,31 @@ export type DepositTransactionCreateManyReversedByInput = {
   version?: number
   organizationId: string
   residentId: string
+  sourceDepositTransactionId?: string | null
   type: $Enums.DepositType
   status?: $Enums.LedgerEntryStatus
   amount: number
   receivedAt?: Date | string | null
   reason?: string | null
+  actorUserId?: string | null
+  reversalReason?: string | null
+  reversedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type DepositTransactionCreateManyActorInput = {
+  id?: string
+  version?: number
+  organizationId: string
+  residentId: string
+  sourceDepositTransactionId?: string | null
+  type: $Enums.DepositType
+  status?: $Enums.LedgerEntryStatus
+  amount: number
+  receivedAt?: Date | string | null
+  reason?: string | null
+  reversedById?: string | null
   reversalReason?: string | null
   reversedAt?: Date | string | null
   createdAt?: Date | string
@@ -986,6 +1565,10 @@ export type DepositTransactionUpdateWithoutReversedByInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutDepositTransactionsNestedInput
   resident?: Prisma.ResidentUpdateOneRequiredWithoutDepositsNestedInput
+  actor?: Prisma.UserUpdateOneWithoutDepositActorsNestedInput
+  applications?: Prisma.DepositApplicationUpdateManyWithoutDepositTransactionNestedInput
+  sourceDepositTransaction?: Prisma.DepositTransactionUpdateOneWithoutDerivedTransactionsNestedInput
+  derivedTransactions?: Prisma.DepositTransactionUpdateManyWithoutSourceDepositTransactionNestedInput
 }
 
 export type DepositTransactionUncheckedUpdateWithoutReversedByInput = {
@@ -993,6 +1576,42 @@ export type DepositTransactionUncheckedUpdateWithoutReversedByInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   residentId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceDepositTransactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumDepositTypeFieldUpdateOperationsInput | $Enums.DepositType
+  status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  applications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutDepositTransactionNestedInput
+  derivedTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutSourceDepositTransactionNestedInput
+}
+
+export type DepositTransactionUncheckedUpdateManyWithoutReversedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  residentId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceDepositTransactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumDepositTypeFieldUpdateOperationsInput | $Enums.DepositType
+  status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type DepositTransactionUpdateWithoutActorInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   type?: Prisma.EnumDepositTypeFieldUpdateOperationsInput | $Enums.DepositType
   status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
   amount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1002,18 +1621,46 @@ export type DepositTransactionUncheckedUpdateWithoutReversedByInput = {
   reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutDepositTransactionsNestedInput
+  resident?: Prisma.ResidentUpdateOneRequiredWithoutDepositsNestedInput
+  reversedBy?: Prisma.UserUpdateOneWithoutReversedDepositsNestedInput
+  applications?: Prisma.DepositApplicationUpdateManyWithoutDepositTransactionNestedInput
+  sourceDepositTransaction?: Prisma.DepositTransactionUpdateOneWithoutDerivedTransactionsNestedInput
+  derivedTransactions?: Prisma.DepositTransactionUpdateManyWithoutSourceDepositTransactionNestedInput
 }
 
-export type DepositTransactionUncheckedUpdateManyWithoutReversedByInput = {
+export type DepositTransactionUncheckedUpdateWithoutActorInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   residentId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceDepositTransactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumDepositTypeFieldUpdateOperationsInput | $Enums.DepositType
   status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  applications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutDepositTransactionNestedInput
+  derivedTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutSourceDepositTransactionNestedInput
+}
+
+export type DepositTransactionUncheckedUpdateManyWithoutActorInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  residentId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceDepositTransactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumDepositTypeFieldUpdateOperationsInput | $Enums.DepositType
+  status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1023,11 +1670,13 @@ export type DepositTransactionUncheckedUpdateManyWithoutReversedByInput = {
 export type DepositTransactionCreateManyResidentInput = {
   id?: string
   version?: number
+  sourceDepositTransactionId?: string | null
   type: $Enums.DepositType
   status?: $Enums.LedgerEntryStatus
   amount: number
   receivedAt?: Date | string | null
   reason?: string | null
+  actorUserId?: string | null
   reversedById?: string | null
   reversalReason?: string | null
   reversedAt?: Date | string | null
@@ -1048,17 +1697,42 @@ export type DepositTransactionUpdateWithoutResidentInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutDepositTransactionsNestedInput
+  actor?: Prisma.UserUpdateOneWithoutDepositActorsNestedInput
   reversedBy?: Prisma.UserUpdateOneWithoutReversedDepositsNestedInput
+  applications?: Prisma.DepositApplicationUpdateManyWithoutDepositTransactionNestedInput
+  sourceDepositTransaction?: Prisma.DepositTransactionUpdateOneWithoutDerivedTransactionsNestedInput
+  derivedTransactions?: Prisma.DepositTransactionUpdateManyWithoutSourceDepositTransactionNestedInput
 }
 
 export type DepositTransactionUncheckedUpdateWithoutResidentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  sourceDepositTransactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumDepositTypeFieldUpdateOperationsInput | $Enums.DepositType
   status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  applications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutDepositTransactionNestedInput
+  derivedTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutSourceDepositTransactionNestedInput
+}
+
+export type DepositTransactionUncheckedUpdateManyWithoutResidentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  sourceDepositTransactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumDepositTypeFieldUpdateOperationsInput | $Enums.DepositType
+  status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1066,7 +1740,23 @@ export type DepositTransactionUncheckedUpdateWithoutResidentInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type DepositTransactionUncheckedUpdateManyWithoutResidentInput = {
+export type DepositTransactionCreateManySourceDepositTransactionInput = {
+  id?: string
+  version?: number
+  type: $Enums.DepositType
+  status?: $Enums.LedgerEntryStatus
+  amount: number
+  receivedAt?: Date | string | null
+  reason?: string | null
+  actorUserId?: string | null
+  reversedById?: string | null
+  reversalReason?: string | null
+  reversedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type DepositTransactionUpdateWithoutSourceDepositTransactionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   type?: Prisma.EnumDepositTypeFieldUpdateOperationsInput | $Enums.DepositType
@@ -1074,6 +1764,45 @@ export type DepositTransactionUncheckedUpdateManyWithoutResidentInput = {
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutDepositTransactionsNestedInput
+  resident?: Prisma.ResidentUpdateOneRequiredWithoutDepositsNestedInput
+  actor?: Prisma.UserUpdateOneWithoutDepositActorsNestedInput
+  reversedBy?: Prisma.UserUpdateOneWithoutReversedDepositsNestedInput
+  applications?: Prisma.DepositApplicationUpdateManyWithoutDepositTransactionNestedInput
+  derivedTransactions?: Prisma.DepositTransactionUpdateManyWithoutSourceDepositTransactionNestedInput
+}
+
+export type DepositTransactionUncheckedUpdateWithoutSourceDepositTransactionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  type?: Prisma.EnumDepositTypeFieldUpdateOperationsInput | $Enums.DepositType
+  status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  applications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutDepositTransactionNestedInput
+  derivedTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutSourceDepositTransactionNestedInput
+}
+
+export type DepositTransactionUncheckedUpdateManyWithoutSourceDepositTransactionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  type?: Prisma.EnumDepositTypeFieldUpdateOperationsInput | $Enums.DepositType
+  status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1081,6 +1810,44 @@ export type DepositTransactionUncheckedUpdateManyWithoutResidentInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+
+/**
+ * Count Type DepositTransactionCountOutputType
+ */
+
+export type DepositTransactionCountOutputType = {
+  applications: number
+  derivedTransactions: number
+}
+
+export type DepositTransactionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  applications?: boolean | DepositTransactionCountOutputTypeCountApplicationsArgs
+  derivedTransactions?: boolean | DepositTransactionCountOutputTypeCountDerivedTransactionsArgs
+}
+
+/**
+ * DepositTransactionCountOutputType without action
+ */
+export type DepositTransactionCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DepositTransactionCountOutputType
+   */
+  select?: Prisma.DepositTransactionCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * DepositTransactionCountOutputType without action
+ */
+export type DepositTransactionCountOutputTypeCountApplicationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DepositApplicationWhereInput
+}
+
+/**
+ * DepositTransactionCountOutputType without action
+ */
+export type DepositTransactionCountOutputTypeCountDerivedTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DepositTransactionWhereInput
+}
 
 
 export type DepositTransactionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1088,11 +1855,13 @@ export type DepositTransactionSelect<ExtArgs extends runtime.Types.Extensions.In
   version?: boolean
   organizationId?: boolean
   residentId?: boolean
+  sourceDepositTransactionId?: boolean
   type?: boolean
   status?: boolean
   amount?: boolean
   receivedAt?: boolean
   reason?: boolean
+  actorUserId?: boolean
   reversedById?: boolean
   reversalReason?: boolean
   reversedAt?: boolean
@@ -1100,7 +1869,12 @@ export type DepositTransactionSelect<ExtArgs extends runtime.Types.Extensions.In
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   resident?: boolean | Prisma.ResidentDefaultArgs<ExtArgs>
+  actor?: boolean | Prisma.DepositTransaction$actorArgs<ExtArgs>
   reversedBy?: boolean | Prisma.DepositTransaction$reversedByArgs<ExtArgs>
+  applications?: boolean | Prisma.DepositTransaction$applicationsArgs<ExtArgs>
+  sourceDepositTransaction?: boolean | Prisma.DepositTransaction$sourceDepositTransactionArgs<ExtArgs>
+  derivedTransactions?: boolean | Prisma.DepositTransaction$derivedTransactionsArgs<ExtArgs>
+  _count?: boolean | Prisma.DepositTransactionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["depositTransaction"]>
 
 export type DepositTransactionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1108,11 +1882,13 @@ export type DepositTransactionSelectCreateManyAndReturn<ExtArgs extends runtime.
   version?: boolean
   organizationId?: boolean
   residentId?: boolean
+  sourceDepositTransactionId?: boolean
   type?: boolean
   status?: boolean
   amount?: boolean
   receivedAt?: boolean
   reason?: boolean
+  actorUserId?: boolean
   reversedById?: boolean
   reversalReason?: boolean
   reversedAt?: boolean
@@ -1120,7 +1896,9 @@ export type DepositTransactionSelectCreateManyAndReturn<ExtArgs extends runtime.
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   resident?: boolean | Prisma.ResidentDefaultArgs<ExtArgs>
+  actor?: boolean | Prisma.DepositTransaction$actorArgs<ExtArgs>
   reversedBy?: boolean | Prisma.DepositTransaction$reversedByArgs<ExtArgs>
+  sourceDepositTransaction?: boolean | Prisma.DepositTransaction$sourceDepositTransactionArgs<ExtArgs>
 }, ExtArgs["result"]["depositTransaction"]>
 
 export type DepositTransactionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1128,11 +1906,13 @@ export type DepositTransactionSelectUpdateManyAndReturn<ExtArgs extends runtime.
   version?: boolean
   organizationId?: boolean
   residentId?: boolean
+  sourceDepositTransactionId?: boolean
   type?: boolean
   status?: boolean
   amount?: boolean
   receivedAt?: boolean
   reason?: boolean
+  actorUserId?: boolean
   reversedById?: boolean
   reversalReason?: boolean
   reversedAt?: boolean
@@ -1140,7 +1920,9 @@ export type DepositTransactionSelectUpdateManyAndReturn<ExtArgs extends runtime.
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   resident?: boolean | Prisma.ResidentDefaultArgs<ExtArgs>
+  actor?: boolean | Prisma.DepositTransaction$actorArgs<ExtArgs>
   reversedBy?: boolean | Prisma.DepositTransaction$reversedByArgs<ExtArgs>
+  sourceDepositTransaction?: boolean | Prisma.DepositTransaction$sourceDepositTransactionArgs<ExtArgs>
 }, ExtArgs["result"]["depositTransaction"]>
 
 export type DepositTransactionSelectScalar = {
@@ -1148,11 +1930,13 @@ export type DepositTransactionSelectScalar = {
   version?: boolean
   organizationId?: boolean
   residentId?: boolean
+  sourceDepositTransactionId?: boolean
   type?: boolean
   status?: boolean
   amount?: boolean
   receivedAt?: boolean
   reason?: boolean
+  actorUserId?: boolean
   reversedById?: boolean
   reversalReason?: boolean
   reversedAt?: boolean
@@ -1160,21 +1944,30 @@ export type DepositTransactionSelectScalar = {
   updatedAt?: boolean
 }
 
-export type DepositTransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "version" | "organizationId" | "residentId" | "type" | "status" | "amount" | "receivedAt" | "reason" | "reversedById" | "reversalReason" | "reversedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["depositTransaction"]>
+export type DepositTransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "version" | "organizationId" | "residentId" | "sourceDepositTransactionId" | "type" | "status" | "amount" | "receivedAt" | "reason" | "actorUserId" | "reversedById" | "reversalReason" | "reversedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["depositTransaction"]>
 export type DepositTransactionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   resident?: boolean | Prisma.ResidentDefaultArgs<ExtArgs>
+  actor?: boolean | Prisma.DepositTransaction$actorArgs<ExtArgs>
   reversedBy?: boolean | Prisma.DepositTransaction$reversedByArgs<ExtArgs>
+  applications?: boolean | Prisma.DepositTransaction$applicationsArgs<ExtArgs>
+  sourceDepositTransaction?: boolean | Prisma.DepositTransaction$sourceDepositTransactionArgs<ExtArgs>
+  derivedTransactions?: boolean | Prisma.DepositTransaction$derivedTransactionsArgs<ExtArgs>
+  _count?: boolean | Prisma.DepositTransactionCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type DepositTransactionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   resident?: boolean | Prisma.ResidentDefaultArgs<ExtArgs>
+  actor?: boolean | Prisma.DepositTransaction$actorArgs<ExtArgs>
   reversedBy?: boolean | Prisma.DepositTransaction$reversedByArgs<ExtArgs>
+  sourceDepositTransaction?: boolean | Prisma.DepositTransaction$sourceDepositTransactionArgs<ExtArgs>
 }
 export type DepositTransactionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   resident?: boolean | Prisma.ResidentDefaultArgs<ExtArgs>
+  actor?: boolean | Prisma.DepositTransaction$actorArgs<ExtArgs>
   reversedBy?: boolean | Prisma.DepositTransaction$reversedByArgs<ExtArgs>
+  sourceDepositTransaction?: boolean | Prisma.DepositTransaction$sourceDepositTransactionArgs<ExtArgs>
 }
 
 export type $DepositTransactionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1182,18 +1975,24 @@ export type $DepositTransactionPayload<ExtArgs extends runtime.Types.Extensions.
   objects: {
     organization: Prisma.$OrganizationPayload<ExtArgs>
     resident: Prisma.$ResidentPayload<ExtArgs>
+    actor: Prisma.$UserPayload<ExtArgs> | null
     reversedBy: Prisma.$UserPayload<ExtArgs> | null
+    applications: Prisma.$DepositApplicationPayload<ExtArgs>[]
+    sourceDepositTransaction: Prisma.$DepositTransactionPayload<ExtArgs> | null
+    derivedTransactions: Prisma.$DepositTransactionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     version: number
     organizationId: string
     residentId: string
+    sourceDepositTransactionId: string | null
     type: $Enums.DepositType
     status: $Enums.LedgerEntryStatus
     amount: number
     receivedAt: Date | null
     reason: string | null
+    actorUserId: string | null
     reversedById: string | null
     reversalReason: string | null
     reversedAt: Date | null
@@ -1595,7 +2394,11 @@ export interface Prisma__DepositTransactionClient<T, Null = never, ExtArgs exten
   readonly [Symbol.toStringTag]: "PrismaPromise"
   organization<T extends Prisma.OrganizationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrganizationDefaultArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   resident<T extends Prisma.ResidentDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ResidentDefaultArgs<ExtArgs>>): Prisma.Prisma__ResidentClient<runtime.Types.Result.GetResult<Prisma.$ResidentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  actor<T extends Prisma.DepositTransaction$actorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DepositTransaction$actorArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   reversedBy<T extends Prisma.DepositTransaction$reversedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DepositTransaction$reversedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  applications<T extends Prisma.DepositTransaction$applicationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DepositTransaction$applicationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DepositApplicationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sourceDepositTransaction<T extends Prisma.DepositTransaction$sourceDepositTransactionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DepositTransaction$sourceDepositTransactionArgs<ExtArgs>>): Prisma.Prisma__DepositTransactionClient<runtime.Types.Result.GetResult<Prisma.$DepositTransactionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  derivedTransactions<T extends Prisma.DepositTransaction$derivedTransactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DepositTransaction$derivedTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DepositTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1629,11 +2432,13 @@ export interface DepositTransactionFieldRefs {
   readonly version: Prisma.FieldRef<"DepositTransaction", 'Int'>
   readonly organizationId: Prisma.FieldRef<"DepositTransaction", 'String'>
   readonly residentId: Prisma.FieldRef<"DepositTransaction", 'String'>
+  readonly sourceDepositTransactionId: Prisma.FieldRef<"DepositTransaction", 'String'>
   readonly type: Prisma.FieldRef<"DepositTransaction", 'DepositType'>
   readonly status: Prisma.FieldRef<"DepositTransaction", 'LedgerEntryStatus'>
   readonly amount: Prisma.FieldRef<"DepositTransaction", 'Int'>
   readonly receivedAt: Prisma.FieldRef<"DepositTransaction", 'DateTime'>
   readonly reason: Prisma.FieldRef<"DepositTransaction", 'String'>
+  readonly actorUserId: Prisma.FieldRef<"DepositTransaction", 'String'>
   readonly reversedById: Prisma.FieldRef<"DepositTransaction", 'String'>
   readonly reversalReason: Prisma.FieldRef<"DepositTransaction", 'String'>
   readonly reversedAt: Prisma.FieldRef<"DepositTransaction", 'DateTime'>
@@ -2040,6 +2845,25 @@ export type DepositTransactionDeleteManyArgs<ExtArgs extends runtime.Types.Exten
 }
 
 /**
+ * DepositTransaction.actor
+ */
+export type DepositTransaction$actorArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
+}
+
+/**
  * DepositTransaction.reversedBy
  */
 export type DepositTransaction$reversedByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2056,6 +2880,73 @@ export type DepositTransaction$reversedByArgs<ExtArgs extends runtime.Types.Exte
    */
   include?: Prisma.UserInclude<ExtArgs> | null
   where?: Prisma.UserWhereInput
+}
+
+/**
+ * DepositTransaction.applications
+ */
+export type DepositTransaction$applicationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DepositApplication
+   */
+  select?: Prisma.DepositApplicationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DepositApplication
+   */
+  omit?: Prisma.DepositApplicationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DepositApplicationInclude<ExtArgs> | null
+  where?: Prisma.DepositApplicationWhereInput
+  orderBy?: Prisma.DepositApplicationOrderByWithRelationInput | Prisma.DepositApplicationOrderByWithRelationInput[]
+  cursor?: Prisma.DepositApplicationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DepositApplicationScalarFieldEnum | Prisma.DepositApplicationScalarFieldEnum[]
+}
+
+/**
+ * DepositTransaction.sourceDepositTransaction
+ */
+export type DepositTransaction$sourceDepositTransactionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DepositTransaction
+   */
+  select?: Prisma.DepositTransactionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DepositTransaction
+   */
+  omit?: Prisma.DepositTransactionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DepositTransactionInclude<ExtArgs> | null
+  where?: Prisma.DepositTransactionWhereInput
+}
+
+/**
+ * DepositTransaction.derivedTransactions
+ */
+export type DepositTransaction$derivedTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DepositTransaction
+   */
+  select?: Prisma.DepositTransactionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DepositTransaction
+   */
+  omit?: Prisma.DepositTransactionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DepositTransactionInclude<ExtArgs> | null
+  where?: Prisma.DepositTransactionWhereInput
+  orderBy?: Prisma.DepositTransactionOrderByWithRelationInput | Prisma.DepositTransactionOrderByWithRelationInput[]
+  cursor?: Prisma.DepositTransactionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DepositTransactionScalarFieldEnum | Prisma.DepositTransactionScalarFieldEnum[]
 }
 
 /**

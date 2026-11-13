@@ -23,8 +23,7 @@ export class TenantGuard implements CanActivate {
     }
 
     const header = request.headers['x-organization-id'];
-    const organizationId =
-      typeof header === 'string' && header.length > 0 ? header : undefined;
+    const organizationId = typeof header === 'string' && header.length > 0 ? header : undefined;
 
     const memberships = await this.tenants.listActiveMemberships(user.id);
     if (memberships.length === 0) {
@@ -35,7 +34,7 @@ export class TenantGuard implements CanActivate {
     if (organizationId) {
       const match = memberships.find((m) => m.organizationId === organizationId);
       if (!match) {
-        throw AppError.forbidden(`No active membership in organization ${organizationId}`);
+        throw AppError.notFound('Organization not found');
       }
       membership = match;
     } else if (memberships.length === 1) {

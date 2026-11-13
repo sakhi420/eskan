@@ -13,11 +13,23 @@ const businessTodayForOrgMock = businessTodayForOrg as jest.Mock;
 
 function contractRow(overrides: Record<string, any> = {}) {
   return {
-    id: 'c1', version: 1, organizationId: 'o1', hostelId: 'h1', residentId: 'r1',
-    contractNumber: 'CNT-1', status: 'CLOSED', startDate: new Date('2026-11-07T00:00:00.000Z'),
-    endDate: new Date('2026-11-08T00:00:00.000Z'), rentAmount: 5000, billingCycle: 'MONTHLY',
-    depositAmount: null, packageId: null, packageSnapshot: null, notes: null,
-    createdAt: new Date('2026-11-01T00:00:00.000Z'), updatedAt: new Date('2026-11-07T00:00:00.000Z'),
+    id: 'c1',
+    version: 1,
+    organizationId: 'o1',
+    hostelId: 'h1',
+    residentId: 'r1',
+    contractNumber: 'CNT-1',
+    status: 'CLOSED',
+    startDate: new Date('2026-11-07T00:00:00.000Z'),
+    endDate: new Date('2026-11-08T00:00:00.000Z'),
+    rentAmount: 5000,
+    billingCycle: 'MONTHLY',
+    depositAmount: null,
+    packageId: null,
+    packageSnapshot: null,
+    notes: null,
+    createdAt: new Date('2026-11-01T00:00:00.000Z'),
+    updatedAt: new Date('2026-11-07T00:00:00.000Z'),
     ...overrides,
   };
 }
@@ -61,7 +73,11 @@ function locksMock() {
 }
 
 function makeService(prisma = prismaMock(), locks = locksMock()) {
-  const svc = new ContractsService(prisma as unknown as PrismaService, idempotencyMock(prisma) as any, locks as any);
+  const svc = new ContractsService(
+    prisma as unknown as PrismaService,
+    idempotencyMock(prisma) as any,
+    locks as any,
+  );
   return { svc, prisma, locks };
 }
 
@@ -73,7 +89,12 @@ describe('ContractsService.checkout', () => {
     const { svc, prisma } = makeService();
     prisma.stayContract.findFirst
       .mockResolvedValueOnce({ hostelId: 'h1', residentId: 'r1' })
-      .mockResolvedValueOnce({ id: 'c1', status: 'ACTIVE', startDate: new Date('2026-11-07T00:00:00.000Z'), version: 1 })
+      .mockResolvedValueOnce({
+        id: 'c1',
+        status: 'ACTIVE',
+        startDate: new Date('2026-11-07T00:00:00.000Z'),
+        version: 1,
+      })
       .mockResolvedValueOnce(contractRow());
 
     await svc.checkout('o1', 'c1', 'u-1', 'idem-1', 1);
@@ -92,9 +113,16 @@ describe('ContractsService.checkout', () => {
     const { svc, prisma } = makeService();
     prisma.stayContract.findFirst
       .mockResolvedValueOnce({ hostelId: 'h1', residentId: 'r1' })
-      .mockResolvedValueOnce({ id: 'c1', status: 'ACTIVE', startDate: new Date('2026-11-07T00:00:00.000Z'), version: 1 });
+      .mockResolvedValueOnce({
+        id: 'c1',
+        status: 'ACTIVE',
+        startDate: new Date('2026-11-07T00:00:00.000Z'),
+        version: 1,
+      });
 
-    await expect(svc.checkout('o1', 'c1', 'u-1', 'idem-1', 1)).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
+    await expect(svc.checkout('o1', 'c1', 'u-1', 'idem-1', 1)).rejects.toMatchObject({
+      code: 'BUSINESS_RULE_VIOLATION',
+    });
     expect(prisma.stayContract.updateMany).not.toHaveBeenCalled();
   });
 });
@@ -118,7 +146,9 @@ describe('ContractsService.terminate', () => {
     const { svc, prisma } = makeService();
     prisma.stayContract.findFirst.mockResolvedValueOnce({ status: 'ACTIVE', version: 2 });
 
-    await expect(svc.terminate('o1', 'c1', 'u-1', 'idem-1', 2)).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
+    await expect(svc.terminate('o1', 'c1', 'u-1', 'idem-1', 2)).rejects.toMatchObject({
+      code: 'BUSINESS_RULE_VIOLATION',
+    });
     expect(prisma.stayContract.updateMany).not.toHaveBeenCalled();
   });
 
@@ -126,35 +156,52 @@ describe('ContractsService.terminate', () => {
     const { svc, prisma } = makeService();
     prisma.stayContract.findFirst.mockResolvedValueOnce({ status: 'CLOSED', version: 2 });
 
-    await expect(svc.terminate('o1', 'c1', 'u-1', 'idem-1', 2)).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
+    await expect(svc.terminate('o1', 'c1', 'u-1', 'idem-1', 2)).rejects.toMatchObject({
+      code: 'BUSINESS_RULE_VIOLATION',
+    });
     expect(prisma.stayContract.updateMany).not.toHaveBeenCalled();
   });
 });
 
 describe('ContractsService billing-cycle guard (YEARLY unsupported in M3a)', () => {
   const yearDto = () => ({
-    hostelId: 'h1', residentId: 'r1', startDate: '2026-11-01',
-    rent: { amount: 5000, currency: 'AFN' }, billingCycle: 'YEARLY',
+    hostelId: 'h1',
+    residentId: 'r1',
+    startDate: '2026-11-01',
+    rent: { amount: 5000, currency: 'AFN' },
+    billingCycle: 'YEARLY',
   });
 
   it('rejects YEARLY on create before any DB read', async () => {
     const { svc } = makeService();
-    await expect(svc.create('o1', 'u-1', yearDto() as any, 'idem-1')).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+    await expect(svc.create('o1', 'u-1', yearDto() as any, 'idem-1')).rejects.toMatchObject({
+      code: 'VALIDATION_ERROR',
+    });
   });
 
   it('rejects YEARLY on update before any package reconcile', async () => {
     const { svc, prisma } = makeService();
-    prisma.stayContract.findFirst.mockResolvedValueOnce({ id: 'c1', status: 'DRAFT', version: 1, hostelId: 'h1', residentId: 'r1' });
-    await expect(svc.update('o1', 'c1', 1, yearDto() as any))
-      .rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+    prisma.stayContract.findFirst.mockResolvedValueOnce({
+      id: 'c1',
+      status: 'DRAFT',
+      version: 1,
+      hostelId: 'h1',
+      residentId: 'r1',
+    });
+    await expect(svc.update('o1', 'c1', 1, yearDto() as any)).rejects.toMatchObject({
+      code: 'VALIDATION_ERROR',
+    });
     expect(prisma.stayContract.updateMany).not.toHaveBeenCalled();
   });
 });
 
 describe('ContractsService.update preserves the existing billing cycle', () => {
   const noCycleDto = () => ({
-    hostelId: 'h1', residentId: 'r1', startDate: '2026-11-01',
-    rent: { amount: 5000, currency: 'AFN' }, notes: 'edited',
+    hostelId: 'h1',
+    residentId: 'r1',
+    startDate: '2026-11-01',
+    rent: { amount: 5000, currency: 'AFN' },
+    notes: 'edited',
   });
 
   function mockParents(prisma: any) {
@@ -165,7 +212,14 @@ describe('ContractsService.update preserves the existing billing cycle', () => {
   it('preserves a legacy YEARLY draft when billingCycle is omitted (no silent MONTHLY downgrade)', async () => {
     const { svc, prisma } = makeService();
     prisma.stayContract.findFirst
-      .mockResolvedValueOnce({ id: 'c1', status: 'DRAFT', version: 1, hostelId: 'h1', residentId: 'r1', billingCycle: 'YEARLY' })
+      .mockResolvedValueOnce({
+        id: 'c1',
+        status: 'DRAFT',
+        version: 1,
+        hostelId: 'h1',
+        residentId: 'r1',
+        billingCycle: 'YEARLY',
+      })
       .mockResolvedValueOnce(contractRow({ billingCycle: 'YEARLY' }));
     mockParents(prisma);
 
@@ -178,7 +232,14 @@ describe('ContractsService.update preserves the existing billing cycle', () => {
   it('preserves MONTHLY when changing other fields without billingCycle', async () => {
     const { svc, prisma } = makeService();
     prisma.stayContract.findFirst
-      .mockResolvedValueOnce({ id: 'c1', status: 'DRAFT', version: 1, hostelId: 'h1', residentId: 'r1', billingCycle: 'MONTHLY' })
+      .mockResolvedValueOnce({
+        id: 'c1',
+        status: 'DRAFT',
+        version: 1,
+        hostelId: 'h1',
+        residentId: 'r1',
+        billingCycle: 'MONTHLY',
+      })
       .mockResolvedValueOnce(contractRow({ billingCycle: 'MONTHLY' }));
     mockParents(prisma);
 
@@ -191,7 +252,14 @@ describe('ContractsService.update preserves the existing billing cycle', () => {
   it('applies an explicit MONTHLY decision to convert a legacy YEARLY draft', async () => {
     const { svc, prisma } = makeService();
     prisma.stayContract.findFirst
-      .mockResolvedValueOnce({ id: 'c1', status: 'DRAFT', version: 1, hostelId: 'h1', residentId: 'r1', billingCycle: 'YEARLY' })
+      .mockResolvedValueOnce({
+        id: 'c1',
+        status: 'DRAFT',
+        version: 1,
+        hostelId: 'h1',
+        residentId: 'r1',
+        billingCycle: 'YEARLY',
+      })
       .mockResolvedValueOnce(contractRow({ billingCycle: 'MONTHLY' }));
     mockParents(prisma);
 
@@ -212,9 +280,20 @@ describe('ContractsService.activate billing-cycle guard', () => {
     const { svc, prisma } = makeService();
     prisma.stayContract.findFirst
       .mockResolvedValueOnce({ hostelId: 'h1', residentId: 'r1' })
-      .mockResolvedValueOnce({ id: 'c1', status: 'DRAFT', hostelId: 'h1', residentId: 'r1', startDate: new Date('2026-11-01T00:00:00.000Z'), endDate: null, version: 1, billingCycle: 'YEARLY' });
+      .mockResolvedValueOnce({
+        id: 'c1',
+        status: 'DRAFT',
+        hostelId: 'h1',
+        residentId: 'r1',
+        startDate: new Date('2026-11-01T00:00:00.000Z'),
+        endDate: null,
+        version: 1,
+        billingCycle: 'YEARLY',
+      });
 
-    await expect(svc.activate('o1', 'c1', 'u-1', 'idem-1', 1)).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
+    await expect(svc.activate('o1', 'c1', 'u-1', 'idem-1', 1)).rejects.toMatchObject({
+      code: 'BUSINESS_RULE_VIOLATION',
+    });
     expect(prisma.stayContract.updateMany).not.toHaveBeenCalled();
   });
 
@@ -222,7 +301,16 @@ describe('ContractsService.activate billing-cycle guard', () => {
     const { svc, prisma } = makeService();
     prisma.stayContract.findFirst
       .mockResolvedValueOnce({ hostelId: 'h1', residentId: 'r1' })
-      .mockResolvedValueOnce({ id: 'c1', status: 'DRAFT', hostelId: 'h1', residentId: 'r1', startDate: new Date('2026-11-01T00:00:00.000Z'), endDate: null, version: 1, billingCycle: 'MONTHLY' })
+      .mockResolvedValueOnce({
+        id: 'c1',
+        status: 'DRAFT',
+        hostelId: 'h1',
+        residentId: 'r1',
+        startDate: new Date('2026-11-01T00:00:00.000Z'),
+        endDate: null,
+        version: 1,
+        billingCycle: 'MONTHLY',
+      })
       .mockResolvedValueOnce(contractRow({ status: 'ACTIVE' }));
     prisma.stayContract.findMany.mockResolvedValue([]);
     mockParents(prisma);

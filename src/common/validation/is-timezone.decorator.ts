@@ -16,7 +16,12 @@ export function IsTimeZone(validationOptions?: ValidationOptions) {
       options: validationOptions,
       validator: {
         validate(value: unknown): boolean {
-          return typeof value === 'string' && value.length > 0 && value.length <= 64 && isValidTimezone(value);
+          return (
+            typeof value === 'string' &&
+            value.length > 0 &&
+            value.length <= 64 &&
+            isValidTimezone(value)
+          );
         },
         defaultMessage(): string {
           return '$property must be a valid IANA timezone (e.g. Asia/Kabul)';

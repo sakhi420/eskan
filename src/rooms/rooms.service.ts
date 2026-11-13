@@ -6,7 +6,12 @@ import { ErrorCode } from '../common/errors/error-codes';
 import { IdempotencyService } from '../common/idempotency/idempotency.service';
 import { LockService } from '../common/concurrency/lock.service';
 import { isUniqueViolation } from '../common/prisma/unique-violation';
-import { ArchiveStatus, AssignmentStatus, BedStatus, MaintenanceStatus } from '../generated/prisma/enums';
+import {
+  ArchiveStatus,
+  AssignmentStatus,
+  BedStatus,
+  MaintenanceStatus,
+} from '../generated/prisma/enums';
 import { RoomDto } from './dto/room.dto';
 
 const ROOM_SELECT = {

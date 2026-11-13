@@ -421,6 +421,9 @@ export const ModelName = {
   AllocationRelease: 'AllocationRelease',
   DepositTransaction: 'DepositTransaction',
   Expense: 'Expense',
+  LedgerReversal: 'LedgerReversal',
+  PaymentRefund: 'PaymentRefund',
+  DepositApplication: 'DepositApplication',
   SubscriptionPlan: 'SubscriptionPlan',
   OrganizationSubscription: 'OrganizationSubscription',
   SubscriptionEvent: 'SubscriptionEvent',
@@ -445,7 +448,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "organization" | "user" | "organizationMembership" | "invitation" | "refreshSession" | "hostel" | "room" | "bed" | "accommodationPackage" | "accommodationPackageComponent" | "temporaryAbsence" | "resident" | "stayContract" | "bedAssignment" | "charge" | "chargePackageComponent" | "absenceCredit" | "billingRun" | "payment" | "paymentAllocation" | "receiptCounter" | "allocationRelease" | "depositTransaction" | "expense" | "subscriptionPlan" | "organizationSubscription" | "subscriptionEvent" | "manualSubscriptionPayment" | "syncDevice" | "syncChange" | "organizationSyncState" | "idempotencyRecord" | "auditEvent"
+    modelProps: "organization" | "user" | "organizationMembership" | "invitation" | "refreshSession" | "hostel" | "room" | "bed" | "accommodationPackage" | "accommodationPackageComponent" | "temporaryAbsence" | "resident" | "stayContract" | "bedAssignment" | "charge" | "chargePackageComponent" | "absenceCredit" | "billingRun" | "payment" | "paymentAllocation" | "receiptCounter" | "allocationRelease" | "depositTransaction" | "expense" | "ledgerReversal" | "paymentRefund" | "depositApplication" | "subscriptionPlan" | "organizationSubscription" | "subscriptionEvent" | "manualSubscriptionPayment" | "syncDevice" | "syncChange" | "organizationSyncState" | "idempotencyRecord" | "auditEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2225,6 +2228,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    LedgerReversal: {
+      payload: Prisma.$LedgerReversalPayload<ExtArgs>
+      fields: Prisma.LedgerReversalFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LedgerReversalFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LedgerReversalPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LedgerReversalFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LedgerReversalPayload>
+        }
+        findFirst: {
+          args: Prisma.LedgerReversalFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LedgerReversalPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LedgerReversalFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LedgerReversalPayload>
+        }
+        findMany: {
+          args: Prisma.LedgerReversalFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LedgerReversalPayload>[]
+        }
+        create: {
+          args: Prisma.LedgerReversalCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LedgerReversalPayload>
+        }
+        createMany: {
+          args: Prisma.LedgerReversalCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LedgerReversalCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LedgerReversalPayload>[]
+        }
+        delete: {
+          args: Prisma.LedgerReversalDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LedgerReversalPayload>
+        }
+        update: {
+          args: Prisma.LedgerReversalUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LedgerReversalPayload>
+        }
+        deleteMany: {
+          args: Prisma.LedgerReversalDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LedgerReversalUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LedgerReversalUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LedgerReversalPayload>[]
+        }
+        upsert: {
+          args: Prisma.LedgerReversalUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LedgerReversalPayload>
+        }
+        aggregate: {
+          args: Prisma.LedgerReversalAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLedgerReversal>
+        }
+        groupBy: {
+          args: Prisma.LedgerReversalGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LedgerReversalGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LedgerReversalCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LedgerReversalCountAggregateOutputType> | number
+        }
+      }
+    }
+    PaymentRefund: {
+      payload: Prisma.$PaymentRefundPayload<ExtArgs>
+      fields: Prisma.PaymentRefundFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PaymentRefundFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentRefundPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PaymentRefundFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentRefundPayload>
+        }
+        findFirst: {
+          args: Prisma.PaymentRefundFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentRefundPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PaymentRefundFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentRefundPayload>
+        }
+        findMany: {
+          args: Prisma.PaymentRefundFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentRefundPayload>[]
+        }
+        create: {
+          args: Prisma.PaymentRefundCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentRefundPayload>
+        }
+        createMany: {
+          args: Prisma.PaymentRefundCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PaymentRefundCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentRefundPayload>[]
+        }
+        delete: {
+          args: Prisma.PaymentRefundDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentRefundPayload>
+        }
+        update: {
+          args: Prisma.PaymentRefundUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentRefundPayload>
+        }
+        deleteMany: {
+          args: Prisma.PaymentRefundDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PaymentRefundUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PaymentRefundUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentRefundPayload>[]
+        }
+        upsert: {
+          args: Prisma.PaymentRefundUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentRefundPayload>
+        }
+        aggregate: {
+          args: Prisma.PaymentRefundAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePaymentRefund>
+        }
+        groupBy: {
+          args: Prisma.PaymentRefundGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaymentRefundGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PaymentRefundCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaymentRefundCountAggregateOutputType> | number
+        }
+      }
+    }
+    DepositApplication: {
+      payload: Prisma.$DepositApplicationPayload<ExtArgs>
+      fields: Prisma.DepositApplicationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DepositApplicationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DepositApplicationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DepositApplicationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DepositApplicationPayload>
+        }
+        findFirst: {
+          args: Prisma.DepositApplicationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DepositApplicationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DepositApplicationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DepositApplicationPayload>
+        }
+        findMany: {
+          args: Prisma.DepositApplicationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DepositApplicationPayload>[]
+        }
+        create: {
+          args: Prisma.DepositApplicationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DepositApplicationPayload>
+        }
+        createMany: {
+          args: Prisma.DepositApplicationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DepositApplicationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DepositApplicationPayload>[]
+        }
+        delete: {
+          args: Prisma.DepositApplicationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DepositApplicationPayload>
+        }
+        update: {
+          args: Prisma.DepositApplicationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DepositApplicationPayload>
+        }
+        deleteMany: {
+          args: Prisma.DepositApplicationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DepositApplicationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DepositApplicationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DepositApplicationPayload>[]
+        }
+        upsert: {
+          args: Prisma.DepositApplicationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DepositApplicationPayload>
+        }
+        aggregate: {
+          args: Prisma.DepositApplicationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDepositApplication>
+        }
+        groupBy: {
+          args: Prisma.DepositApplicationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DepositApplicationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DepositApplicationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DepositApplicationCountAggregateOutputType> | number
+        }
+      }
+    }
     SubscriptionPlan: {
       payload: Prisma.$SubscriptionPlanPayload<ExtArgs>
       fields: Prisma.SubscriptionPlanFieldRefs
@@ -3301,11 +3526,13 @@ export const DepositTransactionScalarFieldEnum = {
   version: 'version',
   organizationId: 'organizationId',
   residentId: 'residentId',
+  sourceDepositTransactionId: 'sourceDepositTransactionId',
   type: 'type',
   status: 'status',
   amount: 'amount',
   receivedAt: 'receivedAt',
   reason: 'reason',
+  actorUserId: 'actorUserId',
   reversedById: 'reversedById',
   reversalReason: 'reversalReason',
   reversedAt: 'reversedAt',
@@ -3327,6 +3554,7 @@ export const ExpenseScalarFieldEnum = {
   spentAt: 'spentAt',
   paymentMethod: 'paymentMethod',
   description: 'description',
+  actorUserId: 'actorUserId',
   reversedById: 'reversedById',
   reversalReason: 'reversalReason',
   reversedAt: 'reversedAt',
@@ -3335,6 +3563,59 @@ export const ExpenseScalarFieldEnum = {
 } as const
 
 export type ExpenseScalarFieldEnum = (typeof ExpenseScalarFieldEnum)[keyof typeof ExpenseScalarFieldEnum]
+
+
+export const LedgerReversalScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  residentId: 'residentId',
+  sourceType: 'sourceType',
+  sourceId: 'sourceId',
+  side: 'side',
+  amount: 'amount',
+  reason: 'reason',
+  actorUserId: 'actorUserId',
+  idempotencyKey: 'idempotencyKey',
+  createdAt: 'createdAt'
+} as const
+
+export type LedgerReversalScalarFieldEnum = (typeof LedgerReversalScalarFieldEnum)[keyof typeof LedgerReversalScalarFieldEnum]
+
+
+export const PaymentRefundScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  residentId: 'residentId',
+  paymentId: 'paymentId',
+  amount: 'amount',
+  reason: 'reason',
+  actorUserId: 'actorUserId',
+  createdAt: 'createdAt'
+} as const
+
+export type PaymentRefundScalarFieldEnum = (typeof PaymentRefundScalarFieldEnum)[keyof typeof PaymentRefundScalarFieldEnum]
+
+
+export const DepositApplicationScalarFieldEnum = {
+  id: 'id',
+  version: 'version',
+  organizationId: 'organizationId',
+  residentId: 'residentId',
+  depositTransactionId: 'depositTransactionId',
+  chargeId: 'chargeId',
+  paymentId: 'paymentId',
+  allocationId: 'allocationId',
+  status: 'status',
+  amount: 'amount',
+  reason: 'reason',
+  actorUserId: 'actorUserId',
+  reversedById: 'reversedById',
+  reversalReason: 'reversalReason',
+  reversedAt: 'reversedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type DepositApplicationScalarFieldEnum = (typeof DepositApplicationScalarFieldEnum)[keyof typeof DepositApplicationScalarFieldEnum]
 
 
 export const SubscriptionPlanScalarFieldEnum = {
@@ -3878,6 +4159,20 @@ export type ListEnumDepositTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$
 
 
 /**
+ * Reference to a field of type 'ReversalSourceType'
+ */
+export type EnumReversalSourceTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReversalSourceType'>
+    
+
+
+/**
+ * Reference to a field of type 'ReversalSourceType[]'
+ */
+export type ListEnumReversalSourceTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReversalSourceType[]'>
+    
+
+
+/**
  * Reference to a field of type 'PlanCode'
  */
 export type EnumPlanCodeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PlanCode'>
@@ -4163,6 +4458,9 @@ export type GlobalOmitConfig = {
   allocationRelease?: Prisma.AllocationReleaseOmit
   depositTransaction?: Prisma.DepositTransactionOmit
   expense?: Prisma.ExpenseOmit
+  ledgerReversal?: Prisma.LedgerReversalOmit
+  paymentRefund?: Prisma.PaymentRefundOmit
+  depositApplication?: Prisma.DepositApplicationOmit
   subscriptionPlan?: Prisma.SubscriptionPlanOmit
   organizationSubscription?: Prisma.OrganizationSubscriptionOmit
   subscriptionEvent?: Prisma.SubscriptionEventOmit

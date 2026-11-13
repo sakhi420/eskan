@@ -64,7 +64,10 @@ export class PostingService {
    * `organization_sync_state` (upsert + RETURNING). Called inside the posting
    * transaction so concurrent postings never reuse or skip the same sequence.
    */
-  private async nextSequence(tx: Prisma.TransactionClient, organizationId: string): Promise<number> {
+  private async nextSequence(
+    tx: Prisma.TransactionClient,
+    organizationId: string,
+  ): Promise<number> {
     const rows = await tx.$queryRaw<Array<{ current_cursor: number }>>`
       INSERT INTO "organization_sync_state" ("organization_id", "current_cursor", "schema_version", "updated_at")
       VALUES (${organizationId}, 1, 1, now())

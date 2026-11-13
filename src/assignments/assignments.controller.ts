@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Headers, HttpCode, HttpStatus, Param, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AssignmentsService } from './assignments.service';
 import { TenantGuard } from '../common/guards/tenant.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -42,7 +53,10 @@ export class AssignmentsController {
   ) {
     const key = requireIdempotencyKey(idempotencyKey);
     const expectedVersion = requireExpectedVersion(versionRaw);
-    return envelope(req, await this.assignments.end(m.organizationId, assignmentId, user.id, key, expectedVersion));
+    return envelope(
+      req,
+      await this.assignments.end(m.organizationId, assignmentId, user.id, key, expectedVersion),
+    );
   }
 
   @Post('bed-assignments/:assignmentId/transfer')
@@ -59,11 +73,25 @@ export class AssignmentsController {
   ) {
     const key = requireIdempotencyKey(idempotencyKey);
     const expectedVersion = requireExpectedVersion(versionRaw);
-    return envelope(req, await this.assignments.transfer(m.organizationId, assignmentId, user.id, dto, key, expectedVersion));
+    return envelope(
+      req,
+      await this.assignments.transfer(
+        m.organizationId,
+        assignmentId,
+        user.id,
+        dto,
+        key,
+        expectedVersion,
+      ),
+    );
   }
 
   @Get('residents/:residentId/assignments')
-  async listByResident(@CurrentMembership() m: MembershipContext, @Param('residentId') residentId: string, @Req() req: RequestWithAuth) {
+  async listByResident(
+    @CurrentMembership() m: MembershipContext,
+    @Param('residentId') residentId: string,
+    @Req() req: RequestWithAuth,
+  ) {
     return envelope(req, await this.assignments.listByResident(m.organizationId, residentId));
   }
 }

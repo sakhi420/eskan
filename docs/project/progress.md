@@ -18,7 +18,7 @@
 | 8   | ساکن/قرارداد/تخصیص | ✅ انجام شد (کد + smoke واقعی ۴۸/۴۸) | overlap, concurrency |
 | 8.1 | سخت‌سازی صحت/سازگاری (بازبینی) | ✅ انجام شد (P0 fixes + smoke ۱۴۴/۱۴۴ = 42+16+48+14+24) | atomic idempotency, CAS locking, resident overlap, transfer/checkout, fail-fast migration |
 | 8.2 | چرخه‌حیات هم‌روندی و یکپارچگی داده | ✅ انجام شد (LockService + business date + overlap contract + smoke ۱۵۷/۱۵۷ = 42+16+48+14+24+13) | resident contract overlap, row locks, business date, idempotency expiry |
-| 9   | مالی (charge/payment/deposit) | 🔄 در حال اجرا — M-1 ✅، M-2 ✅، 4c ✅، M3a ✅ (PR #2)، M3b ✅ (PR #4)؛ M3c بعدی | integer AFN (A-016), reversal, immutability |
+| 9   | مالی (charge/payment/deposit) | 🔄 در حال اجرا — M-1 ✅، M-2 ✅، 4c ✅، M3a ✅ (PR #2)، M3b ✅ (PR #4)، M3c کدنویسی و CI ✅ (PR #5 باز، Draft، ادغام‌نشده؛ Run #102؛ 99/99 آزمون Migration)؛ بازبینی مستقل و Backup/Restore باقی؛ M3d بعدی | integer AFN (A-016), reversal, immutability |
 | 10  | مصارف و گزارش | ⏳ در انتظار | reports |
 | 11  | idempotency/audit/sync | ⏳ در انتظار | cursor, tombstone |
 | 12  | امنیت و سخت‌سازی | ⏳ در انتظار | OWASP, validation |
@@ -27,15 +27,17 @@
 | 15  | مستندات و تحویل | ⏳ در انتظار | — |
 | 16  | گزارش نهایی | ⏳ در انتظار | — |
 
-## وضعیت جاری فاز ۹ (M-gates) — به‌روز 2026-11-10
+## وضعیت جاری فاز ۹ (M-gates) — به‌روز 2026-11-13
 
 - **Merge:** M3a (Charge/Billing/Absence-Credit) از طریق **PR #2** ادغام شد (commit `41af931e8be5ef194670989cae603c6cb1c51eca`)؛ **M3b (Payment/Receipt/Allocation/Release) از طریق PR #4 ادغام شد** (merge commit `198423c6459dd385e1dc905bdd9314de3a29f746`). CI روی هر دو موفق بود.
-- **وضعیت M-gates:** M-1 ✅، M-2 ✅، 4c ✅، M3a ✅، **M3b ✅ (ادغام PR #4)**. M3c بعد، M3d پس از آن.
+- **وضعیت M-gates:** M-1 ✅، M-2 ✅، 4c ✅، M3a ✅، **M3b ✅ (ادغام PR #4)**. پیاده‌سازی M3c روی شاخهٔ `feat/m3c-deposit-expense-refund-reversal` کامل شده و PR #5 باز است؛ **هنوز Draft و ادغام‌نشده**. آخرین سرشاخهٔ پوشش‌داده‌شده در CI کامل Run #102: `787809e663d982cca58d1e61f95ac84a9a3a9999`؛ CI موفق و M3c migration checks برابر 99/99 بود. پس از آن فقط اسناد Review/Progress به همان PR افزوده شده‌اند؛ هیچ فایل اجرایی، schema، migration، contract یا test تغییر نکرده است. M3d پس از پذیرش و ادغام M3c.
+- **دروازه‌های باز M3c:** بازبینی مستقل نفر دوم روی دو Migration و قواعد مالی؛ تصمیم مالک دربارهٔ ۲۹ هشدار باقی‌ماندهٔ وابستگی توسعه/آزمون (۴ Low و ۲۵ Moderate، triage شده اما رفع نشده)؛ تمرین ثبت‌شدهٔ Backup/Restore روی Clone و تأیید rollout مرحله‌ای. تا تکمیل این موارد PR #5 در Draft می‌ماند و هیچ Migration مربوط به M3c روی `eskan_dev`، Staging یا Production اجرا نمی‌شود.
+
 - **وضعیت Migration در محیط‌ها (تفکیک دقیق):** migrationهای M-1/M-2/4c/M3a/M3b روی `eskan_dev` اعمال شده‌اند (M3a+M3b در 2026-11-11 با Backup + Rehearsal روی clone اعمال شد). **Staging و Production هیچ migration اعمال نشده است.** «تست‌شده در CI» ≠ «اعمال‌شده روی دیتابیس توسعه/Staging/Production».
 - **Absence Credit ≠ Absence Lifecycle:** M3a فقط تولید Credit را برای غیابتی که قبلاً به `RETURNED` رسیده پشتیبانی می‌کند. چرخهٔ کامل غیابت (درخواست/تأیید/ثبت خروج/تأیید بازگشت) هنوز کار مستقل و پیاده‌نشده است.
-- **Backend (از `src/` و OpenAPI):** ماژول‌های `auth`، `organizations`، `hostels/rooms/beds`، `residents`، `contracts`، `assignments`، `packages`، `charges` (M3a) و `payments` (M3b) پیاده‌شده‌اند. ماژول‌های `deposits`، `expenses`، `reports`، `sync`، `admin/**` هنوز **ماژول اجرایی ندارند** (فقط در قرارداد/Schema وجود دارند).
+- **Backend (از `src/` و OpenAPI):** ماژول‌های `auth`، `organizations`، `hostels/rooms/beds`، `residents`، `contracts`، `assignments`، `packages`، `charges` (M3a)، `payments` (M3b) و `deposits`/`expenses` (M3c) پیاده‌شده‌اند. ماژول‌های `reports`، `sync` (pull)، `admin/**` هنوز **ماژول اجرایی ندارند** (فقط در قرارداد/Schema وجود دارند).
 - **Frontend:** پروژهٔ Flutter **هنوز در مخزن ساخته نشده** است (فقط Backend در ریشهٔ مخزن).
-- **Next step:** شروع **M3c** (Deposit / Refund / Expense / Reversal). چرخهٔ Absence و Sync Pull مربوط به Gateهای بعدی است.
+- **Next step:** شروع **M3d** (Account / Statement / Audit / Sync Pull). چرخهٔ Absence و Sync Pull مربوط به Gateهای بعدی است.
 - **بایگانی اسناد تاریخی:** گزارش‌ها/طرح‌ها/تحلیل‌های قدیمی (phase-9-engineering-plan، m2-*، mvp-prioritization، hostel-domain-requirements-v1، open-questions، current-workflows، api-gap-analysis، repository-assessment، commands، master-prompt-v3-gap-analysis) به `docs/archive/` منتقل شدند و برای اجرای جاری مرجع نیستند.
 
 ## فاز 0 — بررسی مخزن و خط پایه (انجام شد)
@@ -741,3 +743,16 @@ driver adapter) به‌عنوان بخشی از راه‌اندازی واقعی
 
 ### جزئیات محیطی (بدون افشای secret)
 - Migrationهای M3a روی **دیتابیس توسعهٔ محلی `eskan_dev` هنوز اعمال نشده‌اند** (تست روی DBهای throwaway انجام شد)؛ Staging/Production دست‌نخورده.
+## M3c — Deposit / Refund / Expense / Reversal — remediation update
+
+- **شاخه:** `feat/m3c-deposit-expense-refund-reversal`؛ اصلاحات در همین شاخه و جدا از `main` نگهداری می‌شوند.
+- **DAPP safety:** مسیرهای عمومی create/release/refund/reverse برای `DEPOSIT_APPLICATION` بسته‌اند؛ `reverseApplication` یکتایی و تطابق Allocation را دوباره کنترل می‌کند.
+- **Database invariants:** Migration جدید DAPP را به یک Payment و Allocation کامل و متناظر محدود می‌کند؛ تخصیص دوم برای DAPP رد می‌شود؛ هویت مالی Payment/Allocation/Application قابل تغییر نیست.
+- **Deposit immutability:** ردیف `DepositTransaction` هنگام Void تغییر نمی‌کند؛ `LedgerReversal` تنها رویداد جبرانی است. ماندهٔ منبع، رویدادهای برگشت را در محاسبه لحاظ می‌کند و وضعیت مؤثر API از reversal استخراج می‌شود.
+- **Checkout:** وجود هر قرارداد ACTIVE صریحاً Apply را متوقف می‌کند؛ صرف وجود قرارداد CLOSED کافی نیست.
+- **OpenAPI / Permissions:** درخواست Payment/Expense فقط روش‌های دستی را می‌پذیرد؛ روش پرداخت Expense اجباری است؛ endpoint برگشت DAPP و نقش OWNER/ADMIN ثبت شده‌اند.
+- **Migration tests:** علاوه بر Fresh Replay، مسیر pre-M3c → seed M3b financial rows → apply M3c only → preservation/parity اضافه شده است. باید روی لوکال اجرا شود.
+- **CI:** lint و format:check به Workflow اضافه شده‌اند. CI روی SHA جدید هنوز اجرا/تأیید نشده است.
+- **Integration source inventory:** ۳۳ test case در چهار فایل (۲۰ + ۴ + ۱ + ۸). اجرای جدید هنوز نیازمند تأیید با خروجی واقعی Jest است.
+- **باقی‌ماندهٔ پذیرش:** HTTP/Supertest role matrix و cross-tenant/BOLA tests هنوز P1 باز هستند؛ Build/Jest/Migration/OpenAPI/Lint/Format/CI باید روی commit نهایی واقعاً اجرا شوند.
+- **محیط‌ها:** هیچ Migration روی `eskan_dev`، Staging یا Production اجرا نشده است؛ این مرز حفظ شده است.

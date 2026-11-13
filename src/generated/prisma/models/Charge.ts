@@ -342,6 +342,7 @@ export type ChargeWhereInput = {
   absenceTenants?: Prisma.TemporaryAbsenceListRelationFilter
   components?: Prisma.ChargePackageComponentListRelationFilter
   absenceCredits?: Prisma.AbsenceCreditListRelationFilter
+  depositApplications?: Prisma.DepositApplicationListRelationFilter
 }
 
 export type ChargeOrderByWithRelationInput = {
@@ -374,6 +375,7 @@ export type ChargeOrderByWithRelationInput = {
   absenceTenants?: Prisma.TemporaryAbsenceOrderByRelationAggregateInput
   components?: Prisma.ChargePackageComponentOrderByRelationAggregateInput
   absenceCredits?: Prisma.AbsenceCreditOrderByRelationAggregateInput
+  depositApplications?: Prisma.DepositApplicationOrderByRelationAggregateInput
 }
 
 export type ChargeWhereUniqueInput = Prisma.AtLeast<{
@@ -411,6 +413,7 @@ export type ChargeWhereUniqueInput = Prisma.AtLeast<{
   absenceTenants?: Prisma.TemporaryAbsenceListRelationFilter
   components?: Prisma.ChargePackageComponentListRelationFilter
   absenceCredits?: Prisma.AbsenceCreditListRelationFilter
+  depositApplications?: Prisma.DepositApplicationListRelationFilter
 }, "id" | "organizationId_id" | "organizationId_residentId_id">
 
 export type ChargeOrderByWithAggregationInput = {
@@ -491,6 +494,7 @@ export type ChargeCreateInput = {
   absenceTenants?: Prisma.TemporaryAbsenceCreateNestedManyWithoutCreditChargeTenantInput
   components?: Prisma.ChargePackageComponentCreateNestedManyWithoutChargeInput
   absenceCredits?: Prisma.AbsenceCreditCreateNestedManyWithoutChargeInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutChargeInput
 }
 
 export type ChargeUncheckedCreateInput = {
@@ -518,6 +522,7 @@ export type ChargeUncheckedCreateInput = {
   absenceTenants?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutCreditChargeTenantInput
   components?: Prisma.ChargePackageComponentUncheckedCreateNestedManyWithoutChargeInput
   absenceCredits?: Prisma.AbsenceCreditUncheckedCreateNestedManyWithoutChargeInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutChargeInput
 }
 
 export type ChargeUpdateInput = {
@@ -546,6 +551,7 @@ export type ChargeUpdateInput = {
   absenceTenants?: Prisma.TemporaryAbsenceUpdateManyWithoutCreditChargeTenantNestedInput
   components?: Prisma.ChargePackageComponentUpdateManyWithoutChargeNestedInput
   absenceCredits?: Prisma.AbsenceCreditUpdateManyWithoutChargeNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutChargeNestedInput
 }
 
 export type ChargeUncheckedUpdateInput = {
@@ -573,6 +579,7 @@ export type ChargeUncheckedUpdateInput = {
   absenceTenants?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutCreditChargeTenantNestedInput
   components?: Prisma.ChargePackageComponentUncheckedUpdateManyWithoutChargeNestedInput
   absenceCredits?: Prisma.AbsenceCreditUncheckedUpdateManyWithoutChargeNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutChargeNestedInput
 }
 
 export type ChargeCreateManyInput = {
@@ -1040,6 +1047,20 @@ export type ChargeUpdateOneRequiredWithoutAllocationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ChargeUpdateToOneWithWhereWithoutAllocationsInput, Prisma.ChargeUpdateWithoutAllocationsInput>, Prisma.ChargeUncheckedUpdateWithoutAllocationsInput>
 }
 
+export type ChargeCreateNestedOneWithoutDepositApplicationsInput = {
+  create?: Prisma.XOR<Prisma.ChargeCreateWithoutDepositApplicationsInput, Prisma.ChargeUncheckedCreateWithoutDepositApplicationsInput>
+  connectOrCreate?: Prisma.ChargeCreateOrConnectWithoutDepositApplicationsInput
+  connect?: Prisma.ChargeWhereUniqueInput
+}
+
+export type ChargeUpdateOneRequiredWithoutDepositApplicationsNestedInput = {
+  create?: Prisma.XOR<Prisma.ChargeCreateWithoutDepositApplicationsInput, Prisma.ChargeUncheckedCreateWithoutDepositApplicationsInput>
+  connectOrCreate?: Prisma.ChargeCreateOrConnectWithoutDepositApplicationsInput
+  upsert?: Prisma.ChargeUpsertWithoutDepositApplicationsInput
+  connect?: Prisma.ChargeWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ChargeUpdateToOneWithWhereWithoutDepositApplicationsInput, Prisma.ChargeUpdateWithoutDepositApplicationsInput>, Prisma.ChargeUncheckedUpdateWithoutDepositApplicationsInput>
+}
+
 export type ChargeCreateWithoutOrganizationInput = {
   id?: string
   version?: number
@@ -1065,6 +1086,7 @@ export type ChargeCreateWithoutOrganizationInput = {
   absenceTenants?: Prisma.TemporaryAbsenceCreateNestedManyWithoutCreditChargeTenantInput
   components?: Prisma.ChargePackageComponentCreateNestedManyWithoutChargeInput
   absenceCredits?: Prisma.AbsenceCreditCreateNestedManyWithoutChargeInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutChargeInput
 }
 
 export type ChargeUncheckedCreateWithoutOrganizationInput = {
@@ -1091,6 +1113,7 @@ export type ChargeUncheckedCreateWithoutOrganizationInput = {
   absenceTenants?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutCreditChargeTenantInput
   components?: Prisma.ChargePackageComponentUncheckedCreateNestedManyWithoutChargeInput
   absenceCredits?: Prisma.AbsenceCreditUncheckedCreateNestedManyWithoutChargeInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutChargeInput
 }
 
 export type ChargeCreateOrConnectWithoutOrganizationInput = {
@@ -1169,6 +1192,7 @@ export type ChargeCreateWithoutReversedByInput = {
   absenceTenants?: Prisma.TemporaryAbsenceCreateNestedManyWithoutCreditChargeTenantInput
   components?: Prisma.ChargePackageComponentCreateNestedManyWithoutChargeInput
   absenceCredits?: Prisma.AbsenceCreditCreateNestedManyWithoutChargeInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutChargeInput
 }
 
 export type ChargeUncheckedCreateWithoutReversedByInput = {
@@ -1195,6 +1219,7 @@ export type ChargeUncheckedCreateWithoutReversedByInput = {
   absenceTenants?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutCreditChargeTenantInput
   components?: Prisma.ChargePackageComponentUncheckedCreateNestedManyWithoutChargeInput
   absenceCredits?: Prisma.AbsenceCreditUncheckedCreateNestedManyWithoutChargeInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutChargeInput
 }
 
 export type ChargeCreateOrConnectWithoutReversedByInput = {
@@ -1248,6 +1273,7 @@ export type ChargeCreateWithoutAbsenceInput = {
   absenceTenants?: Prisma.TemporaryAbsenceCreateNestedManyWithoutCreditChargeTenantInput
   components?: Prisma.ChargePackageComponentCreateNestedManyWithoutChargeInput
   absenceCredits?: Prisma.AbsenceCreditCreateNestedManyWithoutChargeInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutChargeInput
 }
 
 export type ChargeUncheckedCreateWithoutAbsenceInput = {
@@ -1274,6 +1300,7 @@ export type ChargeUncheckedCreateWithoutAbsenceInput = {
   absenceTenants?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutCreditChargeTenantInput
   components?: Prisma.ChargePackageComponentUncheckedCreateNestedManyWithoutChargeInput
   absenceCredits?: Prisma.AbsenceCreditUncheckedCreateNestedManyWithoutChargeInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutChargeInput
 }
 
 export type ChargeCreateOrConnectWithoutAbsenceInput = {
@@ -1306,6 +1333,7 @@ export type ChargeCreateWithoutAbsenceTenantsInput = {
   absence?: Prisma.TemporaryAbsenceCreateNestedOneWithoutCreditChargeInput
   components?: Prisma.ChargePackageComponentCreateNestedManyWithoutChargeInput
   absenceCredits?: Prisma.AbsenceCreditCreateNestedManyWithoutChargeInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutChargeInput
 }
 
 export type ChargeUncheckedCreateWithoutAbsenceTenantsInput = {
@@ -1332,6 +1360,7 @@ export type ChargeUncheckedCreateWithoutAbsenceTenantsInput = {
   absence?: Prisma.TemporaryAbsenceUncheckedCreateNestedOneWithoutCreditChargeInput
   components?: Prisma.ChargePackageComponentUncheckedCreateNestedManyWithoutChargeInput
   absenceCredits?: Prisma.AbsenceCreditUncheckedCreateNestedManyWithoutChargeInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutChargeInput
 }
 
 export type ChargeCreateOrConnectWithoutAbsenceTenantsInput = {
@@ -1375,6 +1404,7 @@ export type ChargeUpdateWithoutAbsenceInput = {
   absenceTenants?: Prisma.TemporaryAbsenceUpdateManyWithoutCreditChargeTenantNestedInput
   components?: Prisma.ChargePackageComponentUpdateManyWithoutChargeNestedInput
   absenceCredits?: Prisma.AbsenceCreditUpdateManyWithoutChargeNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutChargeNestedInput
 }
 
 export type ChargeUncheckedUpdateWithoutAbsenceInput = {
@@ -1401,6 +1431,7 @@ export type ChargeUncheckedUpdateWithoutAbsenceInput = {
   absenceTenants?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutCreditChargeTenantNestedInput
   components?: Prisma.ChargePackageComponentUncheckedUpdateManyWithoutChargeNestedInput
   absenceCredits?: Prisma.AbsenceCreditUncheckedUpdateManyWithoutChargeNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutChargeNestedInput
 }
 
 export type ChargeUpsertWithoutAbsenceTenantsInput = {
@@ -1439,6 +1470,7 @@ export type ChargeUpdateWithoutAbsenceTenantsInput = {
   absence?: Prisma.TemporaryAbsenceUpdateOneWithoutCreditChargeNestedInput
   components?: Prisma.ChargePackageComponentUpdateManyWithoutChargeNestedInput
   absenceCredits?: Prisma.AbsenceCreditUpdateManyWithoutChargeNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutChargeNestedInput
 }
 
 export type ChargeUncheckedUpdateWithoutAbsenceTenantsInput = {
@@ -1465,6 +1497,7 @@ export type ChargeUncheckedUpdateWithoutAbsenceTenantsInput = {
   absence?: Prisma.TemporaryAbsenceUncheckedUpdateOneWithoutCreditChargeNestedInput
   components?: Prisma.ChargePackageComponentUncheckedUpdateManyWithoutChargeNestedInput
   absenceCredits?: Prisma.AbsenceCreditUncheckedUpdateManyWithoutChargeNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutChargeNestedInput
 }
 
 export type ChargeCreateWithoutResidentInput = {
@@ -1492,6 +1525,7 @@ export type ChargeCreateWithoutResidentInput = {
   absenceTenants?: Prisma.TemporaryAbsenceCreateNestedManyWithoutCreditChargeTenantInput
   components?: Prisma.ChargePackageComponentCreateNestedManyWithoutChargeInput
   absenceCredits?: Prisma.AbsenceCreditCreateNestedManyWithoutChargeInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutChargeInput
 }
 
 export type ChargeUncheckedCreateWithoutResidentInput = {
@@ -1517,6 +1551,7 @@ export type ChargeUncheckedCreateWithoutResidentInput = {
   absenceTenants?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutCreditChargeTenantInput
   components?: Prisma.ChargePackageComponentUncheckedCreateNestedManyWithoutChargeInput
   absenceCredits?: Prisma.AbsenceCreditUncheckedCreateNestedManyWithoutChargeInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutChargeInput
 }
 
 export type ChargeCreateOrConnectWithoutResidentInput = {
@@ -1570,6 +1605,7 @@ export type ChargeCreateWithoutContractInput = {
   absenceTenants?: Prisma.TemporaryAbsenceCreateNestedManyWithoutCreditChargeTenantInput
   components?: Prisma.ChargePackageComponentCreateNestedManyWithoutChargeInput
   absenceCredits?: Prisma.AbsenceCreditCreateNestedManyWithoutChargeInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutChargeInput
 }
 
 export type ChargeUncheckedCreateWithoutContractInput = {
@@ -1596,6 +1632,7 @@ export type ChargeUncheckedCreateWithoutContractInput = {
   absenceTenants?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutCreditChargeTenantInput
   components?: Prisma.ChargePackageComponentUncheckedCreateNestedManyWithoutChargeInput
   absenceCredits?: Prisma.AbsenceCreditUncheckedCreateNestedManyWithoutChargeInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutChargeInput
 }
 
 export type ChargeCreateOrConnectWithoutContractInput = {
@@ -1633,6 +1670,7 @@ export type ChargeCreateWithoutContractTenantInput = {
   absenceTenants?: Prisma.TemporaryAbsenceCreateNestedManyWithoutCreditChargeTenantInput
   components?: Prisma.ChargePackageComponentCreateNestedManyWithoutChargeInput
   absenceCredits?: Prisma.AbsenceCreditCreateNestedManyWithoutChargeInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutChargeInput
 }
 
 export type ChargeUncheckedCreateWithoutContractTenantInput = {
@@ -1657,6 +1695,7 @@ export type ChargeUncheckedCreateWithoutContractTenantInput = {
   absenceTenants?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutCreditChargeTenantInput
   components?: Prisma.ChargePackageComponentUncheckedCreateNestedManyWithoutChargeInput
   absenceCredits?: Prisma.AbsenceCreditUncheckedCreateNestedManyWithoutChargeInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutChargeInput
 }
 
 export type ChargeCreateOrConnectWithoutContractTenantInput = {
@@ -1726,6 +1765,7 @@ export type ChargeCreateWithoutComponentsInput = {
   absence?: Prisma.TemporaryAbsenceCreateNestedOneWithoutCreditChargeInput
   absenceTenants?: Prisma.TemporaryAbsenceCreateNestedManyWithoutCreditChargeTenantInput
   absenceCredits?: Prisma.AbsenceCreditCreateNestedManyWithoutChargeInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutChargeInput
 }
 
 export type ChargeUncheckedCreateWithoutComponentsInput = {
@@ -1752,6 +1792,7 @@ export type ChargeUncheckedCreateWithoutComponentsInput = {
   absence?: Prisma.TemporaryAbsenceUncheckedCreateNestedOneWithoutCreditChargeInput
   absenceTenants?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutCreditChargeTenantInput
   absenceCredits?: Prisma.AbsenceCreditUncheckedCreateNestedManyWithoutChargeInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutChargeInput
 }
 
 export type ChargeCreateOrConnectWithoutComponentsInput = {
@@ -1795,6 +1836,7 @@ export type ChargeUpdateWithoutComponentsInput = {
   absence?: Prisma.TemporaryAbsenceUpdateOneWithoutCreditChargeNestedInput
   absenceTenants?: Prisma.TemporaryAbsenceUpdateManyWithoutCreditChargeTenantNestedInput
   absenceCredits?: Prisma.AbsenceCreditUpdateManyWithoutChargeNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutChargeNestedInput
 }
 
 export type ChargeUncheckedUpdateWithoutComponentsInput = {
@@ -1821,6 +1863,7 @@ export type ChargeUncheckedUpdateWithoutComponentsInput = {
   absence?: Prisma.TemporaryAbsenceUncheckedUpdateOneWithoutCreditChargeNestedInput
   absenceTenants?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutCreditChargeTenantNestedInput
   absenceCredits?: Prisma.AbsenceCreditUncheckedUpdateManyWithoutChargeNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutChargeNestedInput
 }
 
 export type ChargeCreateWithoutAbsenceCreditsInput = {
@@ -1848,6 +1891,7 @@ export type ChargeCreateWithoutAbsenceCreditsInput = {
   absence?: Prisma.TemporaryAbsenceCreateNestedOneWithoutCreditChargeInput
   absenceTenants?: Prisma.TemporaryAbsenceCreateNestedManyWithoutCreditChargeTenantInput
   components?: Prisma.ChargePackageComponentCreateNestedManyWithoutChargeInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutChargeInput
 }
 
 export type ChargeUncheckedCreateWithoutAbsenceCreditsInput = {
@@ -1874,6 +1918,7 @@ export type ChargeUncheckedCreateWithoutAbsenceCreditsInput = {
   absence?: Prisma.TemporaryAbsenceUncheckedCreateNestedOneWithoutCreditChargeInput
   absenceTenants?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutCreditChargeTenantInput
   components?: Prisma.ChargePackageComponentUncheckedCreateNestedManyWithoutChargeInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutChargeInput
 }
 
 export type ChargeCreateOrConnectWithoutAbsenceCreditsInput = {
@@ -1917,6 +1962,7 @@ export type ChargeUpdateWithoutAbsenceCreditsInput = {
   absence?: Prisma.TemporaryAbsenceUpdateOneWithoutCreditChargeNestedInput
   absenceTenants?: Prisma.TemporaryAbsenceUpdateManyWithoutCreditChargeTenantNestedInput
   components?: Prisma.ChargePackageComponentUpdateManyWithoutChargeNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutChargeNestedInput
 }
 
 export type ChargeUncheckedUpdateWithoutAbsenceCreditsInput = {
@@ -1943,6 +1989,7 @@ export type ChargeUncheckedUpdateWithoutAbsenceCreditsInput = {
   absence?: Prisma.TemporaryAbsenceUncheckedUpdateOneWithoutCreditChargeNestedInput
   absenceTenants?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutCreditChargeTenantNestedInput
   components?: Prisma.ChargePackageComponentUncheckedUpdateManyWithoutChargeNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutChargeNestedInput
 }
 
 export type ChargeCreateWithoutAllocationsInput = {
@@ -1970,6 +2017,7 @@ export type ChargeCreateWithoutAllocationsInput = {
   absenceTenants?: Prisma.TemporaryAbsenceCreateNestedManyWithoutCreditChargeTenantInput
   components?: Prisma.ChargePackageComponentCreateNestedManyWithoutChargeInput
   absenceCredits?: Prisma.AbsenceCreditCreateNestedManyWithoutChargeInput
+  depositApplications?: Prisma.DepositApplicationCreateNestedManyWithoutChargeInput
 }
 
 export type ChargeUncheckedCreateWithoutAllocationsInput = {
@@ -1996,6 +2044,7 @@ export type ChargeUncheckedCreateWithoutAllocationsInput = {
   absenceTenants?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutCreditChargeTenantInput
   components?: Prisma.ChargePackageComponentUncheckedCreateNestedManyWithoutChargeInput
   absenceCredits?: Prisma.AbsenceCreditUncheckedCreateNestedManyWithoutChargeInput
+  depositApplications?: Prisma.DepositApplicationUncheckedCreateNestedManyWithoutChargeInput
 }
 
 export type ChargeCreateOrConnectWithoutAllocationsInput = {
@@ -2039,6 +2088,7 @@ export type ChargeUpdateWithoutAllocationsInput = {
   absenceTenants?: Prisma.TemporaryAbsenceUpdateManyWithoutCreditChargeTenantNestedInput
   components?: Prisma.ChargePackageComponentUpdateManyWithoutChargeNestedInput
   absenceCredits?: Prisma.AbsenceCreditUpdateManyWithoutChargeNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutChargeNestedInput
 }
 
 export type ChargeUncheckedUpdateWithoutAllocationsInput = {
@@ -2061,6 +2111,133 @@ export type ChargeUncheckedUpdateWithoutAllocationsInput = {
   reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  absence?: Prisma.TemporaryAbsenceUncheckedUpdateOneWithoutCreditChargeNestedInput
+  absenceTenants?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutCreditChargeTenantNestedInput
+  components?: Prisma.ChargePackageComponentUncheckedUpdateManyWithoutChargeNestedInput
+  absenceCredits?: Prisma.AbsenceCreditUncheckedUpdateManyWithoutChargeNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutChargeNestedInput
+}
+
+export type ChargeCreateWithoutDepositApplicationsInput = {
+  id?: string
+  version?: number
+  type: $Enums.ChargeType
+  entrySide?: $Enums.EntrySide
+  status?: $Enums.LedgerEntryStatus
+  amount: number
+  periodStart: Date | string
+  periodEnd: Date | string
+  dueDate: Date | string
+  description?: string | null
+  postedAt?: Date | string
+  reversalReason?: string | null
+  reversedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutChargesInput
+  resident: Prisma.ResidentCreateNestedOneWithoutChargesInput
+  contract?: Prisma.StayContractCreateNestedOneWithoutChargesInput
+  contractTenant?: Prisma.StayContractCreateNestedOneWithoutChargeTenantsInput
+  reversedBy?: Prisma.UserCreateNestedOneWithoutReversedChargesInput
+  allocations?: Prisma.PaymentAllocationCreateNestedManyWithoutChargeInput
+  absence?: Prisma.TemporaryAbsenceCreateNestedOneWithoutCreditChargeInput
+  absenceTenants?: Prisma.TemporaryAbsenceCreateNestedManyWithoutCreditChargeTenantInput
+  components?: Prisma.ChargePackageComponentCreateNestedManyWithoutChargeInput
+  absenceCredits?: Prisma.AbsenceCreditCreateNestedManyWithoutChargeInput
+}
+
+export type ChargeUncheckedCreateWithoutDepositApplicationsInput = {
+  id?: string
+  version?: number
+  organizationId: string
+  residentId: string
+  contractId?: string | null
+  type: $Enums.ChargeType
+  entrySide?: $Enums.EntrySide
+  status?: $Enums.LedgerEntryStatus
+  amount: number
+  periodStart: Date | string
+  periodEnd: Date | string
+  dueDate: Date | string
+  description?: string | null
+  postedAt?: Date | string
+  reversedById?: string | null
+  reversalReason?: string | null
+  reversedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  allocations?: Prisma.PaymentAllocationUncheckedCreateNestedManyWithoutChargeInput
+  absence?: Prisma.TemporaryAbsenceUncheckedCreateNestedOneWithoutCreditChargeInput
+  absenceTenants?: Prisma.TemporaryAbsenceUncheckedCreateNestedManyWithoutCreditChargeTenantInput
+  components?: Prisma.ChargePackageComponentUncheckedCreateNestedManyWithoutChargeInput
+  absenceCredits?: Prisma.AbsenceCreditUncheckedCreateNestedManyWithoutChargeInput
+}
+
+export type ChargeCreateOrConnectWithoutDepositApplicationsInput = {
+  where: Prisma.ChargeWhereUniqueInput
+  create: Prisma.XOR<Prisma.ChargeCreateWithoutDepositApplicationsInput, Prisma.ChargeUncheckedCreateWithoutDepositApplicationsInput>
+}
+
+export type ChargeUpsertWithoutDepositApplicationsInput = {
+  update: Prisma.XOR<Prisma.ChargeUpdateWithoutDepositApplicationsInput, Prisma.ChargeUncheckedUpdateWithoutDepositApplicationsInput>
+  create: Prisma.XOR<Prisma.ChargeCreateWithoutDepositApplicationsInput, Prisma.ChargeUncheckedCreateWithoutDepositApplicationsInput>
+  where?: Prisma.ChargeWhereInput
+}
+
+export type ChargeUpdateToOneWithWhereWithoutDepositApplicationsInput = {
+  where?: Prisma.ChargeWhereInput
+  data: Prisma.XOR<Prisma.ChargeUpdateWithoutDepositApplicationsInput, Prisma.ChargeUncheckedUpdateWithoutDepositApplicationsInput>
+}
+
+export type ChargeUpdateWithoutDepositApplicationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  type?: Prisma.EnumChargeTypeFieldUpdateOperationsInput | $Enums.ChargeType
+  entrySide?: Prisma.EnumEntrySideFieldUpdateOperationsInput | $Enums.EntrySide
+  status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  periodStart?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  periodEnd?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  postedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutChargesNestedInput
+  resident?: Prisma.ResidentUpdateOneRequiredWithoutChargesNestedInput
+  contract?: Prisma.StayContractUpdateOneWithoutChargesNestedInput
+  contractTenant?: Prisma.StayContractUpdateOneWithoutChargeTenantsNestedInput
+  reversedBy?: Prisma.UserUpdateOneWithoutReversedChargesNestedInput
+  allocations?: Prisma.PaymentAllocationUpdateManyWithoutChargeNestedInput
+  absence?: Prisma.TemporaryAbsenceUpdateOneWithoutCreditChargeNestedInput
+  absenceTenants?: Prisma.TemporaryAbsenceUpdateManyWithoutCreditChargeTenantNestedInput
+  components?: Prisma.ChargePackageComponentUpdateManyWithoutChargeNestedInput
+  absenceCredits?: Prisma.AbsenceCreditUpdateManyWithoutChargeNestedInput
+}
+
+export type ChargeUncheckedUpdateWithoutDepositApplicationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  residentId?: Prisma.StringFieldUpdateOperationsInput | string
+  contractId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumChargeTypeFieldUpdateOperationsInput | $Enums.ChargeType
+  entrySide?: Prisma.EnumEntrySideFieldUpdateOperationsInput | $Enums.EntrySide
+  status?: Prisma.EnumLedgerEntryStatusFieldUpdateOperationsInput | $Enums.LedgerEntryStatus
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  periodStart?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  periodEnd?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  postedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  allocations?: Prisma.PaymentAllocationUncheckedUpdateManyWithoutChargeNestedInput
   absence?: Prisma.TemporaryAbsenceUncheckedUpdateOneWithoutCreditChargeNestedInput
   absenceTenants?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutCreditChargeTenantNestedInput
   components?: Prisma.ChargePackageComponentUncheckedUpdateManyWithoutChargeNestedInput
@@ -2113,6 +2290,7 @@ export type ChargeUpdateWithoutOrganizationInput = {
   absenceTenants?: Prisma.TemporaryAbsenceUpdateManyWithoutCreditChargeTenantNestedInput
   components?: Prisma.ChargePackageComponentUpdateManyWithoutChargeNestedInput
   absenceCredits?: Prisma.AbsenceCreditUpdateManyWithoutChargeNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutChargeNestedInput
 }
 
 export type ChargeUncheckedUpdateWithoutOrganizationInput = {
@@ -2139,6 +2317,7 @@ export type ChargeUncheckedUpdateWithoutOrganizationInput = {
   absenceTenants?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutCreditChargeTenantNestedInput
   components?: Prisma.ChargePackageComponentUncheckedUpdateManyWithoutChargeNestedInput
   absenceCredits?: Prisma.AbsenceCreditUncheckedUpdateManyWithoutChargeNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutChargeNestedInput
 }
 
 export type ChargeUncheckedUpdateManyWithoutOrganizationInput = {
@@ -2208,6 +2387,7 @@ export type ChargeUpdateWithoutReversedByInput = {
   absenceTenants?: Prisma.TemporaryAbsenceUpdateManyWithoutCreditChargeTenantNestedInput
   components?: Prisma.ChargePackageComponentUpdateManyWithoutChargeNestedInput
   absenceCredits?: Prisma.AbsenceCreditUpdateManyWithoutChargeNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutChargeNestedInput
 }
 
 export type ChargeUncheckedUpdateWithoutReversedByInput = {
@@ -2234,6 +2414,7 @@ export type ChargeUncheckedUpdateWithoutReversedByInput = {
   absenceTenants?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutCreditChargeTenantNestedInput
   components?: Prisma.ChargePackageComponentUncheckedUpdateManyWithoutChargeNestedInput
   absenceCredits?: Prisma.AbsenceCreditUncheckedUpdateManyWithoutChargeNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutChargeNestedInput
 }
 
 export type ChargeUncheckedUpdateManyWithoutReversedByInput = {
@@ -2302,6 +2483,7 @@ export type ChargeUpdateWithoutResidentInput = {
   absenceTenants?: Prisma.TemporaryAbsenceUpdateManyWithoutCreditChargeTenantNestedInput
   components?: Prisma.ChargePackageComponentUpdateManyWithoutChargeNestedInput
   absenceCredits?: Prisma.AbsenceCreditUpdateManyWithoutChargeNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutChargeNestedInput
 }
 
 export type ChargeUncheckedUpdateWithoutResidentInput = {
@@ -2327,6 +2509,7 @@ export type ChargeUncheckedUpdateWithoutResidentInput = {
   absenceTenants?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutCreditChargeTenantNestedInput
   components?: Prisma.ChargePackageComponentUncheckedUpdateManyWithoutChargeNestedInput
   absenceCredits?: Prisma.AbsenceCreditUncheckedUpdateManyWithoutChargeNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutChargeNestedInput
 }
 
 export type ChargeUncheckedUpdateManyWithoutResidentInput = {
@@ -2414,6 +2597,7 @@ export type ChargeUpdateWithoutContractInput = {
   absenceTenants?: Prisma.TemporaryAbsenceUpdateManyWithoutCreditChargeTenantNestedInput
   components?: Prisma.ChargePackageComponentUpdateManyWithoutChargeNestedInput
   absenceCredits?: Prisma.AbsenceCreditUpdateManyWithoutChargeNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutChargeNestedInput
 }
 
 export type ChargeUncheckedUpdateWithoutContractInput = {
@@ -2440,6 +2624,7 @@ export type ChargeUncheckedUpdateWithoutContractInput = {
   absenceTenants?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutCreditChargeTenantNestedInput
   components?: Prisma.ChargePackageComponentUncheckedUpdateManyWithoutChargeNestedInput
   absenceCredits?: Prisma.AbsenceCreditUncheckedUpdateManyWithoutChargeNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutChargeNestedInput
 }
 
 export type ChargeUncheckedUpdateManyWithoutContractInput = {
@@ -2488,6 +2673,7 @@ export type ChargeUpdateWithoutContractTenantInput = {
   absenceTenants?: Prisma.TemporaryAbsenceUpdateManyWithoutCreditChargeTenantNestedInput
   components?: Prisma.ChargePackageComponentUpdateManyWithoutChargeNestedInput
   absenceCredits?: Prisma.AbsenceCreditUpdateManyWithoutChargeNestedInput
+  depositApplications?: Prisma.DepositApplicationUpdateManyWithoutChargeNestedInput
 }
 
 export type ChargeUncheckedUpdateWithoutContractTenantInput = {
@@ -2512,6 +2698,7 @@ export type ChargeUncheckedUpdateWithoutContractTenantInput = {
   absenceTenants?: Prisma.TemporaryAbsenceUncheckedUpdateManyWithoutCreditChargeTenantNestedInput
   components?: Prisma.ChargePackageComponentUncheckedUpdateManyWithoutChargeNestedInput
   absenceCredits?: Prisma.AbsenceCreditUncheckedUpdateManyWithoutChargeNestedInput
+  depositApplications?: Prisma.DepositApplicationUncheckedUpdateManyWithoutChargeNestedInput
 }
 
 export type ChargeUncheckedUpdateManyWithoutContractTenantInput = {
@@ -2543,6 +2730,7 @@ export type ChargeCountOutputType = {
   absenceTenants: number
   components: number
   absenceCredits: number
+  depositApplications: number
 }
 
 export type ChargeCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2550,6 +2738,7 @@ export type ChargeCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   absenceTenants?: boolean | ChargeCountOutputTypeCountAbsenceTenantsArgs
   components?: boolean | ChargeCountOutputTypeCountComponentsArgs
   absenceCredits?: boolean | ChargeCountOutputTypeCountAbsenceCreditsArgs
+  depositApplications?: boolean | ChargeCountOutputTypeCountDepositApplicationsArgs
 }
 
 /**
@@ -2590,6 +2779,13 @@ export type ChargeCountOutputTypeCountAbsenceCreditsArgs<ExtArgs extends runtime
   where?: Prisma.AbsenceCreditWhereInput
 }
 
+/**
+ * ChargeCountOutputType without action
+ */
+export type ChargeCountOutputTypeCountDepositApplicationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DepositApplicationWhereInput
+}
+
 
 export type ChargeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2621,6 +2817,7 @@ export type ChargeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   absenceTenants?: boolean | Prisma.Charge$absenceTenantsArgs<ExtArgs>
   components?: boolean | Prisma.Charge$componentsArgs<ExtArgs>
   absenceCredits?: boolean | Prisma.Charge$absenceCreditsArgs<ExtArgs>
+  depositApplications?: boolean | Prisma.Charge$depositApplicationsArgs<ExtArgs>
   _count?: boolean | Prisma.ChargeCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["charge"]>
 
@@ -2712,6 +2909,7 @@ export type ChargeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   absenceTenants?: boolean | Prisma.Charge$absenceTenantsArgs<ExtArgs>
   components?: boolean | Prisma.Charge$componentsArgs<ExtArgs>
   absenceCredits?: boolean | Prisma.Charge$absenceCreditsArgs<ExtArgs>
+  depositApplications?: boolean | Prisma.Charge$depositApplicationsArgs<ExtArgs>
   _count?: boolean | Prisma.ChargeCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ChargeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2742,6 +2940,7 @@ export type $ChargePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     absenceTenants: Prisma.$TemporaryAbsencePayload<ExtArgs>[]
     components: Prisma.$ChargePackageComponentPayload<ExtArgs>[]
     absenceCredits: Prisma.$AbsenceCreditPayload<ExtArgs>[]
+    depositApplications: Prisma.$DepositApplicationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3167,6 +3366,7 @@ export interface Prisma__ChargeClient<T, Null = never, ExtArgs extends runtime.T
   absenceTenants<T extends Prisma.Charge$absenceTenantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Charge$absenceTenantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TemporaryAbsencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   components<T extends Prisma.Charge$componentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Charge$componentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChargePackageComponentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   absenceCredits<T extends Prisma.Charge$absenceCreditsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Charge$absenceCreditsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AbsenceCreditPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  depositApplications<T extends Prisma.Charge$depositApplicationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Charge$depositApplicationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DepositApplicationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3785,6 +3985,30 @@ export type Charge$absenceCreditsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.AbsenceCreditScalarFieldEnum | Prisma.AbsenceCreditScalarFieldEnum[]
+}
+
+/**
+ * Charge.depositApplications
+ */
+export type Charge$depositApplicationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DepositApplication
+   */
+  select?: Prisma.DepositApplicationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DepositApplication
+   */
+  omit?: Prisma.DepositApplicationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DepositApplicationInclude<ExtArgs> | null
+  where?: Prisma.DepositApplicationWhereInput
+  orderBy?: Prisma.DepositApplicationOrderByWithRelationInput | Prisma.DepositApplicationOrderByWithRelationInput[]
+  cursor?: Prisma.DepositApplicationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DepositApplicationScalarFieldEnum | Prisma.DepositApplicationScalarFieldEnum[]
 }
 
 /**

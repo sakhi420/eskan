@@ -1,4 +1,17 @@
-import { Body, Controller, Get, Headers, HttpCode, HttpStatus, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ResidentsService } from './residents.service';
 import { ContractsService } from '../contracts/contracts.service';
 import { AssignmentsService } from '../assignments/assignments.service';
@@ -9,7 +22,14 @@ import { CurrentMembership } from '../common/decorators/current-membership.decor
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuthUser, MembershipContext, RequestWithAuth } from '../auth/auth.types';
 import { ResidentStatus, ResidentType, Role } from '../generated/prisma/enums';
-import { envelope, parseEnum, parsePage, parseSize, requireExpectedVersion, requireIdempotencyKey } from '../common/http/http-utils';
+import {
+  envelope,
+  parseEnum,
+  parsePage,
+  parseSize,
+  requireExpectedVersion,
+  requireIdempotencyKey,
+} from '../common/http/http-utils';
 import { ResidentDto } from './dto/resident.dto';
 
 @Controller()
@@ -31,7 +51,17 @@ export class ResidentsController {
     @Query('status') statusRaw: string | undefined,
     @Req() req: RequestWithAuth,
   ) {
-    return envelope(req, await this.residents.list(m.organizationId, parsePage(pageRaw), parseSize(sizeRaw), q, parseEnum(ResidentType, typeRaw), parseEnum(ResidentStatus, statusRaw)));
+    return envelope(
+      req,
+      await this.residents.list(
+        m.organizationId,
+        parsePage(pageRaw),
+        parseSize(sizeRaw),
+        q,
+        parseEnum(ResidentType, typeRaw),
+        parseEnum(ResidentStatus, statusRaw),
+      ),
+    );
   }
 
   @Post('residents')
@@ -48,7 +78,11 @@ export class ResidentsController {
   }
 
   @Get('residents/:residentId')
-  async get(@CurrentMembership() m: MembershipContext, @Param('residentId') residentId: string, @Req() req: RequestWithAuth) {
+  async get(
+    @CurrentMembership() m: MembershipContext,
+    @Param('residentId') residentId: string,
+    @Req() req: RequestWithAuth,
+  ) {
     return envelope(req, await this.residents.get(m.organizationId, residentId));
   }
 
@@ -62,18 +96,29 @@ export class ResidentsController {
     @Req() req: RequestWithAuth,
   ) {
     const expectedVersion = requireExpectedVersion(versionRaw);
-    return envelope(req, await this.residents.update(m.organizationId, residentId, expectedVersion, dto));
+    return envelope(
+      req,
+      await this.residents.update(m.organizationId, residentId, expectedVersion, dto),
+    );
   }
 
   @Post('residents/:residentId/archive')
   @Roles(Role.OWNER, Role.ADMIN)
   @HttpCode(HttpStatus.OK)
-  async archive(@CurrentMembership() m: MembershipContext, @Param('residentId') residentId: string, @Req() req: RequestWithAuth) {
+  async archive(
+    @CurrentMembership() m: MembershipContext,
+    @Param('residentId') residentId: string,
+    @Req() req: RequestWithAuth,
+  ) {
     return envelope(req, await this.residents.archive(m.organizationId, residentId));
   }
 
   @Get('residents/:residentId/timeline')
-  async timeline(@CurrentMembership() m: MembershipContext, @Param('residentId') residentId: string, @Req() req: RequestWithAuth) {
+  async timeline(
+    @CurrentMembership() m: MembershipContext,
+    @Param('residentId') residentId: string,
+    @Req() req: RequestWithAuth,
+  ) {
     await this.residents.get(m.organizationId, residentId);
     const [contracts, assignments] = await Promise.all([
       this.contracts.listByResident(m.organizationId, residentId),

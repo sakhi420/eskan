@@ -1,7 +1,8 @@
 import { RequestWithTraceId } from './request.types';
 import { AppError } from '../errors/app-error';
 
-export const UUID_RE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+export const UUID_RE =
+  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
 export function requireIdempotencyKey(raw: string | undefined): string {
   if (!raw || !UUID_RE.test(raw)) {
@@ -33,12 +34,18 @@ export function parseSize(raw: string | undefined): number {
   return 20;
 }
 
-export function parseEnum<T extends Record<string, string>>(enumObj: T, raw: string | undefined): T[keyof T] | undefined {
+export function parseEnum<T extends Record<string, string>>(
+  enumObj: T,
+  raw: string | undefined,
+): T[keyof T] | undefined {
   if (!raw) return undefined;
   const values = Object.values(enumObj) as string[];
   return values.find((v) => v === raw) as T[keyof T] | undefined;
 }
 
-export function envelope(req: RequestWithTraceId, data: unknown): { data: unknown; meta: { traceId: string } } {
+export function envelope(
+  req: RequestWithTraceId,
+  data: unknown,
+): { data: unknown; meta: { traceId: string } } {
   return { data, meta: { traceId: req.traceId ?? 'unknown' } };
 }

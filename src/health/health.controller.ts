@@ -15,7 +15,7 @@ export class HealthController {
   @Public()
   @Get('ready')
   async ready() {
-    let database: 'up' | 'down' = 'down';
+    let database: 'up' | 'down';
     try {
       await this.prisma.$queryRawUnsafe('SELECT 1');
       database = 'up';

@@ -26,7 +26,9 @@ function assertLocalTestHost(): void {
     const u = new URL(BASE_URL);
     host = u.hostname;
     db = decodeURIComponent(u.pathname.replace(/^\//, ''));
-  } catch { /* keep empty */ }
+  } catch {
+    /* keep empty */
+  }
   const okHost = ['localhost', '127.0.0.1', '::1'].includes(host);
   const okDb = ['eskan_dev', 'eskan_test', 'eskan_testing'].includes(db);
   if ((!okHost || !okDb) && process.env.ESKAN_TEST_DB_ALLOW !== '1') {
@@ -37,7 +39,12 @@ function assertLocalTestHost(): void {
   }
 }
 
-interface DraftFixture { org: string; hostel: string; resident: string; contract: string; }
+interface DraftFixture {
+  org: string;
+  hostel: string;
+  resident: string;
+  contract: string;
+}
 
 interface ActiveFixture {
   org: string;
@@ -51,10 +58,19 @@ interface ActiveFixture {
 }
 
 async function seedDraftFixture(db: Client): Promise<DraftFixture> {
-  const org = randomUUID(), hostel = randomUUID(), resident = randomUUID(), contract = randomUUID();
+  const org = randomUUID(),
+    hostel = randomUUID(),
+    resident = randomUUID(),
+    contract = randomUUID();
   await db.query(`INSERT INTO organizations (id, name, updated_at) VALUES ($1,'Org',now())`, [org]);
-  await db.query(`INSERT INTO hostels (id, organization_id, name, updated_at) VALUES ($1,$2,'H',now())`, [hostel, org]);
-  await db.query(`INSERT INTO residents (id, organization_id, full_name, updated_at) VALUES ($1,$2,'R',now())`, [resident, org]);
+  await db.query(
+    `INSERT INTO hostels (id, organization_id, name, updated_at) VALUES ($1,$2,'H',now())`,
+    [hostel, org],
+  );
+  await db.query(
+    `INSERT INTO residents (id, organization_id, full_name, updated_at) VALUES ($1,$2,'R',now())`,
+    [resident, org],
+  );
   await db.query(
     `INSERT INTO stay_contracts (id, organization_id, hostel_id, resident_id, contract_number, status, start_date, rent_amount, updated_at) VALUES ($1,$2,$3,$4,$5,'DRAFT','2020-01-01',5000,now())`,
     [contract, org, hostel, resident, `CNT-${randomUUID().slice(0, 8)}`],
@@ -63,14 +79,35 @@ async function seedDraftFixture(db: Client): Promise<DraftFixture> {
 }
 
 async function seedActiveFixture(db: Client): Promise<ActiveFixture> {
-  const org = randomUUID(), hostel = randomUUID(), room = randomUUID(), bed = randomUUID(),
-    bed2 = randomUUID(), resident = randomUUID(), contract = randomUUID(), assignment = randomUUID();
+  const org = randomUUID(),
+    hostel = randomUUID(),
+    room = randomUUID(),
+    bed = randomUUID(),
+    bed2 = randomUUID(),
+    resident = randomUUID(),
+    contract = randomUUID(),
+    assignment = randomUUID();
   await db.query(`INSERT INTO organizations (id, name, updated_at) VALUES ($1,'Org',now())`, [org]);
-  await db.query(`INSERT INTO hostels (id, organization_id, name, updated_at) VALUES ($1,$2,'H',now())`, [hostel, org]);
-  await db.query(`INSERT INTO rooms (id, organization_id, hostel_id, code, floor, updated_at) VALUES ($1,$2,$3,'R1',1,now())`, [room, org, hostel]);
-  await db.query(`INSERT INTO beds (id, organization_id, room_id, code, updated_at) VALUES ($1,$2,$3,'B1',now())`, [bed, org, room]);
-  await db.query(`INSERT INTO beds (id, organization_id, room_id, code, updated_at) VALUES ($1,$2,$3,'B2',now())`, [bed2, org, room]);
-  await db.query(`INSERT INTO residents (id, organization_id, full_name, updated_at) VALUES ($1,$2,'R',now())`, [resident, org]);
+  await db.query(
+    `INSERT INTO hostels (id, organization_id, name, updated_at) VALUES ($1,$2,'H',now())`,
+    [hostel, org],
+  );
+  await db.query(
+    `INSERT INTO rooms (id, organization_id, hostel_id, code, floor, updated_at) VALUES ($1,$2,$3,'R1',1,now())`,
+    [room, org, hostel],
+  );
+  await db.query(
+    `INSERT INTO beds (id, organization_id, room_id, code, updated_at) VALUES ($1,$2,$3,'B1',now())`,
+    [bed, org, room],
+  );
+  await db.query(
+    `INSERT INTO beds (id, organization_id, room_id, code, updated_at) VALUES ($1,$2,$3,'B2',now())`,
+    [bed2, org, room],
+  );
+  await db.query(
+    `INSERT INTO residents (id, organization_id, full_name, updated_at) VALUES ($1,$2,'R',now())`,
+    [resident, org],
+  );
   await db.query(
     `INSERT INTO stay_contracts (id, organization_id, hostel_id, resident_id, contract_number, status, start_date, rent_amount, updated_at) VALUES ($1,$2,$3,$4,$5,'ACTIVE','2020-01-01',5000,now())`,
     [contract, org, hostel, resident, `CNT-${randomUUID().slice(0, 8)}`],
@@ -105,7 +142,9 @@ describe('Lifecycle versioning + idempotency (real PostgreSQL + real services)',
       encoding: 'utf8',
     });
     if (r.status !== 0) {
-      throw new Error(`prisma migrate deploy failed (status ${r.status}):\n${r.stdout ?? ''}\n${r.stderr ?? ''}`);
+      throw new Error(
+        `prisma migrate deploy failed (status ${r.status}):\n${r.stdout ?? ''}\n${r.stderr ?? ''}`,
+      );
     }
 
     prisma = new PrismaService();
@@ -150,14 +189,18 @@ describe('Lifecycle versioning + idempotency (real PostgreSQL + real services)',
     it('new key + stale version → RESOURCE_VERSION_CONFLICT', async () => {
       const f = await seedDraftFixture(db);
       await contracts.activate(f.org, f.contract, randomUUID(), randomUUID(), 1);
-      await expect(contracts.activate(f.org, f.contract, randomUUID(), randomUUID(), 1)).rejects.toMatchObject({ code: 'RESOURCE_VERSION_CONFLICT' });
+      await expect(
+        contracts.activate(f.org, f.contract, randomUUID(), randomUUID(), 1),
+      ).rejects.toMatchObject({ code: 'RESOURCE_VERSION_CONFLICT' });
     });
 
     it('same key + different version → IDEMPOTENCY_KEY_REUSED', async () => {
       const f = await seedDraftFixture(db);
       const key = randomUUID();
       await contracts.activate(f.org, f.contract, randomUUID(), key, 1);
-      await expect(contracts.activate(f.org, f.contract, randomUUID(), key, 2)).rejects.toMatchObject({ code: 'IDEMPOTENCY_KEY_REUSED' });
+      await expect(
+        contracts.activate(f.org, f.contract, randomUUID(), key, 2),
+      ).rejects.toMatchObject({ code: 'IDEMPOTENCY_KEY_REUSED' });
     });
   });
 
@@ -184,19 +227,25 @@ describe('Lifecycle versioning + idempotency (real PostgreSQL + real services)',
     it('new key + stale version → RESOURCE_VERSION_CONFLICT', async () => {
       const f = await seedDraftFixture(db);
       await contracts.terminate(f.org, f.contract, randomUUID(), randomUUID(), 1);
-      await expect(contracts.terminate(f.org, f.contract, randomUUID(), randomUUID(), 1)).rejects.toMatchObject({ code: 'RESOURCE_VERSION_CONFLICT' });
+      await expect(
+        contracts.terminate(f.org, f.contract, randomUUID(), randomUUID(), 1),
+      ).rejects.toMatchObject({ code: 'RESOURCE_VERSION_CONFLICT' });
     });
 
     it('same key + different version → IDEMPOTENCY_KEY_REUSED', async () => {
       const f = await seedDraftFixture(db);
       const key = randomUUID();
       await contracts.terminate(f.org, f.contract, randomUUID(), key, 1);
-      await expect(contracts.terminate(f.org, f.contract, randomUUID(), key, 2)).rejects.toMatchObject({ code: 'IDEMPOTENCY_KEY_REUSED' });
+      await expect(
+        contracts.terminate(f.org, f.contract, randomUUID(), key, 2),
+      ).rejects.toMatchObject({ code: 'IDEMPOTENCY_KEY_REUSED' });
     });
 
     it('ACTIVE contract → rejected (checkout is the only close path)', async () => {
       const f = await seedActiveFixture(db);
-      await expect(contracts.terminate(f.org, f.contract, randomUUID(), randomUUID(), 1)).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
+      await expect(
+        contracts.terminate(f.org, f.contract, randomUUID(), randomUUID(), 1),
+      ).rejects.toMatchObject({ code: 'BUSINESS_RULE_VIOLATION' });
     });
   });
 
@@ -224,26 +273,40 @@ describe('Lifecycle versioning + idempotency (real PostgreSQL + real services)',
     it('new key + stale version → RESOURCE_VERSION_CONFLICT', async () => {
       const f = await seedActiveFixture(db);
       await assignments.end(f.org, f.assignment, randomUUID(), randomUUID(), 1);
-      await expect(assignments.end(f.org, f.assignment, randomUUID(), randomUUID(), 1)).rejects.toMatchObject({ code: 'RESOURCE_VERSION_CONFLICT' });
+      await expect(
+        assignments.end(f.org, f.assignment, randomUUID(), randomUUID(), 1),
+      ).rejects.toMatchObject({ code: 'RESOURCE_VERSION_CONFLICT' });
     });
 
     it('same key + different version → IDEMPOTENCY_KEY_REUSED', async () => {
       const f = await seedActiveFixture(db);
       const key = randomUUID();
       await assignments.end(f.org, f.assignment, randomUUID(), key, 1);
-      await expect(assignments.end(f.org, f.assignment, randomUUID(), key, 2)).rejects.toMatchObject({ code: 'IDEMPOTENCY_KEY_REUSED' });
+      await expect(
+        assignments.end(f.org, f.assignment, randomUUID(), key, 2),
+      ).rejects.toMatchObject({ code: 'IDEMPOTENCY_KEY_REUSED' });
     });
   });
 
   describe('assignmentTransfer', () => {
     it('ends source + creates ONE destination, history preserved', async () => {
       const f = await seedActiveFixture(db);
-      const r: any = await assignments.transfer(f.org, f.assignment, randomUUID(), { bedId: f.bed2, startDate: '2025-01-01' }, randomUUID(), 1);
+      const r: any = await assignments.transfer(
+        f.org,
+        f.assignment,
+        randomUUID(),
+        { bedId: f.bed2, startDate: '2025-01-01' },
+        randomUUID(),
+        1,
+      );
       expect(r.previous.status).toBe('ENDED');
       expect(r.previous.endReason).toBe('TRANSFER');
       expect(r.assignment.status).toBe('ACTIVE');
       expect(r.assignment.bedId).toBe(f.bed2);
-      const asgs = await db.query(`SELECT bed_id, status, end_reason FROM bed_assignments WHERE contract_id=$1`, [f.contract]);
+      const asgs = await db.query(
+        `SELECT bed_id, status, end_reason FROM bed_assignments WHERE contract_id=$1`,
+        [f.contract],
+      );
       expect(asgs.rows).toHaveLength(2);
       const src = asgs.rows.find((a: any) => a.bed_id === f.bed);
       const dst = asgs.rows.find((a: any) => a.bed_id === f.bed2);
@@ -255,30 +318,95 @@ describe('Lifecycle versioning + idempotency (real PostgreSQL + real services)',
     it('same key + same version → replay (no duplicate destination)', async () => {
       const f = await seedActiveFixture(db);
       const key = randomUUID();
-      await assignments.transfer(f.org, f.assignment, randomUUID(), { bedId: f.bed2, startDate: '2025-01-01' }, key, 1);
-      await assignments.transfer(f.org, f.assignment, randomUUID(), { bedId: f.bed2, startDate: '2025-01-01' }, key, 1);
-      const asgs = await db.query(`SELECT count(*)::int n FROM bed_assignments WHERE contract_id=$1`, [f.contract]);
+      await assignments.transfer(
+        f.org,
+        f.assignment,
+        randomUUID(),
+        { bedId: f.bed2, startDate: '2025-01-01' },
+        key,
+        1,
+      );
+      await assignments.transfer(
+        f.org,
+        f.assignment,
+        randomUUID(),
+        { bedId: f.bed2, startDate: '2025-01-01' },
+        key,
+        1,
+      );
+      const asgs = await db.query(
+        `SELECT count(*)::int n FROM bed_assignments WHERE contract_id=$1`,
+        [f.contract],
+      );
       expect(asgs.rows[0].n).toBe(2);
     });
 
     it('new key + stale version → RESOURCE_VERSION_CONFLICT', async () => {
       const f = await seedActiveFixture(db);
-      await assignments.transfer(f.org, f.assignment, randomUUID(), { bedId: f.bed2, startDate: '2025-01-01' }, randomUUID(), 1);
-      await expect(assignments.transfer(f.org, f.assignment, randomUUID(), { bedId: f.bed2, startDate: '2025-01-01' }, randomUUID(), 1)).rejects.toMatchObject({ code: 'RESOURCE_VERSION_CONFLICT' });
+      await assignments.transfer(
+        f.org,
+        f.assignment,
+        randomUUID(),
+        { bedId: f.bed2, startDate: '2025-01-01' },
+        randomUUID(),
+        1,
+      );
+      await expect(
+        assignments.transfer(
+          f.org,
+          f.assignment,
+          randomUUID(),
+          { bedId: f.bed2, startDate: '2025-01-01' },
+          randomUUID(),
+          1,
+        ),
+      ).rejects.toMatchObject({ code: 'RESOURCE_VERSION_CONFLICT' });
     });
 
     it('same key + different version → IDEMPOTENCY_KEY_REUSED', async () => {
       const f = await seedActiveFixture(db);
       const key = randomUUID();
-      await assignments.transfer(f.org, f.assignment, randomUUID(), { bedId: f.bed2, startDate: '2025-01-01' }, key, 1);
-      await expect(assignments.transfer(f.org, f.assignment, randomUUID(), { bedId: f.bed2, startDate: '2025-01-01' }, key, 2)).rejects.toMatchObject({ code: 'IDEMPOTENCY_KEY_REUSED' });
+      await assignments.transfer(
+        f.org,
+        f.assignment,
+        randomUUID(),
+        { bedId: f.bed2, startDate: '2025-01-01' },
+        key,
+        1,
+      );
+      await expect(
+        assignments.transfer(
+          f.org,
+          f.assignment,
+          randomUUID(),
+          { bedId: f.bed2, startDate: '2025-01-01' },
+          key,
+          2,
+        ),
+      ).rejects.toMatchObject({ code: 'IDEMPOTENCY_KEY_REUSED' });
     });
 
     it('same key + different payload → IDEMPOTENCY_KEY_REUSED', async () => {
       const f = await seedActiveFixture(db);
       const key = randomUUID();
-      await assignments.transfer(f.org, f.assignment, randomUUID(), { bedId: f.bed2, startDate: '2025-01-01' }, key, 1);
-      await expect(assignments.transfer(f.org, f.assignment, randomUUID(), { bedId: f.bed2, startDate: '2025-02-01' }, key, 1)).rejects.toMatchObject({ code: 'IDEMPOTENCY_KEY_REUSED' });
+      await assignments.transfer(
+        f.org,
+        f.assignment,
+        randomUUID(),
+        { bedId: f.bed2, startDate: '2025-01-01' },
+        key,
+        1,
+      );
+      await expect(
+        assignments.transfer(
+          f.org,
+          f.assignment,
+          randomUUID(),
+          { bedId: f.bed2, startDate: '2025-02-01' },
+          key,
+          1,
+        ),
+      ).rejects.toMatchObject({ code: 'IDEMPOTENCY_KEY_REUSED' });
     });
   });
 });

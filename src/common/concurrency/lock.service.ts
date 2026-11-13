@@ -33,7 +33,21 @@ import { Prisma } from '../../generated/prisma/client';
  * does not exist, returns no row (and therefore holds no lock) which the
  * caller detects via the subsequent existence check in the same transaction.
  */
-type OrgEntity = 'hostel' | 'room' | 'bed' | 'resident' | 'contract' | 'temporary_absence' | 'charge' | 'payment' | 'allocation';
+type OrgEntity =
+  | 'hostel'
+  | 'room'
+  | 'bed'
+  | 'resident'
+  | 'contract'
+  | 'temporary_absence'
+  | 'charge'
+  | 'payment'
+  | 'allocation'
+  | 'deposit_transaction'
+  | 'expense'
+  | 'ledger_reversal'
+  | 'payment_refund'
+  | 'deposit_application';
 type GlobalEntity = 'organization' | 'user' | 'refresh_session';
 
 const ORG_TABLE_SQL: Record<OrgEntity, string> = {
@@ -46,6 +60,11 @@ const ORG_TABLE_SQL: Record<OrgEntity, string> = {
   charge: '"charges"',
   payment: '"payments"',
   allocation: '"payment_allocations"',
+  deposit_transaction: '"deposit_transactions"',
+  expense: '"expenses"',
+  ledger_reversal: '"ledger_reversals"',
+  payment_refund: '"payment_refunds"',
+  deposit_application: '"deposit_applications"',
 };
 
 const GLOBAL_TABLE_SQL: Record<GlobalEntity, string> = {
@@ -60,9 +79,16 @@ export class LockService {
    * Exclusive row lock for an org-scoped entity, tenant-isolated by
    * `organization_id`. The `organizationId` argument is mandatory.
    */
-  async lockForUpdate(tx: Prisma.TransactionClient, entity: OrgEntity, id: string, organizationId: string): Promise<void> {
+  async lockForUpdate(
+    tx: Prisma.TransactionClient,
+    entity: OrgEntity,
+    id: string,
+    organizationId: string,
+  ): Promise<void> {
     if (!organizationId) {
-      throw new Error(`LockService.lockForUpdate: organizationId is required for org-scoped entity "${entity}"`);
+      throw new Error(
+        `LockService.lockForUpdate: organizationId is required for org-scoped entity "${entity}"`,
+      );
     }
     await tx.$queryRawUnsafe(
       `SELECT id FROM ${ORG_TABLE_SQL[entity]} WHERE id = $1 AND organization_id = $2 FOR UPDATE`,
@@ -76,10 +102,17 @@ export class LockService {
    * User and RefreshSession may be locked this way; never add `organization_id`.
    */
   async lockGlobal(tx: Prisma.TransactionClient, entity: GlobalEntity, id: string): Promise<void> {
-    await tx.$queryRawUnsafe(`SELECT id FROM ${GLOBAL_TABLE_SQL[entity]} WHERE id = $1 FOR UPDATE`, id);
+    await tx.$queryRawUnsafe(
+      `SELECT id FROM ${GLOBAL_TABLE_SQL[entity]} WHERE id = $1 FOR UPDATE`,
+      id,
+    );
   }
 
-  async lockHostel(tx: Prisma.TransactionClient, id: string, organizationId: string): Promise<void> {
+  async lockHostel(
+    tx: Prisma.TransactionClient,
+    id: string,
+    organizationId: string,
+  ): Promise<void> {
     await this.lockForUpdate(tx, 'hostel', id, organizationId);
   }
 
@@ -91,31 +124,100 @@ export class LockService {
     await this.lockForUpdate(tx, 'bed', id, organizationId);
   }
 
-  async lockResident(tx: Prisma.TransactionClient, id: string, organizationId: string): Promise<void> {
+  async lockResident(
+    tx: Prisma.TransactionClient,
+    id: string,
+    organizationId: string,
+  ): Promise<void> {
     await this.lockForUpdate(tx, 'resident', id, organizationId);
   }
 
-  async lockContract(tx: Prisma.TransactionClient, id: string, organizationId: string): Promise<void> {
+  async lockContract(
+    tx: Prisma.TransactionClient,
+    id: string,
+    organizationId: string,
+  ): Promise<void> {
     await this.lockForUpdate(tx, 'contract', id, organizationId);
   }
 
-  async lockTemporaryAbsence(tx: Prisma.TransactionClient, id: string, organizationId: string): Promise<void> {
+  async lockTemporaryAbsence(
+    tx: Prisma.TransactionClient,
+    id: string,
+    organizationId: string,
+  ): Promise<void> {
     await this.lockForUpdate(tx, 'temporary_absence', id, organizationId);
   }
 
   /** Financial-workflow lock for a Charge row (canonical financial order, tenant-scoped). */
-  async lockCharge(tx: Prisma.TransactionClient, id: string, organizationId: string): Promise<void> {
+  async lockCharge(
+    tx: Prisma.TransactionClient,
+    id: string,
+    organizationId: string,
+  ): Promise<void> {
     await this.lockForUpdate(tx, 'charge', id, organizationId);
   }
 
   /** Financial-workflow lock for a Payment row (canonical financial order, tenant-scoped). */
-  async lockPayment(tx: Prisma.TransactionClient, id: string, organizationId: string): Promise<void> {
+  async lockPayment(
+    tx: Prisma.TransactionClient,
+    id: string,
+    organizationId: string,
+  ): Promise<void> {
     await this.lockForUpdate(tx, 'payment', id, organizationId);
   }
 
   /** Financial-workflow lock for a PaymentAllocation row (canonical financial order, tenant-scoped). */
-  async lockAllocation(tx: Prisma.TransactionClient, id: string, organizationId: string): Promise<void> {
+  async lockAllocation(
+    tx: Prisma.TransactionClient,
+    id: string,
+    organizationId: string,
+  ): Promise<void> {
     await this.lockForUpdate(tx, 'allocation', id, organizationId);
+  }
+
+  /** Financial-workflow lock for a DepositTransaction row (canonical financial order, tenant-scoped). */
+  async lockDepositTransaction(
+    tx: Prisma.TransactionClient,
+    id: string,
+    organizationId: string,
+  ): Promise<void> {
+    await this.lockForUpdate(tx, 'deposit_transaction', id, organizationId);
+  }
+
+  /** Financial-workflow lock for an Expense row (canonical financial order, tenant-scoped). */
+  async lockExpense(
+    tx: Prisma.TransactionClient,
+    id: string,
+    organizationId: string,
+  ): Promise<void> {
+    await this.lockForUpdate(tx, 'expense', id, organizationId);
+  }
+
+  /** Financial-workflow lock for a LedgerReversal row (canonical financial order, tenant-scoped). */
+  async lockLedgerReversal(
+    tx: Prisma.TransactionClient,
+    id: string,
+    organizationId: string,
+  ): Promise<void> {
+    await this.lockForUpdate(tx, 'ledger_reversal', id, organizationId);
+  }
+
+  /** Financial-workflow lock for a PaymentRefund row (canonical financial order, tenant-scoped). */
+  async lockPaymentRefund(
+    tx: Prisma.TransactionClient,
+    id: string,
+    organizationId: string,
+  ): Promise<void> {
+    await this.lockForUpdate(tx, 'payment_refund', id, organizationId);
+  }
+
+  /** Financial-workflow lock for a DepositApplication row (canonical financial order, tenant-scoped). */
+  async lockDepositApplication(
+    tx: Prisma.TransactionClient,
+    id: string,
+    organizationId: string,
+  ): Promise<void> {
+    await this.lockForUpdate(tx, 'deposit_application', id, organizationId);
   }
 
   /**

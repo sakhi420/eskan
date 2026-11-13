@@ -101,8 +101,29 @@ async function nextCounter(c, org) {
     check('[unique] payment_allocations (organization_id, resident_id, id)', uniq.rowCount === 1);
     const chk = await c.query(`SELECT conname FROM pg_constraint WHERE contype='c' AND conname IN ('allocation_releases_amount_positive','receipt_counters_counter_non_negative') ORDER BY conname`);
     check('[check] M3b CHECK constraints present', chk.rowCount === 2, chk.rows.map((r) => r.conname).join(','));
-    const fks = await c.query(`SELECT count(*)::int n FROM pg_constraint WHERE contype='f' AND array_length(conkey,1) >= 2`);
-    check('[composite-fk] tenant composite FKs = 24', fks.rows[0].n === 24, 'count=' + fks.rows[0].n);
+    // Scope this assertion to M3b-owned tables. Later migrations add valid
+    // tenant composite FKs, so a global database count is not a stable M3b test.
+    const m3bCompositeFkNames = [
+      'allocation_releases_organization_id_resident_id_fkey',
+      'allocation_releases_organization_id_resident_id_allocation_fkey',
+    ];
+    const fks = await c.query(
+      `SELECT conname
+         FROM pg_constraint
+        WHERE contype = 'f'
+          AND array_length(conkey, 1) >= 2
+          AND conname = ANY($1::text[])
+        ORDER BY conname`,
+      [m3bCompositeFkNames],
+    );
+    const actualM3bFkNames = fks.rows.map((row) => row.conname);
+    const expectedM3bFkNames = [...m3bCompositeFkNames].sort();
+    check(
+      '[composite-fk] M3b tenant composite FKs present',
+      actualM3bFkNames.length === expectedM3bFkNames.length &&
+        actualM3bFkNames.every((name, index) => name === expectedM3bFkNames[index]),
+      `expected=${expectedM3bFkNames.length} actual=${actualM3bFkNames.length} names=${actualM3bFkNames.join(',')}`,
+    );
 
     const del = await c.query(`SELECT confdeltype FROM pg_constraint WHERE conname='payment_allocations_organization_id_resident_id_payment_id_fkey'`);
     check('[immutability] payment_allocations -> payments is RESTRICT', del.rowCount === 1 && del.rows[0].confdeltype === 'r', 'confdeltype=' + (del.rows[0] && del.rows[0].confdeltype));

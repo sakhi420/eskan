@@ -49,7 +49,12 @@ export class RoomsController {
   ) {
     return envelope(
       req,
-      await this.rooms.list(membership.organizationId, hostelId, parsePage(pageRaw), parseSize(sizeRaw)),
+      await this.rooms.list(
+        membership.organizationId,
+        hostelId,
+        parsePage(pageRaw),
+        parseSize(sizeRaw),
+      ),
     );
   }
 

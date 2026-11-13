@@ -5,19 +5,51 @@ import { AppError } from '../common/errors/app-error';
 import { ErrorCode } from '../common/errors/error-codes';
 import { IdempotencyService } from '../common/idempotency/idempotency.service';
 import { LockService } from '../common/concurrency/lock.service';
-import { businessTodayForOrg, exclusiveEndForInclusiveLastDay, toDateOnly as toBusinessDateOnly } from '../common/date/business-date';
-import { ArchiveStatus, AssignmentEndReason, AssignmentStatus, BedStatus, ContractStatus, MaintenanceStatus, ResidentStatus } from '../generated/prisma/enums';
+import {
+  businessTodayForOrg,
+  exclusiveEndForInclusiveLastDay,
+  toDateOnly as toBusinessDateOnly,
+} from '../common/date/business-date';
+import {
+  ArchiveStatus,
+  AssignmentEndReason,
+  AssignmentStatus,
+  BedStatus,
+  ContractStatus,
+  MaintenanceStatus,
+  ResidentStatus,
+} from '../generated/prisma/enums';
 import { BedAssignmentDto } from './dto/assignment.dto';
 import { TransferDto } from './dto/transfer.dto';
 
 const ASSIGNMENT_SELECT = {
-  id: true, version: true, organizationId: true, bedId: true, residentId: true, contractId: true,
-  status: true, startDate: true, endDate: true, endReason: true, createdAt: true, updatedAt: true,
+  id: true,
+  version: true,
+  organizationId: true,
+  bedId: true,
+  residentId: true,
+  contractId: true,
+  status: true,
+  startDate: true,
+  endDate: true,
+  endReason: true,
+  createdAt: true,
+  updatedAt: true,
 } as const;
 
 interface AssignmentRow {
-  id: string; version: number; organizationId: string; bedId: string; residentId: string; contractId: string;
-  status: AssignmentStatus; startDate: Date; endDate: Date | null; endReason: AssignmentEndReason | null; createdAt: Date; updatedAt: Date;
+  id: string;
+  version: number;
+  organizationId: string;
+  bedId: string;
+  residentId: string;
+  contractId: string;
+  status: AssignmentStatus;
+  startDate: Date;
+  endDate: Date | null;
+  endReason: AssignmentEndReason | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 function toISODate(value: Date | string | null): string | null {
@@ -30,10 +62,18 @@ function toDateOnly(d: string): Date {
 }
 function toAssignmentDto(row: AssignmentRow) {
   return {
-    id: row.id, version: row.version, organizationId: row.organizationId,
-    bedId: row.bedId, residentId: row.residentId, contractId: row.contractId,
-    status: row.status, startDate: toISODate(row.startDate), endDate: toISODate(row.endDate), endReason: row.endReason,
-    createdAt: row.createdAt.toISOString(), updatedAt: row.updatedAt.toISOString(),
+    id: row.id,
+    version: row.version,
+    organizationId: row.organizationId,
+    bedId: row.bedId,
+    residentId: row.residentId,
+    contractId: row.contractId,
+    status: row.status,
+    startDate: toISODate(row.startDate),
+    endDate: toISODate(row.endDate),
+    endReason: row.endReason,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
   };
 }
 
@@ -64,15 +104,24 @@ function assertRangeWithinContract(
 ): void {
   const s = start.getTime();
   if (s < contractStart.getTime()) {
-    throw AppError.conflict(`${label} startDate is before the contract start date`, ErrorCode.BUSINESS_RULE_VIOLATION);
+    throw AppError.conflict(
+      `${label} startDate is before the contract start date`,
+      ErrorCode.BUSINESS_RULE_VIOLATION,
+    );
   }
   if (contractEnd) {
     const ce = contractEnd.getTime();
     if (s >= ce) {
-      throw AppError.conflict(`${label} startDate is on or after the contract end date`, ErrorCode.BUSINESS_RULE_VIOLATION);
+      throw AppError.conflict(
+        `${label} startDate is on or after the contract end date`,
+        ErrorCode.BUSINESS_RULE_VIOLATION,
+      );
     }
     if (end && end.getTime() > ce) {
-      throw AppError.conflict(`${label} extends beyond the contract end date`, ErrorCode.BUSINESS_RULE_VIOLATION);
+      throw AppError.conflict(
+        `${label} extends beyond the contract end date`,
+        ErrorCode.BUSINESS_RULE_VIOLATION,
+      );
     }
   }
 }
@@ -120,14 +169,24 @@ export class AssignmentsService {
   }
 
   async listByResident(organizationId: string, residentId: string) {
-    const resident = await this.prisma.resident.findFirst({ where: { id: residentId, organizationId }, select: { id: true } });
+    const resident = await this.prisma.resident.findFirst({
+      where: { id: residentId, organizationId },
+      select: { id: true },
+    });
     if (!resident) throw AppError.notFound('Resident not found');
     const rows = await this.prisma.bedAssignment.findMany({
-      where: { organizationId, residentId }, orderBy: { createdAt: 'desc' }, select: ASSIGNMENT_SELECT,
+      where: { organizationId, residentId },
+      orderBy: { createdAt: 'desc' },
+      select: ASSIGNMENT_SELECT,
     });
     return rows.map(toAssignmentDto);
   }
-async create(organizationId: string, userId: string, dto: BedAssignmentDto, idempotencyKey: string) {
+  async create(
+    organizationId: string,
+    userId: string,
+    dto: BedAssignmentDto,
+    idempotencyKey: string,
+  ) {
     if (dto.endDate && dto.endDate <= dto.startDate) {
       throw AppError.validation('endDate must be after startDate', [
         { field: 'endDate', code: 'invalid', message: 'must be after startDate' },
@@ -139,7 +198,10 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
     // committed request recovers its stored result even if resource statuses
     // have since changed (e.g. the contract was later checked out).
     const replay = await this.idempotency.getReplay<ReturnType<typeof toAssignmentDto>>(
-      organizationId, idempotencyKey, CREATE_ENDPOINT, requestHash,
+      organizationId,
+      idempotencyKey,
+      CREATE_ENDPOINT,
+      requestHash,
     );
     if (replay) return replay;
 
@@ -150,20 +212,39 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
     });
     if (!bed) throw AppError.notFound('Bed not found');
 
-    const resident = await this.prisma.resident.findFirst({ where: { id: dto.residentId, organizationId }, select: { id: true } });
+    const resident = await this.prisma.resident.findFirst({
+      where: { id: dto.residentId, organizationId },
+      select: { id: true },
+    });
     if (!resident) throw AppError.notFound('Resident not found');
 
-    const contract = await this.prisma.stayContract.findFirst({ where: { id: dto.contractId, organizationId }, select: { id: true, residentId: true, hostelId: true } });
+    const contract = await this.prisma.stayContract.findFirst({
+      where: { id: dto.contractId, organizationId },
+      select: { id: true, residentId: true, hostelId: true },
+    });
     if (!contract) throw AppError.notFound('Contract not found');
     if (contract.residentId !== dto.residentId) {
-      throw AppError.conflict('Resident does not match the contract', ErrorCode.BUSINESS_RULE_VIOLATION);
+      throw AppError.conflict(
+        'Resident does not match the contract',
+        ErrorCode.BUSINESS_RULE_VIOLATION,
+      );
     }
     if (contract.hostelId !== bed.room.hostelId) {
-      throw AppError.conflict('Bed does not belong to the contract hostel', ErrorCode.BUSINESS_RULE_VIOLATION);
+      throw AppError.conflict(
+        'Bed does not belong to the contract hostel',
+        ErrorCode.BUSINESS_RULE_VIOLATION,
+      );
     }
 
     return this.idempotency.runAtomic<ReturnType<typeof toAssignmentDto>>(
-      { organizationId, key: idempotencyKey, endpoint: CREATE_ENDPOINT, userId, requestHash, statusCode: 201 },
+      {
+        organizationId,
+        key: idempotencyKey,
+        endpoint: CREATE_ENDPOINT,
+        userId,
+        requestHash,
+        statusCode: 201,
+      },
       async (tx) => {
         await this.lockCreateContext(tx, organizationId, dto.bedId, dto.residentId, dto.contractId);
         await this.assertAssignable(tx, organizationId, dto);
@@ -171,15 +252,22 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
         try {
           const assignment = await tx.bedAssignment.create({
             data: {
-              organizationId, bedId: dto.bedId, residentId: dto.residentId, contractId: dto.contractId,
-              startDate: toDateOnly(dto.startDate), endDate: dto.endDate ? toDateOnly(dto.endDate) : null,
+              organizationId,
+              bedId: dto.bedId,
+              residentId: dto.residentId,
+              contractId: dto.contractId,
+              startDate: toDateOnly(dto.startDate),
+              endDate: dto.endDate ? toDateOnly(dto.endDate) : null,
             },
             select: ASSIGNMENT_SELECT,
           });
           return toAssignmentDto(assignment);
         } catch (err) {
           if (isExclusionViolation(err)) {
-            throw AppError.conflict('Bed or resident is already assigned within this period', ErrorCode.BED_ASSIGNMENT_OVERLAP);
+            throw AppError.conflict(
+              'Bed or resident is already assigned within this period',
+              ErrorCode.BED_ASSIGNMENT_OVERLAP,
+            );
           }
           throw err;
         }
@@ -206,21 +294,43 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
       },
     });
     if (!bed) throw AppError.notFound('Bed not found');
-    if (bed.status !== BedStatus.ACTIVE) throw AppError.conflict('Bed is inactive', ErrorCode.BUSINESS_RULE_VIOLATION);
-    if (bed.maintenanceStatus === MaintenanceStatus.OUT_OF_SERVICE || bed.maintenanceStatus === MaintenanceStatus.NEEDS_REPAIR) {
-      throw AppError.conflict('Bed is not usable due to its maintenance status', ErrorCode.BUSINESS_RULE_VIOLATION);
+    if (bed.status !== BedStatus.ACTIVE)
+      throw AppError.conflict('Bed is inactive', ErrorCode.BUSINESS_RULE_VIOLATION);
+    if (
+      bed.maintenanceStatus === MaintenanceStatus.OUT_OF_SERVICE ||
+      bed.maintenanceStatus === MaintenanceStatus.NEEDS_REPAIR
+    ) {
+      throw AppError.conflict(
+        'Bed is not usable due to its maintenance status',
+        ErrorCode.BUSINESS_RULE_VIOLATION,
+      );
     }
     if (bed.room.status === ArchiveStatus.ARCHIVED) {
-      throw AppError.conflict('Room is archived; assignment cannot be created', ErrorCode.BUSINESS_RULE_VIOLATION);
+      throw AppError.conflict(
+        'Room is archived; assignment cannot be created',
+        ErrorCode.BUSINESS_RULE_VIOLATION,
+      );
     }
     if (bed.room.hostel.status === ArchiveStatus.ARCHIVED) {
-      throw AppError.conflict('Hostel is archived; assignment cannot be created', ErrorCode.BUSINESS_RULE_VIOLATION);
+      throw AppError.conflict(
+        'Hostel is archived; assignment cannot be created',
+        ErrorCode.BUSINESS_RULE_VIOLATION,
+      );
     }
-    if (bed.room.maintenanceStatus === MaintenanceStatus.OUT_OF_SERVICE || bed.room.maintenanceStatus === MaintenanceStatus.NEEDS_REPAIR) {
-      throw AppError.conflict('Room is not usable due to its maintenance status', ErrorCode.BUSINESS_RULE_VIOLATION);
+    if (
+      bed.room.maintenanceStatus === MaintenanceStatus.OUT_OF_SERVICE ||
+      bed.room.maintenanceStatus === MaintenanceStatus.NEEDS_REPAIR
+    ) {
+      throw AppError.conflict(
+        'Room is not usable due to its maintenance status',
+        ErrorCode.BUSINESS_RULE_VIOLATION,
+      );
     }
 
-    const resident = await tx.resident.findFirst({ where: { id: dto.residentId, organizationId }, select: { status: true } });
+    const resident = await tx.resident.findFirst({
+      where: { id: dto.residentId, organizationId },
+      select: { status: true },
+    });
     if (!resident) throw AppError.notFound('Resident not found');
     if (resident.status !== ResidentStatus.ACTIVE) {
       throw AppError.conflict('Resident is not active', ErrorCode.BUSINESS_RULE_VIOLATION);
@@ -264,7 +374,10 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
       select: ASSIGNMENT_SELECT,
     });
     if (overlapsOver(bedRows, startDate, endDate)) {
-      throw AppError.conflict('Bed is already assigned within this period', ErrorCode.BED_ASSIGNMENT_OVERLAP);
+      throw AppError.conflict(
+        'Bed is already assigned within this period',
+        ErrorCode.BED_ASSIGNMENT_OVERLAP,
+      );
     }
 
     const residentRows = await tx.bedAssignment.findMany({
@@ -272,15 +385,32 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
       select: ASSIGNMENT_SELECT,
     });
     if (overlapsOver(residentRows, startDate, endDate)) {
-      throw AppError.conflict('Resident already has an assignment within this period', ErrorCode.BED_ASSIGNMENT_OVERLAP);
+      throw AppError.conflict(
+        'Resident already has an assignment within this period',
+        ErrorCode.BED_ASSIGNMENT_OVERLAP,
+      );
     }
   }
 
-  async end(organizationId: string, assignmentId: string, userId: string, idempotencyKey: string, expectedVersion: number) {
+  async end(
+    organizationId: string,
+    assignmentId: string,
+    userId: string,
+    idempotencyKey: string,
+    expectedVersion: number,
+  ) {
     const endpoint = `/api/v1/bed-assignments/${assignmentId}/end`;
     const requestHash = this.idempotency.hash({ endpoint, assignmentId, expectedVersion });
     return this.idempotency.runAtomic<ReturnType<typeof toAssignmentDto>>(
-      { organizationId, key: idempotencyKey, endpoint, userId, requestHash, statusCode: 200, retentionClass: 'PERMANENT' },
+      {
+        organizationId,
+        key: idempotencyKey,
+        endpoint,
+        userId,
+        requestHash,
+        statusCode: 200,
+        retentionClass: 'PERMANENT',
+      },
       async (tx) => {
         const assignment = await tx.bedAssignment.findFirst({
           where: { id: assignmentId, organizationId },
@@ -291,7 +421,13 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
         // Serialize against a concurrent checkout/transfer by taking the same
         // parent chain (Hostel -> Room -> Bed -> Resident -> Contract): both lock
         // the contract, so a manual end and a checkout cannot interleave.
-        await this.lockCreateContext(tx, organizationId, assignment.bedId, assignment.residentId, assignment.contractId);
+        await this.lockCreateContext(
+          tx,
+          organizationId,
+          assignment.bedId,
+          assignment.residentId,
+          assignment.contractId,
+        );
 
         // Authoritative re-read AFTER acquiring the locks.
         const current = await tx.bedAssignment.findFirst({
@@ -300,10 +436,16 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
         });
         if (!current) throw AppError.notFound('Assignment not found');
         if (current.version !== expectedVersion) {
-          throw AppError.conflict('Assignment has changed since it was read; refresh and retry', ErrorCode.RESOURCE_VERSION_CONFLICT);
+          throw AppError.conflict(
+            'Assignment has changed since it was read; refresh and retry',
+            ErrorCode.RESOURCE_VERSION_CONFLICT,
+          );
         }
         if (current.status !== AssignmentStatus.ACTIVE) {
-          throw AppError.conflict('Only ACTIVE assignments can be ended', ErrorCode.BUSINESS_RULE_VIOLATION);
+          throw AppError.conflict(
+            'Only ACTIVE assignments can be ended',
+            ErrorCode.BUSINESS_RULE_VIOLATION,
+          );
         }
 
         // The end date is a business date in the org's timezone, never `new Date()`
@@ -311,7 +453,10 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
         const today = await businessTodayForOrg(tx, organizationId);
         const startDate = toISODate(current.startDate);
         if (!startDate) {
-          throw AppError.conflict('Assignment is missing its start date', ErrorCode.BUSINESS_RULE_VIOLATION);
+          throw AppError.conflict(
+            'Assignment is missing its start date',
+            ErrorCode.BUSINESS_RULE_VIOLATION,
+          );
         }
         // Same-day end is valid: endDate is exclusive, so ending on the start day
         // yields endDate = startDay + 1. Only ending strictly before the start is
@@ -325,7 +470,12 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
         const exclusiveEnd = exclusiveEndForInclusiveLastDay(today);
 
         const result = await tx.bedAssignment.updateMany({
-          where: { id: assignmentId, organizationId, status: AssignmentStatus.ACTIVE, version: expectedVersion },
+          where: {
+            id: assignmentId,
+            organizationId,
+            status: AssignmentStatus.ACTIVE,
+            version: expectedVersion,
+          },
           data: {
             status: AssignmentStatus.ENDED,
             endDate: toBusinessDateOnly(exclusiveEnd),
@@ -334,9 +484,15 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
           },
         });
         if (result.count === 0) {
-          throw AppError.conflict('Assignment was modified concurrently; refresh and retry', ErrorCode.RESOURCE_VERSION_CONFLICT);
+          throw AppError.conflict(
+            'Assignment was modified concurrently; refresh and retry',
+            ErrorCode.RESOURCE_VERSION_CONFLICT,
+          );
         }
-        const updated = await tx.bedAssignment.findFirst({ where: { id: assignmentId, organizationId }, select: ASSIGNMENT_SELECT });
+        const updated = await tx.bedAssignment.findFirst({
+          where: { id: assignmentId, organizationId },
+          select: ASSIGNMENT_SELECT,
+        });
         return toAssignmentDto(updated!);
       },
     );
@@ -346,7 +502,14 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
    * Transfer: atomically end the current assignment and start a new one on a
    * different bed, preserving the outgoing assignment as history.
    */
-  async transfer(organizationId: string, assignmentId: string, userId: string, dto: TransferDto, idempotencyKey: string, expectedVersion: number) {
+  async transfer(
+    organizationId: string,
+    assignmentId: string,
+    userId: string,
+    dto: TransferDto,
+    idempotencyKey: string,
+    expectedVersion: number,
+  ) {
     if (dto.endDate && dto.endDate <= dto.startDate) {
       throw AppError.validation('endDate must be after startDate', [
         { field: 'endDate', code: 'invalid', message: 'must be after startDate' },
@@ -356,8 +519,19 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
     const endpoint = `/api/v1/bed-assignments/${assignmentId}/transfer`;
     const requestHash = this.idempotency.hash({ endpoint, assignmentId, expectedVersion, dto });
 
-    return this.idempotency.runAtomic<{ previous: ReturnType<typeof toAssignmentDto>; assignment: ReturnType<typeof toAssignmentDto> }>(
-      { organizationId, key: idempotencyKey, endpoint, userId, requestHash, statusCode: 200, retentionClass: 'PERMANENT' },
+    return this.idempotency.runAtomic<{
+      previous: ReturnType<typeof toAssignmentDto>;
+      assignment: ReturnType<typeof toAssignmentDto>;
+    }>(
+      {
+        organizationId,
+        key: idempotencyKey,
+        endpoint,
+        userId,
+        requestHash,
+        statusCode: 200,
+        retentionClass: 'PERMANENT',
+      },
       async (tx) => {
         const current = await tx.bedAssignment.findFirst({
           where: { id: assignmentId, organizationId },
@@ -365,15 +539,24 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
         });
         if (!current) throw AppError.notFound('Assignment not found');
         if (dto.bedId === current.bedId) {
-          throw AppError.conflict('Cannot transfer to the same bed', ErrorCode.BUSINESS_RULE_VIOLATION);
+          throw AppError.conflict(
+            'Cannot transfer to the same bed',
+            ErrorCode.BUSINESS_RULE_VIOLATION,
+          );
         }
 
         const transitionStart = toDateOnly(dto.startDate);
         if (dateMs(transitionStart) <= dateMs(current.startDate)) {
-          throw AppError.conflict('Transfer startDate must be after the current assignment start date', ErrorCode.BUSINESS_RULE_VIOLATION);
+          throw AppError.conflict(
+            'Transfer startDate must be after the current assignment start date',
+            ErrorCode.BUSINESS_RULE_VIOLATION,
+          );
         }
         if (current.endDate && dateMs(transitionStart) > dateMs(current.endDate)) {
-          throw AppError.conflict('Transfer startDate cannot be after the current assignment end date', ErrorCode.BUSINESS_RULE_VIOLATION);
+          throw AppError.conflict(
+            'Transfer startDate cannot be after the current assignment end date',
+            ErrorCode.BUSINESS_RULE_VIOLATION,
+          );
         }
 
         // Discover destination parents for lock order, then re-read the bed
@@ -400,10 +583,16 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
         });
         if (!source) throw AppError.notFound('Assignment not found');
         if (source.version !== expectedVersion) {
-          throw AppError.conflict('Assignment has changed since it was read; refresh and retry', ErrorCode.RESOURCE_VERSION_CONFLICT);
+          throw AppError.conflict(
+            'Assignment has changed since it was read; refresh and retry',
+            ErrorCode.RESOURCE_VERSION_CONFLICT,
+          );
         }
         if (source.status !== AssignmentStatus.ACTIVE) {
-          throw AppError.conflict('Only ACTIVE assignments can be transferred', ErrorCode.BUSINESS_RULE_VIOLATION);
+          throw AppError.conflict(
+            'Only ACTIVE assignments can be transferred',
+            ErrorCode.BUSINESS_RULE_VIOLATION,
+          );
         }
 
         // Authoritative destination re-read after acquiring the locks.
@@ -422,14 +611,35 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
         });
         if (!bed) throw AppError.notFound('Bed not found');
 
-        if (bed.status !== BedStatus.ACTIVE) throw AppError.conflict('Bed is inactive', ErrorCode.BUSINESS_RULE_VIOLATION);
-        if (bed.maintenanceStatus === MaintenanceStatus.OUT_OF_SERVICE || bed.maintenanceStatus === MaintenanceStatus.NEEDS_REPAIR) {
-          throw AppError.conflict('Destination bed is not usable due to its maintenance status', ErrorCode.BUSINESS_RULE_VIOLATION);
+        if (bed.status !== BedStatus.ACTIVE)
+          throw AppError.conflict('Bed is inactive', ErrorCode.BUSINESS_RULE_VIOLATION);
+        if (
+          bed.maintenanceStatus === MaintenanceStatus.OUT_OF_SERVICE ||
+          bed.maintenanceStatus === MaintenanceStatus.NEEDS_REPAIR
+        ) {
+          throw AppError.conflict(
+            'Destination bed is not usable due to its maintenance status',
+            ErrorCode.BUSINESS_RULE_VIOLATION,
+          );
         }
-        if (bed.room.status === ArchiveStatus.ARCHIVED) throw AppError.conflict('Destination room is archived', ErrorCode.BUSINESS_RULE_VIOLATION);
-        if (bed.room.hostel.status === ArchiveStatus.ARCHIVED) throw AppError.conflict('Destination hostel is archived', ErrorCode.BUSINESS_RULE_VIOLATION);
-        if (bed.room.maintenanceStatus === MaintenanceStatus.OUT_OF_SERVICE || bed.room.maintenanceStatus === MaintenanceStatus.NEEDS_REPAIR) {
-          throw AppError.conflict('Destination room is not usable due to its maintenance status', ErrorCode.BUSINESS_RULE_VIOLATION);
+        if (bed.room.status === ArchiveStatus.ARCHIVED)
+          throw AppError.conflict(
+            'Destination room is archived',
+            ErrorCode.BUSINESS_RULE_VIOLATION,
+          );
+        if (bed.room.hostel.status === ArchiveStatus.ARCHIVED)
+          throw AppError.conflict(
+            'Destination hostel is archived',
+            ErrorCode.BUSINESS_RULE_VIOLATION,
+          );
+        if (
+          bed.room.maintenanceStatus === MaintenanceStatus.OUT_OF_SERVICE ||
+          bed.room.maintenanceStatus === MaintenanceStatus.NEEDS_REPAIR
+        ) {
+          throw AppError.conflict(
+            'Destination room is not usable due to its maintenance status',
+            ErrorCode.BUSINESS_RULE_VIOLATION,
+          );
         }
 
         const contract = await tx.stayContract.findFirst({
@@ -441,7 +651,10 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
           throw AppError.conflict('Contract is not active', ErrorCode.CONTRACT_NOT_ACTIVE);
         }
         if (contract.hostelId !== bed.room.hostelId) {
-          throw AppError.conflict('New bed does not belong to the contract hostel', ErrorCode.BUSINESS_RULE_VIOLATION);
+          throw AppError.conflict(
+            'New bed does not belong to the contract hostel',
+            ErrorCode.BUSINESS_RULE_VIOLATION,
+          );
         }
 
         // Transfer range (including any explicit new endDate) must stay within
@@ -454,36 +667,62 @@ async create(organizationId: string, userId: string, dto: BedAssignmentDto, idem
           'Transfer',
         );
 
-      // CAS: end the current assignment only if still ACTIVE and unmodified.
+        // CAS: end the current assignment only if still ACTIVE and unmodified.
         const endedResult = await tx.bedAssignment.updateMany({
-          where: { id: assignmentId, organizationId, status: AssignmentStatus.ACTIVE, version: expectedVersion },
-          data: { status: AssignmentStatus.ENDED, endDate: transitionStart, endReason: AssignmentEndReason.TRANSFER, version: { increment: 1 } },
+          where: {
+            id: assignmentId,
+            organizationId,
+            status: AssignmentStatus.ACTIVE,
+            version: expectedVersion,
+          },
+          data: {
+            status: AssignmentStatus.ENDED,
+            endDate: transitionStart,
+            endReason: AssignmentEndReason.TRANSFER,
+            version: { increment: 1 },
+          },
         });
         if (endedResult.count === 0) {
-          throw AppError.conflict('Assignment was modified concurrently; refresh and retry', ErrorCode.RESOURCE_VERSION_CONFLICT);
+          throw AppError.conflict(
+            'Assignment was modified concurrently; refresh and retry',
+            ErrorCode.RESOURCE_VERSION_CONFLICT,
+          );
         }
-        const ended = await tx.bedAssignment.findUnique({ where: { id: assignmentId }, select: ASSIGNMENT_SELECT });
+        const ended = await tx.bedAssignment.findUnique({
+          where: { id: assignmentId },
+          select: ASSIGNMENT_SELECT,
+        });
 
         const existing = await tx.bedAssignment.findMany({
           where: { bedId: dto.bedId, status: AssignmentStatus.ACTIVE },
           select: ASSIGNMENT_SELECT,
         });
         if (overlapsOver(existing, dto.startDate, dto.endDate)) {
-          throw AppError.conflict('Destination bed is already assigned within this period', ErrorCode.BED_ASSIGNMENT_OVERLAP);
+          throw AppError.conflict(
+            'Destination bed is already assigned within this period',
+            ErrorCode.BED_ASSIGNMENT_OVERLAP,
+          );
         }
 
         try {
           const created = await tx.bedAssignment.create({
             data: {
-              organizationId, bedId: dto.bedId, residentId: current.residentId, contractId: current.contractId,
-              startDate: transitionStart, endDate: dto.endDate ? toDateOnly(dto.endDate) : null,
+              organizationId,
+              bedId: dto.bedId,
+              residentId: current.residentId,
+              contractId: current.contractId,
+              startDate: transitionStart,
+              endDate: dto.endDate ? toDateOnly(dto.endDate) : null,
             },
             select: ASSIGNMENT_SELECT,
           });
           return { previous: toAssignmentDto(ended!), assignment: toAssignmentDto(created) };
         } catch (err) {
           if (isExclusionViolation(err)) {
-            throw AppError.conflict('Destination bed is already assigned within this period', ErrorCode.BED_ASSIGNMENT_OVERLAP);
+            throw AppError.conflict(
+              'Destination bed is already assigned within this period',
+              ErrorCode.BED_ASSIGNMENT_OVERLAP,
+            );
           }
           throw err;
         }

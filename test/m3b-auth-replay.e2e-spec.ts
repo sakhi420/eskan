@@ -26,8 +26,12 @@ function assertLocalTestHost(): void {
     host = u.hostname;
     db = decodeURIComponent(u.pathname.replace(/^\//, ''));
   } catch {}
-  if (!['localhost', '127.0.0.1', '::1'].includes(host) || !['eskan_dev', 'eskan_test', 'eskan_testing'].includes(db)) {
-    if (process.env.ESKAN_TEST_DB_ALLOW !== '1') throw new Error(`REFUSED: host="${host}" db="${db}" is not local`);
+  if (
+    !['localhost', '127.0.0.1', '::1'].includes(host) ||
+    !['eskan_dev', 'eskan_test', 'eskan_testing'].includes(db)
+  ) {
+    if (process.env.ESKAN_TEST_DB_ALLOW !== '1')
+      throw new Error(`REFUSED: host="${host}" db="${db}" is not local`);
   }
 }
 
@@ -55,7 +59,10 @@ describe('M3b authorization before idempotency replay (HTTP)', () => {
     await admin.connect();
     await admin.query(`CREATE DATABASE "${dbName}"`);
     const url = withDatabase(dbName);
-    const r = spawnSync(process.execPath, [prismaCli, 'migrate', 'deploy'], { env: { ...process.env, DATABASE_URL: url }, encoding: 'utf8' });
+    const r = spawnSync(process.execPath, [prismaCli, 'migrate', 'deploy'], {
+      env: { ...process.env, DATABASE_URL: url },
+      encoding: 'utf8',
+    });
     if (r.status !== 0) throw new Error(`migrate deploy failed: ${r.stdout}${r.stderr}`);
 
     db = new Client({ connectionString: url });
@@ -70,17 +77,43 @@ describe('M3b authorization before idempotency replay (HTTP)', () => {
     resident = randomUUID();
     chargeId = randomUUID();
 
-    await db.query(`INSERT INTO organizations (id, name, updated_at) VALUES ($1,'OrgA',now()), ($2,'OrgB',now())`, [orgA, orgB]);
+    await db.query(
+      `INSERT INTO organizations (id, name, updated_at) VALUES ($1,'OrgA',now()), ($2,'OrgB',now())`,
+      [orgA, orgB],
+    );
     await db.query(
       `INSERT INTO users (id, email, password_hash, full_name, updated_at) VALUES ($1,$2,'x','Owner A',now()), ($3,$4,'x','Op A',now()), ($5,$6,'x','Viewer A',now()), ($7,$8,'x','Owner B',now())`,
-      [ownerA, 'a@example.com', operatorA, 'op@example.com', viewerA, 'v@example.com', ownerB, 'b@example.com'],
+      [
+        ownerA,
+        'a@example.com',
+        operatorA,
+        'op@example.com',
+        viewerA,
+        'v@example.com',
+        ownerB,
+        'b@example.com',
+      ],
     );
     await db.query(
       `INSERT INTO organization_memberships (id, organization_id, user_id, role, active, updated_at)
        VALUES ($1,$2,$3,'OWNER',true,now()), ($4,$2,$5,'OPERATOR',true,now()), ($6,$2,$7,'VIEWER',true,now()), ($8,$9,$10,'OWNER',true,now())`,
-      [randomUUID(), orgA, ownerA, randomUUID(), operatorA, randomUUID(), viewerA, randomUUID(), orgB, ownerB],
+      [
+        randomUUID(),
+        orgA,
+        ownerA,
+        randomUUID(),
+        operatorA,
+        randomUUID(),
+        viewerA,
+        randomUUID(),
+        orgB,
+        ownerB,
+      ],
     );
-    await db.query(`INSERT INTO residents (id, organization_id, full_name, updated_at) VALUES ($1,$2,'R',now())`, [resident, orgA]);
+    await db.query(
+      `INSERT INTO residents (id, organization_id, full_name, updated_at) VALUES ($1,$2,'R',now())`,
+      [resident, orgA],
+    );
     await db.query(
       `INSERT INTO charges (id, organization_id, resident_id, type, amount, period_start, period_end, due_date, updated_at)
        VALUES ($1,$2,$3,'OTHER',10000,'2026-11-01','2026-12-01','2026-11-01',now())`,
@@ -120,7 +153,12 @@ describe('M3b authorization before idempotency replay (HTTP)', () => {
   }, 60000);
 
   async function tokenFor(userId: string, email: string, fullName: string): Promise<string> {
-    const { token } = await tokens.signAccessToken({ sub: userId, email, fullName, isPlatformAdmin: false });
+    const { token } = await tokens.signAccessToken({
+      sub: userId,
+      email,
+      fullName,
+      isPlatformAdmin: false,
+    });
     return token;
   }
 
@@ -130,7 +168,12 @@ describe('M3b authorization before idempotency replay (HTTP)', () => {
       .post('/api/v1/payments')
       .set('Authorization', `Bearer ${t}`)
       .set('Idempotency-Key', randomUUID())
-      .send({ residentId: resident, money: { amount: 10000, currency: 'AFN' }, method: 'CASH', receivedAt: '2026-11-02' });
+      .send({
+        residentId: resident,
+        money: { amount: 10000, currency: 'AFN' },
+        method: 'CASH',
+        receivedAt: '2026-11-02',
+      });
     expect(res.status).toBe(201);
     expect(res.body.data.status).toBe('POSTED');
     expect(res.body.data.receiptNumber).toMatch(/^\d{10}$/);
@@ -154,7 +197,12 @@ describe('M3b authorization before idempotency replay (HTTP)', () => {
       .post('/api/v1/payments')
       .set('Authorization', `Bearer ${t}`)
       .set('Idempotency-Key', randomUUID())
-      .send({ residentId: resident, money: { amount: 1000, currency: 'AFN' }, method: 'CASH', receivedAt: '2026-11-02' });
+      .send({
+        residentId: resident,
+        money: { amount: 1000, currency: 'AFN' },
+        method: 'CASH',
+        receivedAt: '2026-11-02',
+      });
     expect(res.status).toBe(403);
     expect(res.body.code).toBe('FORBIDDEN');
   });
@@ -166,7 +214,14 @@ describe('M3b authorization before idempotency replay (HTTP)', () => {
       .post('/api/v1/payments')
       .set('Authorization', `Bearer ${ownerT}`)
       .set('Idempotency-Key', key)
-      .send({ residentId: resident, money: { amount: 2500, currency: 'AFN' }, method: 'CASH', receivedAt: '2026-11-02', payerName: 'Alice', payerPhone: '0700000000' });
+      .send({
+        residentId: resident,
+        money: { amount: 2500, currency: 'AFN' },
+        method: 'CASH',
+        receivedAt: '2026-11-02',
+        payerName: 'Alice',
+        payerPhone: '0700000000',
+      });
     expect(ok.status).toBe(201);
     expect(ok.body.data.payerName).toBe('Alice');
 
@@ -175,7 +230,14 @@ describe('M3b authorization before idempotency replay (HTTP)', () => {
       .post('/api/v1/payments')
       .set('Authorization', `Bearer ${viewerT}`)
       .set('Idempotency-Key', key)
-      .send({ residentId: resident, money: { amount: 2500, currency: 'AFN' }, method: 'CASH', receivedAt: '2026-11-02', payerName: 'Alice', payerPhone: '0700000000' });
+      .send({
+        residentId: resident,
+        money: { amount: 2500, currency: 'AFN' },
+        method: 'CASH',
+        receivedAt: '2026-11-02',
+        payerName: 'Alice',
+        payerPhone: '0700000000',
+      });
     expect(forbidden.status).toBe(403);
     expect(forbidden.body).not.toHaveProperty('payerName');
   });
@@ -223,29 +285,39 @@ describe('M3b authorization before idempotency replay (HTTP)', () => {
       .set('X-Organization-Id', orgA)
       .set('Idempotency-Key', key)
       .send({ money: { amount: 200, currency: 'AFN' }, reason: 'again' });
-    expect(cross.status).toBe(403);
+    expect(cross.status).toBe(404);
+    expect(cross.body.code).toBe('RESOURCE_NOT_FOUND');
+    expect(cross.body.detail).not.toContain(orgA);
   });
 
   it('rejects invalid payment method and zero/negative amounts (422)', async () => {
     const t = await tokenFor(ownerA, 'a@example.com', 'Owner A');
     const base = { residentId: resident, receivedAt: '2026-11-02' };
     const method = await request(app.getHttpServer())
-      .post('/api/v1/payments').set('Authorization', `Bearer ${t}`).set('Idempotency-Key', randomUUID())
+      .post('/api/v1/payments')
+      .set('Authorization', `Bearer ${t}`)
+      .set('Idempotency-Key', randomUUID())
       .send({ ...base, money: { amount: 1000, currency: 'AFN' }, method: 'CARD' });
     expect(method.status).toBe(422);
 
     const zero = await request(app.getHttpServer())
-      .post('/api/v1/payments').set('Authorization', `Bearer ${t}`).set('Idempotency-Key', randomUUID())
+      .post('/api/v1/payments')
+      .set('Authorization', `Bearer ${t}`)
+      .set('Idempotency-Key', randomUUID())
       .send({ ...base, money: { amount: 0, currency: 'AFN' }, method: 'CASH' });
     expect(zero.status).toBe(422);
 
     const negative = await request(app.getHttpServer())
-      .post('/api/v1/payments').set('Authorization', `Bearer ${t}`).set('Idempotency-Key', randomUUID())
+      .post('/api/v1/payments')
+      .set('Authorization', `Bearer ${t}`)
+      .set('Idempotency-Key', randomUUID())
       .send({ ...base, money: { amount: -5, currency: 'AFN' }, method: 'CASH' });
     expect(negative.status).toBe(422);
 
     const missingMoney = await request(app.getHttpServer())
-      .post('/api/v1/payments').set('Authorization', `Bearer ${t}`).set('Idempotency-Key', randomUUID())
+      .post('/api/v1/payments')
+      .set('Authorization', `Bearer ${t}`)
+      .set('Idempotency-Key', randomUUID())
       .send({ residentId: resident, receivedAt: '2026-11-02', method: 'CASH' });
     expect(missingMoney.status).toBe(422);
   });
@@ -256,7 +328,13 @@ describe('M3b authorization before idempotency replay (HTTP)', () => {
       .post('/api/v1/payments')
       .set('Authorization', `Bearer ${t}`)
       .set('Idempotency-Key', randomUUID())
-      .send({ residentId: resident, money: { amount: 1000, currency: 'AFN' }, method: 'CASH', receivedAt: '2026-11-02', receiptNumber: 'RCP-999' });
+      .send({
+        residentId: resident,
+        money: { amount: 1000, currency: 'AFN' },
+        method: 'CASH',
+        receivedAt: '2026-11-02',
+        receiptNumber: 'RCP-999',
+      });
     expect(res.status).toBe(422);
   });
 });

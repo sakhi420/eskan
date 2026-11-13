@@ -64,10 +64,17 @@ function makeService(overrides: Record<string, any> = {}) {
   const tenants = overrides.tenants ?? {
     resolveActiveMembership: jest.fn(),
     listActiveMemberships: jest.fn().mockResolvedValue([
-      { membershipId: 'm-1', organizationId: 'org-1', organizationName: 'Org One', role: 'OWNER', active: true },
+      {
+        membershipId: 'm-1',
+        organizationId: 'org-1',
+        organizationName: 'Org One',
+        role: 'OWNER',
+        active: true,
+      },
     ]),
   };
-  const config = overrides.config ?? configStub({ 'auth.registrationEnabled': true, trialDays: 30 });
+  const config =
+    overrides.config ?? configStub({ 'auth.registrationEnabled': true, trialDays: 30 });
 
   const svc = new AuthService(
     prisma as unknown as PrismaService,
