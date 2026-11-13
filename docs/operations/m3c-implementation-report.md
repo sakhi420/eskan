@@ -6,7 +6,7 @@
 ## Git / PR
 - Branch: `feat/m3c-deposit-expense-refund-reversal`
 - Base: `main` at `506947b2ac6f475f5c9418dfb640af5c9719bb10`
-- PR head: `787809e663d982cca58d1e61f95ac84a9a3a9999` (docs-only follow-up to the code-bearing implementation head below).
+- Last PR head covered by a full CI run (Run #102): `787809e663d982cca58d1e61f95ac84a9a3a9999`. Documentation-only review/report updates were committed afterward; no runtime source, schema, migration, contract, or test files changed in those follow-up commits.
 - Code-bearing implementation head: `3def75aab45c9080fccb889b2e8f96a4fc7418e7`.
 - PR: [#5](https://github.com/sakhi420/eskan/pull/5) — Draft, open, not merged.
 - Full CI on exact PR head: [Run #102 — success](https://github.com/sakhi420/eskan/actions/runs/43278611645).
